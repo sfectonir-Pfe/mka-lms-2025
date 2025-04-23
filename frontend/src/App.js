@@ -1,23 +1,36 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import ForgetPasswordPage from "./pages/ForgetPasswordPage";
+import LoginPage from "./pages/LoginPage";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { FaRegMoon } from "react-icons/fa";
+import { GoSun } from "react-icons/go";
 
 function App() {
+  const [mode, setMode] = useState("light");
+  const handelMode = () => {
+    if (mode === "light") {
+      setMode("dark");
+    } else {
+      setMode("light");
+    }
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div
+      className={` ${
+        mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"
+      }`}
+    >
+      <div className="d-flex justify-content-end">
+        <button
+          className="btn btn-light d-flex align-items-center"
+          onClick={handelMode}
         >
-          Learn React
-        </a>
-      </header>
+          {" "}
+          {mode === "light" ? <FaRegMoon /> : <GoSun />}
+        </button>
+      </div>
+      {/* <ForgetPasswordPage /> */}
+      <LoginPage />
     </div>
   );
 }
