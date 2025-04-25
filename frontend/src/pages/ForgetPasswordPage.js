@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Link } from 'react-router-dom';
 
 function ForgotPasswordpage() {
   const [email, setEmail] = useState('');
@@ -7,7 +7,7 @@ function ForgotPasswordpage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add password reset logic here
+    
     console.log('Password reset requested for:', email);
     setSubmitted(true);
   };
@@ -24,6 +24,7 @@ function ForgotPasswordpage() {
                 
                 <p className="mb-4">Si un compte existe avec l'adresse email fournie, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.</p>
                 
+                <Link to="/" className="btn btn-outline-primary">Retour à la connexion</Link>
               </div>
             </div>
           </div>
@@ -65,7 +66,7 @@ function ForgotPasswordpage() {
               </form>
               
               <div className="text-center mt-4">
-              
+                <Link to="/" className="text-decoration-none">Retour à la connexion</Link>
               </div>
             </div>
           </div>

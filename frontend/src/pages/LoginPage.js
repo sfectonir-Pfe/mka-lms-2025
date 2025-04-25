@@ -1,11 +1,11 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Link } from 'react-router-dom';
 
 function LoginPage() {
   return (
     <div className="container-fluid p-3 my-5">
       <div className="row align-items-center">
-
         <div className="col-md-6 mb-4">
           <img
             src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
@@ -15,8 +15,6 @@ function LoginPage() {
         </div>
 
         <div className="col-md-6">
-
-
           <form>
             <div className="form-floating mb-4">
               <input type="email" className="form-control" id="email" placeholder="Email" />
@@ -33,12 +31,11 @@ function LoginPage() {
                 <input className="form-check-input" type="checkbox" id="remember" />
                 <label className="form-check-label" htmlFor="remember">Remember me</label>
               </div>
-              <a href="#">Forgot password?</a>
+              <Link to="/forgot-password">Forgot password?</Link>
             </div>
 
             <div className="text-center text-md-start mt-4 pt-2">
               <button type="submit" className="btn btn-primary px-5">Login</button>
-
             </div>
           </form>
         </div>
