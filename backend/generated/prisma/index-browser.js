@@ -119,12 +119,40 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
+  role: 'role',
   email: 'email',
   password: 'password',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   resetToken: 'resetToken',
   resetTokenExpiry: 'resetTokenExpiry'
+};
+
+exports.Prisma.FormateurScalarFieldEnum = {
+  id: 'id',
+  speciality: 'speciality',
+  userId: 'userId'
+};
+
+exports.Prisma.EtudiantScalarFieldEnum = {
+  id: 'id',
+  NameEtablissement: 'NameEtablissement',
+  userId: 'userId'
+};
+
+exports.Prisma.CreateurDeFormationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+};
+
+exports.Prisma.AdminScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId'
+};
+
+exports.Prisma.EtablissementScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId'
 };
 
 exports.Prisma.SortOrder = {
@@ -136,15 +164,21 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
-
-exports.Prisma.NullsOrder = {
-  first: 'first',
-  last: 'last'
+exports.Role = exports.$Enums.Role = {
+  Etudiant: 'Etudiant',
+  Formateur: 'Formateur',
+  Admin: 'Admin',
+  CreateurDeFormation: 'CreateurDeFormation',
+  Etablissement: 'Etablissement'
 };
 
-
 exports.Prisma.ModelName = {
-  User: 'User'
+  User: 'User',
+  Formateur: 'Formateur',
+  Etudiant: 'Etudiant',
+  CreateurDeFormation: 'CreateurDeFormation',
+  Admin: 'Admin',
+  Etablissement: 'Etablissement'
 };
 
 /**
