@@ -14,13 +14,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  resetToken String?  
-  resetTokenExpiry DateTime?
+enum Role {
+  Etudiant
+  Formateur
+  Admin
+  CreateurDeFormation
+  Etablissement
 }
 
+model User {
+  id                    Int                   @id @default(autoincrement())
+  role                  Role                  @default(Etudiant)
+  email                 String                @unique
+  password              String
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  resetToken            String
+  resetTokenExpiry      DateTime
+  formateurs            Formateur[]
+  Etudiants             Etudiant[]
+  CreateursDeFormations CreateurDeFormation[]
+  Admins                Admin[]
+  Etablissements        Etablissement[]
+}
+
+model Formateur {
+  id         Int    @id @default(autoincrement())
+  speciality String
+  User       User   @relation(fields: [userId], references: [id])
+  userId     Int
+}
+
+model Etudiant {
+  id                Int    @id @default(autoincrement())
+  NameEtablissement String
+  User              User   @relation(fields: [userId], references: [id])
+  userId            Int
+}
+
+model CreateurDeFormation {
+  id     Int  @id @default(autoincrement())
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Admin {
+  id     Int   @id @default(autoincrement())
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Etablissement {
+  id     Int  @id @default(autoincrement())
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
+}
