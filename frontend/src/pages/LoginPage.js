@@ -1,35 +1,53 @@
-import React, { useState } from "react";
+import React from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-export default function LoginPage() {
+function LoginPage() {
   return (
-    <div
-      className={`position-fixed h-100 w-100 d-flex justify-content-center align-items-center `}
-    >
-      <div className={` border rounded p-3 col-md-4`}>
-        <h1 className="text-center">LOGIN</h1>
-        <div className="py-3">
-          <label>email</label>
-          <input
-            className="form-control"
-            type="email"
-            placeholder="joe@exemple.com"
+    <div className="container-fluid p-3 my-5">
+      <div className="row align-items-center">
+
+        <div className="col-md-6 mb-4">
+          <img
+            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+            className="img-fluid"
+            alt="Sample"
           />
         </div>
-        <div className="pb-3">
-          <label>password</label>
-          <input
-            className="form-control"
-            type="password"
-            placeholder="password"
-          />
+
+        <div className="col-md-6">
+
+
+          <form>
+            <div className="form-floating mb-4">
+              <input type="email" className="form-control" id="email" placeholder="Email" />
+              <label htmlFor="email">Email address</label>
+            </div>
+
+            <div className="form-floating mb-4">
+              <input type="password" className="form-control" id="password" placeholder="Password" />
+              <label htmlFor="password">Password</label>
+            </div>
+
+            <div className="d-flex justify-content-between mb-4">
+              <div className="form-check">
+                <input className="form-check-input" type="checkbox" id="remember" />
+                <label className="form-check-label" htmlFor="remember">Remember me</label>
+              </div>
+              <a href="#">Forgot password?</a>
+            </div>
+
+            <div className="text-center text-md-start mt-4 pt-2">
+              <button type="submit" className="btn btn-primary px-5">Login</button>
+
+            </div>
+          </form>
         </div>
-        <div className="text-center">
-          <button className="btn btn-light ">Login</button>
-        </div>
-        <div className="text-center p-3">
-          <a href="">Forget Password</a>
-        </div>
+
       </div>
+
+
     </div>
   );
 }
+
+export default LoginPage;
