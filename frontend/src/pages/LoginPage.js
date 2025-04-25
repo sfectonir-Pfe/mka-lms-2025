@@ -39,7 +39,10 @@ function LoginPage() {
             </div>
           </form>
         </div>
+
       </div>
+
+
     </div>
   );
 }

@@ -17,6 +17,7 @@ function App() {
     }
   };
   return (
+    
     <div
       className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"}`}
     >
@@ -36,6 +37,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </div>
+    
   );
 }
 
