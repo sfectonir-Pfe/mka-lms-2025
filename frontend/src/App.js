@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaRegMoon } from "react-icons/fa";
 import { GoSun } from "react-icons/go";
+import React from 'react';
 
 function App() {
   const [mode, setMode] = useState("light");
@@ -15,6 +16,7 @@ function App() {
     }
   };
   return (
+    
     <div
       className={` ${
         mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"
@@ -31,7 +33,10 @@ function App() {
       </div>
       {/* <ForgetPasswordPage /> */}
       <LoginPage />
+      
+      
     </div>
+    
   );
 }
 
