@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import LoginPage from "./pages/LoginPage";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -11,10 +11,21 @@ import ProfilePage from "./pages/ProfilePage";
 import Main from "./apps/Main";
 import Auth from "./apps/Auth";
 import HomePage from "./pages/HomePage";
+import Spinner from "react-bootstrap/Spinner";
 
 function App() {
-  const [user,setUser]=useState(true)
+  const [user, setUser] = useState(null);
   const [mode, setMode] = useState("light");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    var auxUser = localStorage.getItem("user");
+    if (auxUser) {
+      setUser(JSON.parse(auxUser));
+      setLoading(false);
+    }
+    setLoading(false);
+  }, []);
   const handelMode = () => {
     if (mode === "light") {
       setMode("dark");
@@ -36,27 +47,32 @@ function App() {
           {mode === "light" ? <FaRegMoon /> : <GoSun />}
         </button>
       </div>
+      {loading ? (
+        <div>
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : (
+        <BrowserRouter>
+          <Routes>
+            {user ? (
+              <Route path="/" element={<Main setUser={setUser} user={user} />}>
+                <Route index element={<HomePage />} />
+                <Route path="profile" element={<ProfilePage />} />
+              </Route>
+            ) : (
+              <Route path="/" element={<Auth />}>
+                <Route index element={<LoginPage setUser={setUser} />} />
+                <Route
+                  path="/forgot-password/"
+                  element={<ForgetPasswordPage />}
+                />
+              </Route>
+            )}
 
-      <BrowserRouter>
-        <Routes>
-          {user ? (
-            <Route path="/" element={<Main />}>
-              <Route index element={<HomePage />} />
-              <Route path="profile" element={<ProfilePage />} />
-            </Route>
-          ) : (
-            <Route path="/" element={<Auth />}>
-              <Route index element={<LoginPage />} />
-              <Route
-                path="/forgot-password/"
-                element={<ForgetPasswordPage />}
-              />
-            </Route>
-          )}
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      )}
     </div>
   );
 }
