@@ -29,8 +29,8 @@ model User {
   password              String
   createdAt             DateTime              @default(now())
   updatedAt             DateTime              @updatedAt
-  resetToken            String
-  resetTokenExpiry      DateTime
+  resetToken            String?
+  resetTokenExpiry      DateTime?
   formateurs            Formateur[]
   Etudiants             Etudiant[]
   CreateursDeFormations CreateurDeFormation[]
