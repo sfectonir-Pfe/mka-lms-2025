@@ -70,7 +70,7 @@ function LoginPage({setUser}) {
               </div>
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
-
+            
             <div className="text-center text-md-start mt-4 pt-2">
               <button type="submit" className="btn btn-primary px-5" onSubmit={handleRequest}>
                 Login
