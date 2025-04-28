@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAuthDto, loginDto } from './dto/create-auth.dto';
+import { CreateAuthDto, loginDto, RegisterDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from 'nestjs-prisma';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -13,12 +13,32 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (user) {
-      
       if (await bcrypt.compare(dto.password, user.password)) {
         return user;
-      } else  throw new HttpException('invalid password', HttpStatus.BAD_REQUEST)
+      } else
+        throw new HttpException('invalid password', HttpStatus.BAD_REQUEST);
     } else {
-      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST)
+      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
+    }
+  }
+  
+  async addUser(dto: RegisterDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (user) {
+      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
+    } else {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(dto.password, salt);
+
+      return await this.prisma.user.create({
+        data: {
+          role: dto.role,
+          email: dto.email,
+          password: hashedPassword,
+        },
+      });
     }
   }
 
