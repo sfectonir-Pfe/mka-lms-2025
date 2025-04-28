@@ -16,12 +16,12 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
-import { Outlet } from "react-router-dom";
-import Button from "@mui/material/Button";  // Corrected to use MUI's Button
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Added for user icon
-import LogoutIcon from '@mui/icons-material/Logout'; // Added for logout icon
+
+import { Link, Outlet } from "react-router-dom";
+import Button from "@mui/material/Button"; // Corrected to use MUI's Button
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Added for user icon
+import LogoutIcon from "@mui/icons-material/Logout"; // Added for logout icon
+import { sideBarData } from "../constants/sideBarData";
 
 const drawerWidth = 240;
 
@@ -126,7 +126,7 @@ export default function Main({ setUser, user }) {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div">
-            Master Knowledge Academy
+              Master Knowledge Academy
             </Typography>
           </Box>
 
@@ -153,6 +153,7 @@ export default function Main({ setUser, user }) {
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
+          
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
@@ -162,107 +163,59 @@ export default function Main({ setUser, user }) {
           </IconButton>
         </DrawerHeader>
         <Divider />
+        
+        
         <List>
-          {["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: "initial",
-                      }
-                    : {
-                        justifyContent: "center",
-                      },
-                ]}
-              >
-                <ListItemIcon
+          {sideBarData.map((elem, index) => (
+            <Link to={elem.path} style={{all:"unset"}}>
+              <ListItem key={index} disablePadding sx={{ display: "block" }}>
+                <ListItemButton
                   sx={[
                     {
-                      minWidth: 0,
-                      justifyContent: "center",
+                      minHeight: 48,
+                      px: 2.5,
                     },
                     open
                       ? {
-                          mr: 3,
+                          justifyContent: "initial",
                         }
                       : {
-                          mr: "auto",
+                          justifyContent: "center",
                         },
                   ]}
                 >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
-                  sx={[
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {["All mail", "Trash", "Spam"].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: "initial",
-                      }
-                    : {
+                  <ListItemIcon
+                    sx={[
+                      {
+                        minWidth: 0,
                         justifyContent: "center",
                       },
-                ]}
-              >
-                <ListItemIcon
-                  sx={[
-                    {
-                      minWidth: 0,
-                      justifyContent: "center",
-                    },
-                    open
-                      ? {
-                          mr: 3,
-                        }
-                      : {
-                          mr: "auto",
-                        },
-                  ]}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
-                  sx={[
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
+                      open
+                        ? {
+                            mr: 3,
+                          }
+                        : {
+                            mr: "auto",
+                          },
+                    ]}
+                  >
+                     {elem.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={elem.text}
+                    sx={[
+                      open
+                        ? {
+                            opacity: 1,
+                          }
+                        : {
+                            opacity: 0,
+                          },
+                    ]}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Drawer>
@@ -273,4 +226,3 @@ export default function Main({ setUser, user }) {
     </Box>
   );
 }
-

@@ -12,7 +12,9 @@ import Main from "./apps/Main";
 import Auth from "./apps/Auth";
 import HomePage from "./pages/HomePage";
 import Spinner from "react-bootstrap/Spinner";
-import AddUserPage from "./pages/AddUserPage";
+import AddUserView from "./pages/users/views/AddUserView";
+import UsersPages from "./pages/users/UsersPages";
+import UserList from "./pages/users/views/UserList";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -59,10 +61,10 @@ function App() {
               <Route path="/" element={<Main setUser={setUser} user={user} />}>
                 <Route index element={<HomePage />} />
                 <Route path="/" element={<ProfilePage />} />
-                <Route
-                   path="/Add-User/"
-                   element={<AddUserPage />}
-                 />
+                <Route path="users" element={<UsersPages />}>
+                  <Route index element={<UserList />} />
+                  <Route path="add" element={<AddUserView />} />
+                </Route>
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -72,9 +74,7 @@ function App() {
                   element={<ForgetPasswordPage />}
                 />
               </Route>
-            )
-             
-            }
+            )}
 
             <Route path="*" element={<NotFound />} />
           </Routes>
