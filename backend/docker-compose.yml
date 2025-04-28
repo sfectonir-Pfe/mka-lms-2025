@@ -1,4 +1,4 @@
-version: '3.9'
+
 
 services:
   
@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: mka-lms-2025-db
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-mka-lms-2025:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  pgdata-mka-lms-2025:

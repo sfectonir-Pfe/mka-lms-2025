@@ -16,8 +16,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button"; // Corrected to use MUI's Button
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Added for user icon
 import LogoutIcon from "@mui/icons-material/Logout"; // Added for logout icon
@@ -93,6 +92,7 @@ const Drawer = styled(MuiDrawer, {
 export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -105,6 +105,7 @@ export default function Main({ setUser, user }) {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    navigate('/');
   };
 
   return (
