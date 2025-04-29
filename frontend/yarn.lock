@@ -1749,6 +1749,27 @@
     prop-types "^15.8.1"
     react-is "^19.1.0"
 
+"@mui/x-data-grid@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-8.1.0.tgz#1013bd7017137b86f42b48b4e9b2f1c08d9fccef"
+  integrity sha512-jt64FTMRKg9xUOUQkHY+VDbgpLWGssgvTti9n2BNbA4wuOl9r0C44OzYsPMXR0BxgUoWWREUBaeA7x5uwaArnQ==
+  dependencies:
+    "@babel/runtime" "^7.27.0"
+    "@mui/utils" "^7.0.2"
+    "@mui/x-internals" "8.0.0"
+    clsx "^2.1.1"
+    prop-types "^15.8.1"
+    reselect "^5.1.1"
+    use-sync-external-store "^1.5.0"
+
+"@mui/x-internals@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@mui/x-internals/-/x-internals-8.0.0.tgz#4c8c3fa5a7ccf1b2afc4a86477077f41347148e5"
+  integrity sha512-yQOWABTEAIW0wiAwpjAJ6uM47rG1cxrfRtL2WsIdje8F9JdCXO6/jAu7ROAiezw4EqhGYYU7DMrK5svn5tdZpQ==
+  dependencies:
+    "@babel/runtime" "^7.27.0"
+    "@mui/utils" "^7.0.2"
+
 "@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1":
   version "5.1.1-v1"
   resolved "https://registry.yarnpkg.com/@nicolo-ribaudo/eslint-scope-5-internals/-/eslint-scope-5-internals-5.1.1-v1.tgz#dbf733a965ca47b1973177dc0bb6c889edcfb129"
@@ -8545,6 +8566,11 @@ requires-port@^1.0.0:
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==
 
+reselect@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/reselect/-/reselect-5.1.1.tgz#c766b1eb5d558291e5e550298adb0becc24bb72e"
+  integrity sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==
+
 resolve-cwd@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/resolve-cwd/-/resolve-cwd-3.0.0.tgz#0f0075f1bb2544766cf73ba6a6e2adfebcb13f2d"
@@ -9796,6 +9822,11 @@ url-parse@^1.5.3:
   dependencies:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
+
+use-sync-external-store@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.5.0.tgz#55122e2a3edd2a6c106174c27485e0fd59bcfca0"
+  integrity sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==
 
 util-deprecate@^1.0.1, util-deprecate@^1.0.2, util-deprecate@~1.0.1:
   version "1.0.2"
