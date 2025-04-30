@@ -167,6 +167,7 @@ export default function Main({ setUser, user }) {
         
         
         <List>
+          
           {sideBarData.map((elem, index) => (
             <Link to={elem.path} style={{all:"unset"}}>
               <ListItem key={index} disablePadding sx={{ display: "block" }}>
