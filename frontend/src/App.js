@@ -15,6 +15,7 @@ import Spinner from "react-bootstrap/Spinner";
 import AddUserView from "./pages/users/views/AddUserView";
 import UsersPages from "./pages/users/UsersPages";
 import UserList from "./pages/users/views/UserList";
+import ProgramsPage from "./pages/ProgramsPage";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -65,6 +66,7 @@ function App() {
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
                 </Route>
+                <Route path="Programs" element={<ProgramsPage />} />
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>

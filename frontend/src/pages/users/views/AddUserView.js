@@ -59,7 +59,7 @@ const AddUserView = () => {
             <option value="Formateur">Formateur</option>
             <option value="CreateurDeFormation">Créateur de formation</option>
             <option value="Etablissement">
-              Responsable de d'etablissement
+              Responsable  d'etablissement
             </option>
           </select>
         </div>

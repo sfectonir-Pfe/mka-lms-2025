@@ -1,23 +1,55 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Link } from "react-router-dom";
-import axios from 'axios'
+import axios from "axios";
 
-function LoginPage({setUser}) {
-  const [password, setPassword] = useState(null);
-  const [email, setEmail] = useState(null);
-  const handleRequest = async (e) => {
-    try {
-        
-        e.preventDefault();
-        const response= await axios.post('http://localhost:8000/auth/login',{password,email})
-        setUser(response.data)
-        localStorage.setItem('user',JSON.stringify(response.data))
-    } catch (error) {
-        
+function LoginPage({ setUser }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const validate = () => {
+    let valid = true;
+    const newErrors = { email: "", password: "" };
+
+    if (!email) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Email is invalid";
+      valid = false;
     }
-    
+
+    if (!password) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
   };
+
+  const handleRequest = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    try {
+      const response = await axios.post("http://localhost:8000/auth/login", {
+        email,
+        password,
+      });
+
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert("Login failed. Please check your credentials.");
+    }
+  };
+
   return (
     <div className="container-fluid p-3 my-5">
       <div className="row align-items-center">
@@ -30,49 +62,49 @@ function LoginPage({setUser}) {
         </div>
 
         <div className="col-md-6">
-          <form onSubmit={handleRequest}> 
+          <form onSubmit={handleRequest}>
             <div className="form-floating mb-4">
               <input
                 type="email"
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
-                className="form-control"
+                className={`form-control ${errors.email && "is-invalid"}`}
                 id="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <label htmlFor="email">Email address</label>
+              {errors.email && <div className="invalid-feedback">{errors.email}</div>}
             </div>
 
             <div className="form-floating mb-4">
               <input
                 type="password"
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                }}
-                className="form-control"
+                className={`form-control ${errors.password && "is-invalid"}`}
                 id="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <label htmlFor="password">Password</label>
+              {errors.password && <div className="invalid-feedback">{errors.password}</div>}
             </div>
 
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="remember"
-                />
+                <input className="form-check-input" type="checkbox" id="remember" />
                 <label className="form-check-label" htmlFor="remember">
                   Remember me
                 </label>
               </div>
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
-            
+
             <div className="text-center text-md-start mt-4 pt-2">
-              <button type="submit" className="btn btn-primary px-5" onSubmit={handleRequest}>
+              <button
+                type="submit"
+                className="btn btn-primary px-5"
+                disabled={!email || !password}
+              >
                 Login
               </button>
             </div>
