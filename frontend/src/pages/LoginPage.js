@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import showErrorToast from "../utils/toastError";
 
 function LoginPage({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const [msgError, setMgsError] = useState("");
 
   const validate = () => {
     let valid = true;
@@ -45,8 +47,11 @@ function LoginPage({ setUser }) {
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
-      console.error("Login failed:", error);
-      alert("Login failed. Please check your credentials.");
+      setMgsError(
+        "Login failed. Please check your credentials." +
+          error.response.data.message
+      );
+      showErrorToast(msgError);
     }
   };
 
@@ -73,7 +78,9 @@ function LoginPage({ setUser }) {
                 onChange={(e) => setEmail(e.target.value)}
               />
               <label htmlFor="email">Email address</label>
-              {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+              {errors.email && (
+                <div className="invalid-feedback">{errors.email}</div>
+              )}
             </div>
 
             <div className="form-floating mb-4">
@@ -86,12 +93,18 @@ function LoginPage({ setUser }) {
                 onChange={(e) => setPassword(e.target.value)}
               />
               <label htmlFor="password">Password</label>
-              {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+              {errors.password && (
+                <div className="invalid-feedback">{errors.password}</div>
+              )}
             </div>
 
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
-                <input className="form-check-input" type="checkbox" id="remember" />
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="remember"
+                />
                 <label className="form-check-label" htmlFor="remember">
                   Remember me
                 </label>

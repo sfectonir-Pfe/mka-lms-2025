@@ -16,6 +16,7 @@ import AddUserView from "./pages/users/views/AddUserView";
 import UsersPages from "./pages/users/UsersPages";
 import UserList from "./pages/users/views/UserList";
 import ProgramsPage from "./pages/ProgramsPage";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -43,6 +44,7 @@ function App() {
         mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"
       }`}
     >
+      <ToastContainer />
       <div className="d-flex justify-content-end">
         <button
           className="btn btn-light d-flex align-items-center"
