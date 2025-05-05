@@ -8,9 +8,11 @@ const AddUserView = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("Etudiant");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Début de la soumission
     try {
      await axios.post("http://localhost:8000/auth/register", {
         email,
@@ -21,6 +23,8 @@ const AddUserView = () => {
 
     } catch (error) {
       console.log(error);
+    }finally {
+      setLoading(false); // Fin de la soumission
     }
   };
 
@@ -63,12 +67,19 @@ const AddUserView = () => {
             </option>
           </select>
         </div>
-        <button
+       <button
           type="submit"
-          className="btn btn-primary"
-          onSubmit={handleSubmit}
+          className="btn btn-primary w-100"
+          disabled={loading}
         >
-          Ajouter l'utilisateur
+          {loading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Création en cours...
+            </>
+          ) : (
+            "Ajouter l'utilisateur"
+          )}
         </button>
       </form>
     </div>

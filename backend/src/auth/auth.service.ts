@@ -4,6 +4,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from 'nestjs-prisma';
 import * as bcrypt from 'bcrypt';
 
+
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
@@ -41,9 +42,36 @@ export class AuthService {
       });
     }
   }
+  async register(dto: RegisterDto) {
+    const { email, password, role } = dto;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    return this.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        role,
+      },
+    });
+  }
+  
 
-  findAll() {
-    return `This action returns all auth`;
+  async findAll() {
+    try {
+      return await this.prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true
+        }
+      });
+    } catch (error) {
+      throw new HttpException(
+        'Failed to fetch users',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+    
   }
 
   findOne(id: number) {
@@ -54,7 +82,9 @@ export class AuthService {
     return `This action updates a #${id} auth`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async remove(id: number) { // Changed to number type
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }
