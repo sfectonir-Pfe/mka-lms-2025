@@ -1,25 +1,29 @@
 import * as React from "react";
 import { styled, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import {
+  Box,
+  CssBaseline,
+  Typography,
+  Toolbar,
+  IconButton,
+  List,
+  Divider,
+  Menu,
+  MenuItem,
+  Button,
+} from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button"; // Corrected to use MUI's Button
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Added for user icon
-import LogoutIcon from "@mui/icons-material/Logout"; // Added for logout icon
 import { sideBarData } from "../constants/sideBarData";
 
 const drawerWidth = 240;
@@ -94,18 +98,35 @@ export default function Main({ setUser, user }) {
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
-    navigate('/');
+    navigate("/");
+  };
+
+  // Menu déroulant pour le profil
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleVoirProfil = () => {
+    handleMenuClose();
+    navigate("/ProfilePage"); 
+  };
+
+  const handleEditProfil = () => {
+    handleMenuClose();
+    navigate("/EditProfilePage"); 
   };
 
   return (
@@ -133,10 +154,28 @@ export default function Main({ setUser, user }) {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-              <AccountCircleIcon sx={{ mr: 1 }} />
+              <IconButton
+                onClick={handleMenuClick}
+                size="large"
+                color="inherit"
+                sx={{ p: 0, mr: 1 }}
+              >
+                <AccountCircleIcon sx={{ fontSize: 32 }} />
+              </IconButton>
               <Typography variant="body1" noWrap>
                 {user.email} | {user.role}
               </Typography>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <MenuItem onClick={handleVoirProfil}>Voir profil</MenuItem>
+                <MenuItem onClick={handleEditProfil}>Éditer profil</MenuItem>
+              </Menu>
             </Box>
 
             <Button
@@ -154,23 +193,16 @@ export default function Main({ setUser, user }) {
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
+            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
         <Divider />
-        
-        
+
         <List>
-          
           {sideBarData.map((elem, index) => (
-            <Link to={elem.path} style={{all:"unset"}}>
-              <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <Link key={index} to={elem.path} style={{ all: "unset" }}>
+              <ListItem disablePadding sx={{ display: "block" }}>
                 <ListItemButton
                   sx={[
                     {
@@ -178,12 +210,8 @@ export default function Main({ setUser, user }) {
                       px: 2.5,
                     },
                     open
-                      ? {
-                          justifyContent: "initial",
-                        }
-                      : {
-                          justifyContent: "center",
-                        },
+                      ? { justifyContent: "initial" }
+                      : { justifyContent: "center" },
                   ]}
                 >
                   <ListItemIcon
@@ -192,27 +220,17 @@ export default function Main({ setUser, user }) {
                         minWidth: 0,
                         justifyContent: "center",
                       },
-                      open
-                        ? {
-                            mr: 3,
-                          }
-                        : {
-                            mr: "auto",
-                          },
+                      open ? { mr: 3 } : { mr: "auto" },
                     ]}
                   >
-                     {elem.icon}
+                    {elem.icon}
                   </ListItemIcon>
                   <ListItemText
                     primary={elem.text}
                     sx={[
                       open
-                        ? {
-                            opacity: 1,
-                          }
-                        : {
-                            opacity: 0,
-                          },
+                        ? { opacity: 1 }
+                        : { opacity: 0 },
                     ]}
                   />
                 </ListItemButton>
@@ -221,6 +239,7 @@ export default function Main({ setUser, user }) {
           ))}
         </List>
       </Drawer>
+
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <Outlet />
