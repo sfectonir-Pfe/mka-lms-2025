@@ -21,6 +21,8 @@ import Button from "@mui/material/Button"; // Corrected to use MUI's Button
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Added for user icon
 import LogoutIcon from "@mui/icons-material/Logout"; // Added for logout icon
 import { sideBarData } from "../constants/sideBarData";
+import ScrollToTopButton from "../components/ScrollToTopButton";
+import { Tooltip } from "@mui/material"
 
 const drawerWidth = 240;
 
@@ -80,13 +82,13 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open
     ? {
-        ...openedMixin(theme),
-        "& .MuiDrawer-paper": openedMixin(theme),
-      }
+      ...openedMixin(theme),
+      "& .MuiDrawer-paper": openedMixin(theme),
+    }
     : {
-        ...closedMixin(theme),
-        "& .MuiDrawer-paper": closedMixin(theme),
-      }),
+      ...closedMixin(theme),
+      "& .MuiDrawer-paper": closedMixin(theme),
+    }),
 }));
 
 export default function Main({ setUser, user }) {
@@ -154,7 +156,7 @@ export default function Main({ setUser, user }) {
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          
+
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
@@ -164,66 +166,52 @@ export default function Main({ setUser, user }) {
           </IconButton>
         </DrawerHeader>
         <Divider />
-        
-        
+
+
         <List>
-          
-          {sideBarData.map((elem, index) => (
-            <Link to={elem.path} style={{all:"unset"}}>
-              <ListItem key={index} disablePadding sx={{ display: "block" }}>
-                <ListItemButton
-                  sx={[
-                    {
+
+          {sideBarData.map((elem, index) => {
+            const item = (
+              <Link to={elem.path} key={index} style={{ all: "unset" }}>
+                <ListItem disablePadding sx={{ display: "block" }}>
+                  <ListItemButton
+                    sx={{
                       minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
                       px: 2.5,
-                    },
-                    open
-                      ? {
-                          justifyContent: "initial",
-                        }
-                      : {
-                          justifyContent: "center",
-                        },
-                  ]}
-                >
-                  <ListItemIcon
-                    sx={[
-                      {
-                        minWidth: 0,
-                        justifyContent: "center",
-                      },
-                      open
-                        ? {
-                            mr: 3,
-                          }
-                        : {
-                            mr: "auto",
-                          },
-                    ]}
+                    }}
                   >
-                     {elem.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={elem.text}
-                    sx={[
-                      open
-                        ? {
-                            opacity: 1,
-                          }
-                        : {
-                            opacity: 0,
-                          },
-                    ]}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </Link>
-          ))}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {elem.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={elem.text}
+                      sx={{ opacity: open ? 1 : 0 }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Link>
+            );
+
+            return open ? item : (
+              <Tooltip title={elem.text} placement="right" key={index}>
+                {item}
+              </Tooltip>
+            );
+          })}
+
         </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
         <Outlet />
+        <ScrollToTopButton />
       </Box>
     </Box>
   );
