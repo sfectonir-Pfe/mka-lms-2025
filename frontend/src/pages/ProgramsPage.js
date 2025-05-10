@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Card, Button, Container, Row, Col, Spinner } from "react-bootstrap";
+import { Container, CircularProgress, Grid, Typography } from "@mui/material";
+import ProgramList from "./users/views/ProgramList";
 
 const ProgramsPage = () => {
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with your actual NestJS API endpoint
-    axios.get("http://localhost:3000/programs")
-      .then((response) => {
-        setPrograms(response.data);
+    axios
+      .get("http://localhost:8000/programs") // ✅ Fetch programs
+      .then((res) => {
+        setPrograms(res.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -20,29 +21,16 @@ const ProgramsPage = () => {
   }, []);
 
   return (
-    <Container className="my-5">
-      <h1 className="text-center mb-4">Our Programs</h1>
+    <Container maxWidth="lg">
+      <Typography variant="h5" mt={3} mb={2}>
+        Programs Section
+      </Typography>
       {loading ? (
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" />
-        </div>
+        <Grid container justifyContent="center" alignItems="center" sx={{ height: "300px" }}>
+          <CircularProgress color="primary" />
+        </Grid>
       ) : (
-        <Row>
-          {programs.map((program) => (
-            <Col key={program.id} sm={12} md={6} lg={4} className="mb-4">
-              <Card>
-                <Card.Body>
-                  <Card.Title>{program.title}</Card.Title>
-                  <Card.Text>{program.description}</Card.Text>
-                  <Card.Text>
-                    <strong>Duration:</strong> {program.duration}
-                  </Card.Text>
-                  <Button variant="primary">Enroll</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        <ProgramList programs={programs} />
       )}
     </Container>
   );

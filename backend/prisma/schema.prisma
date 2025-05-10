@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -20,6 +19,12 @@ enum Role {
   Admin
   CreateurDeFormation
   Etablissement
+}
+
+enum CourseType {
+  PDF
+  IMAGE
+  VIDEO
 }
 
 model User {
@@ -59,7 +64,7 @@ model CreateurDeFormation {
 }
 
 model Admin {
-  id     Int   @id @default(autoincrement())
+  id     Int  @id @default(autoincrement())
   User   User @relation(fields: [userId], references: [id])
   userId Int
 }
@@ -68,4 +73,29 @@ model Etablissement {
   id     Int  @id @default(autoincrement())
   User   User @relation(fields: [userId], references: [id])
   userId Int
+}
+
+model Program {
+  id      Int      @id @default(autoincrement())
+  name    String
+  modules Module[]
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId Int
+  courses   Course[]
+}
+
+model Course {
+  id       Int        @id @default(autoincrement())
+  title    String
+  fileUrl  String // path or URL to uploaded file
+  type     CourseType
+  module   Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId Int
 }
