@@ -5,9 +5,10 @@ import { PrismaService } from 'nestjs-prisma';
 import * as bcrypt from 'bcrypt';
 
 
+
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService ) {}
 
   async login(dto: loginDto) {
     const user = await this.prisma.user.findUnique({
@@ -87,4 +88,7 @@ export class AuthService {
       where: { id },
     });
   }
+  
 }
+
+  
