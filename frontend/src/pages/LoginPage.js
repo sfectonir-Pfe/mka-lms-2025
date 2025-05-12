@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
 import { Link } from "react-router-dom";
 import axios from "axios";
 import showErrorToast from "../utils/toastError";
@@ -9,6 +10,7 @@ function LoginPage({ setUser }) {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [msgError, setMgsError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const validate = () => {
     let valid = true;
@@ -47,11 +49,12 @@ function LoginPage({ setUser }) {
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
-      setMgsError(
-        "Login failed. Please check your credentials." +
-          error.response.data.message
-      );
-      showErrorToast(msgError);
+      const message =
+        "Login failed. Please check your credentials. " +
+        (error.response?.data?.message || "");
+      setMgsError(message);
+      showErrorToast(message);
+      setPassword("");
     }
   };
 
@@ -68,6 +71,13 @@ function LoginPage({ setUser }) {
 
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
+            {msgError && (
+              <div className="alert alert-danger" role="alert">
+                {msgError}
+              </div>
+            )}
+
+            {/* Email input */}
             <div className="form-floating mb-4">
               <input
                 type="email"
@@ -83,9 +93,10 @@ function LoginPage({ setUser }) {
               )}
             </div>
 
-            <div className="form-floating mb-4">
+            {/* Password input avec icône œil */}
+            <div className="form-floating mb-4 position-relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 className={`form-control ${errors.password && "is-invalid"}`}
                 id="password"
                 placeholder="Password"
@@ -96,8 +107,16 @@ function LoginPage({ setUser }) {
               {errors.password && (
                 <div className="invalid-feedback">{errors.password}</div>
               )}
+
+              {/* Icône œil / œil barré */}
+              <i
+                className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute top-50 end-0 translate-middle-y me-3`}
+                style={{ cursor: "pointer", fontSize: "1.2rem", zIndex: 10 }}
+                onClick={() => setShowPassword((prev) => !prev)}
+              ></i>
             </div>
 
+            {/* Options supplémentaires */}
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
                 <input
@@ -112,6 +131,7 @@ function LoginPage({ setUser }) {
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
 
+            {/* Submit button */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"

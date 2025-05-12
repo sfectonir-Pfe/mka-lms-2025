@@ -34,6 +34,7 @@ import StudentLandingPage from "./pages/StudentLandingPage";
 
 
 
+import EditProfilePage from "./pages/EditProfilePage";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -103,12 +104,8 @@ function App() {
                 <Route path="module/add/:programId" element={<AddModulePage />} />
                 <Route path="/student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="/student" element={<StudentLandingPage />} />
-
-
-
-
-
-
+                <Route path="ProfilePage" element={<ProfilePage />} />
+                <Route path="EditProfilePage" element={<EditProfilePage />} />
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>

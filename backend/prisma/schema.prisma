@@ -20,6 +20,13 @@ enum Role {
   CreateurDeFormation
   Etablissement
 }
+model Mail {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  resetToken       String?  
+  resetTokenExpiry DateTime? 
+}
 
 enum CourseType {
   PDF
