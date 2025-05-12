@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import axios from 'axios';
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -18,12 +18,16 @@ function ForgotPasswordPage() {
 
     setLoading(true);
 
-    // Simule un appel API (remplacez ce bloc par un appel réel avec axios ou fetch)
-    setTimeout(() => {
-      console.log('Password reset requested for:', email);
-      setLoading(false);
+    try {
+      await axios.post('http://localhost:8000/auth/forgot-password', { email });
       setSubmitted(true);
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      alert("Une erreur s'est produite. Veuillez réessayer.");
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   if (submitted) {

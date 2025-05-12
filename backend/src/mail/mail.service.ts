@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { CreateMailDto } from './dto/create-mail.dto';
-import { UpdateMailDto } from './dto/update-mail.dto';
-
+import { MailerService } from '@nestjs-modules/mailer';
+import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService {
-  create(createMailDto: CreateMailDto) {
-    return 'This action adds a new mail';
-  }
+  constructor(private readonly mailerService: MailerService) { }
 
-  findAll() {
-    return `This action returns all mail`;
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} mail`;
-  }
+  async sendPasswordResetEmail(to: string, token: string) {
+    
+    const resetLink = `http://Localhost:3000/ResetPasswordPage?token=${token}&email=${to} `;
+    const mailOptions = {
+      from: 'Auth-backend service',
+      to: to,
+      subject: 'Password Reset Request',
+      html: `<p>You requested a password reset. Click the link below to reset your password:</p>
+      <p><p> your  code is ${token} </p>
+      <a href="${resetLink}">Reset Password</a>
+      </p>`,
+    };
 
-  update(id: number, updateMailDto: UpdateMailDto) {
-    return `This action updates a #${id} mail`;
+    await this.mailerService.sendMail(mailOptions);
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} mail`;
-  }
+  
 }

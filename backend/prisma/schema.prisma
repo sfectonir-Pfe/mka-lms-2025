@@ -48,6 +48,7 @@ model User {
   CreateursDeFormations CreateurDeFormation[]
   Admins                Admin[]
   Etablissements        Etablissement[]
+  ResetToken            ResetToken[]
 }
 
 model Formateur {
@@ -81,6 +82,17 @@ model Etablissement {
   User   User @relation(fields: [userId], references: [id])
   userId Int
 }
+
+model ResetToken {
+  id         Int      @id @default(autoincrement())
+  token      String
+  User       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 
 model Program {
   id      Int      @id @default(autoincrement())

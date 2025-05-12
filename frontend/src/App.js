@@ -35,6 +35,7 @@ import StudentLandingPage from "./pages/StudentLandingPage";
 
 
 import EditProfilePage from "./pages/EditProfilePage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -106,6 +107,7 @@ function App() {
                 <Route path="/student" element={<StudentLandingPage />} />
                 <Route path="ProfilePage" element={<ProfilePage />} />
                 <Route path="EditProfilePage" element={<EditProfilePage />} />
+                
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -114,6 +116,7 @@ function App() {
                   path="/forgot-password/"
                   element={<ForgetPasswordPage />}
                 />
+                <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
               </Route>
             )}
 
