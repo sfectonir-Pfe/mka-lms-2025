@@ -6,12 +6,12 @@ import { MailService } from './mail.service';
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: 'smtp.ethereal.email',
+        host: 'smtp.gmail.com',
         port: 587,
         secure: false,
         auth: {
-          user: 'verner.ferry43@ethereal.email',
-          pass: 'jXtKD6smEQpECd7KzX',
+          user: 'tunirdigital@gmail.com',
+          pass: 'xvkf rxww cxxt lmec',
         },
       },
       defaults: {

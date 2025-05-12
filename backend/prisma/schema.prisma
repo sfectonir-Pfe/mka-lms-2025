@@ -20,6 +20,19 @@ enum Role {
   CreateurDeFormation
   Etablissement
 }
+model Mail {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  resetToken       String?  
+  resetTokenExpiry DateTime? 
+}
+
+enum CourseType {
+  PDF
+  IMAGE
+  VIDEO
+}
 
 model User {
   id                    Int                   @id @default(autoincrement())
@@ -71,11 +84,37 @@ model Etablissement {
 }
 
 model ResetToken {
-  id         Int   @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   token      String
   User       User     @relation(fields: [userId], references: [id])
   userId     Int
   expiryDate DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+
+model Program {
+  id      Int      @id @default(autoincrement())
+  name    String
+  modules Module[]
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId Int
+  courses   Course[]
+}
+
+model Course {
+  id       Int        @id @default(autoincrement())
+  title    String
+  fileUrl  String // path or URL to uploaded file
+  type     CourseType
+  module   Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId Int
 }

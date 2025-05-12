@@ -5,7 +5,6 @@ import { PrismaService } from 'nestjs-prisma';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto'; 
 import * as nodemailer from 'nodemailer';
-import { nanoid } from 'nanoid';
 import { MailService } from '../mail/mail.service'; 
 import * as crypto from 'crypto';
 
@@ -92,6 +91,7 @@ export class AuthService {
     });
   }
   async forgotPassword(email: string) {
+    try {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
@@ -105,28 +105,19 @@ export class AuthService {
       },
     });
     await this.mailService.sendPasswordResetEmail(email, token);
-    // const testAccount = await nodemailer.createTestAccount();
-
-    // const transporter = nodemailer.createTransport({
-    //   host: 'smtp.ethereal.email',
-    //   port: 587,
-    //   auth: { user: testAccount.user, pass: testAccount.pass },
-    // });
-
-    // const resetLink = `http://localhost:3000/reset-password?token=${token}`
-
-    // const info = await transporter.sendMail({
-    //   from: 'LMS Support support@lms.com',
-    //   to: email,
-    //   subject: 'Password Reset',
-    //   html: `<p>Click the link to reset your password:</p><a href="${resetLink}">Reset Password</a>`
-    // });
+    
 
     return {
       message: 'Reset link sent',
       
     };
+   
   }
+   catch (error) {
+     console.log(error) 
+    }
+};
+  
   async resetPassword(token: string, oldPass: string, newPass: string, confirmPass: string) {
     const user = await this.prisma.user.findFirst({
       where: {
