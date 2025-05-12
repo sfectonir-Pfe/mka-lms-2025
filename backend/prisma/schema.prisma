@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
@@ -20,13 +19,6 @@ enum Role {
   Admin
   CreateurDeFormation
   Etablissement
-}
-model Mail {
-  id               String   @id @default(uuid())
-  email            String   @unique
-  password         String
-  resetToken       String?  
-  resetTokenExpiry DateTime? 
 }
 
 model User {
@@ -43,6 +35,7 @@ model User {
   CreateursDeFormations CreateurDeFormation[]
   Admins                Admin[]
   Etablissements        Etablissement[]
+  ResetToken            ResetToken[]
 }
 
 model Formateur {
@@ -66,7 +59,7 @@ model CreateurDeFormation {
 }
 
 model Admin {
-  id     Int   @id @default(autoincrement())
+  id     Int  @id @default(autoincrement())
   User   User @relation(fields: [userId], references: [id])
   userId Int
 }
@@ -75,4 +68,14 @@ model Etablissement {
   id     Int  @id @default(autoincrement())
   User   User @relation(fields: [userId], references: [id])
   userId Int
+}
+
+model ResetToken {
+  id         Int   @id @default(autoincrement())
+  token      String
+  User       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

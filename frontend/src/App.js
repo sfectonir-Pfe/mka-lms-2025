@@ -18,6 +18,7 @@ import UserList from "./pages/users/views/UserList";
 import ProgramsPage from "./pages/ProgramsPage";
 import { ToastContainer } from "react-toastify";
 import EditProfilePage from "./pages/EditProfilePage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -69,9 +70,9 @@ function App() {
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
                 </Route>
-                <Route path="Programs" element={<ProgramsPage />} />
                 <Route path="ProfilePage" element={<ProfilePage />} />
                 <Route path="EditProfilePage" element={<EditProfilePage />} />
+                
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -80,6 +81,7 @@ function App() {
                   path="/forgot-password/"
                   element={<ForgetPasswordPage />}
                 />
+                <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
               </Route>
             )}
 
