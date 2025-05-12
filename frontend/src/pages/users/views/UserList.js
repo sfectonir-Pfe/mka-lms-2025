@@ -93,6 +93,7 @@ export default function UserList() {
             rows={users}
             columns={columns}
             getRowId={(row) => row.id}
+            showToolbar
             initialState={{
               pagination: {
                 paginationModel: {
