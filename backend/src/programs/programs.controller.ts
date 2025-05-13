@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete,   InternalServerErrorException,
+import { Controller,ParseIntPipe, Get, Post, Body, Patch, Param, Delete,   InternalServerErrorException,
 } from '@nestjs/common';
 import { ProgramsService } from './programs.service';
 import { CreateProgramDto } from './dto/create-program.dto';
@@ -19,21 +19,20 @@ export class ProgramsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.programsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.programsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProgramDto) {
-    return this.programsService.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateProgramDto,
+  ) {
+    return this.programsService.update(id, dto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    try {
-      return await this.programsService.remove(+id);
-    } catch (error) {
-      console.error(" Delete failed:", error.message);
-      throw new InternalServerErrorException("Program deletion failed. It may have linked modules.");
-    }
-  }}
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.programsService.remove(id);
+  }
+}

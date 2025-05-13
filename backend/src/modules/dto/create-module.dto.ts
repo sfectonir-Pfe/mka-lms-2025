@@ -1,17 +1,17 @@
-import { IsNotEmpty, IsOptional, IsDateString, IsInt } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsInt } from 'class-validator';
+import { PeriodUnit } from '@prisma/client';
 
 export class CreateModuleDto {
-  @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
-
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
+  @IsEnum(PeriodUnit)
+  periodUnit: PeriodUnit;
 
   @IsInt()
-  programId: number;
+  duration: number;
+
+  @IsOptional()
+  @IsInt()
+  programId?: number;
 }

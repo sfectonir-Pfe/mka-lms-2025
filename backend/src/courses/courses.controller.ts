@@ -1,64 +1,51 @@
 import {
   Controller,
-  Post,
   Get,
-  Delete,
+  Post,
   Body,
+  Patch,
   Param,
-  UploadedFile,
-  UseInterceptors,
-  
+  Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads', // Save outside of src
-        filename: (req, file, cb) => {
-          const uniqueName =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueName + extname(file.originalname));
-        },
-      }),
-    }),
-  )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return {
-      message: 'File uploaded successfully!',
-      fileUrl: `http://localhost:8000/uploads/${file.filename}`, // ← Used by frontend
-    };
-  }
-  
-
   @Post()
-  createCourse(@Body() createCourseDto: CreateCourseDto) {
-    return this.coursesService.create(createCourseDto);
+  create(@Body() dto: CreateCourseDto) {
+    return this.coursesService.create(dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.coursesService.findAll();
   }
 
   @Get('module/:moduleId')
-  getByModule(@Param('moduleId') moduleId: string) {
-    return this.coursesService.findByModule(Number(moduleId));
+  findByModule(@Param('moduleId', ParseIntPipe) moduleId: number) {
+    return this.coursesService.findByModule(moduleId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.coursesService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCourseDto,
+  ) {
+    return this.coursesService.update(id, dto);
   }
 
   @Delete(':id')
-  removeCourse(@Param('id') id: string) {
-    return this.coursesService.remove(Number(id));
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.coursesService.remove(id);
   }
-  @Get()
-findAll() {
-  return this.coursesService.findAll();
-}
-
-  
 }

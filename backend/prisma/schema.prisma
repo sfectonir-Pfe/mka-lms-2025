@@ -20,27 +20,48 @@ enum Role {
   CreateurDeFormation
   Etablissement
 }
+
 model Mail {
-  id               String   @id @default(uuid())
-  email            String   @unique
+  id               String    @id @default(uuid())
+  email            String    @unique
   password         String
-  resetToken       String?  
-  resetTokenExpiry DateTime? 
+  resetToken       String?
+  resetTokenExpiry DateTime?
 }
 
-enum CourseType {
+enum FileType {
   PDF
   IMAGE
   VIDEO
 }
 
+enum ContenuType {
+  Cours
+  Exercice
+  Quiz
+}
+
+enum PeriodUnit {
+  Day
+  Week
+  Month
+}
+
 model User {
-  id                    Int                   @id @default(autoincrement())
-  role                  Role                  @default(Etudiant)
-  email                 String                @unique
-  password              String
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  id         Int      @id @default(autoincrement())
+  role       Role     @default(Etudiant)
+  email      String   @unique
+  password   String
+  name       String?
+  phone      String?
+  profilePic String?
+  location   String?
+  skills     String[]
+  about      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   resetToken            String?
   resetTokenExpiry      DateTime?
   formateurs            Formateur[]
@@ -93,28 +114,54 @@ model ResetToken {
   updatedAt  DateTime @updatedAt
 }
 
-
 model Program {
-  id      Int      @id @default(autoincrement())
+  id      Int             @id @default(autoincrement())
   name    String
-  modules Module[]
+  modules ProgramModule[]
 }
 
 model Module {
-  id        Int      @id @default(autoincrement())
-  name      String
-  startDate DateTime
-  endDate   DateTime
-  program   Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
-  programId Int
-  courses   Course[]
+  id         Int             @id @default(autoincrement())
+  name       String
+  periodUnit PeriodUnit // type of duration
+  duration   Int // how many
+  programs   ProgramModule[]
+  courses    ModuleCourse[]
 }
 
 model Course {
-  id       Int        @id @default(autoincrement())
+  id       Int            @id @default(autoincrement())
   title    String
-  fileUrl  String // path or URL to uploaded file
-  type     CourseType
-  module   Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  modules  ModuleCourse[]
+  contenus Contenu[]
+}
+
+model Contenu {
+  id       Int         @id @default(autoincrement())
+  title    String
+  fileUrl  String
+  fileType FileType
+  type     ContenuType
+  course   Course      @relation(fields: [courseId], references: [id])
+  courseId Int
+}
+
+model ProgramModule {
+  id        Int     @id @default(autoincrement())
+  program   Program @relation(fields: [programId], references: [id])
+  programId Int
+  module    Module  @relation(fields: [moduleId], references: [id])
+  moduleId  Int
+
+  @@unique([programId, moduleId])
+}
+
+model ModuleCourse {
+  id       Int    @id @default(autoincrement())
+  module   Module @relation(fields: [moduleId], references: [id])
   moduleId Int
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId Int
+
+  @@unique([moduleId, courseId])
 }

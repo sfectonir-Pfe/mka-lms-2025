@@ -9,10 +9,13 @@ import { ProgramsModule } from './programs/programs.module';
 import { ModulesModule } from './modules/modules.module';
 import { CoursesModule } from './courses/courses.module';
 import { MailModule } from './mail/mail.module';
+import { ContenusModule } from './contenus/contenus.module';
+import { ProgramModuleModule } from './program-module/program-module.module';
+import { ModuleCourseModule } from './module-course/module-course.module';
 
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, CoursesModule,MailModule],
+imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, CoursesModule,MailModule, ContenusModule, ProgramModuleModule, ModuleCourseModule],
   controllers: [AppController],
   providers: [AppService],
 })

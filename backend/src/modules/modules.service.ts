@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
@@ -7,64 +7,65 @@ import { UpdateModuleDto } from './dto/update-module.dto';
 export class ModulesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: CreateModuleDto) {
-    // Basic input validation
-    if (!data.name || !data.programId || !data.startDate || !data.endDate) {
-      throw new BadRequestException('Tous les champs du module sont requis.');
-    }
-
-    return this.prisma.module.create({
+  async create(data: CreateModuleDto) {
+    // Step 1: Create module only
+    const module = await this.prisma.module.create({
       data: {
         name: data.name,
-        programId: data.programId,
-        startDate: new Date(data.startDate), // Safe conversion
-        endDate: new Date(data.endDate),
+        periodUnit: data.periodUnit,
+        duration: data.duration,
       },
     });
+
+    // Step 2 (optional): link to program via ProgramModule
+    if (data.programId) {
+      await this.prisma.programModule.create({
+        data: {
+          programId: data.programId,
+          moduleId: module.id,
+        },
+      });
+    }
+
+    return module;
   }
 
   findAll() {
-    return this.prisma.module.findMany();
-  }
-
-  findByProgram(programId: number) {
-    console.log("✅ Fetched for programId:", programId);
     return this.prisma.module.findMany({
+      include: { programs: true, courses: true },
+    });
+  }
+
+  async findByProgram(programId: number) {
+    const linked = await this.prisma.programModule.findMany({
       where: { programId },
-      include: {
-        courses: true,
-      },
-      orderBy: { id: 'asc' },
+      include: { module: true },
     });
-  }
-  
-  
 
-  findOne(id: number) {
-    return this.prisma.module.findUnique({
-      where: { id },
-    });
+    return linked.map((pm) => pm.module);
   }
 
-  update(id: number, data: UpdateModuleDto) {
-    if (!data.name || !data.programId || !data.startDate || !data.endDate) {
-      throw new BadRequestException('Tous les champs du module sont requis pour la mise à jour.');
-    }
+  async findOne(id: number) {
+    const mod = await this.prisma.module.findUnique({ where: { id } });
+    if (!mod) throw new NotFoundException('Module not found');
+    return mod;
+  }
+
+  async update(id: number, data: UpdateModuleDto) {
+    await this.findOne(id); // ensure exists
 
     return this.prisma.module.update({
       where: { id },
       data: {
         name: data.name,
-        programId: data.programId,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
+        periodUnit: data.periodUnit,
+        duration: data.duration,
       },
     });
   }
 
-  remove(id: number) {
-    return this.prisma.module.delete({
-      where: { id },
-    });
+  async remove(id: number) {
+    await this.findOne(id);
+    return this.prisma.module.delete({ where: { id } });
   }
 }
