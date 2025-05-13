@@ -1,69 +1,80 @@
-import React from 'react';
-import { Container, Row, Col, Card, Button, Image } from 'react-bootstrap';
-import { Avatar, Typography } from '@mui/material';
+import React from "react";
+import {
+  Container,
+  Typography,
+  Avatar,
+  Grid,
+  Paper,
+  Divider,
+  Box,
+  Chip,
+  Button,
+} from "@mui/material";
 
-function ProfilePage() {
+const dummyUser = {
+  name: "John Doe",
+  email: "john.doe@example.com",
+  phone: "+216 12 345 678",
+  role: "Etudiant",
+  profilePic: "/uploads/avatar-placeholder.png",
+  location: "Tunis, Tunisia",
+  skills: ["React", "Node.js", "SQL"],
+  about: "I'm a passionate full-stack developer who loves building LMS platforms and learning tools.",
+};
+
+const UserProfilePage = () => {
   return (
-    <div className="App">
-      <Container className="mt-5">
-        <Row>
-          <Col md={4} className="text-center">
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} sm={4} textAlign="center">
             <Avatar
-              alt="User Profile"
-              src="https://via.placeholder.com/150"
-              sx={{ width: 150, height: 150 }}
-              className="mb-3"
+              alt={dummyUser.name}
+              src={dummyUser.profilePic}
+              sx={{ width: 120, height: 120, margin: "auto" }}
             />
-            <Typography variant="h5">Yasmeen</Typography>
-            <Typography variant="body2" color="textSecondary">
-              Frontend Developer
+            <Typography variant="h6" mt={2}>
+              {dummyUser.name}
             </Typography>
-          </Col>
+            <Typography variant="body2" color="text.secondary">
+              {dummyUser.role}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{ mt: 2 }}
+              href="/EditProfilePage"
+            >
+              Edit Profile
+            </Button>
+          </Grid>
 
-          <Col md={8}>
-            <Card className="shadow-lg">
-              <Card.Body>
-                <Card.Title>About Me</Card.Title>
-                <Card.Text>
-                  Hello, I'm Yasmeen! I'm passionate about web development, coding, and learning new technologies. I specialize in React, JavaScript, and web design.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          <Grid item xs={12} sm={8}>
+            <Typography variant="h6">About Me</Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              {dummyUser.about}
+            </Typography>
 
-        <Row className="mt-4">
-          <Col md={6}>
-            <Card>
-              <Card.Body>
-                <Card.Title>Contact Info</Card.Title>
-                <ul>
-                  <li>Email: yasmeen@example.com</li>
-                  <li>Location: New York, USA</li>
-                  <li>Phone: +1 234 567 890</li>
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
+            <Divider sx={{ my: 2 }} />
 
-          <Col md={6}>
-            <Card>
-              <Card.Body>
-                <Card.Title>Skills</Card.Title>
-                <ul>
-                  <li>ReactJS</li>
-                  <li>JavaScript</li>
-                  <li>HTML/CSS</li>
-                  <li>Bootstrap</li>
-                  <li>Material UI</li>
-                </ul>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+            <Typography variant="h6">Contact Info</Typography>
+            <Typography>Email: {dummyUser.email}</Typography>
+            <Typography>Phone: {dummyUser.phone}</Typography>
+            <Typography>Location: {dummyUser.location}</Typography>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="h6">Skills</Typography>
+            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {dummyUser.skills.map((skill, idx) => (
+                <Chip key={idx} label={skill} color="primary" />
+              ))}
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+    </Container>
   );
-}
+};
 
-export default ProfilePage;
+export default UserProfilePage;
