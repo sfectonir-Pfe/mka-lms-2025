@@ -1,20 +1,10 @@
-import { IsNotEmpty, IsEnum, IsString, IsInt } from 'class-validator';
-import { CourseType } from '@prisma/client';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateCourseDto {
-  @IsNotEmpty()
   @IsString()
   title: string;
 
-  @IsNotEmpty()
-  @IsEnum(CourseType)
-  type: CourseType;
-
-  @IsNotEmpty()
-  @IsString()
-  fileUrl: string;
-
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
-  moduleId: number;
+  moduleId?: number; // used for ModuleCourse link
 }

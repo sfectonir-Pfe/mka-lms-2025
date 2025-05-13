@@ -108,10 +108,10 @@ const AddUserView = () => {
                 <strong>Force du mot de passe : </strong>
                 <span
                   className={`badge ${passwordStrength === "Forte"
-                      ? "bg-success"
-                      : passwordStrength === "Moyenne"
-                        ? "bg-warning"
-                        : "bg-danger"
+                    ? "bg-success"
+                    : passwordStrength === "Moyenne"
+                      ? "bg-warning"
+                      : "bg-danger"
                     }`}
                 >
                   {passwordStrength || "Évaluation en cours..."}

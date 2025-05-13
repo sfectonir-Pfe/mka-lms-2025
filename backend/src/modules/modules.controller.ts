@@ -3,6 +3,7 @@ import { ModulesService } from './modules.service';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { BadRequestException } from '@nestjs/common';
+import { ParseIntPipe } from '@nestjs/common';
 
 @Controller('modules')
 export class ModulesController {
@@ -19,29 +20,28 @@ export class ModulesController {
   }
 
   @Get('by-program/:programId')
-  findByProgram(@Param('programId') programId: string) {
-    const id = Number(programId);
-    if (isNaN(id)) {
-      throw new BadRequestException("Invalid programId");
+  findByProgram(@Param('programId', ParseIntPipe) programId: number) {
+    if (isNaN(programId)) {
+      throw new BadRequestException('Invalid programId');
     }
-    return this.modulesService.findByProgram(id);
+    return this.modulesService.findByProgram(programId);
   }
 
-  
-
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.modulesService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.modulesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateModuleDto) {
-    return this.modulesService.update(+id, dto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateModuleDto,
+  ) {
+    return this.modulesService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.modulesService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.modulesService.remove(id);
   }
 }
