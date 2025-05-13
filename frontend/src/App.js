@@ -108,6 +108,8 @@ function App() {
                 <Route path="ProfilePage" element={<ProfilePage />} />
                 <Route path="EditProfilePage" element={<EditProfilePage />} />
                 
+               
+                
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>

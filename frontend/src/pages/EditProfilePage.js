@@ -1,99 +1,189 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Form, Button, Card } from 'react-bootstrap';
-import { Avatar, Typography } from '@mui/material';
+import React, { useState } from "react";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  Avatar,
+  Chip,
+  Box,
+} from "@mui/material";
 
-function EditProfilePage() {
-  const [name, setName] = useState('Yasmeen');
-  const [email, setEmail] = useState('yasmeen@example.com');
-  const [bio, setBio] = useState('I am passionate about web development.');
-  const [profilePicture, setProfilePicture] = useState(null);
+const EditProfilePage = () => {
+  const [formData, setFormData] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "+216 12 345 678",
+    role: "Etudiant",
+    location: "Tunis, Tunisia",
+    skills: ["React", "Node.js"],
+    about: "I'm a full-stack developer building LMS systems.",
+    profilePic: "", // preview URL
+    profileFile: null,
+    newSkill: "",
+  });
 
-  const handleNameChange = (e) => setName(e.target.value);
-  const handleEmailChange = (e) => setEmail(e.target.value);
-  const handleBioChange = (e) => setBio(e.target.value);
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
-  const handleProfilePictureChange = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setProfilePicture(URL.createObjectURL(file)); // Create object URL for image preview
+    setFormData((prev) => ({
+      ...prev,
+      profileFile: file,
+      profilePic: file ? URL.createObjectURL(file) : "",
+    }));
+  };
+
+  const handleAddSkill = () => {
+    if (formData.newSkill.trim() !== "") {
+      setFormData((prev) => ({
+        ...prev,
+        skills: [...prev.skills, prev.newSkill],
+        newSkill: "",
+      }));
     }
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: prev.skills.filter((s) => s !== skillToRemove),
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here, you can add logic to save or upload the profile information
-    alert('Profile Updated!');
+    console.log("Submitted Data:", formData);
+    // TODO: Send to backend with Axios (and FormData if file exists)
   };
 
   return (
-    <div className="EditProfile">
-      <Container className="mt-5">
-        <Row>
-          <Col md={4} className="text-center">
-            <Avatar
-              alt="Profile Picture"
-              src={profilePicture || 'https://via.placeholder.com/150'}
-              sx={{ width: 150, height: 150 }}
-              className="mb-3"
-            />
-            <Button variant="outlined" component="label">
-              Upload Profile Picture
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleProfilePictureChange} // Properly handle file selection
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Edit Profile
+        </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={4} textAlign="center">
+              <Avatar
+                src={formData.profilePic}
+                alt="Profile"
+                sx={{ width: 100, height: 100, mx: "auto" }}
               />
-            </Button>
-          </Col>
+              <Button component="label" variant="outlined" size="small" sx={{ mt: 2 }}>
+                Upload Photo
+                <input hidden accept="image/*" type="file" onChange={handleFileChange} />
+              </Button>
+            </Grid>
 
-          <Col md={8}>
-            <Card className="shadow-lg">
-              <Card.Body>
-                <Card.Title>Edit Profile</Card.Title>
-                <Form onSubmit={handleSubmit}>
-                  <Form.Group controlId="formName">
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={name}
-                      onChange={handleNameChange}
-                      placeholder="Enter your name"
+            <Grid item xs={12} sm={8}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="About Me"
+                    name="about"
+                    value={formData.about}
+                    onChange={handleChange}
+                    fullWidth
+                    multiline
+                    rows={4}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1">Skills</Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                    {formData.skills.map((skill, idx) => (
+                      <Chip
+                        key={idx}
+                        label={skill}
+                        onDelete={() => handleRemoveSkill(skill)}
+                        color="primary"
+                      />
+                    ))}
+                  </Box>
+                  <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                    <TextField
+                      label="Add Skill"
+                      value={formData.newSkill}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          newSkill: e.target.value,
+                        }))
+                      }
+                      size="small"
                     />
-                  </Form.Group>
+                    <Button onClick={handleAddSkill} variant="contained">
+                      Add
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Grid>
 
-                  <Form.Group controlId="formEmail" className="mt-3">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      value={email}
-                      onChange={handleEmailChange}
-                      placeholder="Enter your email"
-                    />
-                  </Form.Group>
-
-                  <Form.Group controlId="formBio" className="mt-3">
-                    <Form.Label>Bio</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      rows={3}
-                      value={bio}
-                      onChange={handleBioChange}
-                      placeholder="Tell us something about yourself"
-                    />
-                  </Form.Group>
-
-                  <Button variant="primary" type="submit" className="mt-3">
-                    Save Changes
-                  </Button>
-                </Form>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+            <Grid item xs={12}>
+              <Button variant="contained" type="submit" fullWidth>
+                Save Changes
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </Paper>
+    </Container>
   );
-}
+};
 
 export default EditProfilePage;
