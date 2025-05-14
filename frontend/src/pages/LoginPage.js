@@ -37,27 +37,28 @@ function LoginPage({ setUser }) {
   };
 
   const handleRequest = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+  e.preventDefault();
+  if (!validate()) return;
 
-    try {
-      const response = await axios.post("http://localhost:8000/auth/login", {
-        email,
-        password,
-      });
-
-      setUser(response.data);
-      localStorage.setItem("user", JSON.stringify(response.data));
-    } catch (error) {
-      const message =
-        "Login failed. Please check your credentials. " +
-        (error.response?.data?.message || "");
-      setMgsError(message);
-      showErrorToast(message);
-      setPassword("");
-    }
-  };
-
+  try {
+    const response = await axios.post("http://localhost:8000/auth/login", {
+      email,
+      password,
+    });
+    setUser(response.data);
+    localStorage.setItem("user", JSON.stringify(response.data));
+localStorage.setItem("userEmail", response.data.email);
+      
+ window.location.href = "/ProfilePage"; // ou useNavigate si tu l'utilises
+  } catch (error) {
+    const message =
+      "Login failed. Please check your credentials. " +
+      (error.response?.data?.message || "");
+    setMgsError(message);
+    showErrorToast(message);
+    setPassword("");
+  }
+};
   return (
     <div className="container-fluid p-3 my-5">
       <div className="row align-items-center">

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -10,77 +10,107 @@ import {
   Chip,
   Box,
 } from "@mui/material";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 
 const EditProfilePage = () => {
-  const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+216 12 345 678",
-    role: "Etudiant",
-    location: "Tunis, Tunisia",
-    skills: ["React", "Node.js"],
-    about: "I'm a full-stack developer building LMS systems.",
-    profilePic: "", // preview URL
-    profileFile: null,
-    newSkill: "",
-  });
+  const [formData, setFormData] = useState(null);
+  const [newSkill, setNewSkill] = useState("");
+  const { email: paramEmail } = useParams();
+  const navigate = useNavigate();
+
+  const email = paramEmail || localStorage.getItem("userEmail");
+
+  useEffect(() => {
+    if (!email) return;
+    axios
+      .get(`http://localhost:8000/users/me/${email}`)
+      .then((res) => setFormData(res.data))
+      .catch((err) => console.error("Erreur chargement utilisateur", err));
+  }, [email]);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData((prev) => ({
-      ...prev,
-      profileFile: file,
-      profilePic: file ? URL.createObjectURL(file) : "",
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddSkill = () => {
-    if (formData.newSkill.trim() !== "") {
+    if (newSkill.trim()) {
       setFormData((prev) => ({
         ...prev,
-        skills: [...prev.skills, prev.newSkill],
-        newSkill: "",
+        skills: [...(prev.skills || []), newSkill],
       }));
+      setNewSkill("");
     }
   };
 
-  const handleRemoveSkill = (skillToRemove) => {
+  const handleRemoveSkill = (skill) => {
     setFormData((prev) => ({
       ...prev,
-      skills: prev.skills.filter((s) => s !== skillToRemove),
+      skills: prev.skills.filter((s) => s !== skill),
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitted Data:", formData);
-    // TODO: Send to backend with Axios (and FormData if file exists)
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const data = new FormData();
+    data.append("name", formData.name || "");
+    data.append("phone", formData.phone || "");
+    data.append("location", formData.location || "");
+    data.append("about", formData.about || "");
+    data.append("skills", JSON.stringify(formData.skills || []));
+
+    if (formData.profileFile) {
+      data.append("profileFile", formData.profileFile);
+    }
+
+    await axios.patch(`http://localhost:8000/users/me/${email}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    navigate("/ProfilePage");
+  } catch (err) {
+    console.error("Erreur lors de la mise à jour", err);
+  }
+};
+
+
+  if (!formData) return <p>Chargement...</p>;
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
         <Typography variant="h5" gutterBottom>
-          Edit Profile
+          Modifier le Profil
         </Typography>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             <Grid item xs={12} sm={4} textAlign="center">
-              <Avatar
-                src={formData.profilePic}
-                alt="Profile"
-                sx={{ width: 100, height: 100, mx: "auto" }}
-              />
+             <Avatar
+  src={
+    formData.profilePic
+      ? `http://localhost:8000${formData.profilePic}`
+      : "/avatar-placeholder.png"
+  }
+  sx={{ width: 100, height: 100, mx: "auto" }}
+/>
+
               <Button component="label" variant="outlined" size="small" sx={{ mt: 2 }}>
-                Upload Photo
-                <input hidden accept="image/*" type="file" onChange={handleFileChange} />
+                Télécharger une photo
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      profileFile: e.target.files?.[0] || null,
+                    }))
+                  }
+                />
               </Button>
             </Grid>
 
@@ -88,66 +118,66 @@ const EditProfilePage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Name"
                     name="name"
+                    label="Nom"
+                    fullWidth
                     value={formData.name}
                     onChange={handleChange}
-                    fullWidth
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Email"
                     name="email"
+                    label="Email"
+                    fullWidth
                     value={formData.email}
-                    onChange={handleChange}
-                    fullWidth
+                    disabled
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Phone"
                     name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
+                    label="Téléphone"
                     fullWidth
+                    value={formData.phone || ""}
+                    onChange={handleChange}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    label="Role"
                     name="role"
+                    label="Rôle"
+                    fullWidth
                     value={formData.role}
-                    onChange={handleChange}
-                    fullWidth
+                    disabled
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Location"
                     name="location"
-                    value={formData.location}
-                    onChange={handleChange}
+                    label="Localisation"
                     fullWidth
+                    value={formData.location || ""}
+                    onChange={handleChange}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="About Me"
                     name="about"
-                    value={formData.about}
-                    onChange={handleChange}
+                    label="À propos de moi"
                     fullWidth
                     multiline
                     rows={4}
+                    value={formData.about || ""}
+                    onChange={handleChange}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1">Skills</Typography>
+                  <Typography variant="subtitle1">Compétences</Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                    {formData.skills.map((skill, idx) => (
+                    {formData.skills?.map((skill, i) => (
                       <Chip
-                        key={idx}
+                        key={i}
                         label={skill}
                         onDelete={() => handleRemoveSkill(skill)}
                         color="primary"
@@ -156,18 +186,13 @@ const EditProfilePage = () => {
                   </Box>
                   <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
                     <TextField
-                      label="Add Skill"
-                      value={formData.newSkill}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          newSkill: e.target.value,
-                        }))
-                      }
+                      label="Ajouter compétence"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
                       size="small"
                     />
                     <Button onClick={handleAddSkill} variant="contained">
-                      Add
+                      Ajouter
                     </Button>
                   </Box>
                 </Grid>
@@ -175,8 +200,8 @@ const EditProfilePage = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Button variant="contained" type="submit" fullWidth>
-                Save Changes
+              <Button type="submit" variant="contained" fullWidth>
+                Enregistrer
               </Button>
             </Grid>
           </Grid>

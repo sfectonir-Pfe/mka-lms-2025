@@ -18,7 +18,8 @@ export class AuthService {
     });
     if (user) {
       if (await bcrypt.compare(dto.password, user.password)) {
-        return user;
+  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
+  return safeUser;//fornt never see sens info
       } else
         throw new HttpException('invalid password', HttpStatus.BAD_REQUEST);
     } else {

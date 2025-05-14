@@ -15,14 +15,14 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  profilePic?: string;
-
-  @IsOptional()
-  @IsString()
   about?: string;
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   skills?: string[];
+
+  @IsOptional()
+  @IsString()
+  profilePic?: string; // Optional, handled from file in controller
 }

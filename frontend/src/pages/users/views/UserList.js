@@ -60,7 +60,8 @@ export default function UserList() {
       width: 150,
       renderCell: (params) => (
         <div>
-          <Link to={`/ProfilePage${params.row.id}`} className="btn btn-primary btn-sm mx-1">voir profil</Link>
+         <Link to={`/ProfilePage${params.row.id}`} className="btn btn-primary btn-sm mx-1">voir profil</Link>
+
           <button 
             className="btn btn-danger btn-sm"
             onClick={() => handleDelete(params.row)}
