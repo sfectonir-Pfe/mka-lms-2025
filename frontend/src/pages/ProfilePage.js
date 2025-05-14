@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Typography,
@@ -10,34 +10,55 @@ import {
   Chip,
   Button,
 } from "@mui/material";
-
-const dummyUser = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+216 12 345 678",
-  role: "Etudiant",
-  profilePic: "/uploads/avatar-placeholder.png",
-  location: "Tunis, Tunisia",
-  skills: ["React", "Node.js", "SQL"],
-  about: "I'm a passionate full-stack developer who loves building LMS platforms and learning tools.",
-};
+import axios from "axios";
 
 const UserProfilePage = () => {
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState("");
+
+  const email = localStorage.getItem("userEmail");
+
+  useEffect(() => {
+    if (!email) {
+      setError("Aucun email trouvé. Veuillez vous connecter.");
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/users/me/${encodeURIComponent(email)}`);
+        setUser(res.data);
+      } catch (err) {
+        console.error("❌ Failed to fetch user profile:", err);
+        setError("Impossible de charger le profil utilisateur.");
+      }
+    };
+
+    fetchUser();
+  }, [email]);
+
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!user) return <p>Chargement du profil...</p>;
+
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
         <Grid container spacing={3}>
           <Grid item xs={12} sm={4} textAlign="center">
             <Avatar
-              alt={dummyUser.name}
-              src={dummyUser.profilePic}
-              sx={{ width: 120, height: 120, margin: "auto" }}
-            />
+  alt={user.name || "User"}
+  src={
+    user.profilePic
+      ? `http://localhost:8000${user.profilePic}`
+      : "/uploads/avatar-placeholder.png"
+  }
+  sx={{ width: 120, height: 120, margin: "auto" }}
+/>
             <Typography variant="h6" mt={2}>
-              {dummyUser.name}
+              {user.name || "Nom Inconnu"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {dummyUser.role}
+              {user.role}
             </Typography>
             <Button
               variant="outlined"
@@ -45,30 +66,36 @@ const UserProfilePage = () => {
               sx={{ mt: 2 }}
               href="/EditProfilePage"
             >
-              Edit Profile
+              Modifier le profil
             </Button>
           </Grid>
 
           <Grid item xs={12} sm={8}>
-            <Typography variant="h6">About Me</Typography>
+            <Typography variant="h6">À propos</Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
-              {dummyUser.about}
+              {user.about || "Aucune description disponible."}
             </Typography>
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6">Contact Info</Typography>
-            <Typography>Email: {dummyUser.email}</Typography>
-            <Typography>Phone: {dummyUser.phone}</Typography>
-            <Typography>Location: {dummyUser.location}</Typography>
+            <Typography variant="h6">Contact</Typography>
+            <Typography>Email: {user.email}</Typography>
+            <Typography>Téléphone: {user.phone || "Non renseigné"}</Typography>
+            <Typography>Localisation: {user.location || "Non précisée"}</Typography>
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="h6">Skills</Typography>
+            <Typography variant="h6">Compétences</Typography>
             <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {dummyUser.skills.map((skill, idx) => (
-                <Chip key={idx} label={skill} color="primary" />
-              ))}
+              {user.skills?.length > 0 ? (
+                user.skills.map((skill, idx) => (
+                  <Chip key={idx} label={skill} color="primary" />
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Aucune compétence ajoutée.
+                </Typography>
+              )}
             </Box>
           </Grid>
         </Grid>

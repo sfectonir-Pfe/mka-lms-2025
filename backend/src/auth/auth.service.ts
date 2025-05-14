@@ -18,7 +18,8 @@ export class AuthService {
     });
     if (user) {
       if (await bcrypt.compare(dto.password, user.password)) {
-        return user;
+  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
+  return safeUser;//fornt never see sens info
       } else
         throw new HttpException('invalid password', HttpStatus.BAD_REQUEST);
     } else {
@@ -101,7 +102,7 @@ export class AuthService {
       where: { email },
       data: {
         resetToken: token,
-        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 15),
+        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 1),//timer
       },
     });
     await this.mailService.sendPasswordResetEmail(email, token);
@@ -118,34 +119,32 @@ export class AuthService {
     }
 };
   
-  async resetPassword(token: string, oldPass: string, newPass: string, confirmPass: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        resetToken: token,
-        resetTokenExpiry: { gte: new Date() },
-      },
-    });
+  async resetPassword(token: string, newPass: string, confirmPass: string) {
+  const user = await this.prisma.user.findFirst({
+    where: {
+      resetToken: token,
+      resetTokenExpiry: { gte: new Date() },
+    },
+  });
 
-    if (!user) throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
+  if (!user) throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
 
-    const isOldCorrect = await bcrypt.compare(oldPass, user.password);
-    if (!isOldCorrect) throw new HttpException('Old password incorrect', HttpStatus.BAD_REQUEST);
+  if (newPass !== confirmPass)
+    throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
 
-    if (newPass !== confirmPass) throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
+  const hashedNew = await bcrypt.hash(newPass, 10);
 
-    const hashedNew = await bcrypt.hash(newPass, 10);
+  await this.prisma.user.update({
+    where: { id: user.id },
+    data: {
+      password: hashedNew,
+      resetToken: null,
+      resetTokenExpiry: null,
+    },
+  });
 
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: {
-        password: hashedNew,
-        resetToken: null,
-        resetTokenExpiry: null,
-      },
-    });
-
-    return { message: 'Password reset successful' };
-  }
+  return { message: 'Password reset successful' };
+}
 }
 
 

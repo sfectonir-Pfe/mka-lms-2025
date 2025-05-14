@@ -2,16 +2,30 @@ import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import ToastError from "../components/ToastError";
+import ToastSuccess from "../components/ToastSuccess";
+
 
 function ResetPasswordPage() {
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const navigate = useNavigate();
+
+  // Clean URL
+  React.useEffect(() => {
+    const url = new URL(window.location);
+    url.searchParams.delete("token");
+    url.searchParams.delete("email");
+    window.history.replaceState({}, document.title, url.pathname);
+  }, []);
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+const [showSuccess, setShowSuccess] = useState(false);
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
@@ -30,30 +44,45 @@ function ResetPasswordPage() {
 
   const handleReset = async (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
-      alert("Les mots de passe ne correspondent pas.");
+      setToastMsg("❌ Les mots de passe ne correspondent pas.");
+      setShowToast(true);
       return;
     }
+
     if (!token) {
-      alert("Lien invalide ou expiré.");
+      setToastMsg("❌ Lien invalide ou expiré.");
+      setShowToast(true);
       return;
     }
 
     setLoading(true);
+
     try {
-      await axios.post('http://localhost:3000/auth/reset-password', {
+      await axios.post('http://localhost:8000/auth/reset-password', {
         token,
-        newPassword,
+        newPass: newPassword,
+        confirmPass: confirmPassword,
       });
-      alert("Mot de passe mis à jour avec succès.");
-      navigate('/');
+
+      setToastMsg("✅ Mot de passe mis à jour avec succès.");
+setShowSuccess(true);
+
+setTimeout(() => {
+  navigate('/reset-success');
+}, 2000);
+
+
     } catch (error) {
       console.error(error);
-      alert("Une erreur est survenue. Vérifiez le lien ou réessayez.");
+      setToastMsg("❌ Une erreur est survenue. Vérifiez le lien ou réessayez.");
+      setShowToast(true);
     } finally {
       setLoading(false);
     }
   };
+
 
   const passwordStrength = getPasswordStrength(newPassword);
 
@@ -132,6 +161,8 @@ function ResetPasswordPage() {
           </button>
         </form>
       </div>
+<ToastError msg={toastMsg} show={showToast} setShow={setShowToast} />
+<ToastSuccess msg={toastMsg} show={showSuccess} setShow={setShowSuccess} />
     </div>
   );
 }
