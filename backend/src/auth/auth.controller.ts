@@ -58,11 +58,9 @@ forgot(@Body('email') email: string) {
 @Post('reset-password')
 reset(
   @Body('token') token: string,
-  @Body('oldPass') oldPass: string,
   @Body('newPass') newPass: string,
   @Body('confirmPass') confirmPass: string
 ) {
-  return this.authService.resetPassword(token, oldPass, newPass, confirmPass);
+  return this.authService.resetPassword(token, newPass, confirmPass);
 }
-
 }

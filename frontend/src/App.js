@@ -27,8 +27,7 @@ import StudentProgramPage from "./pages/StudentProgramPage";
 import "react-toastify/dist/ReactToastify.css";
 import StudentLandingPage from "./pages/StudentLandingPage";
 
-
-
+import ResetSuccessPage from "./pages/ResetSuccessPage";
 
 
 
@@ -107,7 +106,6 @@ function App() {
                 <Route path="/student" element={<StudentLandingPage />} />
                 <Route path="ProfilePage" element={<ProfilePage />} />
                 <Route path="EditProfilePage" element={<EditProfilePage />} />
-                
                
                 
               </Route>
@@ -119,7 +117,10 @@ function App() {
                   element={<ForgetPasswordPage />}
                 />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
+                 <Route path="/reset-success" element={<ResetSuccessPage />} />
+
               </Route>
+              
             )}
 
             <Route path="*" element={<NotFound />} />
