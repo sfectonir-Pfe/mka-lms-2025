@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
+  
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await this.hashPassword(createUserDto.password);
     return this.prisma.user.create({
@@ -82,6 +83,7 @@ export class UsersService {
         location: updateUserDto.location,
         about: updateUserDto.about,
         skills: updateUserDto.skills,
+        profilePic: updateUserDto.profilePic,
       },
       select: {
         id: true,
@@ -102,6 +104,7 @@ export class UsersService {
       where: { id },
     });
   }
+  
   async findById(id: number) {
     try {
       // Convertir l'ID en nombre
@@ -153,7 +156,17 @@ export class UsersService {
       console.log("Mise à jour de l'utilisateur avec email:", email);
       console.log("Données reçues:", updateUserDto);
 
-      // Créer un objet de données sans le champ role pour éviter les erreurs de type
+      // Parse skills from string if needed
+      if (updateUserDto.skills && typeof updateUserDto.skills === 'string') {
+        try {
+          updateUserDto.skills = JSON.parse(updateUserDto.skills as unknown as string);
+        } catch (e) {
+          console.error('Failed to parse skills:', e);
+          updateUserDto.skills = [];
+        }
+      }
+
+      // Créer un objet de données
       const updateData: any = {
         name: updateUserDto.name,
         phone: updateUserDto.phone,
@@ -164,6 +177,11 @@ export class UsersService {
       // Ajouter le champ skills seulement s'il est défini
       if (updateUserDto.skills !== undefined) {
         updateData.skills = updateUserDto.skills;
+      }
+
+      // Ajouter le champ profilePic seulement s'il est défini
+      if (updateUserDto.profilePic !== undefined) {
+        updateData.profilePic = updateUserDto.profilePic;
       }
 
       console.log("Données à mettre à jour:", updateData);

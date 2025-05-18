@@ -27,4 +27,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
+
+  @IsOptional()
+  @IsString()
+  profilePic?: string; // Optional, handled from file in controller
 }

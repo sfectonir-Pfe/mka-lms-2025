@@ -10,6 +10,7 @@ import {
   Button,
   Avatar,
   Divider,
+  Chip,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
@@ -145,23 +146,36 @@ const ProfilePage = () => {
 
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary">Téléphone</Typography>
-            <Typography>{user.phone || "Non fourni"}</Typography>
+            <Typography variant="subtitle2" color="text.secondary">Rôle</Typography>
+            <Typography>{user.role}</Typography>
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary">Localisation</Typography>
-            <Typography>{user.location || "Non fournie"}</Typography>
+            <Typography variant="h6">Contact</Typography>
+            <Typography>Email: {user.email}</Typography>
+            <Typography>Téléphone: {user.phone || "Non renseigné"}</Typography>
+            <Typography>Localisation: {user.location || "Non précisée"}</Typography>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="h6">Compétences</Typography>
+            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
+              {user.skills?.length > 0 ? (
+                user.skills.map((skill, idx) => (
+                  <Chip key={idx} label={skill} color="primary" />
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Aucune compétence ajoutée.
+                </Typography>
+              )}
+            </Box>
           </Grid>
 
           <Grid item xs={12}>
             <Typography variant="subtitle2" color="text.secondary">À propos</Typography>
             <Typography>{user.about || "Non renseigné"}</Typography>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary">Rôle</Typography>
-            <Typography>{user.role}</Typography>
           </Grid>
         </Grid>
       </Paper>

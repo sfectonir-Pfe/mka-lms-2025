@@ -116,12 +116,11 @@ export class AuthController {
   @Post('reset-password')
   async reset(
     @Body('token') token: string,
-    @Body('oldPass') oldPass: string,
     @Body('newPass') newPass: string,
     @Body('confirmPass') confirmPass: string,
   ) {
     try {
-      const result = await this.authService.resetPassword(token, oldPass, newPass, confirmPass);
+      const result = await this.authService.resetPassword(token, newPass, confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(
@@ -130,6 +129,4 @@ export class AuthController {
       );
     }
   }
-
-
 }

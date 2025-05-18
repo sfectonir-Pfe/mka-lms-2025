@@ -11,6 +11,7 @@ import {
   Box,
   Avatar,
   IconButton,
+  Chip,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -30,6 +31,8 @@ const EditProfilePage = () => {
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
+  const [newSkill, setNewSkill] = useState("");
+  const [skills, setSkills] = useState([]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -52,6 +55,10 @@ const EditProfilePage = () => {
         if (res.data) {
           setUser(res.data);
           setForm(res.data);
+          // Initialiser les compétences si elles existent
+          if (res.data.skills && Array.isArray(res.data.skills)) {
+            setSkills(res.data.skills);
+          }
         } else {
           throw new Error("Données utilisateur vides");
         }
@@ -85,6 +92,17 @@ const EditProfilePage = () => {
     }
   };
 
+  const handleAddSkill = () => {
+    if (newSkill.trim() !== "" && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill("");
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setSkills(skills.filter(skill => skill !== skillToRemove));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -116,6 +134,7 @@ const EditProfilePage = () => {
         phone: form.phone || null,
         location: form.location || null,
         about: form.about || null,
+        skills: skills,
       };
 
       console.log("Données à mettre à jour:", userData);
@@ -339,6 +358,31 @@ const EditProfilePage = () => {
                 disabled
                 helperText="Le rôle ne peut pas être modifié"
               />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography variant="subtitle1">Compétences</Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {skills.map((skill, idx) => (
+                  <Chip
+                    key={idx}
+                    label={skill}
+                    onDelete={() => handleRemoveSkill(skill)}
+                    color="primary"
+                  />
+                ))}
+              </Box>
+              <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
+                <TextField
+                  label="Ajouter une compétence"
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  size="small"
+                />
+                <Button onClick={handleAddSkill} variant="contained">
+                  Ajouter
+                </Button>
+              </Box>
             </Grid>
 
             <Grid item xs={12} textAlign="right">

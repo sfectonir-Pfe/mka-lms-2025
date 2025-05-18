@@ -26,6 +26,7 @@ import FeedbackPage from "./pages/FeedbackPage";
 import StudentProgramPage from "./pages/StudentProgramPage";
 import "react-toastify/dist/ReactToastify.css";
 import StudentLandingPage from "./pages/StudentLandingPage";
+import ResetSuccessPage from "./pages/ResetSuccessPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
@@ -55,7 +56,6 @@ function App() {
         }`}
 
     > <ToastContainer />
-      <ToastContainer />
       <div className="d-flex justify-content-end">
         <button
           className="btn btn-light d-flex align-items-center"
@@ -110,7 +110,10 @@ function App() {
                   element={<ForgetPasswordPage />}
                 />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
+                <Route path="/reset-success" element={<ResetSuccessPage />} />
+
               </Route>
+              
             )}
 
             <Route path="*" element={<NotFound />} />
