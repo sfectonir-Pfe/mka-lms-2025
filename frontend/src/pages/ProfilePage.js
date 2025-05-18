@@ -1,75 +1,167 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
-  Typography,
-  Avatar,
-  Grid,
   Paper,
-  Divider,
+  Typography,
+  CircularProgress,
+  Alert,
+  Grid,
   Box,
-  Chip,
   Button,
+  Avatar,
+  Divider,
 } from "@mui/material";
+import { useParams, useNavigate } from "react-router-dom";
+import EditIcon from '@mui/icons-material/Edit';
+import axios from "axios";
 
-const dummyUser = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+216 12 345 678",
-  role: "Etudiant",
-  profilePic: "/uploads/avatar-placeholder.png",
-  location: "Tunis, Tunisia",
-  skills: ["React", "Node.js", "SQL"],
-  about: "I'm a passionate full-stack developer who loves building LMS platforms and learning tools.",
-};
+const ProfilePage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-const UserProfilePage = () => {
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!id) {
+        console.error("ID utilisateur manquant");
+        setError("ID utilisateur manquant");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Tentative de chargement du profil pour l'ID:", id);
+      setLoading(true);
+
+      // Stratégie 1: Essayer directement par ID
+      try {
+        console.log("Stratégie 1: Chargement par ID");
+        const res = await axios.get(`http://localhost:8000/users/id/${id}`);
+        console.log("Succès - Données utilisateur chargées par ID:", res.data);
+        setUser(res.data);
+        setLoading(false);
+        return;
+      } catch (err) {
+        console.error("Échec de la stratégie 1:", err.response?.data || err.message);
+      }
+
+      // Stratégie 2: Récupérer tous les utilisateurs et filtrer
+      try {
+        console.log("Stratégie 2: Chargement via liste complète");
+        const allUsersRes = await axios.get(`http://localhost:8000/users`);
+        console.log("Liste des utilisateurs récupérée:", allUsersRes.data);
+
+        const foundUser = allUsersRes.data.find(user => user.id === parseInt(id));
+
+        if (foundUser) {
+          console.log("Utilisateur trouvé dans la liste:", foundUser);
+
+          // Récupérer les détails complets par email
+          const detailRes = await axios.get(`http://localhost:8000/users/email/${foundUser.email}`);
+          console.log("Succès - Données utilisateur chargées via email:", detailRes.data);
+          setUser(detailRes.data);
+          setLoading(false);
+          return;
+        } else {
+          console.error("Utilisateur non trouvé dans la liste");
+          throw new Error("Utilisateur non trouvé");
+        }
+      } catch (secondErr) {
+        console.error("Échec de la stratégie 2:", secondErr.response?.data || secondErr.message);
+        setError("Impossible de charger les informations de l'utilisateur.");
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Container sx={{ mt: 5, textAlign: "center" }}>
+        <CircularProgress />
+      </Container>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <Container sx={{ mt: 5 }}>
+        <Paper elevation={3} sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Erreur de chargement du profil
+          </Typography>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error || "Utilisateur non trouvé."}
+          </Alert>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            ID utilisateur demandé: {id}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => window.location.reload()}
+            sx={{ mr: 1 }}
+          >
+            Réessayer
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/')}
+          >
+            Retour à l'accueil
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
+
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={4} textAlign="center">
-            <Avatar
-              alt={dummyUser.name}
-              src={dummyUser.profilePic}
-              sx={{ width: 120, height: 120, margin: "auto" }}
-            />
-            <Typography variant="h6" mt={2}>
-              {dummyUser.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {dummyUser.role}
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              sx={{ mt: 2 }}
-              href="/EditProfilePage"
-            >
-              Edit Profile
-            </Button>
+    <Container maxWidth="sm" sx={{ mt: 5 }}>
+      <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+          <Typography variant="h5">Profil utilisateur</Typography>
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={() => navigate(`/EditProfile/${user.email}`)}
+          >
+            Modifier
+          </Button>
+        </Box>
+
+        <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+          <Avatar
+            src={user.profilePic ? `http://localhost:8000/uploads${user.profilePic}` : null}
+            sx={{ width: 100, height: 100, mb: 2 }}
+          >
+            {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+          </Avatar>
+          <Typography variant="h6">{user.name}</Typography>
+          <Typography color="text.secondary">{user.email}</Typography>
+        </Box>
+
+        <Divider sx={{ mb: 3 }} />
+
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="text.secondary">Téléphone</Typography>
+            <Typography>{user.phone || "Non fourni"}</Typography>
           </Grid>
 
-          <Grid item xs={12} sm={8}>
-            <Typography variant="h6">About Me</Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {dummyUser.about}
-            </Typography>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="text.secondary">Localisation</Typography>
+            <Typography>{user.location || "Non fournie"}</Typography>
+          </Grid>
 
-            <Divider sx={{ my: 2 }} />
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="text.secondary">À propos</Typography>
+            <Typography>{user.about || "Non renseigné"}</Typography>
+          </Grid>
 
-            <Typography variant="h6">Contact Info</Typography>
-            <Typography>Email: {dummyUser.email}</Typography>
-            <Typography>Phone: {dummyUser.phone}</Typography>
-            <Typography>Location: {dummyUser.location}</Typography>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Typography variant="h6">Skills</Typography>
-            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {dummyUser.skills.map((skill, idx) => (
-                <Chip key={idx} label={skill} color="primary" />
-              ))}
-            </Box>
+          <Grid item xs={12}>
+            <Typography variant="subtitle2" color="text.secondary">Rôle</Typography>
+            <Typography>{user.role}</Typography>
           </Grid>
         </Grid>
       </Paper>
@@ -77,4 +169,4 @@ const UserProfilePage = () => {
   );
 };
 
-export default UserProfilePage;
+export default ProfilePage;

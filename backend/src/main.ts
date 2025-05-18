@@ -10,7 +10,7 @@ async function bootstrap() {
   app.enableCors();
 
   // Serve files from the top-level /uploads folder
- app.useStaticAssets('uploads', { prefix: '/uploads' });
+  app.useStaticAssets('backend/uploads', { prefix: '/uploads' });
 
   const config = new DocumentBuilder()
     .setTitle('MKA-LMS')

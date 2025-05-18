@@ -1,53 +1,59 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogTitle from '@mui/material/DialogTitle';
 import axios from "axios";
-import { useLocation } from "react-router-dom";
-
+import { toast } from 'react-toastify';
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 export default function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    if (location.state?.userAdded) {
-      fetchUsers();
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
-
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:8000/auth");
-      console.log("Full API Response:", response); // Debug log
-      
-      // Ensure proper data structure
-      if (response.data && response.data.success && Array.isArray(response.data.data)) {
-        setUsers(response.data.data);
-      } else {
-        console.error("Unexpected data format:", response.data);
-        setUsers([]);
-      }
+      const data = response.data?.data || response.data;
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message);
+      toast.error("Failed to fetch users.");
       setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (row) => {
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8000/auth/users/${row.id}`);
-      setUsers(users.filter(user => user.id !== row.id));
+      await axios.delete(`http://localhost:8000/auth/users/${userToDelete.id}`);
+      setUsers(users.filter(user => user.id !== userToDelete.id));
+      toast.success("User deleted!");
     } catch (error) {
-      console.error("Error deleting user:", error);
+      toast.error("Failed to delete user.");
+    } finally {
+      setOpenDeleteDialog(false);
     }
   };
 
@@ -57,52 +63,76 @@ export default function UserList() {
     {
       field: 'actions',
       headerName: 'Actions',
-      width: 150,
+      width: 350,
       renderCell: (params) => (
         <div>
-          <Link to={`/ProfilePage${params.row.id}`} className="btn btn-primary btn-sm mx-1">voir profil</Link>
-          <button 
-            className="btn btn-danger btn-sm"
-            onClick={() => handleDelete(params.row)}
+          <Button
+            component={Link}
+            to={`/ProfilePage/${params.row.id}`}
+            variant="contained"
+            size="small"
+            sx={{ mx: 1 }}
+            startIcon={<VisibilityIcon />}
           >
-            supprimer
-          </button>
+          </Button>
+          <Button
+            component={Link}
+            to={`/EditProfile/${params.row.email}`}
+            variant="contained"
+            size="small"
+            color="primary"
+            sx={{ mx: 1 }}
+            startIcon={<EditIcon />}
+          >
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => handleDeleteClick(params.row)}
+          >
+            <Grid size={8}>
+              <DeleteIcon />
+
+            </Grid>
+          </Button>
         </div>
       ),
-    },
+    }
+
   ];
 
   return (
     <div className="container mt-5">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Delete {userToDelete?.email}?</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         <h2>Liste des utilisateurs</h2>
-        <Link to="add" className="btn btn-primary">
-          Ajouter un utilisateur
-        </Link>
-      </div>
+        <Button component={Link} to="add" variant="contained" color="primary">
+          <AddIcon />
+        </Button>
+      </Box>
 
       {loading ? (
-        <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Box>
+      ) : users.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>No users found.</Box>
       ) : (
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid
             rows={users}
             columns={columns}
             getRowId={(row) => row.id}
-            showToolbar
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
             pageSizeOptions={[5, 10, 25]}
-            checkboxSelection
+            checkboxSelection={false}
             disableRowSelectionOnClick
           />
         </Box>

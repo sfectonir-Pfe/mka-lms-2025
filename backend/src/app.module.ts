@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -12,10 +12,27 @@ import { MailModule } from './mail/mail.module';
 import { ContenusModule } from './contenus/contenus.module';
 import { ProgramModuleModule } from './program-module/program-module.module';
 import { ModuleCourseModule } from './module-course/module-course.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, CoursesModule,MailModule, ContenusModule, ProgramModuleModule, ModuleCourseModule],
+imports: [
+  PrismaModule.forRoot({isGlobal:true}),
+  ServeStaticModule.forRoot({
+    rootPath: join(__dirname, '..', '..', 'uploads'),
+    serveRoot: '/uploads',
+  }),
+  AuthModule,
+  UsersModule,
+  ProgramsModule,
+  ModulesModule,
+  CoursesModule,
+  MailModule,
+  ContenusModule,
+  ProgramModuleModule,
+  ModuleCourseModule
+],
   controllers: [AppController],
   providers: [AppService],
 })

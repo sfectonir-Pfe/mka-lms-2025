@@ -123,12 +123,22 @@ export default function Main({ setUser, user }) {
 
   const handleVoirProfil = () => {
     handleMenuClose();
-    navigate("/ProfilePage"); 
+    if (user && user.id) {
+      navigate(`/ProfilePage/${user.id}`);
+      console.log("Navigation vers le profil de l'utilisateur ID:", user.id);
+    } else {
+      console.error("ID utilisateur manquant pour la navigation");
+    }
   };
 
   const handleEditProfil = () => {
     handleMenuClose();
-    navigate("/EditProfilePage"); 
+    if (user && user.email) {
+      navigate(`/EditProfile/${user.email}`);
+      console.log("Navigation vers l'édition du profil de l'utilisateur email:", user.email);
+    } else {
+      console.error("Email utilisateur manquant pour la navigation");
+    }
   };
 
   return (

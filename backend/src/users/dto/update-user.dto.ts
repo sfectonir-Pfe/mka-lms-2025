@@ -1,9 +1,12 @@
-import { IsOptional, IsString, IsArray } from 'class-validator';
+import { IsOptional, IsString, MinLength, IsEmail, IsEnum } from 'class-validator';
+import { Role } from '@prisma/client';
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  // Email modifiable ? généralement non, on peut l’exclure ici
 
   @IsOptional()
   @IsString()
@@ -15,14 +18,13 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  profilePic?: string;
-
-  @IsOptional()
-  @IsString()
   about?: string;
 
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
+  @IsString()
   skills?: string[];
+
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
 }

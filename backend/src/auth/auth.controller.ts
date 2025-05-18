@@ -1,68 +1,135 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+  Put,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto, loginDto, RegisterDto } from './dto/create-auth.dto';
+import { RegisterDto, LoginDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { HttpException, HttpStatus } from '@nestjs/common';
+
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() dto: loginDto) {
-    return this.authService.login(dto);
-  }
-  @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  async login(@Body() dto: LoginDto) {
     try {
-      return await this.authService.register(dto);
+      const result = await this.authService.login(dto);
+      return { success: true, message: 'Connexion réussie', data: result };
     } catch (error) {
       throw new HttpException(
-        error.message || 'Registration failed',
-        error.status || HttpStatus.BAD_REQUEST
+        error.message || 'Échec de la connexion',
+        error.status || HttpStatus.UNAUTHORIZED,
       );
     }
   }
+
+  @Post('register')
+  async register(@Body() dto: RegisterDto) {
+    try {
+      const user = await this.authService.register(dto);
+      return { success: true, message: 'Utilisateur créé', data: user };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Échec de l’enregistrement',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   @Get()
   async findAll() {
     try {
       const users = await this.authService.findAll();
-      return {
-        success: true,
-        data: users
-      };
+      return { success: true, data: users };
     } catch (error) {
       throw new HttpException(
-        error.message || 'Failed to fetch users',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+        error.message || 'Erreur lors de la récupération',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
-  }
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
-  }
-  @Delete('users/:id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(Number(id));
-  }
-  @Post('forgot-password')
-forgot(@Body('email') email: string) {
-  return this.authService.forgotPassword(email);
-}
 
-@Post('reset-password')
-reset(
-  @Body('token') token: string,
-  @Body('oldPass') oldPass: string,
-  @Body('newPass') newPass: string,
-  @Body('confirmPass') confirmPass: string
-) {
-  return this.authService.resetPassword(token, oldPass, newPass, confirmPass);
-}
+  @Get(':id')
+  async findOne(@Param('id') id: number) {
+    try {
+      const user = await this.authService.findOne(id);
+      return { success: true, data: user };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Utilisateur non trouvé',
+        error.status || HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id') id: number,
+    @Body() updateAuthDto: UpdateAuthDto,
+  ) {
+    try {
+      const user = await this.authService.update(id, updateAuthDto);
+      return { success: true, message: 'Utilisateur mis à jour', data: user };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la mise à jour',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Delete('users/:id')
+  async remove(@Param('id') id: number) {
+    try {
+      const result = await this.authService.remove(id);
+      return { success: true, message: 'Utilisateur supprimé', data: result };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la suppression',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('forgot-password')
+  async forgot(@Body('email') email: string) {
+    try {
+      const result = await this.authService.forgotPassword(email);
+      return { success: true, message: 'Email de réinitialisation envoyé', data: result };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la demande',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('reset-password')
+  async reset(
+    @Body('token') token: string,
+    @Body('oldPass') oldPass: string,
+    @Body('newPass') newPass: string,
+    @Body('confirmPass') confirmPass: string,
+  ) {
+    try {
+      const result = await this.authService.resetPassword(token, oldPass, newPass, confirmPass);
+      return { success: true, message: 'Mot de passe réinitialisé', data: result };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur de réinitialisation',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
 
 }
