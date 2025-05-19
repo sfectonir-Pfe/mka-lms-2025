@@ -68,4 +68,10 @@ export class SessionsService {
       },
     });
   }
+  async remove(id: number) {
+  return this.prisma.session.delete({
+    where: { id },
+  });
+}
+
 }

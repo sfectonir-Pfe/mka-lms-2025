@@ -17,4 +17,9 @@ export class SessionsController {
   findAll() {
     return this.sessionsService.findAll();
   }
+  @Delete(':id')
+remove(@Param('id') id: string) {
+  return this.sessionsService.remove(+id);
+}
+
 }
