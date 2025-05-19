@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsInt } from 'class-validator';
+import { IsString, IsEnum, IsInt } from 'class-validator';
 import { PeriodUnit } from '@prisma/client';
 
 export class CreateModuleDto {
@@ -10,8 +10,4 @@ export class CreateModuleDto {
 
   @IsInt()
   duration: number;
-
-  @IsOptional()
-  @IsInt()
-  programId?: number;
 }

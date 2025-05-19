@@ -52,7 +52,7 @@ export class AuthController {
   }
   @Post('forgot-password')
 forgot(@Body('email') email: string) {
-  return this.authService.forgotPassword(email);
+  return this.authService.forgotPassword(email);//auth sendr
 }
 
 @Post('reset-password')
@@ -61,6 +61,6 @@ reset(
   @Body('newPass') newPass: string,
   @Body('confirmPass') confirmPass: string
 ) {
-  return this.authService.resetPassword(token, newPass, confirmPass);
+  return this.authService.resetPassword(token, newPass, confirmPass);//auth reciver 
 }
 }

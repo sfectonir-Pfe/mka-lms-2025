@@ -1,9 +1,16 @@
-import { Controller,ParseIntPipe, Get, Post, Body, Patch, Param, Delete,   InternalServerErrorException,
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProgramsService } from './programs.service';
 import { CreateProgramDto } from './dto/create-program.dto';
-import { UpdateProgramDto } from './dto/update-program.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+import { PrismaService } from 'nestjs-prisma'; // or your local path
 @Controller('programs')
 export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
@@ -18,21 +25,8 @@ export class ProgramsController {
     return this.programsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.programsService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateProgramDto,
-  ) {
-    return this.programsService.update(id, dto);
-  }
-
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.programsService.remove(id);
+  remove(@Param('id') id: string) {
+    return this.programsService.remove(+id);
   }
 }

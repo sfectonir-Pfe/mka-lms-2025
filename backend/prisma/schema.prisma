@@ -115,53 +115,111 @@ model ResetToken {
 }
 
 model Program {
-  id      Int             @id @default(autoincrement())
-  name    String
-  modules ProgramModule[]
+  id        Int             @id @default(autoincrement())
+  name      String
+  modules   ProgramModule[]
+  sessions  Session[]
 }
 
 model Module {
-  id         Int             @id @default(autoincrement())
-  name       String
-  periodUnit PeriodUnit // type of duration
-  duration   Int // how many
-  programs   ProgramModule[]
-  courses    ModuleCourse[]
+  id              Int             @id @default(autoincrement())
+  name            String
+  periodUnit      PeriodUnit
+  duration        Int
+  programs        ProgramModule[]
+  courses         ModuleCourse[]
+  sessionModules  SessionModule[]
 }
 
 model Course {
-  id       Int            @id @default(autoincrement())
-  title    String
-  modules  ModuleCourse[]
-  contenus Contenu[]
+  id              Int             @id @default(autoincrement())
+  title           String
+  modules         ModuleCourse[]
+  courseContenus  CourseContenu[]
+  sessionCourses  SessionCourse[]
 }
 
 model Contenu {
-  id       Int         @id @default(autoincrement())
-  title    String
-  fileUrl  String
-  fileType FileType
-  type     ContenuType
-  course   Course      @relation(fields: [courseId], references: [id])
-  courseId Int
+  id               Int              @id @default(autoincrement())
+  title            String
+  fileUrl          String
+  fileType         FileType
+  type             ContenuType
+  courseContenus   CourseContenu[]     // NEW many-to-many
+  sessionContenus  SessionContenu[]
 }
 
 model ProgramModule {
-  id        Int     @id @default(autoincrement())
-  program   Program @relation(fields: [programId], references: [id])
-  programId Int
-  module    Module  @relation(fields: [moduleId], references: [id])
-  moduleId  Int
+  id         Int      @id @default(autoincrement())
+  program    Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId  Int
+  module     Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId   Int
 
   @@unique([programId, moduleId])
 }
 
 model ModuleCourse {
-  id       Int    @id @default(autoincrement())
-  module   Module @relation(fields: [moduleId], references: [id])
-  moduleId Int
-  course   Course @relation(fields: [courseId], references: [id])
-  courseId Int
+  id        Int     @id @default(autoincrement())
+  module    Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId  Int
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId  Int
 
   @@unique([moduleId, courseId])
 }
+
+model CourseContenu {
+  id         Int      @id @default(autoincrement())
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId   Int
+  contenu    Contenu  @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  contenuId  Int
+
+  @@unique([courseId, contenuId])
+}
+
+model Session {
+  id         Int             @id @default(autoincrement())
+  program    Program         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId  Int
+  startDate  DateTime
+  endDate    DateTime
+  modules    SessionModule[]
+  createdAt  DateTime        @default(now())
+}
+
+model SessionModule {
+  id         Int             @id @default(autoincrement())
+  session    Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId  Int
+  module     Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId   Int
+  courses    SessionCourse[]
+
+  @@unique([sessionId, moduleId])
+}
+
+model SessionCourse {
+  id              Int              @id @default(autoincrement())
+  sessionModule   SessionModule   @relation(fields: [sessionModuleId], references: [id], onDelete: Cascade)
+  sessionModuleId Int
+  course          Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId        Int
+  contenus        SessionContenu[]
+
+  @@unique([sessionModuleId, courseId])
+}
+
+model SessionContenu {
+  id               Int             @id @default(autoincrement())
+  sessionCourse    SessionCourse  @relation(fields: [sessionCourseId], references: [id], onDelete: Cascade)
+  sessionCourseId  Int
+  contenu          Contenu        @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  contenuId        Int
+
+  @@unique([sessionCourseId, contenuId])
+}
+
+
+

@@ -93,19 +93,19 @@ export class AuthService {
   }
   async forgotPassword(email: string) {
     try {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.prisma.user.findUnique({ where: { email } });//si 3ana user 
     if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
 
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = crypto.randomBytes(32).toString('hex');//token
 
     await this.prisma.user.update({
       where: { email },
       data: {
         resetToken: token,
-        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 1),//timer
+        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 1),//timer token
       },
     });
-    await this.mailService.sendPasswordResetEmail(email, token);
+    await this.mailService.sendPasswordResetEmail(email, token);//mailsender
     
 
     return {
@@ -123,7 +123,7 @@ export class AuthService {
   const user = await this.prisma.user.findFirst({
     where: {
       resetToken: token,
-      resetTokenExpiry: { gte: new Date() },
+      resetTokenExpiry: { gte: new Date() },//same token//date
     },
   });
 
@@ -132,7 +132,7 @@ export class AuthService {
   if (newPass !== confirmPass)
     throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
 
-  const hashedNew = await bcrypt.hash(newPass, 10);
+  const hashedNew = await bcrypt.hash(newPass, 10);//10slat
 
   await this.prisma.user.update({
     where: { id: user.id },

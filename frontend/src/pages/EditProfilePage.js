@@ -27,7 +27,7 @@ const EditProfilePage = () => {
       .get(`http://localhost:8000/users/me/${email}`)
       .then((res) => setFormData(res.data))
       .catch((err) => console.error("Erreur chargement utilisateur", err));
-  }, [email]);
+  }, [email]);//user men backend controlleruser/me
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,7 +131,7 @@ const EditProfilePage = () => {
                     label="Email"
                     fullWidth
                     value={formData.email}
-                    disabled
+                    disabled//sand modif
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>

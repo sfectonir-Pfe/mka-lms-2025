@@ -7,15 +7,14 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProgramsModule } from './programs/programs.module';
 import { ModulesModule } from './modules/modules.module';
-import { CoursesModule } from './courses/courses.module';
-import { MailModule } from './mail/mail.module';
-import { ContenusModule } from './contenus/contenus.module';
-import { ProgramModuleModule } from './program-module/program-module.module';
-import { ModuleCourseModule } from './module-course/module-course.module';
 
+import { MailModule } from './mail/mail.module';
+import { CoursesModule } from './courses/courses.module';
+import { ContenuModule } from './contenu/contenu.module';
+import { SessionModule } from './session/session.module';
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, CoursesModule,MailModule, ContenusModule, ProgramModuleModule, ModuleCourseModule],
+imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule,  ],
   controllers: [AppController],
   providers: [AppService],
 })

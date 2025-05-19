@@ -24,5 +24,5 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  profilePic?: string; // Optional, handled from file in controller
+  profilePic?: string; // chemin
 }

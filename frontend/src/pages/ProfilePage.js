@@ -15,6 +15,7 @@ import axios from "axios";
 const UserProfilePage = () => {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
+  
 
   const email = localStorage.getItem("userEmail");
 
@@ -26,7 +27,7 @@ const UserProfilePage = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/users/me/${encodeURIComponent(email)}`);
+        const res = await axios.get(`http://localhost:8000/users/me/${encodeURIComponent(email)}`);//pour eviter les err
         setUser(res.data);
       } catch (err) {
         console.error("❌ Failed to fetch user profile:", err);

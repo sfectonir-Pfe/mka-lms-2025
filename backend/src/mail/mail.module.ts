@@ -9,7 +9,7 @@ import { MailService } from './mail.service';
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
-        auth: {
+        auth: {                                     //sender
           user: 'tunirdigital@gmail.com',
           pass: 'xvkf rxww cxxt lmec',
         },
