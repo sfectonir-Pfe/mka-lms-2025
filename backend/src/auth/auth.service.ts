@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { LoginDto, RegisterDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailService } from 'src/mail/mail.service';
@@ -14,15 +13,15 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    
+
     if (!user) {
       throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
     }
-    
+
     if (!(await bcrypt.compare(dto.password, user.password))) {
       throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
     }
-    
+
     // Remove sensitive information before returning
     const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
     return safeUser;
@@ -44,6 +43,70 @@ export class AuthService {
 
     const { password, ...result } = user;
     return result;
+  }
+
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+  }
+
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
+  }
+
+  async update(id: number, updateData: any) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    await this.prisma.user.delete({ where: { id } });
+    return { id };
   }
 
   async getUserById(id: number) {
@@ -105,7 +168,7 @@ export class AuthService {
       throw error;
     }
   }
-  
+
   async resetPassword(token: string, newPass: string, confirmPass: string) {
     const user = await this.prisma.user.findFirst({
       where: {

@@ -96,7 +96,7 @@ export class UsersController {
       const profilePic = `/${file.filename}`;
       body.profilePic = profilePic;
     }
-    
+
     return this.usersService.updateByEmail(email, body);
   }
 
@@ -119,7 +119,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
-        destination: './backend/uploads/profile-pics',
+        destination: './uploads/profile-pics',
         filename: (req, file, cb) => {
           // Générer un nom de fichier unique
           const randomName = Array(32)

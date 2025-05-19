@@ -15,4 +15,6 @@ export class RegisterDto{
     password:string
     @ApiProperty()
     role:Role
+    @ApiProperty({ required: false })
+    name?:string
 }

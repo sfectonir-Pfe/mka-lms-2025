@@ -11,9 +11,15 @@ import {
   Avatar,
   Divider,
   Chip,
+  Stack,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import WorkIcon from '@mui/icons-material/Work';
+import PersonIcon from '@mui/icons-material/Person';
 import axios from "axios";
 
 const ProfilePage = () => {
@@ -80,102 +86,222 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <Container sx={{ mt: 5, textAlign: "center" }}>
-        <CircularProgress />
+      <Container sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh'
+      }}>
+        <CircularProgress size={60} thickness={4} />
       </Container>
     );
   }
 
   if (error || !user) {
     return (
-      <Container sx={{ mt: 5 }}>
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Erreur de chargement du profil
+      <Container maxWidth="sm" sx={{ mt: 8 }}>
+        <Paper elevation={3} sx={{
+          p: 4,
+          borderRadius: 4,
+          textAlign: 'center',
+          background: 'linear-gradient(45deg, #f8f9fa 30%, #e9ecef 90%)'
+        }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+            Profile Error
           </Typography>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error || "Utilisateur non trouvé."}
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+            {error || "User not found"}
           </Alert>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ID utilisateur demandé: {id}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => window.location.reload()}
-            sx={{ mr: 1 }}
-          >
-            Réessayer
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/')}
-          >
-            Retour à l'accueil
-          </Button>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{ px: 4, py: 1 }}
+            >
+              Try Again
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/')}
+              sx={{ px: 4, py: 1 }}
+            >
+              Go Home
+            </Button>
+          </Stack>
         </Paper>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
-        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-          <Typography variant="h5">Profil utilisateur</Typography>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Paper elevation={4} sx={{
+        p: 6,
+        borderRadius: 6,
+        background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)'
+      }}>
+        {/* Header Section */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4
+        }}>
+          <Typography variant="h4" sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            User Profile
+          </Typography>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<EditIcon />}
             onClick={() => navigate(`/EditProfile/${user.email}`)}
+            sx={{
+              borderRadius: 20,
+              px: 3,
+              py: 1,
+              textTransform: 'none',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              '&:hover': {
+                boxShadow: '0 6px 8px rgba(0,0,0,0.15)'
+              }
+            }}
           >
-            Modifier
+            Edit Profile
           </Button>
         </Box>
 
-        <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+        {/* Profile Top Section */}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'center',
+          mb: 6,
+          gap: 4
+        }}>
           <Avatar
-            src={user.profilePic ? `http://localhost:8000/uploads${user.profilePic}` : null}
-            sx={{ width: 100, height: 100, mb: 2 }}
+            src={user.profilePic ? `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}` : undefined}
+            sx={{
+              width: 150,
+              height: 150,
+              fontSize: 60,
+              border: '4px solid #1976d2',
+              boxShadow: '0 4px 20px rgba(25, 118, 210, 0.3)'
+            }}
           >
-            {user.name ? user.name.charAt(0).toUpperCase() : "U"}
+            {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || "U"}
           </Avatar>
-          <Typography variant="h6">{user.name}</Typography>
-          <Typography color="text.secondary">{user.email}</Typography>
+
+          <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+            <Typography variant="h3" sx={{
+              fontWeight: 600,
+              mb: 1
+            }}>
+              {user.name}
+            </Typography>
+
+            <Chip
+              icon={<WorkIcon />}
+              label={user.role}
+              color="primary"
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                px: 1,
+                fontSize: '0.9rem',
+                fontWeight: 500
+              }}
+            />
+
+            <Typography variant="body1" sx={{
+              mt: 2,
+              color: 'text.secondary',
+              maxWidth: 500
+            }}>
+              {user.about || "No bio provided"}
+            </Typography>
+          </Box>
         </Box>
 
-        <Divider sx={{ mb: 3 }} />
+        <Divider sx={{
+          my: 4,
+          borderColor: 'rgba(0,0,0,0.1)',
+          borderWidth: 1
+        }} />
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary">Rôle</Typography>
-            <Typography>{user.role}</Typography>
+        {/* Details Section */}
+        <Grid container spacing={4}>
+          {/* Contact Info */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" sx={{
+              mb: 3,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}>
+              <PersonIcon color="primary" /> Personal Info
+            </Typography>
+
+            <Stack spacing={2}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <EmailIcon color="action" />
+                <Typography>{user.email}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <PhoneIcon color="action" />
+                <Typography>{user.phone || "Not provided"}</Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <LocationOnIcon color="action" />
+                <Typography>{user.location || "Location not specified"}</Typography>
+              </Box>
+            </Stack>
           </Grid>
 
-          <Grid item xs={12}>
-            <Typography variant="h6">Contact</Typography>
-            <Typography>Email: {user.email}</Typography>
-            <Typography>Téléphone: {user.phone || "Non renseigné"}</Typography>
-            <Typography>Localisation: {user.location || "Non précisée"}</Typography>
-          </Grid>
+          {/* Skills Section */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" sx={{
+              mb: 3,
+              fontWeight: 600
+            }}>
+              Skills & Expertise
+            </Typography>
 
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6">Compétences</Typography>
-            <Box sx={{ mt: 1, display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {user.skills?.length > 0 ? (
-                user.skills.map((skill, idx) => (
-                  <Chip key={idx} label={skill} color="primary" />
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Aucune compétence ajoutée.
-                </Typography>
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="text.secondary">À propos</Typography>
-            <Typography>{user.about || "Non renseigné"}</Typography>
+            {user.skills?.length > 0 ? (
+              <Box sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1.5
+              }}>
+                {user.skills.map((skill, idx) => (
+                  <Chip
+                    key={idx}
+                    label={skill}
+                    color="primary"
+                    sx={{
+                      borderRadius: 2,
+                      px: 1.5,
+                      py: 1,
+                      fontSize: '0.9rem',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 8px rgba(25, 118, 210, 0.2)'
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No skills added yet.
+              </Typography>
+            )}
           </Grid>
         </Grid>
       </Paper>

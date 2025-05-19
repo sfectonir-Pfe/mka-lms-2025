@@ -12,15 +12,27 @@ import {
   Avatar,
   IconButton,
   Chip,
+  Divider,
+  Stack,
+  InputAdornment,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
+import {
+  ArrowBack,
+  PhotoCamera,
+  Email,
+  Phone,
+  LocationOn,
+  Work,
+  Person,
+  Check,
+  Add,
+} from "@mui/icons-material";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const EditProfilePage = () => {
-  const { email } = useParams(); // Récupère l'email depuis l'URL
+  const { email } = useParams();
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
@@ -28,7 +40,6 @@ const EditProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [newSkill, setNewSkill] = useState("");
@@ -36,37 +47,17 @@ const EditProfilePage = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!email) {
-        console.error("Email utilisateur manquant");
-        setError("Email utilisateur manquant");
-        setLoading(false);
-        return;
-      }
-
-      console.log("Tentative de chargement du profil pour l'email:", email);
-
       try {
-        // Utiliser la route correcte avec email
-        console.log("URL de l'API:", `http://localhost:8000/users/email/${email}`);
+        setLoading(true);
         const res = await axios.get(`http://localhost:8000/users/email/${email}`);
-        console.log("Réponse de l'API:", res);
-        console.log("Données utilisateur chargées:", res.data);
-
-        if (res.data) {
-          setUser(res.data);
-          setForm(res.data);
-          // Initialiser les compétences si elles existent
-          if (res.data.skills && Array.isArray(res.data.skills)) {
-            setSkills(res.data.skills);
-          }
-        } else {
-          throw new Error("Données utilisateur vides");
+        setUser(res.data);
+        setForm(res.data);
+        if (res.data.skills) {
+          setSkills(Array.isArray(res.data.skills) ? res.data.skills : []);
         }
       } catch (err) {
-        console.error("Erreur lors du chargement de l'utilisateur:", err);
-        console.error("Message d'erreur:", err.message);
-        console.error("Réponse d'erreur:", err.response?.data);
-        setError(`Erreur de chargement: ${err.message}. Vérifiez la console pour plus de détails.`);
+        console.error("Error loading user:", err);
+        setError(`Error loading profile: ${err.message}`);
       } finally {
         setLoading(false);
       }
@@ -81,19 +72,12 @@ const EditProfilePage = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    console.log("Fichier sélectionné:", file);
-
     setSelectedFile(file);
-
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      console.log("URL de prévisualisation créée:", previewUrl);
-      setPreview(previewUrl);
-    }
+    if (file) setPreview(URL.createObjectURL(file));
   };
 
   const handleAddSkill = () => {
-    if (newSkill.trim() !== "" && !skills.includes(newSkill.trim())) {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
       setSkills([...skills, newSkill.trim()]);
       setNewSkill("");
     }
@@ -107,28 +91,8 @@ const EditProfilePage = () => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
-    setSuccess(false);
-
-    if (!email) {
-      const errorMsg = "Impossible de mettre à jour le profil : email utilisateur manquant.";
-      console.error(errorMsg);
-      setError(errorMsg);
-      setSubmitting(false);
-      return;
-    }
-
-    if (!user?.id) {
-      const errorMsg = "Impossible de mettre à jour le profil : ID utilisateur manquant.";
-      console.error(errorMsg);
-      setError(errorMsg);
-      setSubmitting(false);
-      return;
-    }
 
     try {
-      console.log("Tentative de mise à jour du profil pour l'email:", email);
-
-      // Préparer les données à envoyer (sans le champ role pour éviter les erreurs de type)
       const userData = {
         name: form.name || null,
         phone: form.phone || null,
@@ -137,81 +101,24 @@ const EditProfilePage = () => {
         skills: skills,
       };
 
-      console.log("Données à mettre à jour:", userData);
-      console.log("URL de l'API:", `http://localhost:8000/users/email/${email}`);
+      await axios.patch(`http://localhost:8000/users/email/${email}`, userData);
 
-      // Utiliser la route correcte avec email
-      const updateRes = await axios.patch(`http://localhost:8000/users/email/${email}`, userData);
-      console.log("Réponse de l'API:", updateRes);
-      console.log("Profil mis à jour avec succès:", updateRes.data);
-
-      // Gestion du téléchargement de photo (si cette fonctionnalité est disponible)
       if (selectedFile) {
-        try {
-          const formData = new FormData();
-          formData.append("photo", selectedFile);
-
-          console.log("Tentative de mise à jour de la photo pour l'ID:", user.id);
-          console.log("URL de l'API pour la photo:", `http://localhost:8000/users/id/${user.id}/photo`);
-          console.log("FormData créé:", formData);
-
-          // Utiliser la route correcte pour télécharger la photo
-          const photoRes = await axios.patch(
-            `http://localhost:8000/users/id/${user.id}/photo`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data"
-              }
-            }
-          );
-
-          console.log("Réponse complète de l'API pour la photo:", photoRes);
-          console.log("Photo mise à jour avec succès:", photoRes.data);
-
-          // Mettre à jour l'utilisateur avec la nouvelle photo
-          if (photoRes.data && photoRes.data.profilePic) {
-            console.log("Nouveau chemin de photo:", photoRes.data.profilePic);
-
-            // Mettre à jour l'état de l'utilisateur
-            setUser({
-              ...user,
-              profilePic: photoRes.data.profilePic
-            });
-
-            // Forcer un rafraîchissement de l'image
-            const timestamp = new Date().getTime();
-            const photoUrl = `http://localhost:8000/uploads${photoRes.data.profilePic}?t=${timestamp}`;
-            console.log("URL de la photo avec timestamp:", photoUrl);
-
-            // Mettre à jour la prévisualisation
-            setPreview(photoUrl);
-
-            // Afficher un message de succès
-            toast.success("Photo de profil mise à jour avec succès!");
-          }
-        } catch (photoErr) {
-          console.error("Erreur lors de la mise à jour de la photo:", photoErr);
-          console.error("Message d'erreur:", photoErr.message);
-          console.error("Réponse d'erreur:", photoErr.response?.data);
-          // Ne pas bloquer la mise à jour du profil si la photo échoue
-          toast.error("Erreur lors de la mise à jour de la photo. Les autres informations ont été enregistrées.");
-        }
+        const formData = new FormData();
+        formData.append("photo", selectedFile);
+        await axios.patch(
+          `http://localhost:8000/users/id/${user.id}/photo`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
       }
 
-      setSuccess(true);
-      toast.success("Profil mis à jour avec succès!");
-
-      // Rediriger vers la page de profil après un délai plus long pour permettre au serveur de traiter la photo
-      setTimeout(() => {
-        // Forcer un rafraîchissement complet de la page pour s'assurer que la nouvelle photo est chargée
-        window.location.href = `/ProfilePage/${user.id}`;
-      }, 3000);
+      toast.success("Profile updated successfully!");
+      setTimeout(() => navigate(`/ProfilePage/${user.id}`), 1500);
     } catch (err) {
-      console.error("Erreur lors de la mise à jour:", err);
-      console.error("Message d'erreur:", err.message);
-      console.error("Réponse d'erreur:", err.response?.data);
-      setError(`Erreur de mise à jour: ${err.message}. Vérifiez la console pour plus de détails.`);
+      console.error("Update error:", err);
+      setError(`Update failed: ${err.message}`);
+      toast.error("Failed to update profile");
     } finally {
       setSubmitting(false);
     }
@@ -219,176 +126,289 @@ const EditProfilePage = () => {
 
   if (loading) {
     return (
-      <Container sx={{ mt: 5, textAlign: "center" }}>
-        <CircularProgress />
+      <Container sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '80vh'
+      }}>
+        <CircularProgress size={60} />
       </Container>
     );
   }
 
   if (!user) {
     return (
-      <Container sx={{ mt: 5 }}>
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Erreur de chargement du profil
+      <Container maxWidth="sm" sx={{ mt: 8 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 4, textAlign: 'center' }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+            Profile Error
           </Typography>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error || "Utilisateur non trouvé."}
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error || "User not found"}
           </Alert>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Email utilisateur demandé: {email}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => window.location.reload()}
-            sx={{ mr: 1 }}
-          >
-            Réessayer
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/')}
-          >
-            Retour à l'accueil
-          </Button>
+          <Stack direction="row" spacing={2} justifyContent="center">
+            <Button variant="contained" onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+            <Button variant="outlined" onClick={() => navigate('/')}>
+              Go Home
+            </Button>
+          </Stack>
         </Paper>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-          <Typography variant="h5">Modifier le profil</Typography>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Paper elevation={4} sx={{
+        p: 6,
+        borderRadius: 6,
+        background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)'
+      }}>
+        {/* Header Section */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4
+        }}>
+          <Typography variant="h4" sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Edit Profile
+          </Typography>
           <Button
             component={Link}
             to={`/ProfilePage/${user.id}`}
-            startIcon={<ArrowBackIcon />}
-            size="small"
+            startIcon={<ArrowBack />}
+            variant="outlined"
+            sx={{ borderRadius: 20, px: 3 }}
           >
-            Retour
+            Back to Profile
           </Button>
         </Box>
 
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          ID: {user.id} | Email: {user.email}
-        </Typography>
-
-        <Box display="flex" justifyContent="center" mb={2} position="relative">
-          <Avatar
-            src={preview || (user.profilePic ? `http://localhost:8000/uploads${user.profilePic}` : null)}
-            sx={{ width: 100, height: 100 }}
-          >
-            {user.name ? user.name.charAt(0).toUpperCase() : "U"}
-          </Avatar>
-          <IconButton
-            color="primary"
-            component="label"
-            sx={{ position: "absolute", bottom: 0, right: "calc(50% - 50px)", bgcolor: "#fff" }}
-          >
-            <PhotoCamera />
-            <input type="file" hidden onChange={handleFileChange} accept="image/*" />
-          </IconButton>
+        {/* Profile Picture Section */}
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          mb: 4
+        }}>
+          <Box sx={{ position: 'relative' }}>
+            <Avatar
+              src={preview || (user.profilePic ? `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}` : null)}
+              sx={{
+                width: 150,
+                height: 150,
+                fontSize: 60,
+                border: '4px solid #1976d2',
+                boxShadow: '0 4px 20px rgba(25, 118, 210, 0.3)'
+              }}
+            >
+              {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || "U"}
+            </Avatar>
+            <IconButton
+              color="primary"
+              component="label"
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 0,
+                bgcolor: 'background.paper',
+                '&:hover': { bgcolor: 'action.hover' }
+              }}
+            >
+              <PhotoCamera />
+              <input type="file" hidden onChange={handleFileChange} accept="image/*" />
+            </IconButton>
+          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+            Click camera icon to change photo
+          </Typography>
         </Box>
 
-        {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ my: 2 }}>Profil mis à jour avec succès !</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 4 }}>
+            {error}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
+          <Grid container spacing={4}>
+            {/* Personal Info */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                <Person color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Personal Information
+              </Typography>
+
               <TextField
-                label="Nom"
+                label="Full Name"
                 name="name"
                 fullWidth
                 value={form.name || ""}
                 onChange={handleChange}
+                margin="normal"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Person color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </Grid>
 
-            <Grid item xs={12}>
               <TextField
                 label="Email"
                 name="email"
                 fullWidth
                 value={form.email || ""}
                 disabled
+                margin="normal"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </Grid>
 
-            <Grid item xs={12}>
               <TextField
-                label="Téléphone"
+                label="Phone"
                 name="phone"
                 fullWidth
                 value={form.phone || ""}
                 onChange={handleChange}
+                margin="normal"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Phone color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </Grid>
 
-            <Grid item xs={12}>
               <TextField
-                label="Localisation"
+                label="Location"
                 name="location"
                 fullWidth
                 value={form.location || ""}
                 onChange={handleChange}
+                margin="normal"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LocationOn color="action" />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
 
-            <Grid item xs={12}>
+            {/* About & Skills */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
+                <Work color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
+                Professional Details
+              </Typography>
+
               <TextField
-                label="À propos"
+                label="Role"
+                name="role"
+                fullWidth
+                value={form.role || ""}
+                disabled
+                margin="normal"
+                helperText="Contact admin to change role"
+              />
+
+              <TextField
+                label="About Me"
                 name="about"
                 fullWidth
                 multiline
                 rows={4}
                 value={form.about || ""}
                 onChange={handleChange}
+                margin="normal"
+                sx={{ mt: 2 }}
               />
-            </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                label="Rôle"
-                name="role"
-                fullWidth
-                value={form.role || ""}
-                disabled
-                helperText="Le rôle ne peut pas être modifié"
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="subtitle1">Compétences</Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                {skills.map((skill, idx) => (
-                  <Chip
-                    key={idx}
-                    label={skill}
-                    onDelete={() => handleRemoveSkill(skill)}
-                    color="primary"
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Skills & Expertise
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                  {skills.map((skill, idx) => (
+                    <Chip
+                      key={idx}
+                      label={skill}
+                      onDelete={() => handleRemoveSkill(skill)}
+                      color="primary"
+                      variant="outlined"
+                      deleteIcon={<Check fontSize="small" />}
+                      sx={{ borderRadius: 1 }}
+                    />
+                  ))}
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    label="Add Skill"
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    size="small"
+                    fullWidth
                   />
-                ))}
+                  <Button
+                    onClick={handleAddSkill}
+                    variant="contained"
+                    startIcon={<Add />}
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Add
+                  </Button>
+                </Box>
               </Box>
-              <Box sx={{ mt: 2, display: "flex", gap: 1 }}>
-                <TextField
-                  label="Ajouter une compétence"
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  size="small"
-                />
-                <Button onClick={handleAddSkill} variant="contained">
-                  Ajouter
+            </Grid>
+
+            {/* Submit Button */}
+            <Grid item xs={12}>
+              <Divider sx={{ my: 3 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={submitting}
+                  sx={{
+                    px: 6,
+                    py: 1.5,
+                    borderRadius: 20,
+                    fontSize: '1rem',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)'
+                    }
+                  }}
+                >
+                  {submitting ? (
+                    <>
+                      <CircularProgress size={24} sx={{ mr: 1 }} />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
               </Box>
-            </Grid>
-
-            <Grid item xs={12} textAlign="right">
-              <Button type="submit" variant="contained" disabled={submitting}>
-                {submitting ? "Enregistrement..." : "Enregistrer"}
-              </Button>
             </Grid>
           </Grid>
         </form>
