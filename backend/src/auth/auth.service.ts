@@ -1,151 +1,198 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateAuthDto, loginDto, RegisterDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { LoginDto, RegisterDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto'; 
-import * as nodemailer from 'nodemailer';
-import { MailService } from '../mail/mail.service'; 
 import * as crypto from 'crypto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService, private readonly mailService: MailService ) {}
+  constructor(private readonly prisma: PrismaService, private readonly mailService: MailService) {}
 
-  async login(dto: loginDto) {
+  async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (user) {
-      if (await bcrypt.compare(dto.password, user.password)) {
-  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-  return safeUser;//fornt never see sens info
-      } else
-        throw new HttpException('invalid password', HttpStatus.BAD_REQUEST);
-    } else {
-      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
-    }
-  }
-  
-  async addUser(dto: RegisterDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-    if (user) {
-      throw new HttpException('invalid email', HttpStatus.BAD_REQUEST);
-    } else {
-      const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(dto.password, salt);
 
-      return await this.prisma.user.create({
-        data: {
-          role: dto.role,
-          email: dto.email,
-          password: hashedPassword,
-        },
-      });
+    if (!user) {
+      throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
     }
+
+    if (!(await bcrypt.compare(dto.password, user.password))) {
+      throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
+    }
+
+    // Remove sensitive information before returning
+    const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
+    return safeUser;
   }
+
   async register(dto: RegisterDto) {
-    const { email, password, role } = dto;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    return this.prisma.user.create({
+    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (existing) throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const user = await this.prisma.user.create({
       data: {
-        email,
+        email: dto.email,
         password: hashedPassword,
-        role,
+        role: dto.role,
+        name: dto.name,
       },
     });
+
+    const { password, ...result } = user;
+    return result;
   }
-  
 
   async findAll() {
-    try {
-      return await this.prisma.user.findMany({
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          createdAt: true
-        }
-      });
-    } catch (error) {
-      throw new HttpException(
-        'Failed to fetch users',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-    
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  async remove(id: number) { // Changed to number type
-    return this.prisma.user.delete({
-      where: { id },
-    });
-  }
-  async forgotPassword(email: string) {
-    try {
-    const user = await this.prisma.user.findUnique({ where: { email } });//si 3ana user 
-    if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
-
-    const token = crypto.randomBytes(32).toString('hex');//token
-
-    await this.prisma.user.update({
-      where: { email },
-      data: {
-        resetToken: token,
-        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 1),//timer token
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
       },
     });
-    await this.mailService.sendPasswordResetEmail(email, token);//mailsender
-    
-
-    return {
-      message: 'Reset link sent',
-      
-    };
-   
   }
-   catch (error) {
-     console.log(error) 
+
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
+  }
+
+  async update(id: number, updateData: any) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+  }
+
+  async remove(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+    await this.prisma.user.delete({ where: { id } });
+    return { id };
+  }
+
+  async getUserById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
+  }
+
+  async getUserByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
+  }
+
+  async forgotPassword(email: string) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { email } });
+      if (!user) throw new HttpException('User not found', HttpStatus.BAD_REQUEST);
+
+      const token = crypto.randomBytes(32).toString('hex');
+      await this.prisma.user.update({
+        where: { email },
+        data: {
+          resetToken: token,
+          resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 60), // 1 hour
+        },
+      });
+
+      await this.mailService.sendPasswordResetEmail(email, token);
+      return { message: 'Reset link sent' };
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-};
-  
+  }
+
   async resetPassword(token: string, newPass: string, confirmPass: string) {
-  const user = await this.prisma.user.findFirst({
-    where: {
-      resetToken: token,
-      resetTokenExpiry: { gte: new Date() },//same token//date
-    },
-  });
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetToken: token,
+        resetTokenExpiry: { gte: new Date() },
+      },
+    });
 
-  if (!user) throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
+    if (!user) throw new HttpException('Invalid or expired token', HttpStatus.BAD_REQUEST);
 
-  if (newPass !== confirmPass)
-    throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
+    if (newPass !== confirmPass)
+      throw new HttpException('Passwords do not match', HttpStatus.BAD_REQUEST);
 
-  const hashedNew = await bcrypt.hash(newPass, 10);//10slat
+    const hashedNew = await bcrypt.hash(newPass, 10);
 
-  await this.prisma.user.update({
-    where: { id: user.id },
-    data: {
-      password: hashedNew,
-      resetToken: null,
-      resetTokenExpiry: null,
-    },
-  });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedNew,
+        resetToken: null,
+        resetTokenExpiry: null,
+      },
+    });
 
-  return { message: 'Password reset successful' };
+    return { message: 'Password reset successful' };
+  }
 }
-}
-
-
-  

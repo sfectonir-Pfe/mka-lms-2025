@@ -26,5 +26,6 @@ export const sideBarData = [
   // { text: "Admin View", icon: <PiPathBold />, path: "programs" },
   // { text: "Feedback", icon: <MdFeedback />, path: "feedback" },
   // { text: "Student View", icon: <MdSpaceDashboard />, path: "student" }
+
 ];
 

@@ -74,9 +74,11 @@ function App() {
   };
 
   return (
-    <div className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"}`}>
-      <ToastContainer />
+    <div
+      className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"
+        }`}
 
+    > <ToastContainer />
       <div className="d-flex justify-content-end">
         <button className="btn btn-light d-flex align-items-center" onClick={handleMode}>
           {mode === "light" ? <FaRegMoon /> : <GoSun />}
@@ -93,11 +95,7 @@ function App() {
             {user ? (
               <Route path="/" element={<Main setUser={setUser} user={user} />}>
                 <Route index element={<HomePage />} />
-
-                <Route path="/EditProfilePage" element={<EditProfilePage />} />
-                <Route path="/ProfilePage" element={<ProfilePage />} />
-
-                {/* Users */}
+                {/* <Route path="/" element={<ProfilePage />} /> */}
                 <Route path="users" element={<UsersPages />}>
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
@@ -122,10 +120,22 @@ function App() {
 
                 {/* Other */}
                 <Route path="feedback" element={<FeedbackPage />} />
+                <Route path="/student/program/:programId" element={<StudentProgramPage />} />
+                <Route path="/student" element={<StudentLandingPage />} />
+                <Route path="/EditProfile/:id" element={<EditProfilePage />} />
+                <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+
+
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
                 <Route index element={<LoginPage setUser={setUser} />} />
+                <Route
+                  path="/forgot-password/"
+                  element={<ForgetPasswordPage />}
+                />
+                <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
+                <Route path="/reset-success" element={<ResetSuccessPage />} />
 
                 <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />

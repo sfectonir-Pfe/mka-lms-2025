@@ -72,6 +72,8 @@ model User {
   ResetToken            ResetToken[]
 }
 
+
+
 model Formateur {
   id         Int    @id @default(autoincrement())
   speciality String

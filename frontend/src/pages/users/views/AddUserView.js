@@ -66,7 +66,8 @@ const AddUserView = () => {
         password,
         role,
       });
-      navigate(-1); // Revenir à la page précédente après succès
+      navigate("/users");
+ // Revenir à la page précédente après succès
     } catch (error) {
       console.error(error);
       setErrorMessage("Erreur lors de l'inscription. Veuillez réessayer.");
