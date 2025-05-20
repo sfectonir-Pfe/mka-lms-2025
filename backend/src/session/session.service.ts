@@ -3,22 +3,27 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { PrismaService } from 'nestjs-prisma';
 
+
+
 @Injectable()
 export class SessionsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: CreateSessionDto) {
-    const { programId, startDate, endDate, modules } = data;
+  async create(data: any) {
+    const { programId, startDate, endDate, modules, imageUrl } = data;
+
+    const parsedModules = JSON.parse(modules);
 
     const session = await this.prisma.session.create({
       data: {
-        programId,
+        programId: Number(programId),
         startDate: new Date(startDate),
         endDate: new Date(endDate),
+        imageUrl, // saved from multer
       },
     });
 
-    for (const mod of modules) {
+    for (const mod of parsedModules) {
       const sessionModule = await this.prisma.sessionModule.create({
         data: {
           sessionId: session.id,
@@ -45,12 +50,13 @@ export class SessionsService {
       }
     }
 
-    return { message: 'Session created successfully', sessionId: session.id };
+    return { message: 'Session créée avec succès ✅', sessionId: session.id };
   }
 
   async findAll() {
     return this.prisma.session.findMany({
       include: {
+        program: true,
         modules: {
           include: {
             module: true,
@@ -58,20 +64,21 @@ export class SessionsService {
               include: {
                 course: true,
                 contenus: {
-                  include: { contenu: true },
+                  include: {
+                    contenu: true,
+                  },
                 },
               },
             },
           },
         },
-        program: true,
       },
     });
   }
-  async remove(id: number) {
-  return this.prisma.session.delete({
-    where: { id },
-  });
-}
 
+  async remove(id: number) {
+    return this.prisma.session.delete({
+      where: { id },
+    });
+  }
 }

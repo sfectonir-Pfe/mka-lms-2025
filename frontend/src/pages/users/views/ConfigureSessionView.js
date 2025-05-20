@@ -9,7 +9,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const steps = ["Choisir un programme", "Modules, cours et contenus", "Dates et confirmation"];
+const steps = [
+  "Choisir un programme",
+  "Modules, cours et contenus",
+  "Dates",
+  "Télécharger une image de session"
+];
 
 const ConfigureSessionView = () => {
   const navigate = useNavigate();
@@ -26,6 +31,7 @@ const ConfigureSessionView = () => {
   const [selectedContenus, setSelectedContenus] = useState({});
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     axios.get("http://localhost:8000/programs").then(res => setPrograms(res.data));
@@ -76,15 +82,19 @@ const ConfigureSessionView = () => {
   };
 
   const handleSubmit = async () => {
-    if (!programId) return alert("Veuillez sélectionner un programme.");
-    if (!start || !end) return alert("Veuillez sélectionner une date valide.");
-    if (selectedModules.length === 0) return alert("Veuillez sélectionner un module.");
+    if (!programId || !start || !end || selectedModules.length === 0) {
+      alert("Veuillez remplir tous les champs nécessaires.");
+      return;
+    }
 
-    const payload = {
-      programId: Number(programId),
-      startDate: new Date(start).toISOString(),
-      endDate: new Date(end).toISOString(),
-      modules: selectedModules.map((moduleId) => {
+    const formData = new FormData();
+    formData.append("programId", programId);
+    formData.append("startDate", new Date(start).toISOString());
+    formData.append("endDate", new Date(end).toISOString());
+    if (imageFile) formData.append("image", imageFile);
+
+    formData.append("modules", JSON.stringify(
+      selectedModules.map((moduleId) => {
         const courseIds = selectedCourses[moduleId] || [];
         return {
           moduleId,
@@ -97,11 +107,13 @@ const ConfigureSessionView = () => {
             };
           }),
         };
-      }),
-    };
+      })
+    ));
 
     try {
-      await axios.post("http://localhost:8000/sessions", payload);
+      await axios.post("http://localhost:8000/sessions", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
       alert("✅ Session enregistrée avec succès !");
       navigate("/sessions");
     } catch {
@@ -204,6 +216,18 @@ const ConfigureSessionView = () => {
               </Grid>
             </Grid>
 
+            <Box mt={3} display="flex" justifyContent="space-between">
+              <Button variant="outlined" onClick={() => setActiveStep(1)}>Retour</Button>
+              <Button variant="contained" onClick={() => setActiveStep(3)}>Suivant</Button>
+            </Box>
+          </>
+        )}
+
+        {activeStep === 3 && (
+          <>
+            <Typography variant="h6">🖼️ Image de la session</Typography>
+            <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} style={{ marginTop: "16px" }} />
+
             <Box mt={3}>
               <Typography variant="h6">🔎 Récapitulatif</Typography>
               <Typography variant="body1">Programme : {programs.find(p => p.id === programId)?.name}</Typography>
@@ -218,7 +242,7 @@ const ConfigureSessionView = () => {
             </Box>
 
             <Box mt={3} display="flex" justifyContent="space-between">
-              <Button variant="outlined" onClick={() => setActiveStep(1)}>Retour</Button>
+              <Button variant="outlined" onClick={() => setActiveStep(2)}>Retour</Button>
               <Button variant="contained" color="primary" onClick={handleSubmit}>ENREGISTRER</Button>
             </Box>
           </>

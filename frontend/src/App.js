@@ -37,12 +37,16 @@ import CoursesPage from "./pages/CoursesPage";
 import ContenusPage from "./pages/ContenusPage";
 
 import ConfigureSessionPage from "./pages/ConfigureSessionPage";
+import SessionsOverviewPage from "./pages/SessionsOverviewPage";
 
 
 
 
-// Other
-import AllPages from "./pages/AllPages";
+
+
+
+
+
 
 // UI
 import Spinner from "react-bootstrap/Spinner";
@@ -92,7 +96,7 @@ function App() {
 
                 <Route path="/EditProfilePage" element={<EditProfilePage />} />
                 <Route path="/ProfilePage" element={<ProfilePage />} />
-              
+
                 {/* Users */}
                 <Route path="users" element={<UsersPages />}>
                   <Route index element={<UserList />} />
@@ -109,7 +113,7 @@ function App() {
                 <Route path="courses/*" element={<CoursesPage />} />
                 <Route path="contenus/*" element={<ContenusPage />} />
                 <Route path="/sessions/*" element={<ConfigureSessionPage />} />
-
+                <Route path="/sessions/overview" element={<SessionsOverviewPage />} />
 
 
                 {/* Student */}
@@ -118,7 +122,6 @@ function App() {
 
                 {/* Other */}
                 <Route path="feedback" element={<FeedbackPage />} />
-                <Route path="all" element={<AllPages />} />
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
