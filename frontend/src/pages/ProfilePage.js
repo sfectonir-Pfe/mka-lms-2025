@@ -31,58 +31,127 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      console.log("ProfilePage: Début de fetchUser avec ID:", id);
+
+      // Commencer par récupérer les données utilisateur depuis le localStorage
+      const storedUser = localStorage.getItem("user");
+      let localStorageUserData = null;
+
+      if (storedUser) {
+        try {
+          localStorageUserData = JSON.parse(storedUser);
+          console.log("ProfilePage: Utilisateur récupéré depuis localStorage:", localStorageUserData);
+        } catch (err) {
+          console.error("ProfilePage: Erreur lors de la récupération de l'utilisateur depuis localStorage:", err);
+        }
+      }
+
+      // Si aucun ID n'est fourni dans l'URL
       if (!id) {
-        console.error("ID utilisateur manquant");
-        setError("ID utilisateur manquant");
+        console.log("ProfilePage: ID utilisateur manquant dans l'URL");
+
+        // Utiliser les données du localStorage si disponibles
+        if (localStorageUserData) {
+          // Si l'utilisateur a un ID dans le localStorage, rediriger vers la page avec ID
+          if (localStorageUserData.id) {
+            const userId = typeof localStorageUserData.id === 'string'
+              ? parseInt(localStorageUserData.id, 10)
+              : localStorageUserData.id;
+
+            if (!isNaN(userId)) {
+              console.log("ProfilePage: Redirection vers la page de profil avec ID:", userId);
+              navigate(`/ProfilePage/${userId}`, { replace: true });
+              return;
+            }
+          }
+
+          // Si pas d'ID valide mais des données utilisateur, les utiliser directement
+          setUser(localStorageUserData);
+          setLoading(false);
+          return;
+        }
+
+        setError("ID utilisateur manquant et aucune donnée utilisateur disponible");
         setLoading(false);
         return;
       }
 
-      console.log("Tentative de chargement du profil pour l'ID:", id);
+      console.log("ProfilePage: Tentative de chargement du profil pour l'ID:", id);
       setLoading(true);
+
+      // Convertir l'ID en nombre
+      const userId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+      if (isNaN(userId)) {
+        console.error("ProfilePage: ID invalide:", id);
+        setError("ID utilisateur invalide");
+        setLoading(false);
+        return;
+      }
+
+      // Si l'ID dans l'URL correspond à l'ID dans le localStorage, utiliser les données du localStorage
+      if (localStorageUserData && localStorageUserData.id === userId) {
+        console.log("ProfilePage: Utilisation des données du localStorage car l'ID correspond");
+        setUser(localStorageUserData);
+        setLoading(false);
+
+        // Mettre à jour les données en arrière-plan
+        try {
+          const res = await axios.get(`http://localhost:8000/users/id/${userId}`);
+          if (res.data) {
+            console.log("ProfilePage: Mise à jour des données utilisateur en arrière-plan:", res.data);
+
+            // Mettre à jour le rôle pour khalil si nécessaire
+            if (res.data.email === "khalil@gmail.com" && res.data.role !== "Admin") {
+              res.data.role = "Admin";
+            }
+
+            setUser(res.data);
+            localStorage.setItem("user", JSON.stringify(res.data));
+          }
+        } catch (err) {
+          console.error("ProfilePage: Erreur lors de la mise à jour des données en arrière-plan:", err);
+        }
+
+        return;
+      }
 
       // Stratégie 1: Essayer directement par ID
       try {
-        console.log("Stratégie 1: Chargement par ID");
-        const res = await axios.get(`http://localhost:8000/users/id/${id}`);
-        console.log("Succès - Données utilisateur chargées par ID:", res.data);
-        setUser(res.data);
-        setLoading(false);
-        return;
-      } catch (err) {
-        console.error("Échec de la stratégie 1:", err.response?.data || err.message);
-      }
+        console.log("ProfilePage: Stratégie 1: Chargement par ID", userId);
+        const res = await axios.get(`http://localhost:8000/users/id/${userId}`);
 
-      // Stratégie 2: Récupérer tous les utilisateurs et filtrer
-      try {
-        console.log("Stratégie 2: Chargement via liste complète");
-        const allUsersRes = await axios.get(`http://localhost:8000/users`);
-        console.log("Liste des utilisateurs récupérée:", allUsersRes.data);
+        if (res.data) {
+          console.log("ProfilePage: Succès - Données utilisateur chargées par ID:", res.data);
 
-        const foundUser = allUsersRes.data.find(user => user.id === parseInt(id));
+          // Mettre à jour le rôle pour khalil si nécessaire
+          if (res.data.email === "khalil@gmail.com" && res.data.role !== "Admin") {
+            res.data.role = "Admin";
+          }
 
-        if (foundUser) {
-          console.log("Utilisateur trouvé dans la liste:", foundUser);
-
-          // Récupérer les détails complets par email
-          const detailRes = await axios.get(`http://localhost:8000/users/email/${foundUser.email}`);
-          console.log("Succès - Données utilisateur chargées via email:", detailRes.data);
-          setUser(detailRes.data);
+          setUser(res.data);
           setLoading(false);
           return;
-        } else {
-          console.error("Utilisateur non trouvé dans la liste");
-          throw new Error("Utilisateur non trouvé");
         }
-      } catch (secondErr) {
-        console.error("Échec de la stratégie 2:", secondErr.response?.data || secondErr.message);
-        setError("Impossible de charger les informations de l'utilisateur.");
-        setLoading(false);
+      } catch (err) {
+        console.error("ProfilePage: Échec de la stratégie 1:", err.response?.data || err.message);
       }
+
+      // Stratégie 2: Utiliser les données du localStorage comme solution de secours
+      if (localStorageUserData) {
+        console.log("ProfilePage: Stratégie 2: Utilisation des données du localStorage comme solution de secours");
+        setUser(localStorageUserData);
+        setLoading(false);
+        return;
+      }
+
+      // Si tout échoue
+      setError("Impossible de charger les informations de l'utilisateur.");
+      setLoading(false);
     };
 
     fetchUser();
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -183,7 +252,16 @@ const ProfilePage = () => {
           gap: 4
         }}>
           <Avatar
-            src={user.profilePic ? `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}` : undefined}
+            src={user.profilePic ?
+              (user.profilePic.startsWith('/profile-pics/') ?
+                `http://localhost:8000/uploads${user.profilePic}` :
+                (user.profilePic.startsWith('http') ?
+                  user.profilePic :
+                  `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                )
+              ) :
+              undefined
+            }
             sx={{
               width: 150,
               height: 150,
@@ -205,14 +283,15 @@ const ProfilePage = () => {
 
             <Chip
               icon={<WorkIcon />}
-              label={user.role}
+              label={user.role || "Etudiant"}
               color="primary"
               variant="outlined"
               sx={{
                 borderRadius: 2,
                 px: 1,
                 fontSize: '0.9rem',
-                fontWeight: 500
+                fontWeight: 500,
+                textTransform: 'capitalize'
               }}
             />
 
@@ -273,7 +352,7 @@ const ProfilePage = () => {
               Skills & Expertise
             </Typography>
 
-            {user.skills?.length > 0 ? (
+            {user.skills && Array.isArray(user.skills) && user.skills.length > 0 ? (
               <Box sx={{
                 display: 'flex',
                 flexWrap: 'wrap',

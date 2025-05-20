@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
-  
+
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await this.hashPassword(createUserDto.password);
     return this.prisma.user.create({
@@ -82,7 +82,11 @@ export class UsersService {
         phone: updateUserDto.phone,
         location: updateUserDto.location,
         about: updateUserDto.about,
-        skills: updateUserDto.skills,
+        skills: Array.isArray(updateUserDto.skills)
+          ? updateUserDto.skills
+          : (typeof updateUserDto.skills === 'string'
+            ? [updateUserDto.skills]
+            : undefined),
         profilePic: updateUserDto.profilePic,
       },
       select: {
@@ -104,7 +108,7 @@ export class UsersService {
       where: { id },
     });
   }
-  
+
   async findById(id: number) {
     try {
       // Convertir l'ID en nombre
@@ -157,11 +161,29 @@ export class UsersService {
       console.log("Données reçues:", updateUserDto);
 
       // Parse skills from string if needed
-      if (updateUserDto.skills && typeof updateUserDto.skills === 'string') {
-        try {
-          updateUserDto.skills = JSON.parse(updateUserDto.skills as unknown as string);
-        } catch (e) {
-          console.error('Failed to parse skills:', e);
+      if (updateUserDto.skills) {
+        console.log("Skills avant traitement:", updateUserDto.skills);
+        console.log("Type de skills:", typeof updateUserDto.skills);
+
+        if (typeof updateUserDto.skills === 'string') {
+          try {
+            // Si c'est une chaîne JSON, essayer de la parser
+            if (updateUserDto.skills.startsWith('[') && updateUserDto.skills.endsWith(']')) {
+              updateUserDto.skills = JSON.parse(updateUserDto.skills as unknown as string);
+              console.log("Skills après parsing JSON:", updateUserDto.skills);
+            } else {
+              // Si c'est une chaîne simple, la convertir en tableau avec un seul élément
+              updateUserDto.skills = [updateUserDto.skills];
+              console.log("Skills convertis en tableau:", updateUserDto.skills);
+            }
+          } catch (e) {
+            console.error('Failed to parse skills:', e);
+            updateUserDto.skills = [];
+          }
+        } else if (Array.isArray(updateUserDto.skills)) {
+          console.log("Skills est déjà un tableau:", updateUserDto.skills);
+        } else {
+          console.error("Format de skills non reconnu, conversion en tableau vide");
           updateUserDto.skills = [];
         }
       }

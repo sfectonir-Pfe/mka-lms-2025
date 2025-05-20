@@ -21,8 +21,7 @@ export class UpdateUserDto {
   about?: string;
 
   @IsOptional()
-  @IsString()
-  skills?: string[];
+  skills?: string[] | string;
 
   @IsOptional()
   @IsEnum(Role)

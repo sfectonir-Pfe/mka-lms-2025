@@ -153,11 +153,11 @@ export default function UserList() {
 
           <Tooltip title="Edit user">
             <IconButton
-              color="secondary"
+              color="primary"
               onClick={() => navigate(`/EditProfile/${params.row.email}`)}
               sx={{
-                bgcolor: theme.palette.secondary.light,
-                '&:hover': { bgcolor: theme.palette.secondary.main }
+                bgcolor: theme.palette.primary.light,
+                '&:hover': { bgcolor: theme.palette.primary.main }
               }}
             >
               <Edit fontSize="small" />

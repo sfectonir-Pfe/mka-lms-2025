@@ -102,7 +102,18 @@ export class UsersController {
 
   @Patch('email/:email')
   async updateByEmail(@Param('email') email: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.updateByEmail(email, updateUserDto);
+    try {
+      console.log("Contrôleur: Mise à jour de l'utilisateur avec email:", email);
+      console.log("Contrôleur: Données reçues:", updateUserDto);
+      console.log("Contrôleur: Type de skills:", typeof updateUserDto.skills);
+
+      const result = await this.usersService.updateByEmail(email, updateUserDto);
+      console.log("Contrôleur: Résultat de la mise à jour:", result);
+      return result;
+    } catch (error) {
+      console.error("Contrôleur: Erreur lors de la mise à jour de l'utilisateur:", error);
+      throw error;
+    }
   }
 
   @Patch(':id')

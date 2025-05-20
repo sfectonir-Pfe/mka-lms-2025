@@ -30,6 +30,7 @@ import ResetSuccessPage from "./pages/ResetSuccessPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
+
 function App() {
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("light");
@@ -38,10 +39,31 @@ function App() {
   useEffect(() => {
     var auxUser = localStorage.getItem("user");
     if (auxUser) {
-      setUser(JSON.parse(auxUser));
+      try {
+        const userData = JSON.parse(auxUser);
+        console.log("User data from localStorage:", userData);
+
+        // Ensure role is set correctly
+        if (!userData.role || userData.role === "user") {
+          userData.role = "Etudiant";
+        }
+
+        // Specifically for khalil, update role to Admin
+        if (userData.email === "khalil@gmail.com" && userData.role !== "Admin") {
+          userData.role = "Admin";
+          console.log("Updated khalil's role to Admin in App.js");
+          // Update localStorage with the corrected role
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+
+        setUser(userData);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+      }
+      setLoading(false);
+    } else {
       setLoading(false);
     }
-    setLoading(false);
   }, []);
   const handelMode = () => {
     if (mode === "light") {
@@ -99,6 +121,9 @@ function App() {
                 <Route path="/student" element={<StudentLandingPage />} />
                 <Route path="/EditProfile/:email" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+                <Route path="/EditProfile" element={<EditProfilePage />} />
+                <Route path="/ProfilePage" element={<ProfilePage />} />
+
 
 
               </Route>
@@ -113,7 +138,7 @@ function App() {
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
 
               </Route>
-              
+
             )}
 
             <Route path="*" element={<NotFound />} />

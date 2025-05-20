@@ -41,16 +41,34 @@ function LoginPage({ setUser }) {
   if (!validate()) return;
 
   try {
+    // Connexion de l'utilisateur
     const response = await axios.post("http://localhost:8000/auth/login", {
       email,
       password,
     });
-    setUser(response.data);
-    localStorage.setItem("user", JSON.stringify(response.data));
-localStorage.setItem("userEmail", response.data.email);
-      
- window.location.href = "/ProfilePage"; // ou useNavigate si tu l'utilises
+
+    console.log("Login response:", response.data);
+
+    // Création d'un objet utilisateur simplifié
+    const userData = {
+      id: response.data.id,
+      email: email,
+      role: response.data.role || "Etudiant", // Utiliser l'une des valeurs de l'énumération Role
+      name: response.data.name || email.split('@')[0],
+      token: response.data.access_token
+    };
+
+    console.log("User data to store:", userData);
+
+    // Stockage des données utilisateur
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("userEmail", email);
+
+    // Naviguer vers la page d'accueil après la connexion
+    
   } catch (error) {
+    console.error("Login error:", error);
     const message =
       "Login failed. Please check your credentials. " +
       (error.response?.data?.message || "");
