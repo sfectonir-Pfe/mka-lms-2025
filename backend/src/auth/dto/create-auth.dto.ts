@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 export class CreateAuthDto {}
 
-export class loginDto{
+export class LoginDto{
     @ApiProperty()
     email:string
     @ApiProperty()
@@ -15,4 +15,6 @@ export class RegisterDto{
     password:string
     @ApiProperty()
     role:Role
+    @ApiProperty({ required: false })
+    name?:string
 }

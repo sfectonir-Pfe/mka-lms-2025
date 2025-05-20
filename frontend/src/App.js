@@ -26,13 +26,7 @@ import FeedbackPage from "./pages/FeedbackPage";
 import StudentProgramPage from "./pages/StudentProgramPage";
 import "react-toastify/dist/ReactToastify.css";
 import StudentLandingPage from "./pages/StudentLandingPage";
-
 import ResetSuccessPage from "./pages/ResetSuccessPage";
-
-
-
-
-
 import EditProfilePage from "./pages/EditProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 
@@ -60,9 +54,8 @@ function App() {
     <div
       className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"
         }`}
-        
-    > <ToastContainer /> 
-      <ToastContainer />
+
+    > <ToastContainer />
       <div className="d-flex justify-content-end">
         <button
           className="btn btn-light d-flex align-items-center"
@@ -81,7 +74,7 @@ function App() {
             {user ? (
               <Route path="/" element={<Main setUser={setUser} user={user} />}>
                 <Route index element={<HomePage />} />
-                <Route path="/" element={<ProfilePage />} />
+                {/* <Route path="/" element={<ProfilePage />} /> */}
                 <Route path="users" element={<UsersPages />}>
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
@@ -104,10 +97,10 @@ function App() {
                 <Route path="module/add/:programId" element={<AddModulePage />} />
                 <Route path="/student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="/student" element={<StudentLandingPage />} />
-                <Route path="ProfilePage" element={<ProfilePage />} />
-                <Route path="EditProfilePage" element={<EditProfilePage />} />
-               
-                
+                <Route path="/EditProfile/:email" element={<EditProfilePage />} />
+                <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+
+
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -117,7 +110,7 @@ function App() {
                   element={<ForgetPasswordPage />}
                 />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
-                 <Route path="/reset-success" element={<ResetSuccessPage />} />
+                <Route path="/reset-success" element={<ResetSuccessPage />} />
 
               </Route>
               
