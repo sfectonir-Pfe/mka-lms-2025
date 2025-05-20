@@ -55,6 +55,7 @@ function LoginPage({ setUser }) {
       email: email,
       role: response.data.role || "Etudiant", // Utiliser l'une des valeurs de l'énumération Role
       name: response.data.name || email.split('@')[0],
+      profilePic: response.data.profilePic || null, // Ajouter la photo de profil
       token: response.data.access_token
     };
 
@@ -66,7 +67,7 @@ function LoginPage({ setUser }) {
     localStorage.setItem("userEmail", email);
 
     // Naviguer vers la page d'accueil après la connexion
-    
+    window.location.href = `/`; // Redirection vers la page d'accueil
   } catch (error) {
     console.error("Login error:", error);
     const message =

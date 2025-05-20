@@ -140,8 +140,38 @@ export default function Main({ setUser, user }) {
         console.log("Updated user role to Etudiant");
       }
 
+      // Récupérer les données utilisateur à jour, y compris la photo de profil
+      const fetchUserData = async () => {
+        try {
+          if (user.email) {
+            const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+            if (response.data) {
+              // Mettre à jour l'objet utilisateur avec les données à jour
+              const updatedUser = {
+                ...user,
+                profilePic: response.data.profilePic || user.profilePic,
+                name: response.data.name || user.name,
+                role: response.data.role || user.role
+              };
+
+              // Si l'utilisateur est khalil, s'assurer que son rôle est Admin
+              if (updatedUser.email === "khalil@gmail.com" && updatedUser.role !== "Admin") {
+                updatedUser.role = "Admin";
+              }
+
+              setUser(updatedUser);
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+              console.log("Updated user data with profile pic:", updatedUser);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      fetchUserData();
     }
-  }, [user]);
+  }, [user?.email]);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -299,7 +329,7 @@ export default function Main({ setUser, user }) {
                 sx={{ p: 0 }}
               >
                 <Avatar
-                  alt={user?.email || "User"}
+                  alt={user?.name || user?.email || "User"}
                   src={user?.profilePic ?
                     (user.profilePic.startsWith('/profile-pics/') ?
                       `http://localhost:8000/uploads${user.profilePic}` :
@@ -310,7 +340,11 @@ export default function Main({ setUser, user }) {
                     ) :
                     null
                   }
-                  sx={{ width: 36, height: 36 }}
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    bgcolor: 'primary.main' // Couleur de fond pour l'avatar par défaut
+                  }}
                 >
                   {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                 </Avatar>

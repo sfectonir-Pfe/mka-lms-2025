@@ -66,6 +66,33 @@ const EditProfilePage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState("");
+
+  // Fonction pour évaluer la force du mot de passe
+  const getPasswordStrength = (password) => {
+    if (!password) return "";
+
+    let strength = 0;
+
+    // Critères d'évaluation
+    const lengthCriteria = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    // Calcul du score
+    strength += lengthCriteria ? 1 : 0;
+    strength += hasUpperCase ? 1 : 0;
+    strength += hasLowerCase ? 1 : 0;
+    strength += hasDigit ? 1 : 0;
+    strength += hasSpecialChar ? 1 : 0;
+
+    // Détermination de la force
+    if (strength <= 2) return "faible";
+    if (strength <= 4) return "moyenne";
+    return "forte";
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -199,10 +226,16 @@ const EditProfilePage = () => {
   };
 
   const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
     setPasswordForm({
       ...passwordForm,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Évaluer la force du mot de passe si c'est le champ newPassword qui est modifié
+    if (name === "newPassword") {
+      setPasswordStrength(getPasswordStrength(value));
+    }
   };
 
   const handleChangePassword = async () => {
@@ -770,6 +803,99 @@ const EditProfilePage = () => {
               )
             }}
           />
+
+          {/* Indicateur de force du mot de passe */}
+          {passwordForm.newPassword && (
+            <Box sx={{ mt: 1, mb: 2 }}>
+              <Typography variant="body2" gutterBottom>
+                Force du mot de passe:
+                <Box component="span"
+                  sx={{
+                    ml: 1,
+                    fontWeight: 'bold',
+                    color: passwordStrength === 'forte'
+                      ? 'success.main'
+                      : passwordStrength === 'moyenne'
+                        ? 'warning.main'
+                        : 'error.main'
+                  }}
+                >
+                  {passwordStrength.toUpperCase()}
+                </Box>
+              </Typography>
+
+              {/* Barre de progression */}
+              <Box sx={{ width: '100%', height: 4, bgcolor: 'grey.200', borderRadius: 1, overflow: 'hidden' }}>
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: passwordStrength === 'forte'
+                      ? '100%'
+                      : passwordStrength === 'moyenne'
+                        ? '60%'
+                        : '30%',
+                    bgcolor: passwordStrength === 'forte'
+                      ? 'success.main'
+                      : passwordStrength === 'moyenne'
+                        ? 'warning.main'
+                        : 'error.main',
+                    transition: 'width 0.3s ease'
+                  }}
+                />
+              </Box>
+
+              {/* Conseils pour un mot de passe fort */}
+              {passwordStrength !== 'forte' && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" gutterBottom color="primary">
+                    Pour un mot de passe fort, incluez:
+                  </Typography>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={passwordForm.newPassword.length >= 8 ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {passwordForm.newPassword.length >= 8 ? '✓' : '○'} Au moins 8 caractères
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/[A-Z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[A-Z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre majuscule
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/[a-z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[a-z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre minuscule
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/\d/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/\d/.test(passwordForm.newPassword) ? '✓' : '○'} Un chiffre
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="body2"
+                        color={/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? '✓' : '○'} Un caractère spécial (!@#$%...)
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </Box>
+          )}
 
           <TextField
             label="Confirm New Password"
