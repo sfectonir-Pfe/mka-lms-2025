@@ -1,35 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
 import { Link } from "react-router-dom";
 import axios from "axios";
 import showErrorToast from "../utils/toastError";
+import { useTranslation } from "react-i18next";
+import SimpleLanguageSelector from "../components/SimpleLanguageSelector";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function LoginPage({ setUser }) {
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [msgError, setMgsError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const recaptchaRef = useRef(null);
+
+  // Vérifier si l'utilisateur a précédemment coché "Remember Me"
+  React.useEffect(() => {
+    const savedRememberMe = localStorage.getItem("rememberMe") === "true";
+    const savedEmail = localStorage.getItem("savedEmail");
+
+    if (savedRememberMe && savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
+  const handleCaptchaChange = (value) => {
+    // value sera null si le captcha expire
+    setCaptchaVerified(!!value);
+  };
 
   const validate = () => {
     let valid = true;
     const newErrors = { email: "", password: "" };
 
     if (!email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t('auth.emailRequired', 'Email is required');
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t('auth.emailInvalid', 'Email is invalid');
       valid = false;
     }
 
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t('auth.passwordRequired', 'Password is required');
       valid = false;
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = t('auth.passwordMinLength', 'Password must be at least 6 characters');
       valid = false;
+    }
+
+    if (!captchaVerified) {
+      setMgsError(t('auth.captchaRequired', 'Please verify that you are not a robot'));
+      valid = false;
+    } else {
+      setMgsError("");
     }
 
     setErrors(newErrors);
@@ -63,16 +93,38 @@ function LoginPage({ setUser }) {
 
     // Stockage des données utilisateur
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("userEmail", email);
+
+    // Gestion de l'option "Remember Me"
+    if (rememberMe) {
+      // Si "Remember Me" est coché, stocker les données dans localStorage (persistant)
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("rememberMe", "true");
+
+      // Optionnel : stocker les identifiants de connexion de manière sécurisée
+      // Note : ceci est une implémentation simplifiée, pour une application réelle,
+      // utilisez une méthode plus sécurisée comme les cookies HttpOnly ou un token de rafraîchissement
+      localStorage.setItem("savedEmail", email);
+      // Ne jamais stocker le mot de passe en clair, même en développement
+    } else {
+      // Si "Remember Me" n'est pas coché, stocker les données dans sessionStorage (durée de la session)
+      sessionStorage.setItem("user", JSON.stringify(userData));
+      sessionStorage.setItem("userEmail", email);
+
+      // Supprimer les données persistantes si elles existent
+      localStorage.removeItem("user");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("rememberMe");
+      localStorage.removeItem("savedEmail");
+    }
 
     // Naviguer vers la page d'accueil après la connexion
     window.location.href = `/`; // Redirection vers la page d'accueil
   } catch (error) {
     console.error("Login error:", error);
     const message =
-      "Login failed. Please check your credentials. " +
-      (error.response?.data?.message || "");
+      t('auth.loginError', 'Login failed. Please check your credentials.') +
+      " " + (error.response?.data?.message || "");
     setMgsError(message);
     showErrorToast(message);
     setPassword("");
@@ -80,6 +132,9 @@ function LoginPage({ setUser }) {
 };
   return (
     <div className="container-fluid p-3 my-5">
+      {/* Sélecteur de langue */}
+      <SimpleLanguageSelector />
+
       <div className="row align-items-center">
         <div className="col-md-6 mb-4">
           <img
@@ -90,6 +145,7 @@ function LoginPage({ setUser }) {
         </div>
 
         <div className="col-md-6">
+          <h2 className="text-center mb-4 fw-bold text-primary">{t('auth.loginTitle')}</h2>
           <form onSubmit={handleRequest}>
             {msgError && (
               <div className="alert alert-danger" role="alert">
@@ -107,7 +163,7 @@ function LoginPage({ setUser }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <label htmlFor="email">Email address</label>
+              <label htmlFor="email">{t('common.email')}</label>
               {errors.email && (
                 <div className="invalid-feedback">{errors.email}</div>
               )}
@@ -123,7 +179,7 @@ function LoginPage({ setUser }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t('common.password')}</label>
               {errors.password && (
                 <div className="invalid-feedback">{errors.password}</div>
               )}
@@ -143,12 +199,24 @@ function LoginPage({ setUser }) {
                   className="form-check-input"
                   type="checkbox"
                   id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="remember">
-                  Remember me
+                  {t('common.rememberMe')}
                 </label>
               </div>
-              <Link to="/forgot-password">Forgot password?</Link>
+              <Link to="/forgot-password">{t('common.forgotPassword')}</Link>
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="mb-4 d-flex justify-content-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Clé de test de Google
+                onChange={handleCaptchaChange}
+                hl={i18n.language} // Langue du reCAPTCHA basée sur la langue actuelle
+              />
             </div>
 
             {/* Submit button */}
@@ -156,9 +224,9 @@ function LoginPage({ setUser }) {
               <button
                 type="submit"
                 className="btn btn-primary px-5"
-                disabled={!email || !password}
+                disabled={!email || !password || !captchaVerified}
               >
-                Login
+                {t('common.login')}
               </button>
             </div>
           </form>

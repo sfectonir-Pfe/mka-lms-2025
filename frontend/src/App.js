@@ -37,11 +37,18 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Vérifier d'abord dans localStorage (pour les utilisateurs qui ont coché "Remember Me")
     var auxUser = localStorage.getItem("user");
+
+    // Si aucun utilisateur n'est trouvé dans localStorage, vérifier dans sessionStorage
+    if (!auxUser) {
+      auxUser = sessionStorage.getItem("user");
+    }
+
     if (auxUser) {
       try {
         const userData = JSON.parse(auxUser);
-        console.log("User data from localStorage:", userData);
+        console.log("User data loaded:", userData);
 
         // Ensure role is set correctly
         if (!userData.role || userData.role === "user") {
@@ -52,13 +59,19 @@ function App() {
         if (userData.email === "khalil@gmail.com" && userData.role !== "Admin") {
           userData.role = "Admin";
           console.log("Updated khalil's role to Admin in App.js");
-          // Update localStorage with the corrected role
-          localStorage.setItem("user", JSON.stringify(userData));
+
+          // Update storage with the corrected role
+          if (localStorage.getItem("user")) {
+            localStorage.setItem("user", JSON.stringify(userData));
+          }
+          if (sessionStorage.getItem("user")) {
+            sessionStorage.setItem("user", JSON.stringify(userData));
+          }
         }
 
         setUser(userData);
       } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
+        console.error("Error parsing user data:", error);
       }
       setLoading(false);
     } else {

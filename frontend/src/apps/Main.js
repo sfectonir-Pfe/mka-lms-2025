@@ -29,8 +29,10 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { sideBarData } from "../constants/sideBarData";
 import ScrollToTopButton from "../components/ScrollToTopButton";
+import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth = 260;
 
@@ -122,6 +124,7 @@ export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -177,7 +180,18 @@ export default function Main({ setUser, user }) {
   const handleDrawerClose = () => setOpen(false);
 
   const handleLogout = () => {
+    // Supprimer les données de localStorage
     localStorage.removeItem("user");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("rememberMe");
+
+    // Supprimer les données de sessionStorage
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("userEmail");
+
+    // Conserver l'email sauvegardé si "Remember Me" était coché
+    // pour pré-remplir le champ email lors de la prochaine connexion
+
     setUser(null);
     navigate("/");
   };
@@ -305,11 +319,13 @@ export default function Main({ setUser, user }) {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
-              Master Knowledge Academy
+              {t('common.appTitle', 'Master Knowledge Academy')}
             </Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <LanguageSelectorWithFlags />
+
             <IconButton color="inherit">
               <StyledBadge badgeContent={4} color="error">
                 <NotificationsIcon />
@@ -317,7 +333,7 @@ export default function Main({ setUser, user }) {
             </IconButton>
 
             <Typography variant="body1" noWrap>
-              {user && user.email ? user.email : "User"} |
+              {user && user.email ? user.email : t('common.user')} |
               <span style={{ textTransform: 'capitalize' }}>
                 {user && user.role  }
               </span>
@@ -394,20 +410,20 @@ export default function Main({ setUser, user }) {
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
-                  View Profile
+                  {t('profile.viewProfile')}
                 </MenuItem>
                 <MenuItem onClick={handleEditProfil}>
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
-                  Edit Profile
+                  {t('profile.editProfile')}
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={handleLogout}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" />
                   </ListItemIcon>
-                  Logout
+                  {t('common.logout')}
                 </MenuItem>
               </Menu>
             </Box>
