@@ -8,55 +8,67 @@ const ProgramList = () => {
   const [programs, setPrograms] = useState([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios.get("http://localhost:8000/programs").then((res) => {
+  const fetchPrograms = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/programs");
       setPrograms(res.data);
-    });
+    } catch (err) {
+      console.error("Erreur chargement programmes", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPrograms();
   }, []);
 
-  const handleDelete = (id) => {
-    axios.delete(`http://localhost:8000/programs/${id}`).then(() => {
+  const handleDelete = async (id) => {
+    if (!window.confirm("Supprimer ce programme ?")) return;
+
+    try {
+      await axios.delete(`http://localhost:8000/programs/${id}`);
       setPrograms((prev) => prev.filter((p) => p.id !== id));
-    });
+    } catch (err) {
+      console.error("Erreur suppression", err);
+    }
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "name", headerName: "Titre", flex: 1 },
+    { field: "id", headerName: "ID", width: 80 },
+    { field: "name", headerName: "Nom du programme", flex: 1 },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
       renderCell: (params) => (
-        <div>
+        <>
           <Button
-  className="btn btn-sm btn-outline-info mx-1"
-  onClick={() => navigate(`/programs/${params.row.id}/modules`)}
->
-  Voir Modules
-</Button>
-
-<Button
-  className="btn btn-sm btn-outline-danger mx-1"
-  onClick={() => handleDelete(params.row.id)}
->
-  Supprimer
-</Button>
-        </div>
+            variant="outlined"
+            color="info"
+            size="small"
+            onClick={() => navigate(`/programs/${params.row.id}/modules`)}
+          >
+            Voir Modules
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            size="small"
+            onClick={() => handleDelete(params.row.id)}
+            style={{ marginLeft: "8px" }}
+          >
+            Supprimer
+          </Button>
+        </>
       ),
     },
   ];
 
   return (
-    <Box mt={5}>
+    <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">Liste des programmes</Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/programs/add")}
-        >
-          Ajouter un programme
+        <Button variant="contained" onClick={() => navigate("/programs/add")}>
+          ➕ Ajouter un programme
         </Button>
       </Grid>
 

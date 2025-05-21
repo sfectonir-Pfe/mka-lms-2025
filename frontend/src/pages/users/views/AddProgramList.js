@@ -16,7 +16,6 @@ const AddProgramList = () => {
       alert("Erreur : échec de l'enregistrement");
     }
   };
-  
 
   return (
     <Container maxWidth="sm">
