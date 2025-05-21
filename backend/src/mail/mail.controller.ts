@@ -26,7 +26,7 @@ export class MailController {
       where: { email },
       data: {
         resetToken: token,
-        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 120), // 1 hour from now
+        resetTokenExpiry: new Date(Date.now() + 1000 * 60 * 120), //time
       },
     });
 

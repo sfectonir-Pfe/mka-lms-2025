@@ -20,6 +20,27 @@ export class MailService {
     };
 
     await this.mailerService.sendMail(mailOptions);
+  } 
+  async sendWelcomeEmail(to: string, tempPassword: string, role: string) {
+    const mailOptions = {
+      from: 'LMS Platform <your-email@gmail.com>',
+      to,
+      subject: '🎓 Welcome to the LMS Platform',
+      html: `
+        <h3>Welcome to the LMS!</h3>
+        <p>Your account has been created successfully. Here are your login credentials:</p>
+        <ul>
+          <li><strong>Email:</strong> ${to}</li>
+          <li><strong>Temporary Password:</strong> ${tempPassword}</li>
+          <li><strong>Role:</strong> ${role}</li>
+        </ul>
+        <p>Please log in and change your password as soon as possible for security reasons.</p>
+        <br/>
+        <p>– LMS Team</p>
+      `,
+    };
+
+    await this.mailerService.sendMail(mailOptions);
   }
-  
 }
+  

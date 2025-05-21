@@ -3,15 +3,29 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
+
+  private async hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+
+  private generateTempPassword(length = 10): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  }
 
   async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await this.hashPassword(createUserDto.password);
-    return this.prisma.user.create({
+    const tempPassword = this.generateTempPassword();
+    const hashedPassword = await this.hashPassword(tempPassword);
+
+    const newUser = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
         password: hashedPassword,
@@ -34,10 +48,14 @@ export class UsersService {
         profilePic: true,
       },
     });
-  }
 
-  private async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+    await this.mailService.sendWelcomeEmail(
+      newUser.email,
+      tempPassword,
+      newUser.role,
+    );
+
+    return newUser;
   }
 
   async findAll() {
@@ -111,12 +129,8 @@ export class UsersService {
 
   async findById(id: number) {
     try {
-      // Convertir l'ID en nombre
       const numericId = parseInt(String(id), 10);
-
-      if (isNaN(numericId)) {
-        throw new Error('ID invalide');
-      }
+      if (isNaN(numericId)) throw new Error('ID invalide');
 
       return this.prisma.user.findUnique({
         where: { id: numericId },
@@ -188,7 +202,6 @@ export class UsersService {
         }
       }
 
-      // Créer un objet de données
       const updateData: any = {
         name: updateUserDto.name,
         phone: updateUserDto.phone,
@@ -196,19 +209,15 @@ export class UsersService {
         about: updateUserDto.about,
       };
 
-      // Ajouter le champ skills seulement s'il est défini
       if (updateUserDto.skills !== undefined) {
         updateData.skills = updateUserDto.skills;
       }
 
-      // Ajouter le champ profilePic seulement s'il est défini
       if (updateUserDto.profilePic !== undefined) {
         updateData.profilePic = updateUserDto.profilePic;
       }
 
-      console.log("Données à mettre à jour:", updateData);
-
-      const updatedUser = await this.prisma.user.update({
+      return await this.prisma.user.update({
         where: { email },
         data: updateData,
         select: {
@@ -223,9 +232,6 @@ export class UsersService {
           about: true,
         },
       });
-
-      console.log("Utilisateur mis à jour:", updatedUser);
-      return updatedUser;
     } catch (error) {
       console.error("Erreur dans updateByEmail:", error);
       throw error;
@@ -234,10 +240,7 @@ export class UsersService {
 
   async updateProfilePic(id: number, profilePicPath: string) {
     try {
-      console.log("Mise à jour de la photo de profil pour l'utilisateur avec ID:", id);
-      console.log("Chemin de la photo:", profilePicPath);
-
-      const updatedUser = await this.prisma.user.update({
+      return await this.prisma.user.update({
         where: { id },
         data: {
           profilePic: profilePicPath,
@@ -254,9 +257,6 @@ export class UsersService {
           about: true,
         },
       });
-
-      console.log("Photo de profil mise à jour:", updatedUser);
-      return updatedUser;
     } catch (error) {
       console.error("Erreur dans updateProfilePic:", error);
       throw error;
