@@ -26,7 +26,7 @@ import UsersPages from "./pages/users/UsersPages";
 import AddUserView from "./pages/users/views/AddUserView";
 import UserList from "./pages/users/views/UserList";
 
-// Program / Module / Course
+// Program / Module / Course/ quiz / session 
 import ProgramsPage from "./pages/ProgramsPage";
 import AddProgramList from "./pages/users/views/AddProgramList";
 
@@ -38,6 +38,14 @@ import ContenusPage from "./pages/ContenusPage";
 
 import ConfigureSessionPage from "./pages/ConfigureSessionPage";
 import SessionsOverviewPage from "./pages/SessionsOverviewPage";
+
+import AddQuizForm from "./pages/users/views/AddQuizForm";
+import PlayQuizPage from "./pages/users/views/PlayQuizPage";
+
+
+
+
+
 
 
 
@@ -113,7 +121,8 @@ function App() {
                 <Route path="/sessions/*" element={<ConfigureSessionPage />} />
                 <Route path="/sessions/overview" element={<SessionsOverviewPage />} />
 
-
+                <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
+                <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
