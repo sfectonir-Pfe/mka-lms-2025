@@ -11,7 +11,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto } from './dto/create-auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 
 
@@ -125,6 +125,23 @@ export class AuthController {
     } catch (error) {
       throw new HttpException(
         error.message || 'Erreur de réinitialisation',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('change-password')
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
+    try {
+      const result = await this.authService.changePassword(
+        changePasswordDto.email,
+        changePasswordDto.currentPassword,
+        changePasswordDto.newPassword
+      );
+      return { success: true, message: 'Mot de passe changé avec succès', data: result };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors du changement de mot de passe',
         error.status || HttpStatus.BAD_REQUEST,
       );
     }

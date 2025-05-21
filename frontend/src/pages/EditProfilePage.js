@@ -15,6 +15,12 @@ import {
   Divider,
   Stack,
   InputAdornment,
+  Modal,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from "@mui/material";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
@@ -27,6 +33,9 @@ import {
   Person,
   Check,
   Add,
+  Lock,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -45,15 +54,128 @@ const EditProfilePage = () => {
   const [newSkill, setNewSkill] = useState("");
   const [skills, setSkills] = useState([]);
 
+  // États pour le changement de mot de passe
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [passwordError, setPasswordError] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState("");
+
+  // Fonction pour évaluer la force du mot de passe
+  const getPasswordStrength = (password) => {
+    if (!password) return "";
+
+    let strength = 0;
+
+    // Critères d'évaluation
+    const lengthCriteria = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    // Calcul du score
+    strength += lengthCriteria ? 1 : 0;
+    strength += hasUpperCase ? 1 : 0;
+    strength += hasLowerCase ? 1 : 0;
+    strength += hasDigit ? 1 : 0;
+    strength += hasSpecialChar ? 1 : 0;
+
+    // Détermination de la force
+    if (strength <= 2) return "faible";
+    if (strength <= 4) return "moyenne";
+    return "forte";
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8000/users/email/${email}`);
-        setUser(res.data);
-        setForm(res.data);
-        if (res.data.skills) {
-          setSkills(Array.isArray(res.data.skills) ? res.data.skills : []);
+
+        // Si l'email n'est pas fourni dans l'URL, essayer de le récupérer depuis le localStorage
+        let userEmail = email;
+        if (!userEmail) {
+          console.log("Email not provided in URL, trying to get it from localStorage");
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            try {
+              const userData = JSON.parse(storedUser);
+              if (userData && userData.email) {
+                userEmail = userData.email;
+                console.log("Using email from localStorage:", userEmail);
+              }
+            } catch (err) {
+              console.error("Error parsing user data from localStorage:", err);
+            }
+          }
+        }
+
+        if (!userEmail) {
+          throw new Error("No email available to fetch user data");
+        }
+
+        try {
+          console.log("Fetching user data for email:", userEmail);
+          const res = await axios.get(`http://localhost:8000/users/email/${userEmail}`);
+          console.log("User data received:", res.data);
+
+          if (!res.data) {
+            throw new Error("No user data received from server");
+          }
+
+          setUser(res.data);
+          setForm(res.data);
+
+          // Gérer les skills correctement
+          if (res.data.skills) {
+            // Si skills est une chaîne de caractères, essayer de la parser
+            if (typeof res.data.skills === 'string') {
+              try {
+                const parsedSkills = JSON.parse(res.data.skills);
+                setSkills(Array.isArray(parsedSkills) ? parsedSkills : []);
+              } catch (parseErr) {
+                console.error("Error parsing skills:", parseErr);
+                setSkills([]);
+              }
+            } else if (Array.isArray(res.data.skills)) {
+              setSkills(res.data.skills);
+            } else {
+              setSkills([]);
+            }
+          } else {
+            setSkills([]);
+          }
+        } catch (fetchErr) {
+          console.error("Error fetching user data:", fetchErr);
+
+          // Si l'utilisateur est dans le localStorage, l'utiliser comme solution de secours
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            try {
+              const userData = JSON.parse(storedUser);
+              console.log("Using user data from localStorage as fallback:", userData);
+              setUser(userData);
+              setForm(userData);
+
+              if (userData.skills) {
+                setSkills(Array.isArray(userData.skills) ? userData.skills : []);
+              } else {
+                setSkills([]);
+              }
+            } catch (parseErr) {
+              console.error("Error parsing user data from localStorage:", parseErr);
+              throw new Error("Failed to load user data");
+            }
+          } else {
+            throw new Error("Failed to fetch user data and no local data available");
+          }
         }
       } catch (err) {
         console.error("Error loading user:", err);
@@ -64,7 +186,7 @@ const EditProfilePage = () => {
     };
 
     fetchUser();
-  }, [email]);
+  }, [email, navigate]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -87,34 +209,196 @@ const EditProfilePage = () => {
     setSkills(skills.filter(skill => skill !== skillToRemove));
   };
 
+  // Fonctions pour le changement de mot de passe
+  const handlePasswordDialogOpen = () => {
+    setPasswordDialogOpen(true);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+    setPasswordError("");
+  };
+
+  const handlePasswordDialogClose = () => {
+    setPasswordDialogOpen(false);
+    setPasswordError("");
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm({
+      ...passwordForm,
+      [name]: value
+    });
+
+    // Évaluer la force du mot de passe si c'est le champ newPassword qui est modifié
+    if (name === "newPassword") {
+      setPasswordStrength(getPasswordStrength(value));
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!passwordForm.currentPassword) {
+      setPasswordError("Current password is required");
+      return;
+    }
+
+    if (!passwordForm.newPassword) {
+      setPasswordError("New password is required");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long");
+      return;
+    }
+
+    setChangingPassword(true);
+    setPasswordError("");
+
+    try {
+      // Appel API pour changer le mot de passe
+      await axios.post(`http://localhost:8000/auth/change-password`, {
+        email: user.email,
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+
+      toast.success("Password changed successfully!");
+      handlePasswordDialogClose();
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setPasswordError(error.response?.data?.message || "Failed to change password. Please try again.");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError("");
 
     try {
+      // Utiliser l'email de l'utilisateur chargé plutôt que celui de l'URL
+      const userEmail = user.email;
+
+      if (!userEmail) {
+        throw new Error("No email available to update user data");
+      }
+
+      console.log("Updating user data for email:", userEmail);
+
+      // Convertir les skills en JSON string pour éviter les problèmes de format
       const userData = {
         name: form.name || null,
         phone: form.phone || null,
         location: form.location || null,
         about: form.about || null,
-        skills: skills,
+        skills: skills, // Le backend s'attend à un tableau
       };
 
-      await axios.patch(`http://localhost:8000/users/email/${email}`, userData);
+      console.log("User data to update:", userData);
 
-      if (selectedFile) {
-        const formData = new FormData();
-        formData.append("photo", selectedFile);
-        await axios.patch(
-          `http://localhost:8000/users/id/${user.id}/photo`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      try {
+        const updateResponse = await axios.patch(`http://localhost:8000/users/email/${userEmail}`, userData);
+        console.log("Update response:", updateResponse.data);
+
+        // Mettre à jour l'utilisateur avec les données de la réponse
+        setUser(updateResponse.data);
+
+        // Mettre à jour les données utilisateur dans le localStorage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const storedUserData = JSON.parse(storedUser);
+            // Utiliser les données de la réponse pour mettre à jour le localStorage
+            const updatedUserData = {
+              ...storedUserData,
+              name: updateResponse.data.name,
+              phone: updateResponse.data.phone,
+              location: updateResponse.data.location,
+              about: updateResponse.data.about,
+              skills: updateResponse.data.skills,
+              profilePic: updateResponse.data.profilePic
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUserData));
+            console.log("Updated user data in localStorage:", updatedUserData);
+          } catch (err) {
+            console.error("Error updating user data in localStorage:", err);
+          }
+        }
+
+        // Télécharger la photo de profil si sélectionnée
+        if (selectedFile) {
+          try {
+            console.log("Uploading profile picture for user ID:", user.id);
+            const formData = new FormData();
+            formData.append("photo", selectedFile);
+            const photoResponse = await axios.patch(
+              `http://localhost:8000/users/id/${user.id}/photo`,
+              formData,
+              { headers: { "Content-Type": "multipart/form-data" } }
+            );
+            console.log("Photo upload response:", photoResponse.data);
+
+            // Mettre à jour l'utilisateur avec la nouvelle photo
+            setUser(prev => ({ ...prev, profilePic: photoResponse.data.profilePic }));
+
+            // Mettre à jour le localStorage avec la nouvelle photo
+            const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+              try {
+                const storedUserData = JSON.parse(storedUser);
+                storedUserData.profilePic = photoResponse.data.profilePic;
+                localStorage.setItem("user", JSON.stringify(storedUserData));
+                console.log("Updated profile picture in localStorage");
+              } catch (err) {
+                console.error("Error updating profile picture in localStorage:", err);
+              }
+            }
+          } catch (photoErr) {
+            console.error("Error uploading profile picture:", photoErr);
+            toast.error("Profile updated but failed to upload profile picture");
+          }
+        }
+
+        toast.success("Profile updated successfully!");
+
+        // Naviguer vers la page de profil avec l'ID de l'utilisateur
+        setTimeout(() => {
+          if (user && user.id) {
+            navigate(`/ProfilePage/${user.id}`);
+          } else {
+            // Si l'ID n'est pas disponible, essayer de récupérer l'utilisateur depuis le localStorage
+            const storedUser = localStorage.getItem("user");
+            if (storedUser) {
+              try {
+                const userData = JSON.parse(storedUser);
+                if (userData && userData.id) {
+                  navigate(`/ProfilePage/${userData.id}`);
+                  return;
+                }
+              } catch (err) {
+                console.error("Error parsing user data from localStorage:", err);
+              }
+            }
+            // Si tout échoue, naviguer vers la page d'accueil
+            navigate("/");
+          }
+        }, 1500);
+      } catch (updateErr) {
+        console.error("Error updating user data:", updateErr);
+        setError(`Update failed: ${updateErr.response?.data?.message || updateErr.message}`);
+        toast.error("Failed to update profile");
       }
-
-      toast.success("Profile updated successfully!");
-      setTimeout(() => navigate(`/ProfilePage/${user.id}`), 1500);
     } catch (err) {
       console.error("Update error:", err);
       setError(`Update failed: ${err.message}`);
@@ -202,7 +486,16 @@ const EditProfilePage = () => {
         }}>
           <Box sx={{ position: 'relative' }}>
             <Avatar
-              src={preview || (user.profilePic ? `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}` : null)}
+              src={preview || (user.profilePic ?
+                (user.profilePic.startsWith('/profile-pics/') ?
+                  `http://localhost:8000/uploads${user.profilePic}` :
+                  (user.profilePic.startsWith('http') ?
+                    user.profilePic :
+                    `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                  )
+                ) :
+                null
+              )}
               sx={{
                 width: 150,
                 height: 150,
@@ -255,12 +548,14 @@ const EditProfilePage = () => {
                 value={form.name || ""}
                 onChange={handleChange}
                 margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Person color="action" />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person color="action" />
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
 
@@ -271,12 +566,14 @@ const EditProfilePage = () => {
                 value={form.email || ""}
                 disabled
                 margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Email color="action" />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email color="action" />
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
 
@@ -287,12 +584,14 @@ const EditProfilePage = () => {
                 value={form.phone || ""}
                 onChange={handleChange}
                 margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Phone color="action" />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Phone color="action" />
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
 
@@ -303,14 +602,34 @@ const EditProfilePage = () => {
                 value={form.location || ""}
                 onChange={handleChange}
                 margin="normal"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LocationOn color="action" />
-                    </InputAdornment>
-                  ),
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LocationOn color="action" />
+                      </InputAdornment>
+                    )
+                  }
                 }}
               />
+
+              <Box sx={{ mt: 3 }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  startIcon={<Lock />}
+                  onClick={handlePasswordDialogOpen}
+                  fullWidth
+                  sx={{
+                    borderRadius: 2,
+                    py: 1,
+                    textTransform: 'none',
+                    fontWeight: 500
+                  }}
+                >
+                  Change Password
+                </Button>
+              </Box>
             </Grid>
 
             {/* About & Skills */}
@@ -324,10 +643,15 @@ const EditProfilePage = () => {
                 label="Role"
                 name="role"
                 fullWidth
-                value={form.role || ""}
+                value={form.role || "Etudiant"}
                 disabled
                 margin="normal"
                 helperText="Contact admin to change role"
+                InputProps={{
+                  sx: {
+                    textTransform: 'capitalize'
+                  }
+                }}
               />
 
               <TextField
@@ -413,6 +737,207 @@ const EditProfilePage = () => {
           </Grid>
         </form>
       </Paper>
+
+      {/* Dialog pour changer le mot de passe */}
+      <Dialog
+        open={passwordDialogOpen}
+        onClose={handlePasswordDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Change Password
+        </DialogTitle>
+
+        <DialogContent>
+          {passwordError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {passwordError}
+            </Alert>
+          )}
+
+          <DialogContentText sx={{ mb: 2 }}>
+            Please enter your current password and a new password to update your account security.
+          </DialogContentText>
+
+          <TextField
+            label="Current Password"
+            name="currentPassword"
+            type={showCurrentPassword ? "text" : "password"}
+            value={passwordForm.currentPassword}
+            onChange={handlePasswordChange}
+            fullWidth
+            margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    edge="end"
+                  >
+                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+
+          <TextField
+            label="New Password"
+            name="newPassword"
+            type={showNewPassword ? "text" : "password"}
+            value={passwordForm.newPassword}
+            onChange={handlePasswordChange}
+            fullWidth
+            margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    edge="end"
+                  >
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+
+          {/* Indicateur de force du mot de passe */}
+          {passwordForm.newPassword && (
+            <Box sx={{ mt: 1, mb: 2 }}>
+              <Typography variant="body2" gutterBottom>
+                Force du mot de passe:
+                <Box component="span"
+                  sx={{
+                    ml: 1,
+                    fontWeight: 'bold',
+                    color: passwordStrength === 'forte'
+                      ? 'success.main'
+                      : passwordStrength === 'moyenne'
+                        ? 'warning.main'
+                        : 'error.main'
+                  }}
+                >
+                  {passwordStrength.toUpperCase()}
+                </Box>
+              </Typography>
+
+              {/* Barre de progression */}
+              <Box sx={{ width: '100%', height: 4, bgcolor: 'grey.200', borderRadius: 1, overflow: 'hidden' }}>
+                <Box
+                  sx={{
+                    height: '100%',
+                    width: passwordStrength === 'forte'
+                      ? '100%'
+                      : passwordStrength === 'moyenne'
+                        ? '60%'
+                        : '30%',
+                    bgcolor: passwordStrength === 'forte'
+                      ? 'success.main'
+                      : passwordStrength === 'moyenne'
+                        ? 'warning.main'
+                        : 'error.main',
+                    transition: 'width 0.3s ease'
+                  }}
+                />
+              </Box>
+
+              {/* Conseils pour un mot de passe fort */}
+              {passwordStrength !== 'forte' && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="subtitle2" gutterBottom color="primary">
+                    Pour un mot de passe fort, incluez:
+                  </Typography>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={passwordForm.newPassword.length >= 8 ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {passwordForm.newPassword.length >= 8 ? '✓' : '○'} Au moins 8 caractères
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/[A-Z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[A-Z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre majuscule
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/[a-z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[a-z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre minuscule
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="body2"
+                        color={/\d/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/\d/.test(passwordForm.newPassword) ? '✓' : '○'} Un chiffre
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="body2"
+                        color={/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                      >
+                        {/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? '✓' : '○'} Un caractère spécial (!@#$%...)
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </Box>
+          )}
+
+          <TextField
+            label="Confirm New Password"
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            value={passwordForm.confirmPassword}
+            onChange={handlePasswordChange}
+            fullWidth
+            margin="normal"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handlePasswordDialogClose}
+            variant="outlined"
+            disabled={changingPassword}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleChangePassword}
+            variant="contained"
+            disabled={changingPassword}
+            startIcon={changingPassword ? <CircularProgress size={20} /> : <Lock />}
+          >
+            {changingPassword ? "Updating..." : "Update Password"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled, useTheme, alpha } from "@mui/material/styles";
 import {
   Box,
   CssBaseline,
@@ -10,10 +10,9 @@ import {
   Divider,
   Menu,
   MenuItem,
+  Button,
   Avatar,
-  Chip,
   Badge,
-  Tooltip,
 } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
@@ -24,30 +23,72 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import EditIcon from "@mui/icons-material/Edit";
+import LogoutIcon from "@mui/icons-material/Logout";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { sideBarData } from "../constants/sideBarData";
 import ScrollToTopButton from "../components/ScrollToTopButton";
+import { Tooltip } from "@mui/material";
+import axios from "axios";
 
-const drawerWidth = 240;
-const closedDrawerWidth = 56; // mini variant width
+const drawerWidth = 260;
+
+const openedMixin = (theme) => ({
+  width: drawerWidth,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: "hidden",
+  boxShadow: theme.shadows[3],
+  backgroundColor: theme.palette.background.default,
+});
+
+const closedMixin = (theme) => ({
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: "hidden",
+  width: `calc(${theme.spacing(9)} + 1px)`,
+  boxShadow: theme.shadows[3],
+  backgroundColor: theme.palette.background.default,
+  [theme.breakpoints.up("sm")]: {
+    width: `calc(${theme.spacing(9)} + 1px)`,
+  },
+});
+
+const DrawerHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: theme.spacing(0, 2),
+  height: "80px",
+  ...theme.mixins.toolbar,
+}));
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: alpha(theme.palette.background.paper, 0.8),
+  backdropFilter: "blur(8px)",
+  color: theme.palette.text.primary,
+  boxShadow: "none",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  background: theme.palette.background.default,
-  color: theme.palette.text.primary,
-  boxShadow: 'none',
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  marginLeft: open ? drawerWidth : closedDrawerWidth,
-  width: `calc(100% - ${open ? drawerWidth : closedDrawerWidth}px)`,
+  ...(open && {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(["width", "margin"], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  }),
 }));
 
 const Drawer = styled(MuiDrawer, {
@@ -59,67 +100,190 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open
     ? {
-        width: drawerWidth,
-        transition: theme.transitions.create("width", {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        overflowX: "hidden",
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          background: theme.palette.background.paper,
-          borderRight: 'none',
-        },
-      }
+      ...openedMixin(theme),
+      "& .MuiDrawer-paper": openedMixin(theme),
+    }
     : {
-        transition: theme.transitions.create("width", {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        overflowX: "hidden",
-        width: closedDrawerWidth,
-        "& .MuiDrawer-paper": {
-          width: closedDrawerWidth,
-          background: theme.palette.background.paper,
-          borderRight: 'none',
-        },
-      }),
+      ...closedMixin(theme),
+      "& .MuiDrawer-paper": closedMixin(theme),
+    }),
 }));
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar,
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 13,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: "0 4px",
+  },
 }));
 
 export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const menuOpen = Boolean(anchorEl);
+
+  // Log user object for debugging and ensure role is set correctly
+  React.useEffect(() => {
+    console.log("User object in Main.js:", user);
+    if (user) {
+      console.log("User ID:", user.id);
+      console.log("User email:", user.email);
+      console.log("User role:", user.role);
+      console.log("User keys:", Object.keys(user));
+
+      // Ensure role is set correctly
+      if (!user.role || user.role === "user") {
+        const updatedUser = { ...user };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        console.log("Updated user role to Etudiant");
+      }
+
+      // Récupérer les données utilisateur à jour, y compris la photo de profil
+      const fetchUserData = async () => {
+        try {
+          if (user.email) {
+            const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+            if (response.data) {
+              // Mettre à jour l'objet utilisateur avec les données à jour
+              const updatedUser = {
+                ...user,
+                profilePic: response.data.profilePic || user.profilePic,
+                name: response.data.name || user.name,
+                role: response.data.role || user.role
+              };
+
+              // Si l'utilisateur est khalil, s'assurer que son rôle est Admin
+              if (updatedUser.email === "khalil@gmail.com" && updatedUser.role !== "Admin") {
+                updatedUser.role = "Admin";
+              }
+
+              setUser(updatedUser);
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+              console.log("Updated user data with profile pic:", updatedUser);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+
+      fetchUserData();
+    }
+  }, [user?.email]);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
-  const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
-
-  const handleVoirProfil = () => {
-    handleMenuClose();
-    user?.id && navigate(`/ProfilePage/${user.id}`);
-  };
-
-  const handleEditProfil = () => {
-    handleMenuClose();
-    user?.email && navigate(`/EditProfile/${user.email}`);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
     navigate("/");
+  };
+
+  // Menu déroulant pour le profil
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleVoirProfil = async () => {
+    handleMenuClose();
+
+    // Afficher l'objet utilisateur complet pour le débogage
+    console.log("Current user object:", user);
+
+    // Récupérer les données utilisateur depuis le localStorage pour le débogage
+    const storedUserStr = localStorage.getItem("user");
+    let storedUser = null;
+
+    if (storedUserStr) {
+      try {
+        storedUser = JSON.parse(storedUserStr);
+        console.log("User from localStorage:", storedUser);
+      } catch (err) {
+        console.error("Error parsing localStorage user:", err);
+      }
+    }
+
+    try {
+      // Si l'utilisateur a un email, essayer de récupérer son ID depuis le backend
+      if (user && user.email) {
+        console.log("Trying to fetch user data from backend for email:", user.email);
+        try {
+          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          if (response.data && response.data.id) {
+            console.log("User data from backend:", response.data);
+
+            // Mettre à jour l'objet utilisateur dans le localStorage et l'état
+            const updatedUser = { ...user, id: response.data.id };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUser(updatedUser);
+
+            console.log("Navigating to profile page with ID from backend:", response.data.id);
+            navigate(`/ProfilePage/${response.data.id}`);
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching user data from backend:", error);
+        }
+      }
+
+      // Si l'utilisateur a un ID dans l'état, l'utiliser
+      if (user && user.id) {
+        console.log("Navigating to profile page with ID from state:", user.id);
+        navigate(`/ProfilePage/${user.id}`);
+        return;
+      }
+
+      // Si l'utilisateur a un ID dans le localStorage, l'utiliser
+      if (storedUser && storedUser.id) {
+        console.log("Navigating to profile page with ID from localStorage:", storedUser.id);
+        navigate(`/ProfilePage/${storedUser.id}`);
+        return;
+      }
+
+      // Si tout échoue, naviguer vers la page de profil sans ID
+      console.log("No valid user ID found, navigating to profile page without ID");
+      navigate("/ProfilePage");
+    } catch (err) {
+      console.error("Error in handleVoirProfil:", err);
+      navigate("/ProfilePage");
+    }
+  };
+
+  const handleEditProfil = () => {
+    handleMenuClose();
+    if (user && user.email) {
+      console.log("Navigating to edit profile with email:", user.email);
+      // Assurez-vous que la route correspond exactement à celle définie dans App.js
+      navigate(`/EditProfile/${user.email}`);
+    } else {
+      console.error("User email not available for edit profile navigation");
+      // Récupérer l'email depuis le localStorage comme solution de secours
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          if (userData && userData.email) {
+            console.log("Using email from localStorage:", userData.email);
+            navigate(`/EditProfile/${userData.email}`);
+            return;
+          }
+        } catch (err) {
+          console.error("Error parsing user data from localStorage:", err);
+        }
+      }
+      // Si tout échoue, naviguer vers la page d'accueil
+      navigate("/");
+    }
   };
 
   return (
@@ -130,132 +294,158 @@ export default function Main({ setUser, user }) {
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               color="inherit"
+              aria-label="open drawer"
               onClick={handleDrawerOpen}
               edge="start"
               sx={{
-                mr: 2,
+                marginRight: 2,
                 ...(open && { display: "none" }),
-                color: theme.palette.primary.main,
               }}
             >
               <MenuIcon />
             </IconButton>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              sx={{
-                fontWeight: 700,
-                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
+            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
               Master Knowledge Academy
             </Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Badge
-              overlap="circular"
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              badgeContent={
-                <Box sx={{
-                  width: 12,
-                  height: 12,
-                  bgcolor: theme.palette.success.main,
-                  borderRadius: '30%',
-                  border: `2px solid ${theme.palette.background.paper}`
-                }} />
-              }
-            >
-              <Avatar
-                src={user?.profilePic ? `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}` : null}
-                sx={{ width: 40, height: 40 }}
-              >
-                {user?.name?.charAt(0) || user?.email?.charAt(0) || "U"}
-              </Avatar>
-            </Badge>
-
-            <Box sx={{ display: "flex", flexDirection: "column" }}>
-              <Typography variant="subtitle2" noWrap sx={{ fontWeight: 100 }}>
-                {user?.email}
-              </Typography>
-              <Chip
-                label={user?.role}
-                size="small"
-                color="primary"
-                sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
-                  textTransform: 'capitalize'
-                }}
-              />
-            </Box>
-
-            <IconButton onClick={handleMenuClick} sx={{ color: theme.palette.text.primary }}>
-              <MenuIcon />
+            <IconButton color="inherit">
+              <StyledBadge badgeContent={4} color="error">
+                <NotificationsIcon />
+              </StyledBadge>
             </IconButton>
 
-            <Menu
-              anchorEl={anchorEl}
-              open={menuOpen}
-              onClose={handleMenuClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              slotProps={{
-                paper: {
-                  elevation: 3,
-                  sx: {
-                    borderRadius: 2,
-                    minWidth: 100,
-                    mt: 1.5,
-                    '& .MuiMenuItem-root': {
-                      px: 2,
-                      py: 1,
-                      typography: 'body2',
-                    },
+            <Typography variant="body1" noWrap>
+              {user && user.email ? user.email : "User"} |
+              <span style={{ textTransform: 'capitalize' }}>
+                {user && user.role  }
+              </span>
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconButton
+                onClick={handleMenuClick}
+                size="small"
+                sx={{ p: 0 }}
+              >
+                <Avatar
+                  alt={user?.name || user?.email || "User"}
+                  src={user?.profilePic ?
+                    (user.profilePic.startsWith('/profile-pics/') ?
+                      `http://localhost:8000/uploads${user.profilePic}` :
+                      (user.profilePic.startsWith('http') ?
+                        user.profilePic :
+                        `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                      )
+                    ) :
+                    null
                   }
-                }
-              }}
-            >
-              <MenuItem onClick={handleVoirProfil}>
-                <ListItemIcon><AccountCircleIcon fontSize="small" /></ListItemIcon>
-                View Profile
-              </MenuItem>
-              <MenuItem onClick={handleEditProfil}>
-                <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
-                Edit Profile
-              </MenuItem>
-              <Divider />
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    bgcolor: 'primary.main' // Couleur de fond pour l'avatar par défaut
+                  }}
+                >
+                  {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                </Avatar>
+              </IconButton>
+              {open && (
+                <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                  {user?.email}
+                </Typography>
+              )}
+
+              <Menu
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{
+                  paper: {
+                    elevation: 0,
+                    sx: {
+                      overflow: "visible",
+                      filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                      mt: 1.5,
+                      "& .MuiAvatar-root": {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      "&:before": {
+                        content: '""',
+                        display: "block",
+                        position: "absolute",
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: "background.paper",
+                        transform: "translateY(-50%) rotate(45deg)",
+                        zIndex: 0,
+                      },
+                    }
+                  }
+                }}
+              >
+                <MenuItem onClick={handleVoirProfil}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  View Profile
+                </MenuItem>
+                <MenuItem onClick={handleEditProfil}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  Edit Profile
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>
 
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
+          <Typography variant="h6" sx={{ fontWeight: 700, opacity: open ? 1 : 0 }}>
+            MENU
+          </Typography>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
         <Divider />
+
         <List sx={{ px: 1 }}>
-          {sideBarData.map((item, index) => (
-            <Tooltip title={!open ? item.text : ''} placement="right" key={index} arrow>
-              <ListItem disablePadding sx={{ display: "block", mb: 0.5, borderRadius: 2 }}>
-                <Link to={item.path} style={{ textDecoration: 'none', color: 'inherit' }}>
+          {sideBarData.map((elem, index) => {
+            const item = (
+              <Link to={elem.path} key={index} style={{ all: "unset" }}>
+                <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
                   <ListItemButton
                     sx={{
                       minHeight: 48,
                       justifyContent: open ? "initial" : "center",
                       px: 2.5,
                       borderRadius: 2,
-                      '&:hover': { backgroundColor: theme.palette.action.hover },
+                      "&:hover": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                        "&:hover": {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.25),
+                        },
+                      },
                     }}
                   >
                     <ListItemIcon
@@ -263,26 +453,31 @@ export default function Main({ setUser, user }) {
                         minWidth: 0,
                         mr: open ? 3 : "auto",
                         justifyContent: "center",
-                        color: theme.palette.text.secondary,
+                        color: theme.palette.primary.main,
                       }}
                     >
-                      {item.icon}
+                      {elem.icon}
                     </ListItemIcon>
                     <ListItemText
-                      primary={item.text}
+                      primary={elem.text}
                       sx={{
                         opacity: open ? 1 : 0,
                         '& .MuiTypography-root': {
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
+                          fontWeight: 500
                         }
                       }}
                     />
                   </ListItemButton>
-                </Link>
-              </ListItem>
-            </Tooltip>
-          ))}
+                </ListItem>
+              </Link>
+            );
+
+            return open ? item : (
+              <Tooltip title={elem.text} placement="right" key={index}>
+                {item}
+              </Tooltip>
+            );
+          })}
         </List>
       </Drawer>
 
@@ -291,29 +486,23 @@ export default function Main({ setUser, user }) {
         sx={{
           flexGrow: 1,
           p: 3,
-          transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-          marginLeft: open ? `${drawerWidth}px` : `${closedDrawerWidth}px`,
-          bgcolor: theme.palette.background.default,
-          minHeight: '60vh'
+          backgroundColor: theme.palette.grey[50],
+          minHeight: "100vh",
         }}
       >
         <DrawerHeader />
         <Box
           sx={{
-            borderRadius: 4,
-            bgcolor: theme.palette.background.paper,
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 2,
             boxShadow: theme.shadows[1],
             p: 3,
-            minHeight: 'calc(100vh - 64px - 32px)'
           }}
         >
           <Outlet />
         </Box>
         <ScrollToTopButton />
       </Box>
-    </Box>
+    </Box >
   );
 }

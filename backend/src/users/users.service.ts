@@ -100,7 +100,11 @@ export class UsersService {
         phone: updateUserDto.phone,
         location: updateUserDto.location,
         about: updateUserDto.about,
-        skills: updateUserDto.skills,
+        skills: Array.isArray(updateUserDto.skills)
+          ? updateUserDto.skills
+          : (typeof updateUserDto.skills === 'string'
+            ? [updateUserDto.skills]
+            : undefined),
         profilePic: updateUserDto.profilePic,
       },
       select: {
@@ -167,11 +171,33 @@ export class UsersService {
 
   async updateByEmail(email: string, updateUserDto: UpdateUserDto) {
     try {
-      if (updateUserDto.skills && typeof updateUserDto.skills === 'string') {
-        try {
-          updateUserDto.skills = JSON.parse(updateUserDto.skills as unknown as string);
-        } catch (e) {
-          console.error('Failed to parse skills:', e);
+      console.log("Mise à jour de l'utilisateur avec email:", email);
+      console.log("Données reçues:", updateUserDto);
+
+      // Parse skills from string if needed
+      if (updateUserDto.skills) {
+        console.log("Skills avant traitement:", updateUserDto.skills);
+        console.log("Type de skills:", typeof updateUserDto.skills);
+
+        if (typeof updateUserDto.skills === 'string') {
+          try {
+            // Si c'est une chaîne JSON, essayer de la parser
+            if (updateUserDto.skills.startsWith('[') && updateUserDto.skills.endsWith(']')) {
+              updateUserDto.skills = JSON.parse(updateUserDto.skills as unknown as string);
+              console.log("Skills après parsing JSON:", updateUserDto.skills);
+            } else {
+              // Si c'est une chaîne simple, la convertir en tableau avec un seul élément
+              updateUserDto.skills = [updateUserDto.skills];
+              console.log("Skills convertis en tableau:", updateUserDto.skills);
+            }
+          } catch (e) {
+            console.error('Failed to parse skills:', e);
+            updateUserDto.skills = [];
+          }
+        } else if (Array.isArray(updateUserDto.skills)) {
+          console.log("Skills est déjà un tableau:", updateUserDto.skills);
+        } else {
+          console.error("Format de skills non reconnu, conversion en tableau vide");
           updateUserDto.skills = [];
         }
       }
