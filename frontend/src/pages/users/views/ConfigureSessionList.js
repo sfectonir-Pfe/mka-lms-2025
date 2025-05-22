@@ -1,25 +1,27 @@
+// ✅ Redesigned ConfigureSessionList.jsx with modern card layout and full image support
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
   Button,
+  Grid,
   Paper,
-  Divider,
+  IconButton,
+  Chip,
   List,
   ListItem,
-  Grid,
   Stack,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
+  Divider
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import Chip from '@mui/material/Chip';
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ConfigureSessionList = () => {
   const navigate = useNavigate();
@@ -62,71 +64,94 @@ const ConfigureSessionList = () => {
   };
 
   return (
-    <Box mt={4} p={3} maxWidth="1000px" mx="auto">
-      <Typography variant="h4" gutterBottom align="center">
-        📆 Sessions configurées
+    <Box mt={4} p={3} maxWidth="1200px" mx="auto">
+      <Typography variant="h4" align="center" gutterBottom>
+        📅 Sessions configurées
       </Typography>
 
-      {sessions.length === 0 ? (
-        <Typography color="text.secondary" align="center">
-          Aucune session configurée.
-        </Typography>
-      ) : (
-        <Grid container spacing={3}>
-          {sessions.map((s) => (
-            <Grid item xs={12} md={6} key={s.id}>
-              <Paper elevation={3} sx={{ p: 3, borderRadius: 3, position: 'relative' }}>
-                <Box display="flex" alignItems="center" mb={1}>
-                  <img
-  src={`http://localhost:8000/${s.imageUrl || 'uploads/session-default.png'}`}
+      <Grid container spacing={4}>
+        {sessions.map((s) => (
+          <Grid item xs={12} md={6} lg={4} key={s.id}>
+           <Paper
+  elevation={3}
+  sx={{
+    borderRadius: 4,
+    overflow: 'hidden',
+    boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
+    transition: '0.3s',
+    '&:hover': {
+      boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+      transform: 'translateY(-4px)',
+    },
+  }}
+>
+  <Box sx={{ position: 'relative' }}>
+    <img
+  src={s.imageUrl ?? "http://localhost:8000/uploads/sessions/default.png"}
   alt="Session"
-  width={50}
-  height={50}
-  style={{ marginRight: '12px', borderRadius: '8px', objectFit: 'cover' }}
+  style={{ width: '100%', height: '180px', objectFit: 'cover', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = "http://localhost:8000/uploads/sessions/default.png";
+  }}
 />
 
+    <Chip
+      label={s.program.name}
+      color="primary"
+      size="small"
+      sx={{
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        bgcolor: '#1976d2',
+        color: 'white',
+        fontWeight: 'bold',
+        boxShadow: 1,
+      }}
+    />
+  </Box>
 
-                  <Typography variant="h6">{s.program.name}</Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  🗓️ Du <strong>{new Date(s.startDate).toLocaleDateString()}</strong> au <strong>{new Date(s.endDate).toLocaleDateString()}</strong>
-                </Typography>
-                <Divider sx={{ my: 2 }} />
+  <Box p={2}>
+    <Typography variant="h6" fontWeight="bold" gutterBottom noWrap>
+      Session: {s.program.name}
+    </Typography>
+    <Typography variant="body2" color="text.secondary" gutterBottom>
+      📆 {new Date(s.startDate).toLocaleDateString()} ➜ {new Date(s.endDate).toLocaleDateString()}
+    </Typography>
 
-                <Typography variant="subtitle2" gutterBottom>Modules & Cours:</Typography>
-                <List dense>
-                  {s.modules.map((m) => (
-                    <ListItem key={m.id} alignItems="flex-start">
-                      <Box>
-                        <Typography fontWeight="bold">📦 {m.module.name}</Typography>
-                        <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
-                          {(m.courses || []).map(c => (
-                            <Chip key={c.id} label={`📘 ${c.course.title}`} size="small" />
-                          ))}
-                        </Stack>
-                      </Box>
-                    </ListItem>
-                  ))}
-                </List>
+    <Typography variant="subtitle2" mt={2}>Modules & Cours:</Typography>
+    <List dense>
+      {s.modules.map((m) => (
+        <ListItem key={m.id} sx={{ display: 'block', py: 0.5 }}>
+          <Typography fontWeight="bold">📦 {m.module.name}</Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" mt={0.5}>
+            {(m.courses || []).map(c => (
+              <Chip key={c.id} label={`📘 ${c.course.title}`} size="small" />
+            ))}
+          </Stack>
+        </ListItem>
+      ))}
+    </List>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => handleViewDetails(s)}
-                  >
-                    Détail
-                  </Button>
-                  <IconButton color="error" onClick={() => handleDelete(s.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      )}
+    <Box mt={2} display="flex" justifyContent="space-between">
+      <Button
+        variant="outlined"
+        size="small"
+        startIcon={<VisibilityIcon />}
+        onClick={() => handleViewDetails(s)}
+      >
+        Détail
+      </Button>
+      <IconButton color="error" onClick={() => handleDelete(s.id)}>
+        <DeleteIcon />
+      </IconButton>
+    </Box>
+  </Box>
+</Paper>
+          </Grid>
+        ))}
+      </Grid>
 
       <Box textAlign="center" mt={4}>
         <Button
@@ -162,7 +187,6 @@ const ConfigureSessionList = () => {
                             href={ct.contenu.fileUrl}
                             target="_blank"
                             rel="noreferrer"
-                            style={{ textDecoration: "none" }}
                           >
                             <Chip
                               label={`📄 ${ct.contenu.title}`}

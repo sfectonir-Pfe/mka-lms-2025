@@ -23,24 +23,33 @@ const AddContenusView = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !file) return alert("Titre et fichier obligatoires.");
+    if (!title) return alert("Le titre est obligatoire.");
+    if (type !== "Quiz" && !file) return alert("Veuillez choisir un fichier.");
 
     const formData = new FormData();
     formData.append("title", title);
     formData.append("type", type);
-    formData.append("fileType", fileType);
-    formData.append("file", file);
 
-    // Important: backend expects courseIds as JSON array
+    if (type !== "Quiz") {
+      formData.append("file", file);
+      formData.append("fileType", fileType);
+    }
+
     if (courseId) {
       formData.append("courseIds", JSON.stringify([parseInt(courseId)]));
     }
 
     try {
-      await axios.post("http://localhost:8000/contenus/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },//images, PDF, vidéos.
+      const res = await axios.post("http://localhost:8000/contenus/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      navigate("/contenus");
+
+      const newContenu = res.data;
+      if (type === "Quiz") {
+        navigate(`/quizzes/create/${newContenu.id}`);
+      } else {
+        navigate("/contenus");
+      }
     } catch (err) {
       console.error("❌ Erreur ajout contenu :", err);
       alert("Erreur lors de l'enregistrement.");
@@ -81,34 +90,45 @@ const AddContenusView = () => {
           <MenuItem value="Exercice">Exercice</MenuItem>
           <MenuItem value="Quiz">Quiz</MenuItem>
         </TextField>
-        <TextField
-          select
-          fullWidth
-          label="Type de fichier"
-          value={fileType}
-          onChange={(e) => setFileType(e.target.value)}
-          margin="normal"
-        >
-          <MenuItem value="PDF">PDF</MenuItem>
-          <MenuItem value="IMAGE">Image</MenuItem>
-          <MenuItem value="VIDEO">Vidéo</MenuItem>
-        </TextField>
 
-        <input
-          type="file"
-          accept={
-            fileType === "PDF"
-              ? ".pdf"
-              : fileType === "IMAGE"
-              ? "image/*"
-              : "video/*"
-          }
-          onChange={handleFileChange}
-          style={{ marginTop: "16px" }}
-          required
-        />
+        {type !== "Quiz" && (
+          <>
+            <TextField
+              select
+              fullWidth
+              label="Type de fichier"
+              value={fileType}
+              onChange={(e) => setFileType(e.target.value)}
+              margin="normal"
+            >
+              <MenuItem value="PDF">PDF</MenuItem>
+              <MenuItem value="IMAGE">Image</MenuItem>
+              <MenuItem value="VIDEO">Vidéo</MenuItem>
+            </TextField>
 
-        <Box mt={2}>
+            <input
+              type="file"
+              accept={
+                fileType === "PDF"
+                  ? ".pdf"
+                  : fileType === "IMAGE"
+                  ? "image/*"
+                  : "video/*"
+              }
+              onChange={handleFileChange}
+              style={{ marginTop: "16px" }}
+              required
+            />
+          </>
+        )}
+
+        {type === "Quiz" && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Le fichier n'est pas nécessaire. Vous pourrez créer le quiz après avoir enregistré.
+          </Typography>
+        )}
+
+        <Box mt={3}>
           <Button type="submit" variant="contained" fullWidth>
             Enregistrer
           </Button>

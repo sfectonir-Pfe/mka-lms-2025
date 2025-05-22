@@ -17,8 +17,13 @@ const ContenusList = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Supprimer ce contenu ?")) return;
-    await axios.delete(`http://localhost:8000/contenus/${id}`);
-    setContenus((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await axios.delete(`http://localhost:8000/contenus/${id}`);
+      setContenus((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+      console.error(err);
+    }
   };
 
   const columns = [
@@ -34,16 +39,47 @@ const ContenusList = () => {
       field: "fileUrl",
       headerName: "Lien",
       flex: 1,
-      renderCell: (params) => (
-        <a href={params.row.fileUrl} target="_blank" rel="noreferrer">Voir</a>
-      ),
+      renderCell: (params) => {
+        const isQuiz = params.row.type === "Quiz";
+        if (isQuiz) {
+          return (
+            <Button
+              variant="outlined"
+              size="small"
+              color="primary"
+              onClick={() => navigate(`/quizzes/play/${params.row.id}`)}
+            >
+              Prendre le quiz
+            </Button>
+          );
+        } else {
+          return params.row.fileUrl ? (
+            <a
+              href={params.row.fileUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Voir
+            </a>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Aucun fichier
+            </Typography>
+          );
+        }
+      },
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
       renderCell: (params) => (
-        <Button variant="outlined" color="error" size="small" onClick={() => handleDelete(params.row.id)}>
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={() => handleDelete(params.row.id)}
+        >
           Supprimer
         </Button>
       ),
@@ -59,8 +95,14 @@ const ContenusList = () => {
         </Button>
       </Grid>
 
-      <Box sx={{ height: 400 }}>
-        <DataGrid rows={contenus} columns={columns} pageSize={5} rowsPerPageOptions={[5]} getRowId={(row) => row.id} />
+      <Box sx={{ height: 500 }}>
+        <DataGrid
+          rows={contenus}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5, 10, 100]}
+          getRowId={(row) => row.id}
+        />
       </Box>
     </Box>
   );
