@@ -36,11 +36,14 @@ import AddModuleView from "./pages/users/views/AddModuleView";
 import CoursesPage from "./pages/CoursesPage";
 import ContenusPage from "./pages/ContenusPage";
 
-import ConfigureSessionPage from "./pages/ConfigureSessionPage";
-import SessionsOverviewPage from "./pages/SessionsOverviewPage";
+
 
 import AddQuizForm from "./pages/users/views/AddQuizForm";
 import PlayQuizPage from "./pages/users/views/PlayQuizPage";
+
+import BuildProgramView from "./pages/users/views/BuildProgramView";
+import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
+
 
 
 
@@ -64,6 +67,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaRegMoon } from "react-icons/fa";
 import { GoSun } from "react-icons/go";
 
+
 function App() {
   const [user, setUser] = useState(null);
   const [mode, setMode] = useState("light");
@@ -72,9 +76,31 @@ function App() {
   useEffect(() => {
     const auxUser = localStorage.getItem("user");
     if (auxUser) {
-      setUser(JSON.parse(auxUser));
+      try {
+        const userData = JSON.parse(auxUser);
+        console.log("User data from localStorage:", userData);
+
+        // Ensure role is set correctly
+        if (!userData.role || userData.role === "user") {
+          userData.role = "Etudiant";
+        }
+
+        // Specifically for khalil, update role to Admin
+        if (userData.email === "khalil@gmail.com" && userData.role !== "Admin") {
+          userData.role = "Admin";
+          console.log("Updated khalil's role to Admin in App.js");
+          // Update localStorage with the corrected role
+          localStorage.setItem("user", JSON.stringify(userData));
+        }
+
+        setUser(userData);
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+      }
+      setLoading(false);
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const handleMode = () => {
@@ -118,11 +144,16 @@ function App() {
 
                 <Route path="courses/*" element={<CoursesPage />} />
                 <Route path="contenus/*" element={<ContenusPage />} />
-                <Route path="/sessions/*" element={<ConfigureSessionPage />} />
-                <Route path="/sessions/overview" element={<SessionsOverviewPage />} />
+                
+                <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
 
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+
+                <Route path="/programs/build/:programId" element={<BuildProgramView />} />
+
+
+
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
@@ -133,6 +164,9 @@ function App() {
                 <Route path="/student" element={<StudentLandingPage />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+                <Route path="/EditProfile" element={<EditProfilePage />} />
+                <Route path="/ProfilePage" element={<ProfilePage />} />
+
 
 
               </Route>

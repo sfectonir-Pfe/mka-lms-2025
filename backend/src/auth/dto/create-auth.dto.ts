@@ -1,20 +1,62 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-export class CreateAuthDto {}
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class LoginDto{
+export class CreateAuthDto { }
+
+export class LoginDto {
     @ApiProperty()
-    email:string
+    @IsEmail({}, { message: 'Email invalide' })
+    @IsNotEmpty({ message: 'Email requis' })
+    email: string;
+
     @ApiProperty()
-    password:string
+    @IsNotEmpty({ message: 'Mot de passe requis' })
+    password: string;
 }
-export class RegisterDto{
+
+export class RegisterDto {
     @ApiProperty()
-    email:string
+    @IsEmail({}, { message: 'Email invalide' })
+    @IsNotEmpty({ message: 'Email requis' })
+    email: string;
+
     @ApiProperty()
-    password:string
+    @IsNotEmpty({ message: 'Mot de passe requis' })
+    @MinLength(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' })
+    password: string;
+
     @ApiProperty()
-    role:Role
+    @IsNotEmpty({ message: 'Rôle requis' })
+    role: Role;
+
     @ApiProperty({ required: false })
-    name?:string
+    name?: string;
+}
+
+export class ChangePasswordDto {
+    @ApiProperty()
+    @IsEmail({}, { message: 'Email invalide' })
+    @IsNotEmpty({ message: 'Email requis' })
+    email: string;
+
+    @ApiProperty()
+    @IsNotEmpty({ message: 'Mot de passe actuel requis' })
+    currentPassword: string;
+
+    @ApiProperty()
+    @IsNotEmpty({ message: 'Nouveau mot de passe requis' })
+    @MinLength(6, { message: 'Le nouveau mot de passe doit contenir au moins 6 caractères' })
+    newPassword: string;
+
+}
+export class ResetPassword {
+    @ApiProperty()
+    token: string
+      @ApiProperty()
+    newPass: string
+      @ApiProperty()
+    confirmPass: string
+
+
 }

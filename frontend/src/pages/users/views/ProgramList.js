@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import VisibilityIcon from "@mui/icons-material/Visibility";
 const ProgramList = () => {
   const [programs, setPrograms] = useState([]);
   const navigate = useNavigate();
@@ -66,11 +66,26 @@ const ProgramList = () => {
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Liste des programmes</Typography>
-        <Button variant="contained" onClick={() => navigate("/programs/add")}>
-          ➕ Ajouter un programme
-        </Button>
-      </Grid>
+  <Typography variant="h5">Liste des programmes</Typography>
+
+  <Box>
+    <Button
+      variant="contained"
+      onClick={() => navigate("/programs/add")}
+      sx={{ mr: 2 }}
+    >
+      ➕ Ajouter un programme
+    </Button>
+    <Button
+      variant="outlined"
+      startIcon={<VisibilityIcon />}
+      onClick={() => navigate("/programs/overview")}
+    >
+      Voir Programmes
+    </Button>
+  </Box>
+</Grid>
+
 
       <Box sx={{ height: 400 }}>
         <DataGrid

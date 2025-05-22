@@ -19,13 +19,19 @@ const storage = diskStorage({
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 @Post()
-  @UseInterceptors(FileInterceptor('image', { storage }))
-  async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
-    return this.sessionsService.create({
-      ...body,
-      imageUrl: file ? `http://localhost:8000/uploads/sessions/${file.filename}` : null,
-    });
-  }
+@UseInterceptors(FileInterceptor('image', { storage }))
+async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
+  const { startDate, endDate, level, ...rest } = body;
+
+  return this.sessionsService.create({
+    ...rest,
+    level: level || "Basique",
+    startDate: startDate || null,
+    endDate: endDate || null,
+    imageUrl: file ? `http://localhost:8000/uploads/sessions/${file.filename}` : null,
+  });
+}
+
  
 
   @Get()

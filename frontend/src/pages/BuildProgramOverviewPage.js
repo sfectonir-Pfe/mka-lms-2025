@@ -1,25 +1,12 @@
+// ✅ Renamed and cleaned version of SessionsOverviewPage → BuildProgramOverviewPage
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  Container,
-  Typography,
-  Divider,
-  Box,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Collapse,
-  TextField,
-  Badge,
-  Stack,
-  Chip,
+  Container, Typography, Divider, Box, Paper, List, ListItem, ListItemText,
+  IconButton, Collapse, TextField, Badge, Stack, Chip
 } from "@mui/material";
-import {
-  ExpandLess,
-  ExpandMore,
-} from "@mui/icons-material";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
 const Section = ({ title, items, renderItem, expanded, onToggle }) => (
@@ -32,7 +19,6 @@ const Section = ({ title, items, renderItem, expanded, onToggle }) => (
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </IconButton>
     </Box>
-
     <Collapse in={expanded}>
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -51,7 +37,7 @@ const Section = ({ title, items, renderItem, expanded, onToggle }) => (
   </Box>
 );
 
-export default function SessionsOverviewPage() {
+export default function BuildProgramOverviewPage() {
   const [sessions, setSessions] = useState([]);
   const [search, setSearch] = useState("");
   const [showSessions, setShowSessions] = useState(true);
@@ -63,7 +49,7 @@ export default function SessionsOverviewPage() {
   const fetchSessions = () => {
     axios.get("http://localhost:8000/sessions")
       .then((res) => setSessions(res.data))
-      .catch(() => toast.error("Erreur chargement sessions."));
+      .catch(() => toast.error("Erreur chargement des programmes."));
   };
 
   const filterBySearch = (s) =>
@@ -72,13 +58,13 @@ export default function SessionsOverviewPage() {
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        🎓 Vue d'ensemble des sessions
+        🎓 Vue d'ensemble des programmes configurés
       </Typography>
       <Divider sx={{ mb: 2 }} />
 
       <TextField
         fullWidth
-        label="Rechercher une session par programme"
+        label="Rechercher un programme par nom"
         variant="outlined"
         size="small"
         value={search}
@@ -87,17 +73,16 @@ export default function SessionsOverviewPage() {
       />
 
       <Section
-        title="Sessions"
+        title="Programmes"
         items={sessions.filter(filterBySearch)}
         expanded={showSessions}
         onToggle={() => setShowSessions((prev) => !prev)}
         renderItem={(session) => (
           <Box component={Paper} elevation={1} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
-            {/* Optional Image Preview */}
             {session.imageUrl && (
               <img
                 src={session.imageUrl}
-                alt="session"
+                alt="program preview"
                 style={{
                   width: "100%",
                   height: "160px",
@@ -111,16 +96,13 @@ export default function SessionsOverviewPage() {
                 }}
               />
             )}
-
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               📘 Programme : {session.program.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               📅 Du {new Date(session.startDate).toLocaleDateString()} au {new Date(session.endDate).toLocaleDateString()}
             </Typography>
-
             <Divider sx={{ my: 1 }} />
-
             {session.modules.map((m) => (
               <Box key={m.id} mb={2}>
                 <Typography fontWeight="bold" color="primary.main">📦 {m.module.name}</Typography>

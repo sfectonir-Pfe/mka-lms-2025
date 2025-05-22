@@ -195,4 +195,48 @@ export class AuthService {
 
     return { message: 'Password reset successful' };
   }
+
+  async changePassword(email: string, currentPassword: string, newPassword: string) {
+    // Validation des entrées
+    if (!email || !currentPassword || !newPassword) {
+      throw new HttpException('All fields are required', HttpStatus.BAD_REQUEST);
+    }
+
+    if (newPassword.length < 6) {
+      throw new HttpException('New password must be at least 6 characters long', HttpStatus.BAD_REQUEST);
+    }
+
+    // Recherche de l'utilisateur
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Vérifier que le mot de passe actuel est correct
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new HttpException('Current password is incorrect', HttpStatus.BAD_REQUEST);
+    }
+
+    // Vérifier que le nouveau mot de passe est différent de l'ancien
+    if (currentPassword === newPassword) {
+      throw new HttpException('New password must be different from current password', HttpStatus.BAD_REQUEST);
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Mettre à jour le mot de passe
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return { message: 'Password changed successfully' };
+  }
 }
