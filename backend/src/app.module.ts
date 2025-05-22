@@ -10,9 +10,10 @@ import { CoursesModule } from './courses/courses.module';
 import { MailModule } from './mail/mail.module';
 import { ContenuModule } from './contenu/contenu.module';
 import { SessionModule } from './session/session.module';
+import { QuizModule } from './quiz/quiz.module';
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule,],
+imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule,],
 
   controllers: [AppController],
   providers: [AppService],

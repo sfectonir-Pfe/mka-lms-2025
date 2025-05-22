@@ -20,7 +20,6 @@ import {
   ExpandLess,
   ExpandMore,
 } from "@mui/icons-material";
-
 import { toast } from "react-toastify";
 
 const Section = ({ title, items, renderItem, expanded, onToggle }) => (
@@ -43,9 +42,7 @@ const Section = ({ title, items, renderItem, expanded, onToggle }) => (
         <List dense>
           {items.map((item) => (
             <ListItem key={item.id} alignItems="flex-start">
-              <ListItemText
-                primary={renderItem(item)}
-                />
+              <ListItemText primary={renderItem(item)} />
             </ListItem>
           ))}
         </List>
@@ -58,7 +55,6 @@ export default function SessionsOverviewPage() {
   const [sessions, setSessions] = useState([]);
   const [search, setSearch] = useState("");
   const [showSessions, setShowSessions] = useState(true);
-
 
   useEffect(() => {
     fetchSessions();
@@ -96,34 +92,58 @@ export default function SessionsOverviewPage() {
         expanded={showSessions}
         onToggle={() => setShowSessions((prev) => !prev)}
         renderItem={(session) => (
-          <Box>
-            <Typography variant="subtitle1">{session.program.name}</Typography>
-            <Typography variant="caption" color="text.secondary">
-              Du {new Date(session.startDate).toLocaleDateString()} au {new Date(session.endDate).toLocaleDateString()}
+          <Box component={Paper} elevation={1} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+            {/* Optional Image Preview */}
+            {session.imageUrl && (
+              <img
+                src={session.imageUrl}
+                alt="session"
+                style={{
+                  width: "100%",
+                  height: "160px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                  marginBottom: "12px"
+                }}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "http://localhost:8000/uploads/sessions/default.png";
+                }}
+              />
+            )}
+
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+              📘 Programme : {session.program.name}
             </Typography>
-            <Box mt={1}>
-              {session.modules.map((m) => (
-                <Box key={m.id} mb={1}>
-                  <Typography fontWeight="bold">📦 {m.module.name}</Typography>
-                  {(m.courses || []).map((c) => (
-                    <Box key={c.id} ml={2} mt={1}>
-                      <Typography variant="body2">📘 {c.course.title}</Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
-                        {(c.contenus || []).map((ct) => (
-                          <Chip
-                            key={ct.id}
-                            label={`📄 ${ct.contenu.title}`}
-                            size="small"
-                            onClick={() => window.open(ct.contenu.fileUrl, "_blank")}
-                            sx={{ cursor: "pointer" }}
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  ))}
-                </Box>
-              ))}
-            </Box>
+            <Typography variant="body2" color="text.secondary">
+              📅 Du {new Date(session.startDate).toLocaleDateString()} au {new Date(session.endDate).toLocaleDateString()}
+            </Typography>
+
+            <Divider sx={{ my: 1 }} />
+
+            {session.modules.map((m) => (
+              <Box key={m.id} mb={2}>
+                <Typography fontWeight="bold" color="primary.main">📦 {m.module.name}</Typography>
+                {(m.courses || []).map((c) => (
+                  <Box key={c.id} ml={2} mt={1}>
+                    <Typography variant="body2" fontWeight="bold">📘 {c.course.title}</Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" mt={1}>
+                      {(c.contenus || []).map((ct) => (
+                        <Chip
+                          key={ct.id}
+                          label={`📄 ${ct.contenu.title}`}
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                          onClick={() => window.open(ct.contenu.fileUrl, "_blank")}
+                          sx={{ cursor: "pointer" }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                ))}
+              </Box>
+            ))}
           </Box>
         )}
       />

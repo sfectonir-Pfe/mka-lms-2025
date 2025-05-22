@@ -9,11 +9,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ContenusService } from './contenu.service';
-import { CreateContenuDto } from './dto/create-contenu.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-
+import { PrismaService } from 'nestjs-prisma';
 
 const storage = diskStorage({
   destination: './uploads',
@@ -23,10 +22,12 @@ const storage = diskStorage({
   },
 });
 
-
 @Controller('contenus')
 export class ContenusController {
-  constructor(private readonly contenusService: ContenusService) {}
+  constructor(
+    private readonly contenusService: ContenusService,
+    private readonly prisma: PrismaService // ✅ Injected properly
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))
@@ -34,12 +35,25 @@ export class ContenusController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any
   ) {
-    const payload = {
-      ...body,
-      fileUrl: `http://localhost:8000/uploads/${file.filename}`,
-      courseIds: body.courseIds ? JSON.parse(body.courseIds) : [],
-    };
-    return this.contenusService.create(payload);
+    const { title, type, fileType, courseIds } = body;
+
+    const newContenu = await this.prisma.contenu.create({
+      data: {
+        title,
+        type,
+        fileType: file ? fileType : null,
+        fileUrl: file ? `http://localhost:8000/uploads/${file.filename}` : null,
+        courseContenus: {
+          create: courseIds
+            ? JSON.parse(courseIds).map((courseId) => ({
+                course: { connect: { id: courseId } },
+              }))
+            : [],
+        },
+      },
+    });
+
+    return newContenu;
   }
 
   @Get()

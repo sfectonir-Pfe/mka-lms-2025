@@ -70,6 +70,7 @@ model User {
   Admins                Admin[]
   Etablissements        Etablissement[]
   ResetToken            ResetToken[]
+  UserAnswer            UserAnswer[]
 }
 
 model Formateur {
@@ -142,11 +143,12 @@ model Course {
 model Contenu {
   id              Int              @id @default(autoincrement())
   title           String
-  fileUrl         String
-  fileType        FileType
+  fileUrl         String?
+  fileType        FileType?
   type            ContenuType
   courseContenus  CourseContenu[] // NEW many-to-many
   sessionContenus SessionContenu[]
+  quiz            Quiz?
 }
 
 model ProgramModule {
@@ -220,4 +222,51 @@ model SessionContenu {
   contenuId       Int
 
   @@unique([sessionCourseId, contenuId])
+}
+
+model Quiz {
+  id          Int          @id @default(autoincrement())
+  contenu     Contenu      @relation(fields: [contenuId], references: [id],onDelete: Cascade)
+  contenuId   Int          @unique
+  questions   Question[]
+  userAnswers UserAnswer[]
+}
+
+model Question {
+  id      Int      @id @default(autoincrement())
+  text    String
+  quiz    Quiz     @relation(fields: [quizId], references: [id],onDelete: Cascade)
+  quizId  Int
+  choices Choice[]
+  Answer  Answer[]
+}
+
+model Choice {
+  id         Int      @id @default(autoincrement())
+  text       String
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id],onDelete: Cascade)
+  questionId Int
+  Answer     Answer[]
+}
+
+model UserAnswer {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id],onDelete: Cascade)
+  userId      Int
+  quiz        Quiz     @relation(fields: [quizId], references: [id],onDelete: Cascade)
+  quizId      Int
+  score       Int
+  submittedAt DateTime @default(now())
+  answers     Answer[]
+}
+
+model Answer {
+  id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id],onDelete: Cascade)
+  userAnswerId Int
+  question     Question   @relation(fields: [questionId], references: [id],onDelete: Cascade)
+  questionId   Int
+  selected     Choice     @relation(fields: [selectedId], references: [id],onDelete: Cascade)
+  selectedId   Int
 }

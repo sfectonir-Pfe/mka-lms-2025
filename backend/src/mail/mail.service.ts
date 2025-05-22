@@ -25,7 +25,7 @@ export class MailService {
     const mailOptions = {
       from: 'LMS Platform <your-email@gmail.com>',
       to,
-      subject: '🎓 Welcome to the LMS Platform',
+      subject: '🎓 Welcome to MKA Platform',
       html: `
         <h3>Welcome to the LMS!</h3>
         <p>Your account has been created successfully. Here are your login credentials:</p>
