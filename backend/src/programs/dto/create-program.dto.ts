@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class CreateProgramDto {
-  @ApiProperty({ example: 'Web Development Bootcamp' })
+  @IsString()
   name: string;
 }

@@ -9,7 +9,7 @@ import ToastSuccess from "../components/ToastSuccess";
 function ResetPasswordPage() {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();//get token from url and send it tobackend
   const token = searchParams.get('token');
   const navigate = useNavigate();
 

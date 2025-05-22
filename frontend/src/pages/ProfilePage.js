@@ -29,6 +29,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   useEffect(() => {
     const fetchUser = async () => {
       console.log("ProfilePage: Début de fetchUser avec ID:", id);
@@ -227,7 +228,12 @@ const ProfilePage = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={() => navigate(`/EditProfile/${user.email}`)}
+            onClick={() => {
+              // Stocker temporairement l'utilisateur à éditer dans sessionStorage
+              console.log("Storing user data for editing:", user);
+              sessionStorage.setItem("editingUser", JSON.stringify(user));
+              navigate(`/EditProfile/${user.email}`);
+            }}
             sx={{
               borderRadius: 20,
               px: 3,

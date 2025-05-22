@@ -3,41 +3,134 @@ import { PrismaService } from 'nestjs-prisma';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  async create(createUserDto: CreateUserDto) {
-    const hashedPassword = await this.hashPassword(createUserDto.password);
-    return this.prisma.user.create({
-      data: {
-        email: createUserDto.email,
-        password: hashedPassword,
-        role: createUserDto.role,
-        name: createUserDto.name,
-        phone: createUserDto.phone,
-        location: createUserDto.location,
-        about: createUserDto.about,
-        skills: createUserDto.skills ? [createUserDto.skills] : undefined,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        phone: true,
-        location: true,
-        about: true,
-        skills: true,
-        profilePic: true,
-      },
-    });
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   private async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
+  }
+
+  private generateTempPassword(length = 10): string {
+    // Utiliser des caractères plus lisibles pour éviter les confusions (pas de 0/O, 1/l/I, etc.)
+    const upperChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    const lowerChars = 'abcdefghijkmnopqrstuvwxyz';
+    const numbers = '23456789';
+    const specialChars = '@#$%&*!?';
+
+    // S'assurer que le mot de passe contient au moins un caractère de chaque catégorie
+    let password = '';
+    password += upperChars.charAt(Math.floor(Math.random() * upperChars.length));
+    password += lowerChars.charAt(Math.floor(Math.random() * lowerChars.length));
+    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    password += specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+
+    // Compléter le reste du mot de passe
+    const allChars = upperChars + lowerChars + numbers + specialChars;
+    const remainingLength = length - 4;
+
+    for (let i = 0; i < remainingLength; i++) {
+      password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    }
+
+    // Mélanger le mot de passe pour éviter que les premiers caractères soient toujours les mêmes catégories
+    return password.split('').sort(() => 0.5 - Math.random()).join('');
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    try {
+      console.log("Création d'un nouvel utilisateur:", createUserDto);
+
+      // Générer un mot de passe temporaire
+      const tempPassword = this.generateTempPassword();
+      console.log("Mot de passe temporaire généré:", tempPassword);
+
+      // Hasher le mot de passe
+      const hashedPassword = await this.hashPassword(tempPassword);
+
+      // Traiter les compétences (skills)
+      let formattedSkills;
+      if (createUserDto.skills) {
+        console.log("Skills avant traitement:", createUserDto.skills);
+        console.log("Type de skills:", typeof createUserDto.skills);
+
+        if (typeof createUserDto.skills === 'string') {
+          try {
+            // Si c'est une chaîne JSON, essayer de la parser
+            if (createUserDto.skills.startsWith('[') && createUserDto.skills.endsWith(']')) {
+              formattedSkills = JSON.parse(createUserDto.skills);
+              console.log("Skills après parsing JSON:", formattedSkills);
+            } else {
+              // Si c'est une chaîne simple, la convertir en tableau avec un seul élément
+              formattedSkills = [createUserDto.skills];
+              console.log("Skills convertis en tableau:", formattedSkills);
+            }
+          } catch (e) {
+            console.error('Failed to parse skills:', e);
+            formattedSkills = [];
+          }
+        } else if (Array.isArray(createUserDto.skills)) {
+          formattedSkills = createUserDto.skills;
+          console.log("Skills est déjà un tableau:", formattedSkills);
+        } else {
+          console.error("Format de skills non reconnu, conversion en tableau vide");
+          formattedSkills = [];
+        }
+      } else {
+        formattedSkills = [];
+      }
+
+      // Créer l'utilisateur
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: createUserDto.email,
+          password: hashedPassword,
+          role: createUserDto.role,
+          name: createUserDto.name,
+          phone: createUserDto.phone,
+          location: createUserDto.location,
+          about: createUserDto.about,
+          skills: formattedSkills,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          phone: true,
+          location: true,
+          about: true,
+          skills: true,
+          profilePic: true,
+        },
+      });
+
+      console.log("Nouvel utilisateur créé:", newUser);
+
+      // Envoyer l'email de bienvenue avec le mot de passe temporaire
+      try {
+        console.log("Envoi de l'email de bienvenue à:", newUser.email);
+        await this.mailService.sendWelcomeEmail(
+          newUser.email,
+          tempPassword,
+          newUser.role,
+        );
+        console.log("Email de bienvenue envoyé avec succès");
+      } catch (emailError) {
+        console.error("Erreur lors de l'envoi de l'email de bienvenue:", emailError);
+        // Ne pas bloquer la création de l'utilisateur si l'envoi de l'email échoue
+      }
+
+      return newUser;
+    } catch (error) {
+      console.error("Erreur lors de la création de l'utilisateur:", error);
+      throw error;
+    }
   }
 
   async findAll() {
@@ -111,12 +204,8 @@ export class UsersService {
 
   async findById(id: number) {
     try {
-      // Convertir l'ID en nombre
       const numericId = parseInt(String(id), 10);
-
-      if (isNaN(numericId)) {
-        throw new Error('ID invalide');
-      }
+      if (isNaN(numericId)) throw new Error('ID invalide');
 
       return this.prisma.user.findUnique({
         where: { id: numericId },
@@ -188,7 +277,6 @@ export class UsersService {
         }
       }
 
-      // Créer un objet de données
       const updateData: any = {
         name: updateUserDto.name,
         phone: updateUserDto.phone,
@@ -196,19 +284,15 @@ export class UsersService {
         about: updateUserDto.about,
       };
 
-      // Ajouter le champ skills seulement s'il est défini
       if (updateUserDto.skills !== undefined) {
         updateData.skills = updateUserDto.skills;
       }
 
-      // Ajouter le champ profilePic seulement s'il est défini
       if (updateUserDto.profilePic !== undefined) {
         updateData.profilePic = updateUserDto.profilePic;
       }
 
-      console.log("Données à mettre à jour:", updateData);
-
-      const updatedUser = await this.prisma.user.update({
+      return await this.prisma.user.update({
         where: { email },
         data: updateData,
         select: {
@@ -223,9 +307,6 @@ export class UsersService {
           about: true,
         },
       });
-
-      console.log("Utilisateur mis à jour:", updatedUser);
-      return updatedUser;
     } catch (error) {
       console.error("Erreur dans updateByEmail:", error);
       throw error;
@@ -234,10 +315,7 @@ export class UsersService {
 
   async updateProfilePic(id: number, profilePicPath: string) {
     try {
-      console.log("Mise à jour de la photo de profil pour l'utilisateur avec ID:", id);
-      console.log("Chemin de la photo:", profilePicPath);
-
-      const updatedUser = await this.prisma.user.update({
+      return await this.prisma.user.update({
         where: { id },
         data: {
           profilePic: profilePicPath,
@@ -254,9 +332,6 @@ export class UsersService {
           about: true,
         },
       });
-
-      console.log("Photo de profil mise à jour:", updatedUser);
-      return updatedUser;
     } catch (error) {
       console.error("Erreur dans updateProfilePic:", error);
       throw error;

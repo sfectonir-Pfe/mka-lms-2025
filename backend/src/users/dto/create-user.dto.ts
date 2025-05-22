@@ -29,7 +29,6 @@ export class CreateUserDto {
   @IsOptional()
   about?: string;
 
-  @IsString()
   @IsOptional()
-  skills?: string;
+  skills?: string | string[];
 }

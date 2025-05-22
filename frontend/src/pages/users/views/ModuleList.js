@@ -1,74 +1,93 @@
-import React from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const ModuleList = ({ modules, setModules, programId }) => {
+const ModuleList = () => {
+  const [modules, setModules] = useState([]);
   const navigate = useNavigate();
 
-  const handleVoirCours = (id) => {
-    navigate(`/module/cours/${id}`);
+  const fetchModules = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/modules");
+      setModules(res.data);
+    } catch (err) {
+      console.error("Erreur chargement modules", err);
+    }
   };
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm("Voulez-vous vraiment supprimer ce module ?");
-    if (!confirm) return;
-  
-    await axios.delete(`http://localhost:8000/modules/${id}`);
-    setModules((prev) => prev.filter((m) => m.id !== id));
+    if (!window.confirm("Supprimer ce module ?")) return;
+    try {
+      await axios.delete(`http://localhost:8000/modules/${id}`);
+      setModules((prev) => prev.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Erreur suppression", err);
+    }
   };
-  
 
   const columns = [
-    { field: "name", headerName: "Titre", flex: 1 },
-    { field: "startDate", headerName: "Date début", flex: 1 },
-    { field: "endDate", headerName: "Date fin", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: (params) => (
-        <div className="d-flex gap-2">
-          <Button
-            size="small"
-            color="primary"
-            onClick={() => handleVoirCours(params.row.id)}
-          >
-            Voir Cours
-          </Button>
-          <Button
-            size="small"
-            color="error"
-            onClick={() => handleDelete(params.row.id)}
-          >
-            Supprimer
-          </Button>
-        </div>
-      ),
+    { valueGetter: (value) => {
+      
+      return "M-"+value
     },
+     field: "id", headerName: "ID", width: 80 },
+    { field: "name", headerName: "Nom du module", flex: 1 },
+    { field: "periodUnit", headerName: "Période", width: 120 },
+    { field: "duration", headerName: "Durée", width: 100 },
+    {
+  field: "actions",
+  headerName: "Actions",
+  flex: 1,
+  renderCell: (params) => (
+    <>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => navigate(`/modules/${params.row.id}/courses`)}
+        style={{ marginRight: 8 }}
+      >
+        Voir Cours
+      </Button>
+
+      <Button
+        variant="outlined"
+        color="error"
+        size="small"
+        onClick={() => handleDelete(params.row.id)}
+      >
+        Supprimer
+      </Button>
+    </>
+  ),
+}
+
   ];
 
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">Liste des modules</Typography>
-        <Button
-          variant="contained"
-          onClick={() => navigate(`/module/add/${programId}`)}
-        >
-          Ajouter un module
-        </Button>
+        <Typography variant="h5">Liste des modules</Typography>
+        <Button variant="contained" onClick={() => navigate("/module/add")}>
+  ➕ Ajouter un module
+</Button>
+
       </Grid>
 
-      <DataGrid
-        rows={modules}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        autoHeight
-        getRowId={(row) => row.id}
-      />
+      <Box sx={{ height: 400 }}>
+        <DataGrid
+          rows={modules}
+          columns={columns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          getRowId={(row) => row.id}
+        />
+      </Box>
     </Box>
   );
 };

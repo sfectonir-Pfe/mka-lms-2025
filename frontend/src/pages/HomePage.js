@@ -1,220 +1,205 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import {
   Container,
-  Typography,
-  Button,
+  Grid,
   Card,
   CardContent,
-  CardMedia,
+  Typography,
   Box,
   Avatar,
-  TextField,
-  IconButton,
-  Grid,
+  LinearProgress,
+  
+  useTheme,
 } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-export default function HomePage() {
-  const [programs, setPrograms] = useState([]);
-  const navigate = useNavigate();
-  const scrollRef = useRef(null);
+export default function AdminDashboard() {
+  const theme = useTheme();
 
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -300 : 300,
-        behavior: "smooth",
-      });
-    }
-  };
+  const topFormations = [
+    { name: "Dév Web Fullstack", participants: 180 },
+    { name: "Python pour débutants", participants: 165 },
+    { name: "React Avancé", participants: 140 },
+    { name: "Gestion de projet", participants: 122 },
+    { name: "Data Science Intro", participants: 119 },
+  ];
 
-  useEffect(() => {
-    const fetchPrograms = async () => {
-      try {
-        const res = await axios.get("http://localhost:8000/programs");
-        setPrograms(res.data);
-      } catch (err) {
-        console.error("❌ Failed to load programs:", err.message);
-      }
-    };
+  const topFormateurs = [
+    { name: "Mahdi Trabelsi", rating: 4.9, comment: "pédagogique" },
+    { name: "Salma Bouguerra", rating: 4.7, comment: "claire et cool" },
+    { name: "Walid Laâroussi", rating: 4.6, comment: "dynamique" },
+  ];
 
-    fetchPrograms();
-  }, []);
+  const topEtablissements = [
+    { name: "ISET Rades", count: 210 },
+    { name: "IHEC Carthage", count: 150 },
+    { name: "ENIT", count: 140 },
+    { name: "ISG Tunis", count: 120 },
+    { name: "INSAT", count: 120 },
+  ];
+
+  const stats = [
+    { label: "Participants", value: 1245 },
+    { label: "Participations ce mois", value: 342 },
+    { label: "Formations", value: 38 },
+    { label: "Formateurs", value: 14 },
+  ];
+
+  const monthlyData = [
+    { month: "Jan", value: 180 },
+    { month: "Feb", value: 145 },
+    { month: "Mar", value: 200 },
+    { month: "Apr", value: 162 },
+    { month: "May", value: 342 },
+    { month: "Jun", value: 260 },
+    { month: "Jul", value: 300 },
+    { month: "Aug", value: 280 },
+    { month: "Sep", value: 240 },
+  ];
 
   return (
-    <div>
-      {/* Hero Section */}
-      <Box sx={{ backgroundColor: "#f8f9fa", py: 8, textAlign: "center" }}>
-        <Typography variant="h4" gutterBottom fontWeight="bold">
-          Welcome to Master Knowledge Academy LMS
-        </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Learn, Grow, Excel
-        </Typography>
-        <Box sx={{ maxWidth: 400, mx: "auto", mb: 2 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search for programs..."
-            sx={{ backgroundColor: "white", borderRadius: 1 }}
-          />
-        </Box>
-        <Button variant="contained" color="primary" size="large">
-          EXPLORE PROGRAMS
-        </Button>
-      </Box>
+    <Container sx={{ py: 5 }}>
+      <Typography variant="h4" gutterBottom fontWeight="bold">
+        Dashboard – Admin
+      </Typography>
+      <Grid container spacing={3}>
+        {stats.map((stat, i) => (
+          <Grid item xs={12} sm={6} md={3} key={i}>
+            <Card
+              elevation={3}
+              sx={{ borderRadius: 3, transition: "0.3s", '&:hover': { boxShadow: 6 } }}
+            >
+              <CardContent sx={{ textAlign: "center" }}>
+                <Typography variant="body1" color="text.secondary">
+                  {stat.label}
+                </Typography>
+                <Typography variant="h4" fontWeight="bold" color="primary">
+                  {stat.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
 
-      {/* Programs Section */}
-      <Container sx={{ py: 5 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Our Popular Programs
-        </Typography>
-
-        <Box sx={{ position: "relative", mt: 4 }}>
-          <IconButton
-            onClick={() => scroll("left")}
-            sx={{
-              position: "absolute",
-              top: "40%",
-              left: 0,
-              zIndex: 2,
-              backgroundColor: "white",
-              boxShadow: 1,
-            }}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-
-          <IconButton
-            onClick={() => scroll("right")}
-            sx={{
-              position: "absolute",
-              top: "40%",
-              right: 0,
-              zIndex: 2,
-              backgroundColor: "white",
-              boxShadow: 1,
-            }}
-          >
-            <ChevronRightIcon />
-          </IconButton>
-
-          <Box
-            ref={scrollRef}
-            sx={{
-              display: "flex",
-              overflowX: "auto",
-              gap: 2,
-              scrollBehavior: "smooth",
-              px: 6,
-              py: 2,
-            }}
-          >
-            {programs.length === 0 ? (
-              <Typography sx={{ mt: 2 }}>No programs available.</Typography>
-            ) : (
-              programs.map((program) => (
-                <Card
-                  key={program.id}
-                  sx={{
-                    minWidth: 280,
-                    flexShrink: 0,
-                    transition: "0.3s",
-                    "&:hover": { transform: "scale(1.03)", boxShadow: 6 },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="160"
-                    image={program.image || "/uploads/default.jpg"}
-                    alt={program.name}
+        <Grid item xs={12} md={6}>
+          <Card elevation={3} sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom fontWeight="bold">
+                Top Formations (Plus suivies)
+              </Typography>
+              {topFormations.map((f, i) => (
+                <Box key={i} mb={2}>
+                  <Typography fontWeight={500}>{f.name}</Typography>
+                  <LinearProgress
+                    variant="determinate"
+                    value={(f.participants / 180) * 100}
+                    sx={{
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: theme.palette.grey[300],
+                      '& .MuiLinearProgress-bar': { backgroundColor: theme.palette.primary.main },
+                    }}
                   />
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {program.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {program.description || "No description provided."}
-                    </Typography>
-                    <Button
-                      onClick={() => navigate(`/student/program/${program.id}`)}
-                      variant="outlined"
-                    >
-                      GET STARTED
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </Box>
-        </Box>
-      </Container>
-
-      {/* Testimonials */}
-      <Container className="py-5">
-        <Typography variant="h5" align="center" gutterBottom>
-          What Our Students Say
-        </Typography>
-        <Grid container justifyContent="center" spacing={4}>
-          {[
-            {
-              name: "aaa",
-              text: "This platform made learning so easy!",
-              avatar: "/uploads/avatar1.png",
-            },
-            {
-              name: "Majd",
-              text: "Amazing content, clean and professional UI!",
-              avatar: "/uploads/avatar2.png",
-            },
-          ].map((feedback, idx) => (
-            <Grid item xs={12} md={4} key={idx}>
-              <Card sx={{ p: 2, textAlign: "center" }}>
-                <Avatar
-                  src={feedback.avatar}
-                  sx={{ width: 60, height: 60, margin: "0 auto" }}
-                />
-                <Typography variant="body1" className="mt-3">
-                  "{feedback.text}"
-                </Typography>
-                <Typography
-                  variant="subtitle2"
-                  color="text.secondary"
-                  className="mt-2"
-                >
-                  - {feedback.name}
-                </Typography>
-                <Box mt={1}>
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} fontSize="small" color="warning" />
-                  ))}
+                  <Typography variant="caption" color="text.secondary">
+                    {f.participants} Étudiants
+                  </Typography>
                 </Box>
+              ))}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card elevation={3} sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom fontWeight="bold">
+                Participation mensuelle (12 mois)
+              </Typography>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="value" stroke={theme.palette.primary.main} strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card elevation={3} sx={{ borderRadius: 3 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom fontWeight="bold">
+                    Top Formateurs (avis étudiants)
+                  </Typography>
+                  {topFormateurs.map((f, i) => (
+                    <Box
+                      key={i}
+                      display="flex"
+                      alignItems="center"
+                      my={2}
+                      sx={{
+                        p: 1,
+                        borderRadius: 2,
+                        '&:hover': { backgroundColor: theme.palette.action.hover },
+                        transition: "0.3s",
+                      }}
+                    >
+                      <Avatar sx={{ mr: 2 }} />
+                      <Box>
+                        <Typography fontWeight={600}>{f.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          ★ {f.rating} – {f.comment}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      </Container>
 
-      {/* Footer */}
-      <Box className="bg-dark text-white text-center py-4">
-        <Container>
-          <Typography variant="body2" gutterBottom>
-            © 2025 Master Knowledge Academy. All rights reserved.
-          </Typography>
-          <Box>
-            <FacebookIcon className="mx-2" />
-            <InstagramIcon className="mx-2" />
-            <LinkedInIcon className="mx-2" />
-          </Box>
-        </Container>
-      </Box>
-    </div>
+            <Grid item xs={12} md={6}>
+              <Card elevation={3} sx={{ borderRadius: 3 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom fontWeight="bold">
+                    Top Établissements partenaires
+                  </Typography>
+                  {topEtablissements.map((e, i) => (
+                    <Box
+                      key={i}
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      py={1.2}
+                      sx={{
+                        px: 1,
+                        borderRadius: 2,
+                        '&:hover': { backgroundColor: theme.palette.action.hover },
+                        transition: "0.3s",
+                      }}
+                    >
+                      <Typography>{e.name}</Typography>
+                      <Typography fontWeight="bold">{e.count}</Typography>
+                    </Box>
+                  ))}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

@@ -154,7 +154,12 @@ export default function UserList() {
           <Tooltip title="Edit user">
             <IconButton
               color="primary"
-              onClick={() => navigate(`/EditProfile/${params.row.email}`)}
+              onClick={() => {
+                console.log("Navigating to edit profile with user:", params.row);
+                // Stocker temporairement l'utilisateur à éditer dans sessionStorage
+                sessionStorage.setItem("editingUser", JSON.stringify(params.row));
+                navigate(`/EditProfile/${params.row.email}`);
+              }}
               sx={{
                 bgcolor: theme.palette.primary.light,
                 '&:hover': { bgcolor: theme.palette.primary.main }
