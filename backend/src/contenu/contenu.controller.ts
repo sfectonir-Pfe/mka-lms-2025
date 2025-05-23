@@ -37,20 +37,42 @@ export class ContenusController {
   ) {
     const { title, type, fileType, courseIds } = body;
 
-    const newContenu = await this.prisma.contenu.create({
-      data: {
-        title,
-        type,
-        fileType: file ? fileType : null,
-        fileUrl: file ? `http://localhost:8000/uploads/${file.filename}` : null,
-        courseContenus: {
-          create: courseIds
-            ? JSON.parse(courseIds).map((courseId) => ({
-                course: { connect: { id: courseId } },
-              }))
-            : [],
-        },
+    // Vérifier si un fichier a été téléchargé
+    if (!file && (type === 'Cours' || type === 'Exercice')) {
+      throw new Error('Un fichier est requis pour les types de contenu Cours et Exercice');
+    }
+
+    // Préparer les données pour la création du contenu
+    const contentData = {
+      title,
+      type,
+      // Toujours fournir une valeur pour fileUrl et fileType
+      fileType: file ? fileType : 'PDF', // Valeur par défaut pour fileType
+      fileUrl: file
+        ? `http://localhost:8000/uploads/${file.filename}`
+        : 'placeholder.pdf', // Valeur par défaut pour fileUrl
+      courseContenus: {
+        create: courseIds && courseIds !== 'undefined' && courseIds !== 'null'
+          ? (() => {
+              try {
+                const parsedIds = JSON.parse(courseIds);
+                console.log('Parsed courseIds:', parsedIds);
+                return parsedIds.map((courseId: string | number) => ({
+                  course: { connect: { id: typeof courseId === 'string' ? parseInt(courseId) : courseId } },
+                }));
+              } catch (error) {
+                console.error('Error parsing courseIds:', error);
+                return [];
+              }
+            })()
+          : [],
       },
+    };
+
+    console.log('Creating content with data:', contentData);
+
+    const newContenu = await this.prisma.contenu.create({
+      data: contentData,
     });
 
     return newContenu;

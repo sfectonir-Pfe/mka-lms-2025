@@ -13,15 +13,23 @@ import {
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-
+import { CaptchaService } from '../captcha/captcha.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly captchaService: CaptchaService,
+  ) { }
 
   @Post('login')
+
   async login(@Body() dto: LoginDto) {
     try {
+      const isValid = await this.captchaService.validateToken(dto.captcha);
+      if (!isValid) {
+        throw new HttpException('CAPTCHA invalide', HttpStatus.UNAUTHORIZED);
+      }
       const result = await this.authService.login(dto);
       return { success: true, message: 'Connexion réussie', data: result };
     } catch (error) {

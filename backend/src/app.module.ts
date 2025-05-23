@@ -11,9 +11,10 @@ import { MailModule } from './mail/mail.module';
 import { ContenuModule } from './contenu/contenu.module';
 import { SessionModule } from './session/session.module';
 import { QuizModule } from './quiz/quiz.module';
+import { CaptchaModule } from './captcha/captcha.module';
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule,],
+imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule, CaptchaModule,],
 
   controllers: [AppController],
   providers: [AppService],

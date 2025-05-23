@@ -143,7 +143,7 @@ model Course {
 model Contenu {
   id              Int              @id @default(autoincrement())
   title           String
-  fileUrl         String?
+  fileUrl         String? // Optionnel dans le schéma Prisma
   fileType        FileType?
   type            ContenuType
   courseContenus  CourseContenu[] // NEW many-to-many

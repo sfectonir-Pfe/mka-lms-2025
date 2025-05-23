@@ -41,21 +41,6 @@ import SessionsOverviewPage from "./pages/SessionsOverviewPage";
 
 import AddQuizForm from "./pages/users/views/AddQuizForm";
 import PlayQuizPage from "./pages/users/views/PlayQuizPage";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // UI
 import Spinner from "react-bootstrap/Spinner";
 import { ToastContainer } from "react-toastify";
