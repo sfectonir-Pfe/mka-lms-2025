@@ -44,6 +44,8 @@ import PlayQuizPage from "./pages/users/views/PlayQuizPage";
 import BuildProgramView from "./pages/users/views/BuildProgramView";
 import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
 
+import ModuleList from './pages/users/views/ModuleList'; 
+
 
 
 
@@ -144,13 +146,20 @@ function App() {
 
                 <Route path="courses/*" element={<CoursesPage />} />
                 <Route path="contenus/*" element={<ContenusPage />} />
-                
+
                 <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
 
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
 
                 <Route path="/programs/build/:programId" element={<BuildProgramView />} />
+                <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
+               <Route path="/modules" element={<ModuleList />} />
+
+
+
+
+
 
 
 

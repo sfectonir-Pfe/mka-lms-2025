@@ -41,14 +41,16 @@ const ProgramList = () => {
       flex: 1,
       renderCell: (params) => (
         <>
-          <Button
-            variant="outlined"
-            color="info"
-            size="small"
-            onClick={() => navigate(`/programs/${params.row.id}/modules`)}
-          >
-            Voir Modules
-          </Button>
+         <Button
+  variant="outlined"
+  color="info"
+  size="small"
+  onClick={() => navigate(`/programs/overview/${params.row.id}`)}
+>
+  Voir programme
+</Button>
+
+
           <Button
             variant="outlined"
             color="error"
@@ -66,25 +68,25 @@ const ProgramList = () => {
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-  <Typography variant="h5">Liste des programmes</Typography>
+        <Typography variant="h5">Liste des programmes</Typography>
 
-  <Box>
-    <Button
-      variant="contained"
-      onClick={() => navigate("/programs/add")}
-      sx={{ mr: 2 }}
-    >
-      ➕ Ajouter un programme
-    </Button>
-    <Button
-      variant="outlined"
-      startIcon={<VisibilityIcon />}
-      onClick={() => navigate("/programs/overview")}
-    >
-      Voir Programmes
-    </Button>
-  </Box>
-</Grid>
+        <Box>
+          <Button
+            variant="contained"
+            onClick={() => navigate("/programs/add")}
+            sx={{ mr: 2 }}
+          >
+            ➕ Ajouter un programme
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<VisibilityIcon />}
+            onClick={() => navigate("/programs/overview")}
+          >
+            Voir Programmes
+          </Button>
+        </Box>
+      </Grid>
 
 
       <Box sx={{ height: 400 }}>

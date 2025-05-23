@@ -6,7 +6,7 @@ import {
   Param,
   Body,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors,Patch,
 } from '@nestjs/common';
 import { ContenusService } from './contenu.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -65,4 +65,9 @@ export class ContenusController {
   remove(@Param('id') id: string) {
     return this.contenusService.remove(+id);
   }
+  @Patch(':id')
+update(@Param('id') id: string, @Body() data: any) {
+  return this.contenusService.update(+id, data);
+}
+
 }

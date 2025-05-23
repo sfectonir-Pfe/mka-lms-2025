@@ -10,7 +10,7 @@ import {
   Divider,
   Menu,
   MenuItem,
-  Button,
+  
   Avatar,
   Badge,
 } from "@mui/material";
@@ -141,6 +141,7 @@ export default function Main({ setUser, user }) {
       }
 
       // Récupérer les données utilisateur à jour, y compris la photo de profil
+
       const fetchUserData = async () => {
         try {
           if (user.email) {
@@ -317,11 +318,12 @@ export default function Main({ setUser, user }) {
             </IconButton>
 
             <Typography variant="body1" noWrap>
-              {user && user.email ? user.email : "User"} |
-              <span style={{ textTransform: 'capitalize' }}>
-                {user && user.role  }
+              {user?.name || "Utilisateur"} |{" "}
+              <span style={{ textTransform: "capitalize" }}>
+                {user?.role || "Rôle"}
               </span>
             </Typography>
+
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton
                 onClick={handleMenuClick}
@@ -349,11 +351,6 @@ export default function Main({ setUser, user }) {
                   {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                 </Avatar>
               </IconButton>
-              {open && (
-                <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
-                  {user?.email}
-                </Typography>
-              )}
 
               <Menu
                 anchorEl={anchorEl}
@@ -390,25 +387,42 @@ export default function Main({ setUser, user }) {
                   }
                 }}
               >
+                <Box sx={{ px: 4, py: 4, textAlign: "center" }}>
+                  <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+                    {user?.name || "Utilisateur"}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
+                    {user?.email}
+                  </Typography>
+                </Box>
+
+
+
+                <Divider />
+
                 <MenuItem onClick={handleVoirProfil}>
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
                   View Profile
                 </MenuItem>
+
                 <MenuItem onClick={handleEditProfil}>
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
                   Edit Profile
                 </MenuItem>
+
                 <Divider />
+
                 <MenuItem onClick={handleLogout}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" />
                   </ListItemIcon>
                   Logout
                 </MenuItem>
+
               </Menu>
             </Box>
           </Box>

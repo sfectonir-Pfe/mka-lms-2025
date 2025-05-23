@@ -7,7 +7,7 @@ import { FaGraduationCap, FaBook, FaFileAlt } from "react-icons/fa"; // addition
 import { BiBookBookmark, } from "react-icons/bi";
 
 
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+// import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 export const sideBarData = [
 
@@ -18,7 +18,7 @@ export const sideBarData = [
   { text: "Contenus", icon: <FaFileAlt />, path: "contenus" },
   { text: "Programs", icon: <FaGraduationCap />, path: "/programs" },
 
-  { text: "Vue Programmes", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+  // { text: "Vue Programmes", icon: <LibraryBooksIcon />, path: "/programs/overview" }
 
   // { text: "Modules (Test)", icon: <FaBookOpen />, path: "/programs/1/modules" }, // temp path with test ID
   // { text: "Courses (Test)", icon: <FaFolderOpen />, path: "/modules/1/courses" }, // temp path with test ID
