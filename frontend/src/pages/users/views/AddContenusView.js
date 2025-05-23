@@ -128,11 +128,15 @@ const AddContenusView = () => {
           </Typography>
         )}
 
-        <Box mt={3}>
-          <Button type="submit" variant="contained" fullWidth>
-            Enregistrer
-          </Button>
-        </Box>
+        <Box mt={3} display="flex" justifyContent="space-between">
+  <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
+    Annuler
+  </Button>
+  <Button type="submit" variant="contained">
+    Enregistrer
+  </Button>
+</Box>
+
       </form>
     </Container>
   );

@@ -1,25 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSessionDto } from './dto/create-session.dto';
-import { UpdateSessionDto } from './dto/update-session.dto';
 import { PrismaService } from 'nestjs-prisma';
-
-
 
 @Injectable()
 export class SessionsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: any) {
-    const { programId, startDate, endDate, modules, imageUrl } = data;
+    const { programId, level, modules /*, startDate, endDate, imageUrl */ } = data;
 
     const parsedModules = JSON.parse(modules);
 
     const session = await this.prisma.session.create({
       data: {
         programId: Number(programId),
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        imageUrl, // saved from multer
+        level,
+        // Optional future fields:
+        // startDate: startDate ? new Date(startDate) : undefined,
+        // endDate: endDate ? new Date(endDate) : undefined,
+        // imageUrl,
       },
     });
 
