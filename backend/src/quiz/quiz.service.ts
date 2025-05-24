@@ -7,35 +7,47 @@ export class QuizService {
   constructor(private prisma: PrismaService) {}
 
   async create(createQuizDto: CreateQuizDto) {
-    const { contenuId, questions } = createQuizDto;
+  const { contenuId, title, description, timeLimit, questions } = createQuizDto;
 
-    const quiz = await this.prisma.quiz.create({
+  const quiz = await this.prisma.quiz.create({
+    data: {
+      contenu: { connect: { id: contenuId } },
+      title,
+      description,
+      timeLimit,
+    },
+  });
+
+  for (const question of questions) {
+    const createdQuestion = await this.prisma.question.create({
       data: {
-        contenu: { connect: { id: contenuId } },
+        text: question.text,
+        imageUrl: question.imageUrl,
+        type: question.type,
+        score: question.score,
+        negativeMark: question.negativeMark || 0,
+        correctText: question.correctText,
+        quizId: quiz.id,
       },
     });
 
-    for (const question of questions) {
-      const createdQuestion = await this.prisma.question.create({
-        data: {
-          text: question.text,
-          quizId: quiz.id,
-        },
-      });
-
-      for (const choice of question.choices) {
+    // Only add choices for types that need them
+    if (['MCQ', 'IMAGE_CHOICE', 'TRUE_FALSE'].includes(question.type)) {
+      for (const choice of question.choices || []) {
         await this.prisma.choice.create({
           data: {
             text: choice.text,
+            imageUrl: choice.imageUrl,
             isCorrect: !!choice.isCorrect,
             questionId: createdQuestion.id,
           },
         });
       }
     }
-
-    return { message: 'Quiz créé avec succès ✅', quizId: quiz.id };
   }
+
+  return { message: 'Quiz created with advanced types ✅', quizId: quiz.id };
+}
 
   async findAll() {
     return this.prisma.quiz.findMany({
@@ -63,7 +75,7 @@ export class QuizService {
       },
     });
   }
-  async getQuizWithQuestions(contenuId: number) {
+ async getQuizWithQuestions(contenuId: number) {
   const quiz = await this.prisma.quiz.findUnique({
     where: { contenuId },
     include: {
@@ -79,8 +91,9 @@ export class QuizService {
     throw new Error("Quiz not found for this contenu.");
   }
 
-  return quiz.questions;
+  return quiz; // ✅ Return the entire quiz, including timeLimit
 }
+
 
 }
 
