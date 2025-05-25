@@ -8,31 +8,45 @@ import {
   Delete,
   HttpException,
   HttpStatus,
-  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { CaptchaService } from '../captcha/captcha.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly captchaService: CaptchaService,
   ) { }
 
   @Post('login')
-
   async login(@Body() dto: LoginDto) {
     try {
-      const isValid = await this.captchaService.validateToken(dto.captcha);
-      if (!isValid) {
-        throw new HttpException('CAPTCHA invalide', HttpStatus.UNAUTHORIZED);
-      }
+      console.log('Login request received:', {
+        email: dto.email,
+        rememberMe: dto.rememberMe,
+        
+      });
+
+      // CAPTCHA verification disabled
+      console.log('CAPTCHA verification disabled');
+
+      // Authentifier l'utilisateur
       const result = await this.authService.login(dto);
-      return { success: true, message: 'Connexion réussie', data: result };
+
+      // Ajouter une information sur rememberMe dans la réponse
+      return {
+        success: true,
+        message: 'Connexion réussie',
+        data: {
+          ...result,
+          rememberMe: dto.rememberMe || false,
+          // Ajouter un access_token fictif pour le moment (à remplacer par un vrai JWT plus tard)
+          access_token: `temp_token_${Date.now()}_${dto.rememberMe ? 'long' : 'short'}`
+        }
+      };
     } catch (error) {
+      console.error('Login error:', error);
       throw new HttpException(
         error.message || 'Échec de la connexion',
         error.status || HttpStatus.UNAUTHORIZED,

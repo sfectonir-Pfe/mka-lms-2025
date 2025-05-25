@@ -13,10 +13,11 @@ export class LoginDto {
     @ApiProperty()
     @IsNotEmpty({ message: 'Mot de passe requis' })
     password: string;
-    
-    @ApiProperty()
-    @IsNotEmpty({ message: 'captcha requis' })
-    captcha: string;
+
+
+
+    @ApiProperty({ required: false, default: false })
+    rememberMe?: boolean;
 }
 
 export class RegisterDto {

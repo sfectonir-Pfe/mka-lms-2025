@@ -26,6 +26,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { sideBarData } from "../constants/sideBarData";
 import ScrollToTopButton from "../components/ScrollToTopButton";
@@ -33,6 +34,8 @@ import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
+import { secureLogout } from "../utils/authUtils";
+import { clearAllStorage, debugStorageState } from "../utils/storageDebug";
 
 const drawerWidth = 260;
 
@@ -137,9 +140,16 @@ export default function Main({ setUser, user }) {
 
       // Ensure role is set correctly
       if (!user.role || user.role === "user") {
-        const updatedUser = { ...user };
+        const updatedUser = { ...user, role: "Etudiant" };
         setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Mettre à jour le storage approprié selon le flag Remember Me
+        const rememberMeFlag = localStorage.getItem("rememberMe") === "true";
+        if (rememberMeFlag) {
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        }
         console.log("Updated user role to Etudiant");
       }
 
@@ -163,7 +173,14 @@ export default function Main({ setUser, user }) {
               }
 
               setUser(updatedUser);
-              localStorage.setItem("user", JSON.stringify(updatedUser));
+
+              // Mettre à jour le storage approprié selon le flag Remember Me
+              const rememberMeFlag = localStorage.getItem("rememberMe") === "true";
+              if (rememberMeFlag) {
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+              } else {
+                sessionStorage.setItem("user", JSON.stringify(updatedUser));
+              }
               console.log("Updated user data with profile pic:", updatedUser);
             }
           }
@@ -179,19 +196,27 @@ export default function Main({ setUser, user }) {
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
-  const handleLogout = () => {
-    // Supprimer les données de localStorage
-    localStorage.removeItem("user");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("rememberMe");
+  const handleLogout = async () => {
+    console.log("=== LOGOUT INITIATED FROM MAIN COMPONENT ===");
+    console.log("Current user before logout:", user);
 
-    // Supprimer les données de sessionStorage
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("userEmail");
+    try {
+      // Utiliser la fonction de déconnexion sécurisée
+      await secureLogout(setUser, navigate);
+    } catch (error) {
+      console.error("Error during logout from Main component:", error);
 
-    // Conserver l'email sauvegardé si "Remember Me" était coché
-    // pour pré-remplir le champ email lors de la prochaine connexion
+      // En cas d'erreur, forcer un rechargement complet
+      console.log("Forcing complete page reload as fallback...");
+      window.location.href = "/";
+    }
+  };
 
+  // Fonction de test pour nettoyer complètement le storage
+  const handleClearStorage = () => {
+    console.log("🧹 MANUAL STORAGE CLEANUP INITIATED");
+    debugStorageState();
+    clearAllStorage();
     setUser(null);
     navigate("/");
   };
@@ -326,6 +351,7 @@ export default function Main({ setUser, user }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <LanguageSelectorWithFlags />
 
+            
             <IconButton color="inherit">
               <StyledBadge badgeContent={4} color="error">
                 <NotificationsIcon />
