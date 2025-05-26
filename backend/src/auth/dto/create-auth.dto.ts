@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class CreateAuthDto {}
+export class CreateAuthDto { }
 
 export class LoginDto {
     @ApiProperty()
@@ -48,4 +48,15 @@ export class ChangePasswordDto {
     @IsNotEmpty({ message: 'Nouveau mot de passe requis' })
     @MinLength(6, { message: 'Le nouveau mot de passe doit contenir au moins 6 caractères' })
     newPassword: string;
+
+}
+export class ResetPassword {
+    @ApiProperty()
+    token: string
+      @ApiProperty()
+    newPass: string
+      @ApiProperty()
+    confirmPass: string
+
+
 }

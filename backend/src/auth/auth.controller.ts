@@ -11,8 +11,9 @@ import {
   Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiBody, ApiProperty } from '@nestjs/swagger';
 
 
 @Controller('auth')
@@ -114,13 +115,13 @@ export class AuthController {
   }
 
   @Post('reset-password')
+
   async reset(
-    @Body('token') token: string,
-    @Body('newPass') newPass: string,
-    @Body('confirmPass') confirmPass: string,
+  
+    @Body() dto:ResetPassword
   ) {
     try {
-      const result = await this.authService.resetPassword(token, newPass, confirmPass);
+      const result = await this.authService.resetPassword(dto.token,dto. newPass,dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(

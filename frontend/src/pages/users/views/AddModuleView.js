@@ -41,61 +41,65 @@ const AddModuleView = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Ajouter un module
-        </Typography>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                name="name"
-                label="Nom du module"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
+   <Container maxWidth="sm" sx={{ mt: 4 }}>
+  <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+    <Typography variant="h5" gutterBottom>
+      Ajouter un module
+    </Typography>
+    <form onSubmit={handleSubmit}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            name="name"
+            label="Nom du module"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                select
-                fullWidth
-                name="periodUnit"
-                label="Période"
-                value={formData.periodUnit}
-                onChange={handleChange}
-              >
-                <MenuItem value="Day">Jour</MenuItem>
-                <MenuItem value="Week">Semaine</MenuItem>
-                <MenuItem value="Month">Mois</MenuItem>
-              </TextField>
-            </Grid>
+        <Grid item xs={12}>
+          <TextField
+            select
+            fullWidth
+            name="periodUnit"
+            label="Période"
+            value={formData.periodUnit}
+            onChange={handleChange}
+          >
+            <MenuItem value="Day">Jour</MenuItem>
+            <MenuItem value="Week">Semaine</MenuItem>
+            <MenuItem value="Month">Mois</MenuItem>
+          </TextField>
+        </Grid>
 
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                type="number"
-                name="duration"
-                label="Durée"
-                value={formData.duration}
-                onChange={handleChange}
-                inputProps={{ min: 1 }}
-                required
-              />
-            </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            type="number"
+            name="duration"
+            label="Durée"
+            value={formData.duration}
+            onChange={handleChange}
+            inputProps={{ min: 1 }}
+            required
+          />
+        </Grid>
 
-            <Grid item xs={12}>
-              <Button type="submit" fullWidth variant="contained" color="primary">
-                ENREGISTRER
-              </Button>
-            </Grid>
-          </Grid>
-        </form>
-      </Paper>
-    </Container>
+        <Grid item xs={12} display="flex" justifyContent="space-between">
+          <Button variant="outlined" color="error" onClick={() => navigate("/modules")}>
+            Annuler
+          </Button>
+          <Button type="submit" variant="contained" color="primary">
+            Enregistrer
+          </Button>
+        </Grid>
+      </Grid>
+    </form>
+  </Paper>
+</Container>
+
   );
 };
 

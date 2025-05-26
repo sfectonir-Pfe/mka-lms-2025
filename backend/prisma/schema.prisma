@@ -62,15 +62,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  resetToken            String?
-  resetTokenExpiry      DateTime?
-  formateurs            Formateur[]
-  Etudiants             Etudiant[]
+  resetToken              String?
+  resetTokenExpiry        DateTime?
+  formateurs              Formateur[]
+  Etudiants               Etudiant[]
   Createurs_De_Formations Createur_De_Formation[]
-  Admins                Admin[]
-  Etablissements        Etablissement[]
-  ResetToken            ResetToken[]
-  UserAnswer            UserAnswer[]
+  Admins                  Admin[]
+  Etablissements          Etablissement[]
+  ResetToken              ResetToken[]
+  UserAnswer              UserAnswer[]
 }
 
 model Formateur {
@@ -182,14 +182,16 @@ model CourseContenu {
 }
 
 model Session {
-  id        Int             @id @default(autoincrement())
-  program   Program         @relation(fields: [programId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  program   Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId Int
-  startDate DateTime
-  endDate   DateTime
+  startDate DateTime?
+  endDate   DateTime?
   imageUrl  String?
+  level     String    @default("Basique")
+
   modules   SessionModule[]
-  createdAt DateTime        @default(now())
+  createdAt DateTime?       @default(now())
 }
 
 model SessionModule {
@@ -224,49 +226,66 @@ model SessionContenu {
   @@unique([sessionCourseId, contenuId])
 }
 
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  FILL_BLANK
+  IMAGE_CHOICE
+}
+
 model Quiz {
-  id          Int          @id @default(autoincrement())
-  contenu     Contenu      @relation(fields: [contenuId], references: [id],onDelete: Cascade)
-  contenuId   Int          @unique
-  questions   Question[]
-  userAnswers UserAnswer[]
+  id           Int          @id @default(autoincrement())
+  contenu      Contenu      @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  contenuId    Int          @unique
+  title        String?
+  description  String?
+  timeLimit    Int?         // in seconds (e.g., 600 for 10 mins)
+  questions    Question[]
+  userAnswers  UserAnswer[]
 }
 
 model Question {
-  id      Int      @id @default(autoincrement())
-  text    String
-  quiz    Quiz     @relation(fields: [quizId], references: [id],onDelete: Cascade)
-  quizId  Int
-  choices Choice[]
-  Answer  Answer[]
+  id           Int          @id @default(autoincrement())
+  text         String
+  imageUrl     String?      // optional image with question
+  type         QuestionType @default(MCQ)
+  score        Int          @default(1)       // points for correct answer
+  negativeMark Int          @default(0)       // optional penalty
+  quiz         Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId       Int
+  choices      Choice[]     // only for MCQ and IMAGE_CHOICE
+  correctText  String?      // only for FILL_BLANK
+  answers      Answer[]
 }
 
 model Choice {
-  id         Int      @id @default(autoincrement())
-  text       String
-  isCorrect  Boolean  @default(false)
-  question   Question @relation(fields: [questionId], references: [id],onDelete: Cascade)
-  questionId Int
-  Answer     Answer[]
+  id           Int        @id @default(autoincrement())
+  text         String?
+  imageUrl     String?    // used for image-based answers
+  isCorrect    Boolean    @default(false)
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId   Int
+  answers      Answer[]
 }
 
 model UserAnswer {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id],onDelete: Cascade)
-  userId      Int
-  quiz        Quiz     @relation(fields: [quizId], references: [id],onDelete: Cascade)
-  quizId      Int
-  score       Int
-  submittedAt DateTime @default(now())
-  answers     Answer[]
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  quiz         Quiz       @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId       Int
+  score        Int
+  submittedAt  DateTime   @default(now())
+  answers      Answer[]
 }
 
 model Answer {
   id           Int        @id @default(autoincrement())
-  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id],onDelete: Cascade)
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   userAnswerId Int
-  question     Question   @relation(fields: [questionId], references: [id],onDelete: Cascade)
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int
-  selected     Choice     @relation(fields: [selectedId], references: [id],onDelete: Cascade)
-  selectedId   Int
+  selectedId   Int?       // for MCQ/IMAGE_CHOICE
+  selected     Choice?    @relation(fields: [selectedId], references: [id])
+  textAnswer   String?    // for FILL_BLANK
 }
