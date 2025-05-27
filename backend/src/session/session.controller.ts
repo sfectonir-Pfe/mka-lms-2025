@@ -42,5 +42,19 @@ async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
 remove(@Param('id') id: string) {
   return this.sessionsService.remove(+id);
 }
+@Patch(':id')
+@UseInterceptors(FileInterceptor('image', { storage }))
+async update(
+  @Param('id') id: string,
+  @UploadedFile() file: Express.Multer.File,
+  @Body() body: any
+) {
+  return this.sessionsService.update(+id, body, file);
+}
+@Get('program/:programId')
+getByProgram(@Param('programId') programId: string) {
+  return this.sessionsService.findByProgramId(+programId);
+}
+
 
 }

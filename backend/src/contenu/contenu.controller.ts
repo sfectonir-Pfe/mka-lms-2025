@@ -65,9 +65,6 @@ export class ContenusController {
   remove(@Param('id') id: string) {
     return this.contenusService.remove(+id);
   }
-  @Patch(':id')
-update(@Param('id') id: string, @Body() data: any) {
-  return this.contenusService.update(+id, data);
-}
+ 
 
 }

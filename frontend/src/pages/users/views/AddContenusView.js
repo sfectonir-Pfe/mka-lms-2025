@@ -15,7 +15,6 @@ const AddContenusView = () => {
   const [type, setType] = useState("Cours");
   const [fileType, setFileType] = useState("PDF");
   const [file, setFile] = useState(null);
-  const [courseId, setCourseId] = useState("");
 
   const navigate = useNavigate();
 
@@ -33,10 +32,6 @@ const AddContenusView = () => {
     if (type !== "Quiz") {
       formData.append("file", file);
       formData.append("fileType", fileType);
-    }
-
-    if (courseId) {
-      formData.append("courseIds", JSON.stringify([parseInt(courseId)]));
     }
 
     try {
@@ -70,14 +65,7 @@ const AddContenusView = () => {
           margin="normal"
           required
         />
-        <TextField
-          fullWidth
-          label="ID du cours (optionnel)"
-          type="number"
-          value={courseId}
-          onChange={(e) => setCourseId(e.target.value)}
-          margin="normal"
-        />
+
         <TextField
           select
           fullWidth
@@ -129,14 +117,13 @@ const AddContenusView = () => {
         )}
 
         <Box mt={3} display="flex" justifyContent="space-between">
-  <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
-    Annuler
-  </Button>
-  <Button type="submit" variant="contained">
-    Enregistrer
-  </Button>
-</Box>
-
+          <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
+            Annuler
+          </Button>
+          <Button type="submit" variant="contained">
+            Enregistrer
+          </Button>
+        </Box>
       </form>
     </Container>
   );
