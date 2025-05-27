@@ -73,6 +73,12 @@ async update(id: number, data: any) {
     data,
   });
 }
+async publishProgram(id: number) {
+  return this.prisma.program.update({
+    where: { id },
+    data: { published: true },
+  });
+}
 
 
 }

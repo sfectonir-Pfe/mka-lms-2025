@@ -136,9 +136,22 @@ export default function BuildProgramOverviewPage() {
                 🛠️ Modifier
               </Button>
 
-              <Button variant="contained" color="success">
-                📤 Publier
-              </Button>
+              <Button
+  variant="contained"
+  color="success"
+  onClick={async () => {
+    try {
+      await axios.patch(`http://localhost:8000/programs/${session.program.id}/publish`);
+      toast.success("Programme publié avec succès !");
+      fetchSessions(); // refresh list after publishing
+    } catch (err) {
+      toast.error("Erreur lors de la publication du programme.");
+    }
+  }}
+>
+  📤 Publier
+</Button>
+
             </Box>
           </Box>
         )}

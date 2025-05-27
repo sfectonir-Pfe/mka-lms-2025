@@ -40,6 +40,11 @@ rebuildProgram(@Param('id') id: string, @Body() body: any) {
 update(@Param('id') id: string, @Body() body: any) {
   return this.programsService.update(+id, body);
 }
+@Patch(':id/publish')
+async publishProgram(@Param('id', ParseIntPipe) id: number) {
+  return this.programsService.publishProgram(id);
+}
+
 
 
 
