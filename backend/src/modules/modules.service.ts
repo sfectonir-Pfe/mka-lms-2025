@@ -17,4 +17,6 @@ export class ModulesService {
   remove(id: number) {
     return this.prisma.module.delete({ where: { id } });
   }
+  
+
 }
