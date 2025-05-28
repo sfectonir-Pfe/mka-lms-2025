@@ -23,8 +23,10 @@ export class ContenusService {
       });
     }
 
+
     return created;
   }
+  
 
   findAll() {
     return this.prisma.contenu.findMany({

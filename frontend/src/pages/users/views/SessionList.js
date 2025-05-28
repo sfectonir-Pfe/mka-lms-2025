@@ -38,8 +38,8 @@ const SessionList = () => {
   };
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom>
+    <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+      <Typography variant="h5" fontWeight="bold" gutterBottom>
         📋 Liste des sessions créées
       </Typography>
 
@@ -49,28 +49,43 @@ const SessionList = () => {
         </Typography>
       ) : (
         sessions.map((session) => (
-          <Box key={session.id} mt={4} p={2} border="1px solid #ddd" borderRadius={2}>
-            
-            {/* ✅ Image at the top */}
+          <Paper
+            key={session.id}
+            elevation={1}
+            sx={{
+              mt: 4,
+              p: 3,
+              borderRadius: 3,
+              backgroundColor: "#ffffff",
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            {/* 📸 Image */}
             {session.imageUrl && (
               <Box mb={2} display="flex" justifyContent="center">
                 <img
                   src={session.imageUrl}
                   alt="Session"
                   style={{
-                    maxWidth: '100%',
-                    maxHeight: 160,
-                    borderRadius: 12,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    objectFit: 'contain',
+                    maxWidth: "100%",
+                    maxHeight: 180,
+                    borderRadius: 16,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    objectFit: "cover",
                   }}
                 />
               </Box>
             )}
 
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="h6" fontWeight="bold">
-                🧾 Session : {session.name}
+            {/* 🧾 Session Info */}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1}
+            >
+              <Typography variant="h6" fontWeight="bold" color="primary">
+                🧾 {session.name}
               </Typography>
               <Button
                 variant="outlined"
@@ -82,28 +97,29 @@ const SessionList = () => {
               </Button>
             </Stack>
 
-            <Typography variant="body2" mt={1}>
+            <Typography variant="body2" mb={0.5}>
               📚 Programme : <strong>{session.program?.name || "Inconnu"}</strong>
             </Typography>
-
             <Typography variant="body2">
               📅 Du <strong>{session.startDate?.slice(0, 10)}</strong> au{" "}
               <strong>{session.endDate?.slice(0, 10)}</strong>
             </Typography>
 
-            {/* ✅ Modules + contenus */}
+            {/* 📦 Modules + Contenus */}
             {session.session2Modules?.length > 0 && (
               <>
                 <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1" fontWeight="bold">📦 Modules et contenus</Typography>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  🧱 Modules et Contenus
+                </Typography>
                 {session.session2Modules.map((mod) => (
                   <Box key={mod.id} mt={1}>
-                    <Typography fontWeight="bold" color="primary.main">
+                    <Typography fontWeight="bold" color="secondary.main">
                       📦 {mod.module?.name}
                     </Typography>
                     {mod.courses.map((c) => (
                       <Box key={c.id} ml={2} mt={1}>
-                        <Typography variant="body2" fontWeight="bold">
+                        <Typography variant="body2" fontWeight="bold" color="text.primary">
                           📘 {c.course?.title}
                         </Typography>
                         <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
@@ -113,7 +129,7 @@ const SessionList = () => {
                               label={`📄 ${ct.contenu?.title}`}
                               size="small"
                               variant="outlined"
-                              color="secondary"
+                              color="info"
                               onClick={() =>
                                 ct.contenu?.fileUrl &&
                                 window.open(ct.contenu.fileUrl, "_blank")
@@ -130,9 +146,7 @@ const SessionList = () => {
                 ))}
               </>
             )}
-
-            <Divider sx={{ my: 2 }} />
-          </Box>
+          </Paper>
         ))
       )}
     </Paper>

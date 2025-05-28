@@ -74,11 +74,25 @@ async update(id: number, data: any) {
   });
 }
 async publishProgram(id: number) {
-  return this.prisma.program.update({
+  const program = await this.prisma.program.findUnique({
     where: { id },
-    data: { published: true },
   });
+
+  if (!program) {
+    throw new NotFoundException('Programme non trouvé');
+  }
+
+  const updated = await this.prisma.program.update({
+    where: { id },
+    data: { published: !program.published },
+  });
+
+  return {
+    message: `Programme ${updated.published ? 'publié' : 'dépublié'} avec succès ✅`,
+    program: updated,
+  };
 }
+
 
 
 }

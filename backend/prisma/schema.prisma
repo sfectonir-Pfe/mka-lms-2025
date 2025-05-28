@@ -33,6 +33,9 @@ enum FileType {
   PDF
   IMAGE
   VIDEO
+  WORD
+  EXCEL
+  PPT
 }
 
 enum ContenuType {

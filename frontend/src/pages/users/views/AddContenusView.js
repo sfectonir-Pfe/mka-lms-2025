@@ -52,81 +52,107 @@ const AddContenusView = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h5" mt={4} mb={2}>
-        Ajouter un contenu
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          label="Titre"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          margin="normal"
-          required
-        />
+  <Container maxWidth="sm">
+    <Typography variant="h5" mt={4} mb={2}>
+      Ajouter un contenu
+    </Typography>
 
-        <TextField
-          select
-          fullWidth
-          label="Type de contenu"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          margin="normal"
-        >
-          <MenuItem value="Cours">Cours</MenuItem>
-          <MenuItem value="Exercice">Exercice</MenuItem>
-          <MenuItem value="Quiz">Quiz</MenuItem>
-        </TextField>
+    <form onSubmit={handleSubmit}>
+      <TextField
+        fullWidth
+        label="Titre"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        margin="normal"
+        required
+      />
 
-        {type !== "Quiz" && (
-          <>
-            <TextField
-              select
-              fullWidth
-              label="Type de fichier"
-              value={fileType}
-              onChange={(e) => setFileType(e.target.value)}
-              margin="normal"
-            >
-              <MenuItem value="PDF">PDF</MenuItem>
-              <MenuItem value="IMAGE">Image</MenuItem>
-              <MenuItem value="VIDEO">Vidéo</MenuItem>
-            </TextField>
+      <TextField
+        select
+        fullWidth
+        label="Type de contenu"
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        margin="normal"
+      >
+        <MenuItem value="Cours">Cours</MenuItem>
+        <MenuItem value="Exercice">Exercice</MenuItem>
+        <MenuItem value="Quiz">Quiz</MenuItem>
+      </TextField>
 
+      {type !== "Quiz" && (
+        <>
+          <TextField
+            select
+            fullWidth
+            label="Type de fichier"
+            value={fileType}
+            onChange={(e) => setFileType(e.target.value)}
+            margin="normal"
+          >
+            <MenuItem value="PDF">PDF</MenuItem>
+            <MenuItem value="IMAGE">Image</MenuItem>
+            <MenuItem value="VIDEO">Vidéo</MenuItem>
+            <MenuItem value="WORD">Word (.docx)</MenuItem>
+            <MenuItem value="EXCEL">Excel (.xlsx)</MenuItem>
+            <MenuItem value="PPT">PowerPoint (.pptx)</MenuItem>
+          </TextField>
+
+          <Button
+            variant="outlined"
+            component="label"
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            📎 Choisir un fichier {fileType && `(${fileType})`}
             <input
+              hidden
               type="file"
               accept={
                 fileType === "PDF"
                   ? ".pdf"
                   : fileType === "IMAGE"
                   ? "image/*"
-                  : "video/*"
+                  : fileType === "VIDEO"
+                  ? "video/*"
+                  : fileType === "WORD"
+                  ? ".doc,.docx"
+                  : fileType === "EXCEL"
+                  ? ".xls,.xlsx"
+                  : fileType === "PPT"
+                  ? ".ppt,.pptx"
+                  : "*"
               }
               onChange={handleFileChange}
-              style={{ marginTop: "16px" }}
-              required
             />
-          </>
-        )}
-
-        {type === "Quiz" && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Le fichier n'est pas nécessaire. Vous pourrez créer le quiz après avoir enregistré.
-          </Typography>
-        )}
-
-        <Box mt={3} display="flex" justifyContent="space-between">
-          <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
-            Annuler
           </Button>
-          <Button type="submit" variant="contained">
-            Enregistrer
-          </Button>
-        </Box>
-      </form>
-    </Container>
-  );
+
+          {file && (
+            <Typography variant="caption" color="text.secondary" mt={1}>
+              Fichier sélectionné : {file.name}
+            </Typography>
+          )}
+        </>
+      )}
+
+      {type === "Quiz" && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Le fichier n'est pas nécessaire. Vous pourrez créer le quiz après avoir enregistré.
+        </Typography>
+      )}
+
+      <Box mt={3} display="flex" justifyContent="space-between">
+        <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
+          Annuler
+        </Button>
+        <Button type="submit" variant="contained">
+          Enregistrer
+        </Button>
+      </Box>
+    </form>
+  </Container>
+);
+
 };
 
 export default AddContenusView;
