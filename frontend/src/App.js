@@ -47,6 +47,7 @@ import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
 import ModuleList from './pages/users/views/ModuleList';
 import EditProgramView from "./pages/users/views/EditProgramView";
 import SessionPage from "./pages/SessionPage";
+import EditQuizForm from "./pages/users/views/EditQuizForm";
 
 
 
@@ -159,6 +160,8 @@ function App() {
                 <Route path="/modules" element={<ModuleList />} />
                 <Route path="/programs/edit/:programId" element={<EditProgramView />} />
                 <Route path="/sessions" element={<SessionPage />} />
+<Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
+
                 
 
 

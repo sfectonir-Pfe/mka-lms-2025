@@ -19,11 +19,19 @@ import ClearIcon from "@mui/icons-material/Clear";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
-const AddQuizForm = () => {
-  const { contenuId } = useParams();
+const AddQuizForm = ({
+  contenuId: propContenuId,
+  initialTimeLimit = 5,
+  initialQuestions = [],
+  editMode = false,
+}) => {
+  const params = useParams();
   const navigate = useNavigate();
-  const [timeLimitMinutes, setTimeLimitMinutes] = useState(5);
-  const [questions, setQuestions] = useState([]);
+
+  const contenuId = propContenuId || params.contenuId;
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(initialTimeLimit);
+  const [questions, setQuestions] = useState(initialQuestions);
+
 
   const addQuestion = () => {
     setQuestions([
@@ -145,20 +153,51 @@ const AddQuizForm = () => {
     input.click();
   };
 
-  const handleSubmit = async () => {
-    try {
-      await axios.post("http://localhost:8000/quizzes", {
-        contenuId: parseInt(contenuId),
-        timeLimit: timeLimitMinutes * 60,
-        questions,
-      });
-      alert("✅ Quiz créé avec succès !");
-      navigate("/contenus");
-    } catch (err) {
-      console.error("Erreur création quiz", err);
-      alert("❌ Échec de création du quiz.");
+ const handleSubmit = async () => {
+  // ✅ Validate first
+  for (const [i, q] of questions.entries()) {
+    if (!q.text.trim()) {
+      alert(`❌ La question ${i + 1} doit avoir un texte.`);
+      return;
     }
-  };
+
+    if (q.type !== "FILL_BLANK" && !q.choices.some((c) => c.isCorrect)) {
+      alert(`❌ La question ${i + 1} doit avoir au moins une bonne réponse.`);
+      return;
+    }
+
+    if (q.type !== "FILL_BLANK" && q.choices.some((c) => !c.text.trim() && !c.imageUrl)) {
+      alert(`❌ Tous les choix de la question ${i + 1} doivent avoir un texte ou une image.`);
+      return;
+    }
+
+    if (q.type === "FILL_BLANK" && !q.correctText.trim()) {
+      alert(`❌ La question ${i + 1} de type "Remplir le blanc" doit avoir une réponse correcte.`);
+      return;
+    }
+  }
+
+  // ✅ Submit after validation
+  try {
+    const endpoint = editMode
+      ? `http://localhost:8000/quizzes/by-contenu/${contenuId}`
+      : `http://localhost:8000/quizzes`;
+
+    const method = editMode ? axios.patch : axios.post;
+
+    await method(endpoint, {
+      contenuId: parseInt(contenuId),
+      timeLimit: timeLimitMinutes * 60,
+      questions,
+    });
+
+    alert(editMode ? "✅ Quiz modifié avec succès !" : "✅ Quiz créé avec succès !");
+    navigate("/contenus");
+  } catch (err) {
+    console.error("Erreur soumission quiz", err);
+    alert("❌ Échec lors de la soumission du quiz.");
+  }
+};
 
   return (
     <Box maxWidth="900px" mx="auto" mt={4} pb={8}>

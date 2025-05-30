@@ -147,59 +147,90 @@ const PlayQuizPage = () => {
 
       {/* Questions */}
       {!timerExpired && questions.map((q, index) => (
-        <Paper key={q.id} sx={{ p: 3, mb: 3 }}>
-          <Typography fontWeight="bold">
-            {index + 1}. {q.text}
-          </Typography>
+       <Paper
+  key={q.id}
+  elevation={3}
+  sx={{
+    p: 4,
+    mb: 4,
+    borderRadius: 3,
+    backgroundColor: "#fafafa",
+    borderLeft: "5px solid #1976d2",
+  }}
+>
+  <Typography variant="h6" fontWeight="bold" mb={1}>
+    🧠 Question {index + 1}
+  </Typography>
 
-          {q.imageUrl && (
-            <img src={q.imageUrl} alt="question" style={{ maxWidth: "100%", marginTop: 10 }} />
-          )}
+  <Typography variant="subtitle1" mb={2}>
+    {q.text}
+  </Typography>
 
-          {["MCQ", "TRUE_FALSE", "IMAGE_CHOICE"].includes(q.type) && (
-            <FormControl component="fieldset">
-              <RadioGroup
-                value={answers[q.id] || ""}
-                onChange={(e) => handleSelect(q.id, e.target.value)}
-              >
-                {q.choices.map((choice) => (
-                  <FormControlLabel
-                    key={choice.id}
-                    value={choice.id.toString()}
-                    control={<Radio />}
-                    label={
-                      q.type === "IMAGE_CHOICE" ? (
-                        <img
-                          src={choice.imageUrl}
-                          alt={`Choix ${choice.id}`}
-                          style={{
-                            width: "180px",
-                            height: "auto",
-                            borderRadius: "8px",
-                            border: "1px solid #ccc",
-                            padding: "4px",
-                          }}
-                        />
-                      ) : (
-                        choice.text
-                      )
-                    }
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
-          )}
+  {q.imageUrl && (
+    <Box textAlign="center" mb={2}>
+      <img
+        src={q.imageUrl}
+        alt="question"
+        style={{ maxWidth: "100%", borderRadius: 8 }}
+      />
+    </Box>
+  )}
 
-          {q.type === "FILL_BLANK" && (
-            <TextField
-              fullWidth
-              label="Votre réponse"
-              value={answers[q.id] || ""}
-              onChange={(e) => handleSelect(q.id, e.target.value)}
-              sx={{ mt: 2 }}
-            />
-          )}
-        </Paper>
+  {["MCQ", "TRUE_FALSE", "IMAGE_CHOICE"].includes(q.type) && (
+    <FormControl component="fieldset">
+      <RadioGroup
+        value={answers[q.id] || ""}
+        onChange={(e) => handleSelect(q.id, e.target.value)}
+      >
+        {q.choices.map((choice) => (
+          <FormControlLabel
+            key={choice.id}
+            value={choice.id.toString()}
+            control={<Radio />}
+            label={
+              q.type === "IMAGE_CHOICE" ? (
+                <img
+                  src={choice.imageUrl}
+                  alt={`Choix ${choice.id}`}
+                  style={{
+                    width: "180px",
+                    borderRadius: 8,
+                    border: "2px solid #ccc",
+                    padding: "4px",
+                  }}
+                />
+              ) : (
+                choice.text
+              )
+            }
+            sx={{
+              backgroundColor:
+                answers[q.id] === choice.id.toString() ? "#e3f2fd" : "transparent",
+              borderRadius: 2,
+              px: 2,
+              my: 1,
+              transition: "0.2s",
+              "&:hover": {
+                backgroundColor: "#f0f7ff",
+              },
+            }}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
+  )}
+
+  {q.type === "FILL_BLANK" && (
+    <TextField
+      fullWidth
+      label="Votre réponse"
+      value={answers[q.id] || ""}
+      onChange={(e) => handleSelect(q.id, e.target.value)}
+      sx={{ mt: 2 }}
+    />
+  )}
+</Paper>
+
       ))}
 
       {/* Time expired message */}

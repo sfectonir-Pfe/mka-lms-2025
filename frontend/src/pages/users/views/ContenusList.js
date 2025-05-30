@@ -1,6 +1,6 @@
 // src/pages/users/views/ContenusList.js
 import React, { useEffect, useState } from "react";
-import { Box, Button, Typography, Grid } from "@mui/material";
+import { Box, Button, Typography, Grid,Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,19 +26,21 @@ const ContenusList = () => {
     }
   };
 
-  const columns = [
-    { field: "id", headerName: "ID", width: 80 },
-    { field: "title", headerName: "Titre", flex: 1 },
-    { field: "type", headerName: "Type", width: 130 },
-    { field: "fileType", headerName: "Fichier", width: 130 },
-    {
-      field: "fileUrl",
-      headerName: "Lien",
-      flex: 1,
-      renderCell: (params) => {
-        const isQuiz = params.row.type === "Quiz";
-        if (isQuiz) {
-          return (
+ const columns = [
+  { field: "id", headerName: "ID", width: 80 },
+  { field: "title", headerName: "Titre", flex: 1 },
+  { field: "type", headerName: "Type", width: 130 },
+  { field: "fileType", headerName: "Fichier", width: 130 },
+  {
+    field: "fileUrl",
+    headerName: "Lien",
+    flex: 1,
+    renderCell: (params) => {
+      const isQuiz = params.row.type === "Quiz";
+
+      if (isQuiz) {
+        return (
+          <Stack direction="row" spacing={1}>
             <Button
               variant="outlined"
               size="small"
@@ -47,40 +49,51 @@ const ContenusList = () => {
             >
               Prendre le quiz
             </Button>
-          );
-        } else {
-          return params.row.fileUrl ? (
-            <a
-              href={params.row.fileUrl}
-              target="_blank"
-              rel="noreferrer"
+            <Button
+              variant="outlined"
+              size="small"
+              color="secondary"
+              onClick={() => navigate(`/quizzes/edit/${params.row.id}`)}
             >
-              Voir
-            </a>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              Aucun fichier
-            </Typography>
-          );
-        }
-      },
+              Modifier
+            </Button>
+          </Stack>
+        );
+      } else {
+        return params.row.fileUrl ? (
+          <Button
+            variant="outlined"
+            size="small"
+            color="info"
+            onClick={() => window.open(params.row.fileUrl, "_blank")}
+          >
+            Voir
+          </Button>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Aucun fichier
+          </Typography>
+        );
+      }
     },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 1,
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          onClick={() => handleDelete(params.row.id)}
-        >
-          Supprimer
-        </Button>
-      ),
-    },
-  ];
+  },
+  {
+    field: "actions",
+    headerName: "Actions",
+    flex: 1,
+    renderCell: (params) => (
+      <Button
+        variant="outlined"
+        color="error"
+        size="small"
+        onClick={() => handleDelete(params.row.id)}
+      >
+        Supprimer
+      </Button>
+    ),
+  },
+];
+
 
   return (
     <Box mt={4}>
