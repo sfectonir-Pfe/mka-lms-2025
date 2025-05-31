@@ -94,7 +94,7 @@ const BuildProgramView = () => {
     ));
 
     try {
-      await axios.post("http://localhost:8000/sessions", formData, {
+      await axios.post("http://localhost:8000/buildProgram", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       alert("✅ Programme construit avec succès !");

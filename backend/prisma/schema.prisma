@@ -124,7 +124,7 @@ model Program {
   published Boolean @default(false)
 
   modules   ProgramModule[]
-  sessions  Session[]
+  buildProgram  buildProgram[]
   sessions2 Session2[]
 }
 
@@ -135,7 +135,7 @@ model Module {
   duration        Int
   programs        ProgramModule[]
   courses         ModuleCourse[]
-  sessionModules  SessionModule[]
+  buildProgramModules  buildProgramModule[]
   session2Modules Session2Module[]
 }
 
@@ -144,7 +144,7 @@ model Course {
   title           String
   modules         ModuleCourse[]
   courseContenus  CourseContenu[]
-  sessionCourses  SessionCourse[]
+  buildProgramCourses  buildProgramCourse[]
   session2Courses Session2Course[]
 }
 
@@ -155,7 +155,7 @@ model Contenu {
   fileType         FileType?
   type             ContenuType
   courseContenus   CourseContenu[] // NEW many-to-many
-  sessionContenus  SessionContenu[]
+  buildProgramContenus  buildProgramContenu[]
   session2Contenus Session2Contenu[]
   quiz             Quiz?
 }
@@ -190,7 +190,7 @@ model CourseContenu {
   @@unique([courseId, contenuId])
 }
 
-model Session {
+model buildProgram {
   id        Int       @id @default(autoincrement())
   program   Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId Int
@@ -199,40 +199,40 @@ model Session {
   imageUrl  String?
   level     String    @default("Basique")
 
-  modules   SessionModule[]
+  modules   buildProgramModule[]
   createdAt DateTime?       @default(now())
 }
 
-model SessionModule {
+model buildProgramModule {
   id        Int             @id @default(autoincrement())
-  session   Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  sessionId Int
+  buildProgram   buildProgram         @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
+  buildProgramId Int
   module    Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   moduleId  Int
-  courses   SessionCourse[]
+  courses   buildProgramCourse[]
 
-  @@unique([sessionId, moduleId])
+  @@unique([buildProgramId, moduleId])
 }
 
-model SessionCourse {
+model buildProgramCourse {
   id              Int              @id @default(autoincrement())
-  sessionModule   SessionModule    @relation(fields: [sessionModuleId], references: [id], onDelete: Cascade)
-  sessionModuleId Int
+  buildProgramModule   buildProgramModule    @relation(fields: [buildProgramModuleId], references: [id], onDelete: Cascade)
+  buildProgramModuleId Int
   course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId        Int
-  contenus        SessionContenu[]
+  contenus        buildProgramContenu[]
 
-  @@unique([sessionModuleId, courseId])
+  @@unique([buildProgramModuleId, courseId])
 }
 
-model SessionContenu {
+model buildProgramContenu {
   id              Int           @id @default(autoincrement())
-  sessionCourse   SessionCourse @relation(fields: [sessionCourseId], references: [id], onDelete: Cascade)
-  sessionCourseId Int
+  buildProgramCourse   buildProgramCourse @relation(fields: [buildProgramCourseId], references: [id], onDelete: Cascade)
+  buildProgramCourseId Int
   contenu         Contenu       @relation(fields: [contenuId], references: [id], onDelete: Cascade)
   contenuId       Int
 
-  @@unique([sessionCourseId, contenuId])
+  @@unique([buildProgramCourseId, contenuId])
 }
 
 enum QuestionType {

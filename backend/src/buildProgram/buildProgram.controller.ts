@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete,UploadedFile, UseInterceptors} from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma'; // or your local path
-import { CreateSessionDto } from './dto/create-session.dto';
-import { UpdateSessionDto } from './dto/update-session.dto';
-import { SessionsService } from './session.service';
+import { CreatebuildProgramDto } from './dto/create-buildProgram.dto';
+import { UpdatebuildProgramDto } from './dto/update-buildProgram.dto';
+import { buildProgramService } from './buildProgram.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -15,15 +15,15 @@ const storage = diskStorage({
   },
 });
 
-@Controller('sessions')
-export class SessionsController {
-  constructor(private readonly sessionsService: SessionsService) {}
+@Controller('buildProgram')
+export class buildProgramController {
+  constructor(private readonly buildProgramService: buildProgramService) {}
 @Post()
 @UseInterceptors(FileInterceptor('image', { storage }))
 async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
   const { startDate, endDate, level, ...rest } = body;
 
-  return this.sessionsService.create({
+  return this.buildProgramService.create({
     ...rest,
     level: level || "Basique",
     startDate: startDate || null,
@@ -36,11 +36,11 @@ async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
 
   @Get()
   findAll() {
-    return this.sessionsService.findAll();
+    return this.buildProgramService.findAll();
   }
   @Delete(':id')
 remove(@Param('id') id: string) {
-  return this.sessionsService.remove(+id);
+  return this.buildProgramService.remove(+id);
 }
 @Patch(':id')
 @UseInterceptors(FileInterceptor('image', { storage }))
@@ -49,11 +49,11 @@ async update(
   @UploadedFile() file: Express.Multer.File,
   @Body() body: any
 ) {
-  return this.sessionsService.update(+id, body, file);
+  return this.buildProgramService.update(+id, body, file);
 }
 @Get('program/:programId')
 getByProgram(@Param('programId') programId: string) {
-  return this.sessionsService.findByProgramId(+programId);
+  return this.buildProgramService.findByProgramId(+programId);
 }
 
 

@@ -1,32 +1,32 @@
 import { IsArray, IsDateString, IsInt, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class CreateSessionContenuDto {
+export class CreatebuildProgramContenuDto {
   @IsInt()
   contenuId: number;
 }
 
-export class CreateSessionCourseDto {
+export class CreatebuildProgramCourseDto {
   @IsInt()
   courseId: number;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateSessionContenuDto)
-  contenus: CreateSessionContenuDto[];
+  @Type(() => CreatebuildProgramContenuDto)
+  contenus: CreatebuildProgramContenuDto[];
 }
 
-export class CreateSessionModuleDto {
+export class CreatebuildProgramModuleDto {
   @IsInt()
   moduleId: number;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateSessionCourseDto)
-  courses: CreateSessionCourseDto[];
+  @Type(() => CreatebuildProgramCourseDto)
+  courses: CreatebuildProgramCourseDto[];
 }
 
-export class CreateSessionDto {
+export class CreatebuildProgramDto {
   @IsInt()
   programId: number;
 
@@ -38,6 +38,6 @@ export class CreateSessionDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateSessionModuleDto)
-  modules: CreateSessionModuleDto[];
+  @Type(() => CreatebuildProgramModuleDto)
+  modules: CreatebuildProgramModuleDto[];
 }

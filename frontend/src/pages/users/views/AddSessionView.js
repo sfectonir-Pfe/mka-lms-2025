@@ -35,7 +35,7 @@ const [sessionName, setSessionName] = useState("");
   // Fetch program structure (preview)
   const fetchStructure = async (programId) => {
     try {
-      const res = await axios.get(`http://localhost:8000/sessions/program/${programId}`);
+      const res = await axios.get(`http://localhost:8000/buildProgram/program/${programId}`);
       setStructure(res.data);
     } catch {
       toast.error("Erreur chargement de la structure du programme");

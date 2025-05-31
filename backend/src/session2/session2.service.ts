@@ -8,7 +8,7 @@ export class Session2Service {
   async create(data: any, file?: Express.Multer.File) {
     const { name, programId, startDate, endDate } = data;
 
-    const programStructure = await this.prisma.session.findFirst({
+    const programStructure = await this.prisma.buildProgram.findFirst({
       where: { programId: Number(programId) },
       include: {
         modules: {

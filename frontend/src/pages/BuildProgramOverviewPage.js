@@ -37,25 +37,25 @@ const Section = ({ title, items, renderItem, expanded, onToggle }) => (
 );
 
 export default function BuildProgramOverviewPage() {
-  const [sessions, setSessions] = useState([]);
+  const [buildProgram, setbuildProgram] = useState([]);
   const [search, setSearch] = useState("");
-  const [showSessions, setShowSessions] = useState(true);
+  const [showbuildProgram, setShowbuildProgram] = useState(true);
   const navigate = useNavigate();
   const { programId } = useParams();
 
-  const fetchSessions = useCallback(async () => {
+  const fetchbuildProgram = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:8000/sessions");
+      const res = await axios.get("http://localhost:8000/buildProgram");
       const all = res.data;
-      setSessions(programId ? all.filter(s => s.programId === Number(programId)) : all);
+      setbuildProgram(programId ? all.filter(s => s.programId === Number(programId)) : all);
     } catch (err) {
       toast.error("Erreur chargement des programmes.");
     }
   }, [programId]);
 
   useEffect(() => {
-    fetchSessions();
-  }, [fetchSessions]);
+    fetchbuildProgram();
+  }, [fetchbuildProgram]);
 
   const filterBySearch = (s) =>
     s.program?.name?.toLowerCase().includes(search.toLowerCase());
@@ -85,24 +85,24 @@ export default function BuildProgramOverviewPage() {
 
     <Section
       title="Programmes"
-      items={sessions.filter(filterBySearch)}
-      expanded={showSessions}
-      onToggle={() => setShowSessions((prev) => !prev)}
-      renderItem={(session) => (
+      items={buildProgram.filter(filterBySearch)}
+      expanded={showbuildProgram}
+      onToggle={() => setShowbuildProgram((prev) => !prev)}
+      renderItem={(buildProgram) => (
         <Box component={Paper} elevation={1} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-            📘 Programme : {session.program.name}
+            📘 Programme : {buildProgram.program.name}
           </Typography>
 
-          {session.level && (
+          {buildProgram.level && (
             <Typography variant="body2" sx={{ mb: 1 }}>
-              🎯 Niveau : <strong>{session.level}</strong>
+              🎯 Niveau : <strong>{buildProgram.level}</strong>
             </Typography>
           )}
 
           <Divider sx={{ my: 1 }} />
 
-          {session.modules.map((m) => (
+          {buildProgram.modules.map((m) => (
             <Box key={m.id} mb={2}>
               <Typography fontWeight="bold" color="primary.main">📦 {m.module.name}</Typography>
 
@@ -131,12 +131,12 @@ export default function BuildProgramOverviewPage() {
             <Button
               variant="outlined"
               color="info"
-              onClick={() => navigate(`/programs/edit/${session.program.id}`)}
+              onClick={() => navigate(`/programs/edit/${buildProgram.program.id}`)}
             >
               🛠️ Modifier
             </Button>
 
-            {session.program.published && (
+            {buildProgram.program.published && (
   <Chip
     label="Publié"
     icon={<span style={{ fontSize: 14 }}>✅</span>}
@@ -153,17 +153,17 @@ export default function BuildProgramOverviewPage() {
 )}
 
 <Button
-  variant={session.program.published ? "outlined" : "contained"}
-  color={session.program.published ? "warning" : "success"}
+  variant={buildProgram.program.published ? "outlined" : "contained"}
+  color={buildProgram.program.published ? "warning" : "success"}
   onClick={async () => {
     try {
-      await axios.patch(`http://localhost:8000/programs/${session.program.id}/publish`);
+      await axios.patch(`http://localhost:8000/programs/${buildProgram.program.id}/publish`);
       toast.success(
-        session.program.published
+        buildProgram.program.published
           ? "Programme dépublié avec succès !"
           : "Programme publié avec succès !"
       );
-      fetchSessions(); // refresh list
+      fetchbuildProgram(); // refresh list
     } catch (err) {
       toast.error("Erreur lors de la mise à jour du statut de publication.");
     }
@@ -176,15 +176,15 @@ export default function BuildProgramOverviewPage() {
     px: 2.5,
     py: 0.8,
     height: 36,
-    backgroundColor: session.program.published ? "#fff3e0" : "#e8f5e9",
-    color: session.program.published ? "#ef6c00" : "#2e7d32",
-    border: `1px solid ${session.program.published ? "#ef6c00" : "#2e7d32"}`,
+    backgroundColor: buildProgram.program.published ? "#fff3e0" : "#e8f5e9",
+    color: buildProgram.program.published ? "#ef6c00" : "#2e7d32",
+    border: `1px solid ${buildProgram.program.published ? "#ef6c00" : "#2e7d32"}`,
     "&:hover": {
-      backgroundColor: session.program.published ? "#ffe0b2" : "#c8e6c9",
+      backgroundColor: buildProgram.program.published ? "#ffe0b2" : "#c8e6c9",
     },
   }}
 >
-  {session.program.published ? "❌ Dépublier" : "📤 Publier"}
+  {buildProgram.program.published ? "❌ Dépublier" : "📤 Publier"}
 </Button>
 
           </Box>

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
-export class SessionsService {
+export class buildProgramService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: any) {
@@ -10,7 +10,7 @@ export class SessionsService {
 
     const parsedModules = JSON.parse(modules);
 
-    const session = await this.prisma.session.create({
+    const buildProgram = await this.prisma.buildProgram.create({
       data: {
         programId: Number(programId),
         level,
@@ -22,25 +22,25 @@ export class SessionsService {
     });
 
     for (const mod of parsedModules) {
-      const sessionModule = await this.prisma.sessionModule.create({
+      const buildProgramModule = await this.prisma.buildProgramModule.create({
         data: {
-          sessionId: session.id,
+          buildProgramId: buildProgram.id,
           moduleId: mod.moduleId,
         },
       });
 
       for (const course of mod.courses) {
-        const sessionCourse = await this.prisma.sessionCourse.create({
+        const buildProgramCourse = await this.prisma.buildProgramCourse.create({
           data: {
-            sessionModuleId: sessionModule.id,
+            buildProgramModuleId: buildProgramModule.id,
             courseId: course.courseId,
           },
         });
 
         for (const contenu of course.contenus) {
-          await this.prisma.sessionContenu.create({
+          await this.prisma.buildProgramContenu.create({
             data: {
-              sessionCourseId: sessionCourse.id,
+              buildProgramCourseId: buildProgramCourse.id,
               contenuId: contenu.contenuId,
             },
           });
@@ -48,11 +48,11 @@ export class SessionsService {
       }
     }
 
-    return { message: 'Session créée avec succès ✅', sessionId: session.id };
+    return { message: 'Program créée avec succès ✅', buildProgramId: buildProgram.id };
   }
 
   async findAll() {
-    return this.prisma.session.findMany({
+    return this.prisma.buildProgram.findMany({
       include: {
         program: true,
         modules: {
@@ -75,7 +75,7 @@ export class SessionsService {
   }
 
   async remove(id: number) {
-    return this.prisma.session.delete({
+    return this.prisma.buildProgram.delete({
       where: { id },
     });
   }
@@ -84,7 +84,7 @@ export class SessionsService {
   const parsedModules = typeof modules === 'string' ? JSON.parse(modules) : modules;
 
   // 1. Update base session data
-  await this.prisma.session.update({
+  await this.prisma.buildProgram.update({
     where: { id },
     data: {
       level: level || "Basique",
@@ -95,39 +95,39 @@ export class SessionsService {
   });
 
   // 2. Remove all existing session links
-  await this.prisma.sessionContenu.deleteMany({
-    where: { sessionCourse: { sessionModule: { sessionId: id } } },
+  await this.prisma.buildProgramContenu.deleteMany({
+    where: { buildProgramCourse: { buildProgramModule: { buildProgramId: id } } },
   });
 
-  await this.prisma.sessionCourse.deleteMany({
-    where: { sessionModule: { sessionId: id } },
+  await this.prisma.buildProgramCourse.deleteMany({
+    where: { buildProgramModule: { buildProgramId: id } },
   });
 
-  await this.prisma.sessionModule.deleteMany({
-    where: { sessionId: id },
+  await this.prisma.buildProgramModule.deleteMany({
+    where: { buildProgramId: id },
   });
 
   // 3. Re-create updated structure
   for (const mod of parsedModules) {
-    const sessionModule = await this.prisma.sessionModule.create({
+    const buildProgramModule = await this.prisma.buildProgramModule.create({
       data: {
-        sessionId: id,
+        buildProgramId: id,
         moduleId: mod.moduleId,
       },
     });
 
     for (const course of mod.courses) {
-      const sessionCourse = await this.prisma.sessionCourse.create({
+      const buildProgramCourse = await this.prisma.buildProgramCourse.create({
         data: {
-          sessionModuleId: sessionModule.id,
+          buildProgramModuleId: buildProgramModule.id,
           courseId: course.courseId,
         },
       });
 
       for (const contenu of course.contenus) {
-        await this.prisma.sessionContenu.create({
+        await this.prisma.buildProgramContenu.create({
           data: {
-            sessionCourseId: sessionCourse.id,
+            buildProgramCourseId: buildProgramCourse.id,
             contenuId: contenu.contenuId,
           },
         });
@@ -135,10 +135,10 @@ export class SessionsService {
     }
   }
 
-  return { message: "✅ Session modifiée avec succès !" };
+  return { message: "✅ Program modifiée avec succès !" };
 }
 async findByProgramId(programId: number) {
-  return this.prisma.session.findFirst({
+  return this.prisma.buildProgram.findFirst({
     where: { programId },
     include: {
       program: true,

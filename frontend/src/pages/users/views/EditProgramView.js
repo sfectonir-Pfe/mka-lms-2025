@@ -27,27 +27,27 @@ const EditProgramBuildView = () => {
   const [selectedCourses, setSelectedCourses] = useState({});
   const [selectedContenus, setSelectedContenus] = useState({});
   const [level, setLevel] = useState("");
-  const [sessionId, setSessionId] = useState(null);
+  const [buildProgramId, setbuildProgramId] = useState(null);
 const [search, setSearch] = useState("");
 const [searchScope, setSearchScope] = useState("module");
 
   useEffect(() => {
     axios.get("http://localhost:8000/modules").then(res => setModules(res.data));
 
-    axios.get(`http://localhost:8000/sessions/program/${programId}`)
+    axios.get(`http://localhost:8000/buildProgram/program/${programId}`)
       .then(async (res) => {
-        const session = res.data;
-        setSessionId(session.id);
-        setProgramName(session.program.name);
-        setLevel(session.level);
+        const buildProgram = res.data;
+        setbuildProgramId(buildProgram.id);
+        setProgramName(buildProgram.program.name);
+        setLevel(buildProgram.level);
 
-        const selectedModuleIds = session.modules.map(sm => sm.module.id);
+        const selectedModuleIds = buildProgram.modules.map(sm => sm.module.id);
         setSelectedModules(selectedModuleIds);
 
         const courseMap = {};
         const contenuMap = {};
 
-        for (const sm of session.modules) {
+        for (const sm of buildProgram.modules) {
           const moduleId = sm.module.id;
 
           if (!coursesByModule[moduleId]) {
@@ -72,7 +72,7 @@ const [searchScope, setSearchScope] = useState("module");
         setSelectedContenus(contenuMap);
       })
       .catch((err) => {
-        console.error("Erreur chargement session du programme:", err);
+        console.error("Erreur chargement Program du programme:", err);
       });
   }, [programId]);
 
@@ -111,7 +111,7 @@ const [searchScope, setSearchScope] = useState("module");
   };
 
   const handleSubmit = async () => {
-    if (!sessionId || !programName || !level || selectedModules.length === 0) {
+    if (!buildProgramId || !programName || !level || selectedModules.length === 0) {
       alert("Veuillez remplir tous les champs nécessaires.");
       return;
     }
@@ -122,7 +122,7 @@ const [searchScope, setSearchScope] = useState("module");
         name: programName,
       });
 
-      // 2. Update session structure
+      // 2. Update buildProgram structure
       const modulesPayload = selectedModules.map((moduleId) => {
         const courseIds = selectedCourses[moduleId] || [];
         return {
@@ -142,7 +142,7 @@ const [searchScope, setSearchScope] = useState("module");
       formData.append("level", level);
       formData.append("modules", JSON.stringify(modulesPayload));
 
-      await axios.patch(`http://localhost:8000/sessions/${sessionId}`, formData, {
+      await axios.patch(`http://localhost:8000/buildProgram/${buildProgramId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
