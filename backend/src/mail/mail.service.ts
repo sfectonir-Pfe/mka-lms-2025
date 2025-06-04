@@ -30,7 +30,7 @@ export class MailService {
         <h3>Welcome to the LMS!</h3>
         <p>Your account has been created successfully. Here are your login credentials:</p>
         <ul>
-          <li><strong>Email:</strong> ${to}</li>
+         
           <li><strong>Temporary Password:</strong> ${tempPassword}</li>
           <li><strong>Role:</strong> ${role}</li>
         </ul>
@@ -40,7 +40,22 @@ export class MailService {
       `,
     };
 
+
     await this.mailerService.sendMail(mailOptions);
   }
+  async sendEmailVerificationCode(to: string, code: string) {
+  const mailOptions = {
+    from: 'MKA LMS <your-email@gmail.com>',
+    to,
+    subject: 'Code de vérification',
+    html: `
+      <h3>Code de vérification</h3>
+      <p>Voici votre code : <strong>${code}</strong></p>
+      <p>Ce code est valable pendant 5 minutes.</p>
+    `,
+  };
+  await this.mailerService.sendMail(mailOptions);
+}
+
 }
   

@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 const AddUserView = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("Etudiant");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -16,28 +17,33 @@ const AddUserView = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
+  e.preventDefault();
+  setErrorMessage("");
 
-    if (!validateEmail(email)) {
-      setErrorMessage("Adresse email invalide.");
-      return;
-    }
+  if (!validateEmail(email)) {
+    setErrorMessage("Adresse email invalide.");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await axios.post("http://localhost:8000/users", {
-        email,
-        role,
-      });
-      navigate("/users"); // or wherever your user list is
-    } catch (error) {
-      console.error(error);
-      setErrorMessage("Erreur lors de la création de l'utilisateur.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    // 1️⃣ Créer l'utilisateur
+    await axios.post("http://localhost:8000/users", {
+      email,
+      phone,
+      role,
+    });
+
+    // ✅ Just show message — no code sending here
+    alert("✅ Utilisateur créé. Le mot de passe temporaire a été envoyé par email.");
+    navigate("/users");
+  } catch (error) {
+    console.error(error);
+    setErrorMessage("Erreur lors de la création de l'utilisateur.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="container mt-5">
@@ -50,6 +56,18 @@ const AddUserView = () => {
             className="form-control"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="form-label">Téléphone :</label>
+          <input
+            type="tel"
+            className="form-control"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+216xxxxxxxx"
             required
           />
         </div>

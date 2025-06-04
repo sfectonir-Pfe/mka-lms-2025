@@ -48,6 +48,9 @@ import ModuleList from './pages/users/views/ModuleList';
 import EditProgramView from "./pages/users/views/EditProgramView";
 import SessionPage from "./pages/SessionPage";
 import EditQuizForm from "./pages/users/views/EditQuizForm";
+import VerifyAccountPage from './pages/VerifyAccountPage';
+
+
 
 
 
@@ -162,6 +165,8 @@ function App() {
                 <Route path="/sessions" element={<SessionPage />} />
 <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
 
+
+
                 
 
 
@@ -199,6 +204,10 @@ function App() {
                 <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
                 <Route path="reset-success" element={<ResetSuccessPage />} />
+              <Route path="/verify-sms" element={<VerifyAccountPage />} />
+
+               
+
               </Route>
             )}
 

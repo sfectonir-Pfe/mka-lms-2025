@@ -62,8 +62,16 @@ model User {
   skills     String[]
   about      String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isVerified Boolean  @default(false)
+
+  needsVerification Boolean @default(true) // ✅ ADD THIS LINE
+
+  // 🔐 Ajouts pour vérification email :
+  emailVerified         DateTime?
+  emailVerificationCode String?
+  codeExpiryDate        DateTime?
 
   resetToken              String?
   resetTokenExpiry        DateTime?
@@ -123,41 +131,41 @@ model Program {
   name      String
   published Boolean @default(false)
 
-  modules   ProgramModule[]
-  buildProgram  buildProgram[]
-  sessions2 Session2[]
+  modules      ProgramModule[]
+  buildProgram buildProgram[]
+  sessions2    Session2[]
 }
 
 model Module {
-  id              Int              @id @default(autoincrement())
-  name            String
-  periodUnit      PeriodUnit
-  duration        Int
-  programs        ProgramModule[]
-  courses         ModuleCourse[]
-  buildProgramModules  buildProgramModule[]
-  session2Modules Session2Module[]
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  periodUnit          PeriodUnit
+  duration            Int
+  programs            ProgramModule[]
+  courses             ModuleCourse[]
+  buildProgramModules buildProgramModule[]
+  session2Modules     Session2Module[]
 }
 
 model Course {
-  id              Int              @id @default(autoincrement())
-  title           String
-  modules         ModuleCourse[]
-  courseContenus  CourseContenu[]
-  buildProgramCourses  buildProgramCourse[]
-  session2Courses Session2Course[]
+  id                  Int                  @id @default(autoincrement())
+  title               String
+  modules             ModuleCourse[]
+  courseContenus      CourseContenu[]
+  buildProgramCourses buildProgramCourse[]
+  session2Courses     Session2Course[]
 }
 
 model Contenu {
-  id               Int               @id @default(autoincrement())
-  title            String
-  fileUrl          String?
-  fileType         FileType?
-  type             ContenuType
-  courseContenus   CourseContenu[] // NEW many-to-many
-  buildProgramContenus  buildProgramContenu[]
-  session2Contenus Session2Contenu[]
-  quiz             Quiz?
+  id                   Int                   @id @default(autoincrement())
+  title                String
+  fileUrl              String?
+  fileType             FileType?
+  type                 ContenuType
+  courseContenus       CourseContenu[] // NEW many-to-many
+  buildProgramContenus buildProgramContenu[]
+  session2Contenus     Session2Contenu[]
+  quiz                 Quiz?
 }
 
 model ProgramModule {
@@ -200,37 +208,37 @@ model buildProgram {
   level     String    @default("Basique")
 
   modules   buildProgramModule[]
-  createdAt DateTime?       @default(now())
+  createdAt DateTime?            @default(now())
 }
 
 model buildProgramModule {
-  id        Int             @id @default(autoincrement())
+  id             Int                  @id @default(autoincrement())
   buildProgram   buildProgram         @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
   buildProgramId Int
-  module    Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId  Int
-  courses   buildProgramCourse[]
+  module         Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId       Int
+  courses        buildProgramCourse[]
 
   @@unique([buildProgramId, moduleId])
 }
 
 model buildProgramCourse {
-  id              Int              @id @default(autoincrement())
+  id                   Int                   @id @default(autoincrement())
   buildProgramModule   buildProgramModule    @relation(fields: [buildProgramModuleId], references: [id], onDelete: Cascade)
   buildProgramModuleId Int
-  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId        Int
-  contenus        buildProgramContenu[]
+  course               Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId             Int
+  contenus             buildProgramContenu[]
 
   @@unique([buildProgramModuleId, courseId])
 }
 
 model buildProgramContenu {
-  id              Int           @id @default(autoincrement())
+  id                   Int                @id @default(autoincrement())
   buildProgramCourse   buildProgramCourse @relation(fields: [buildProgramCourseId], references: [id], onDelete: Cascade)
   buildProgramCourseId Int
-  contenu         Contenu       @relation(fields: [contenuId], references: [id], onDelete: Cascade)
-  contenuId       Int
+  contenu              Contenu            @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  contenuId            Int
 
   @@unique([buildProgramCourseId, contenuId])
 }

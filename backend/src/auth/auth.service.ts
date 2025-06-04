@@ -10,22 +10,30 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService, private readonly mailService: MailService) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+  const user = await this.prisma.user.findUnique({
+    where: { email: dto.email },
+  });
 
-    if (!user) {
-      throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
-    }
-
-    if (!(await bcrypt.compare(dto.password, user.password))) {
-      throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
-    }
-
-    // Remove sensitive information before returning
-    const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-    return safeUser;
+  if (!user) {
+    throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
   }
+
+  const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+  if (!isPasswordValid) {
+    throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
+  }
+
+  // ✅ Vérification : bloquer si non vérifié sauf si Admin
+ if (!user.isVerified && user.role.toLowerCase() !== 'admin') {
+  console.log('🧠 Forcing verification for:', user.email, 'Role:', user.role);
+  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
+  return { ...safeUser, needsVerification: true };
+}
+
+const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
+return { ...safeUser, needsVerification: false }; // Always include this
+
+}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
@@ -239,4 +247,25 @@ export class AuthService {
 
     return { message: 'Password changed successfully' };
   }
+  async verifyUser(email: string) {
+  if (!email || typeof email !== 'string') {
+    throw new Error('Email invalide');
+  }
+
+  const user = await this.prisma.user.findUnique({ where: { email } });
+  if (!user) throw new Error('Utilisateur introuvable');
+  if (user.isVerified) return { message: 'Déjà vérifié', user };
+
+  const updated = await this.prisma.user.update({
+    where: { email },
+    data: {
+      isVerified: true,
+      needsVerification: false, // ✅ add this
+    },
+  });
+
+  return { message: 'Utilisateur vérifié avec succès', user: updated };
+}
+
+
 }
