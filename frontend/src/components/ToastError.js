@@ -1,5 +1,4 @@
 import { Toast } from "react-bootstrap";
-import React from "react";
 
 export default function ToastError({ msg, show, setShow }) {
   return (

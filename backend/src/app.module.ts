@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from 'nestjs-prisma';
@@ -11,11 +11,11 @@ import { MailModule } from './mail/mail.module';
 import { ContenuModule } from './contenu/contenu.module';
 import { SessionModule } from './session/session.module';
 import { QuizModule } from './quiz/quiz.module';
-import { CaptchaModule } from './captcha/captcha.module';
 
-  @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule, CaptchaModule,],
 
+
+@Module({
+  imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule],
   controllers: [AppController],
   providers: [AppService],
 })

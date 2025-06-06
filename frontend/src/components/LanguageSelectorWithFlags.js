@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  Box, 
-  Button, 
-  Menu, 
-  MenuItem, 
-  ListItemIcon, 
+import {
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
   ListItemText,
-  Typography,
-  IconButton,
   Tooltip
 } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
@@ -43,7 +41,7 @@ const LanguageSelectorWithFlags = () => {
 
   const changeLanguage = (language) => {
     i18n.changeLanguage(language);
-    
+
     // Si la langue est l'arabe, définir la direction du document sur RTL
     if (language === 'ar') {
       document.documentElement.dir = 'rtl';
@@ -52,7 +50,7 @@ const LanguageSelectorWithFlags = () => {
       document.documentElement.dir = 'ltr';
       document.documentElement.lang = language;
     }
-    
+
     handleClose();
   };
 
@@ -78,7 +76,7 @@ const LanguageSelectorWithFlags = () => {
           endIcon={<LanguageIcon />}
           variant="outlined"
           size="small"
-          sx={{ 
+          sx={{
             borderRadius: '20px',
             textTransform: 'none',
             fontWeight: 'medium',
@@ -120,7 +118,7 @@ const LanguageSelectorWithFlags = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem 
+        <MenuItem
           onClick={() => changeLanguage('en')}
           selected={i18n.language === 'en'}
           sx={{ py: 1.5 }}
@@ -130,7 +128,7 @@ const LanguageSelectorWithFlags = () => {
           </ListItemIcon>
           <ListItemText>English</ListItemText>
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           onClick={() => changeLanguage('fr')}
           selected={i18n.language === 'fr'}
           sx={{ py: 1.5 }}
@@ -140,7 +138,7 @@ const LanguageSelectorWithFlags = () => {
           </ListItemIcon>
           <ListItemText>Français</ListItemText>
         </MenuItem>
-        <MenuItem 
+        <MenuItem
           onClick={() => changeLanguage('ar')}
           selected={i18n.language === 'ar'}
           sx={{ py: 1.5 }}

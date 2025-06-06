@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,14 +26,27 @@ const AddUserView = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:8000/users", {
+      console.log("Creating user with data:", { email, role });
+      const response = await axios.post("http://localhost:8000/users", {
         email,
         role,
       });
-      navigate("/users"); // or wherever your user list is
+      console.log("User created successfully:", response.data);
+
+      // Naviguer vers la liste des utilisateurs avec un paramètre pour forcer le rafraîchissement
+      navigate("/users", {
+        state: {
+          refresh: true,
+          message: "Utilisateur ajouté avec succès!"
+        }
+      });
     } catch (error) {
-      console.error(error);
-      setErrorMessage("Erreur lors de la création de l'utilisateur.");
+      console.error("Error creating user:", error);
+      if (error.response?.data?.message) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        setErrorMessage("Erreur lors de la création de l'utilisateur.");
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { DataGrid } from '@mui/x-data-grid';
 import {
   Box,
@@ -25,6 +25,7 @@ import {
 } from "@mui/icons-material";
 import axios from "axios";
 import { toast } from 'react-toastify';
+
 
 // ============================
 // DESIGN CONFIGURATION
@@ -53,15 +54,50 @@ function CustomToolbar({ refreshData }) {
 
 export default function UserList() {
   const theme = useTheme();
+  const location = useLocation();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
+  const [hasShownToast, setHasShownToast] = useState(false);
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  // Rafraîchir la liste quand on revient de la page d'ajout
+  useEffect(() => {
+    if (location.state?.refresh) {
+      console.log("Refreshing user list after user creation");
+      fetchUsers();
+
+      // Afficher un message de succès si fourni (une seule fois)
+      if (location.state?.message && !hasShownToast) {
+        // Vérifier si ce toast a déjà été affiché récemment
+        const lastToastTime = sessionStorage.getItem('lastUserCreatedToast');
+        const now = Date.now();
+
+        if (!lastToastTime || (now - parseInt(lastToastTime)) > 2000) {
+          // Utiliser un ID unique pour éviter les doublons
+          const toastId = `user-created-${now}`;
+          toast.success(location.state.message, { toastId });
+          setHasShownToast(true);
+          sessionStorage.setItem('lastUserCreatedToast', now.toString());
+        }
+      }
+
+      // Nettoyer l'état immédiatement
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state?.refresh, location.state?.message, hasShownToast, navigate]);
+
+  // Réinitialiser le flag quand on change de page
+  useEffect(() => {
+    return () => {
+      setHasShownToast(false);
+    };
+  }, [location.pathname]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -72,12 +108,29 @@ export default function UserList() {
 
       const data = response.data?.data || response.data;
       console.log("Processed data:", data);
+      console.log("Number of users fetched:", Array.isArray(data) ? data.length : 0);
 
       setUsers(Array.isArray(data) ? data : []);
+
+      if (Array.isArray(data) && data.length > 0) {
+        console.log("Users successfully loaded:", data.length);
+      } else {
+        console.log("No users found or empty response");
+      }
     } catch (error) {
-      toast.error("Failed to fetch users.");
       console.error("Fetch error:", error);
       console.error("Error details:", error.response?.data || error.message);
+
+      if (error.response?.status === 500) {
+        toast.error("Erreur serveur - Vérifiez que la base de données est accessible");
+      } else if (error.code === 'ECONNREFUSED') {
+        toast.error("Impossible de se connecter au serveur backend");
+      } else {
+        toast.error("Échec du chargement des utilisateurs");
+      }
+
+      // En cas d'erreur, garder la liste vide
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -91,13 +144,29 @@ export default function UserList() {
   const handleConfirmDelete = async () => {
     try {
       console.log("Deleting user with ID:", userToDelete.id);
-      await axios.delete(`http://localhost:8000/users/${userToDelete.id}`);
+      console.log("Delete URL:", `http://localhost:8000/users/${userToDelete.id}`);
+
+      const response = await axios.delete(`http://localhost:8000/users/${userToDelete.id}`);
+      console.log("Delete response:", response);
+
       setUsers(users.filter(user => user.id !== userToDelete.id));
       toast.success("User deleted successfully!");
     } catch (error) {
-      toast.error("Failed to delete user.");
       console.error("Delete error:", error);
-      console.error("Error details:", error.response?.data || error.message);
+      console.error("Error response:", error.response);
+      console.error("Error status:", error.response?.status);
+      console.error("Error data:", error.response?.data);
+      console.error("Error message:", error.message);
+
+      if (error.response?.status === 404) {
+        toast.error("User not found - may have already been deleted");
+      } else if (error.response?.status === 500) {
+        toast.error("Server error - please try again");
+      } else if (error.code === 'ECONNREFUSED') {
+        toast.error("Cannot connect to server - please check if backend is running");
+      } else {
+        toast.error(`Failed to delete user: ${error.response?.data?.message || error.message}`);
+      }
     } finally {
       setOpenDeleteDialog(false);
     }
@@ -140,9 +209,10 @@ export default function UserList() {
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Tooltip title="View profile">
             <IconButton
-              color="primary"
+
               onClick={() => navigate(`/ProfilePage/${params.row.id}`)}
               sx={{
+                color:"white",
                 bgcolor: theme.palette.primary.light,
                 '&:hover': { bgcolor: theme.palette.primary.main }
               }}
@@ -153,7 +223,6 @@ export default function UserList() {
 
           <Tooltip title="Edit user">
             <IconButton
-              color="primary"
               onClick={() => {
                 console.log("Navigating to edit profile with user:", params.row);
                 // Stocker temporairement l'utilisateur à éditer dans sessionStorage
@@ -161,6 +230,7 @@ export default function UserList() {
                 navigate(`/EditProfile/${params.row.email}`);
               }}
               sx={{
+                color:"white",
                 bgcolor: theme.palette.primary.light,
                 '&:hover': { bgcolor: theme.palette.primary.main }
               }}
@@ -171,9 +241,9 @@ export default function UserList() {
 
           <Tooltip title="Delete user">
             <IconButton
-              color="error"
               onClick={() => handleDeleteClick(params.row)}
               sx={{
+                color:"white",
                 bgcolor: theme.palette.error.light,
                 '&:hover': { bgcolor: theme.palette.error.main }
               }}

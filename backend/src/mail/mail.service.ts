@@ -1,102 +1,240 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import * as nodemailer from 'nodemailer';
-import { appConfig } from '../config/app.config';
+
 @Injectable()
 export class MailService {
   constructor(private readonly mailerService: MailerService) { }
 
+  private async send(to: string, subject: string, html: string) {
+    try {
+      const response =await  this.mailerService.sendMail({
+      from: 'LMS Platform <tunirdigital@gmail.com>',
+      to,
+      subject,
+      html,
+    });
+    console.log("Email sent successfully:", response)
+    return response;
+    } catch (error) {
+      console.log("Failed to send email:", error);
+    }
+    
+  }
 
   async sendPasswordResetEmail(to: string, token: string) {
-    try {
-      console.log(`Préparation de l'email de réinitialisation de mot de passe pour ${to}`);
+  const resetLink = `http://localhost:3000/ResetPasswordPage?token=${token}&email=${encodeURIComponent(to)}`;
+  return this.send(to, '🔐 Réinitialisation de mot de passe - Plateforme LMS', `
+    <div style="font-family:Segoe UI,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
 
-      // Construire l'URL de réinitialisation à partir de la configuration
-      const resetLink = `${appConfig.urls.frontendBaseUrl}${appConfig.urls.resetPassword}?token=${token}&email=${to}`;
-      console.log(`URL de réinitialisation générée: ${resetLink}`);
+      <!-- En-tête -->
+      <div style="background:#1976d2;padding:30px 20px;text-align:center;">
+        <h1 style="color:#fff;margin:0;font-size:24px;">🔐 Réinitialisation de mot de passe</h1>
+        <p style="color:#dce3ec;margin-top:8px;">Plateforme LMS</p>
+      </div>
 
-      const mailOptions = {
-        from: appConfig.email.defaultSender,
-        to: to,
-        subject: 'Demande de réinitialisation de mot de passe',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-            <h2 style="color: #1976d2; text-align: center;">Réinitialisation de mot de passe</h2>
-            <p>Vous avez demandé une réinitialisation de votre mot de passe. Voici votre code de réinitialisation :</p>
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
-              <p style="font-family: monospace; font-size: 24px; font-weight: bold; letter-spacing: 2px;">${token}</p>
-            </div>
-            <p>Cliquez sur le bouton ci-dessous pour réinitialiser votre mot de passe :</p>
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${resetLink}" style="background-color: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Réinitialiser mon mot de passe</a>
-            </div>
-            <p style="color: #757575; margin-top: 20px; font-size: 14px;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;" />
-            <p style="text-align: center; color: #757575; font-size: 14px;">– L'équipe LMS</p>
-          </div>
-        `,
-      };
+      <!-- Contenu -->
+      <div style="padding:30px 20px;">
+        <p style="font-size:16px;color:#333;">Bonjour,</p>
+        <p style="font-size:16px;color:#333;line-height:1.5;">
+          Nous avons reçu une demande de réinitialisation de votre mot de passe.<br>
+          
+        </p>
 
-      console.log("Envoi de l'email avec les options:", {
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        from: mailOptions.from
-      });
+       
 
-      const result = await this.mailerService.sendMail(mailOptions);
-      console.log("Email envoyé avec succès:", result);
-      return result;
-    } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email de réinitialisation:", error);
-      throw error;
-    }
-  }
-  async sendWelcomeEmail(to: string, tempPassword: string, role: string) {
-    try {
-      console.log(`Préparation de l'email de bienvenue pour ${to} avec le mot de passe temporaire: ${tempPassword}`);
+        <p style="font-size:15px;color:#333;margin-bottom:30px;">
+          Vous pouvez également cliquer sur le bouton ci-dessous pour procéder directement :
+        </p>
 
-      // Construire l'URL de connexion à partir de la configuration
-      const loginUrl = `${appConfig.urls.frontendBaseUrl}${appConfig.urls.login}`;
-      console.log(`URL de connexion générée: ${loginUrl}`);
+        <div style="text-align:center;">
+          <a href="${resetLink}" target="_blank"
+             style="background:#1976d2;color:#fff;text-decoration:none;padding:12px 30px;border-radius:30px;font-weight:bold;font-size:16px;display:inline-block;">
+            🔁 Réinitialiser mon mot de passe
+          </a>
+        </div>
 
-      const mailOptions = {
-        from: appConfig.email.defaultSender,
-        to,
-        subject: '🎓 Bienvenue sur la plateforme LMS',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-            <h2 style="color: #1976d2; text-align: center;">Bienvenue sur la plateforme LMS!</h2>
-            <p>Votre compte a été créé avec succès. Voici vos identifiants de connexion:</p>
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <p><strong>Email:</strong> ${to}</p>
-              <p><strong>Mot de passe temporaire:</strong> <span style="font-family:
-              monospace; background-color: #e0e0e0; padding: 3px 6px; border-radius: 3px;">${tempPassword}</span></p>
-              <p><strong>Rôle:</strong> ${role}</p>
-            </div>
-            <p style="color: #d32f2f; font-weight: bold;">Important: Veuillez vous connecter et changer votre mot de passe dès que possible pour des raisons de sécurité.</p>
-            <div style="text-align: center; margin-top: 30px;">
-              <a href="${loginUrl}" style="background-color: #1976d2;
-              color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Se connecter maintenant</a>
-            </div>
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;" />
-            <p style="text-align: center; color: #757575; font-size: 14px;">– L'équipe LMS</p>
-          </div>
-        `,
-      };
+        <div style="margin-top:30px;padding:15px;background:#fff3cd;border-left:4px solid #ffc107;border-radius:6px;">
+          <p style="margin:0;font-size:14px;color:#856404;">
+            ⚠️ Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.
+          </p>
+        </div>
+      </div>
 
-      console.log("Envoi de l'email avec les options:", {
-        to: mailOptions.to,
-        subject: mailOptions.subject,
-        from: mailOptions.from
-      });
+      <!-- Pied de page -->
+      <div style="background:#f8f9fa;padding:20px;text-align:center;font-size:13px;color:#666;border-top:1px solid #e0e0e0;">
+        <p style="margin:0;">Besoin d’aide ? Contactez-nous à <a href="mailto:tunirdigital@gmail.com" style="color:#1976d2;text-decoration:none;">tunirdigital@gmail.com</a></p>
+        <p style="margin:8px 0 0 0;">© 2025 Plateforme LMS</p>
+      </div>
 
-      const result = await this.mailerService.sendMail(mailOptions);
-      console.log("Email envoyé avec succès:", result);
-      return result;
-    } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email de bienvenue:", error);
-      throw error;
-    }
-  }
+    </div>
+  `);
 }
 
+  async sendWelcomeEmail(to: string, tempPassword: string, role: string) {
+    return this.send(to, '🎓 Bienvenue sur la plateforme LMS', `
+      <div style="font-family:Arial;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:5px">
+        <h2 style="color:#1976d2;text-align:center">Bienvenue sur la plateforme LMS!</h2>
+        <p>Votre compte a été créé avec succès. Voici vos identifiants de connexion :</p>
+        <div style="background:#f5f5f5;padding:15px;border-radius:5px;margin:20px 0">
+          <p><strong>Email:</strong> ${to}</p>
+          <p><strong>Mot de passe temporaire:</strong> <span style="font-family:monospace;background:#e0e0e0;padding:3px 6px;border-radius:3px">${tempPassword}</span></p>
+          <p><strong>Rôle:</strong> ${role}</p>
+        </div>
+        <p style="color:#666;font-size:14px;margin:15px 0">
+          Cliquez sur le bouton ci-dessous pour vous connecter à la plateforme avec vos identifiants :
+        </p>
+        <div style="text-align:center;margin-top:30px">
+          <a href="http://localhost:3000/login?forceLogout=true&email=${encodeURIComponent(to)}"
+             style="background:#1976d2;color:white;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold"
+             target="_blank">
+            Se connecter
+          </a>
+        </div>
+
+
+      </div>
+    `);
+  }
+
+  async sendPasswordChangeConfirmationEmail(to: string, timestamp: string, ipAddress?: string) {
+    const loginLink = `http://localhost:3000/login`;
+    return this.send(to, '🔒 Confirmation de changement de mot de passe', `
+      <div style="font-family:Arial;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e0e0e0;border-radius:5px">
+        <h2 style="color:#1976d2;text-align:center">Mot de passe modifié avec succès</h2>
+
+        <div style="background:#e8f5e8;border:1px solid #4caf50;border-radius:5px;padding:15px;margin:20px 0">
+          <p style="color:#2e7d32;margin:0;font-weight:bold">✅ Votre mot de passe a été modifié avec succès</p>
+        </div>
+
+        <p>Votre mot de passe a été réinitialisé et modifié avec succès sur la plateforme LMS.</p>
+
+        <div style="background:#f5f5f5;padding:15px;border-radius:5px;margin:20px 0">
+          <h3 style="color:#333;margin-top:0">Détails de la modification :</h3>
+          <p><strong>Date et heure :</strong> ${timestamp}</p>
+          ${ipAddress ? `<p><strong>Adresse IP :</strong> ${ipAddress}</p>` : ''}
+          <p><strong>Action :</strong> Réinitialisation de mot de passe</p>
+        </div>
+
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:5px;padding:15px;margin:20px 0">
+          <h3 style="color:#856404;margin-top:0">⚠️ Important - Sécurité</h3>
+          <p style="color:#856404;margin:0">
+            Si vous n'avez pas effectué cette modification, votre compte pourrait être compromis.
+            Veuillez immédiatement :
+          </p>
+          <ul style="color:#856404;margin:10px 0">
+            <li>Vous connecter et changer votre mot de passe</li>
+            <li>Vérifier vos informations de compte</li>
+            <li>Contacter notre support technique</li>
+          </ul>
+        </div>
+
+        <div style="text-align:center;margin-top:30px">
+          <a href="${loginLink}"
+             style="background:#1976d2;color:white;padding:12px 24px;text-decoration:none;border-radius:4px;display:inline-block;font-weight:bold"
+             target="_blank">
+            Se connecter à la plateforme
+          </a>
+        </div>
+
+        <div style="margin-top:30px;padding-top:20px;border-top:1px solid #e0e0e0;color:#666;font-size:12px">
+          <p>Si vous avez des questions ou des préoccupations concernant la sécurité de votre compte,
+          contactez notre équipe de support à <strong>tunirdigital@gmail.com</strong></p>
+          <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+        </div>
+      </div>
+    `);
+  }
+
+  async sendPasswordResetEmailV2(to: string, token: string) {
+    const resetLink = `http://localhost:3000/ResetPasswordPage?token=${token}&email=${to}`;
+    return this.send(to, '🔐 Nouvelle demande de réinitialisation - Plateforme LMS', `
+      <div style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;max-width:650px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+
+        <!-- Header avec gradient -->
+        <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);padding:40px 30px;text-align:center">
+          <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:300;letter-spacing:1px">🔐 Réinitialisation</h1>
+          <p style="color:#e8f0fe;margin:10px 0 0 0;font-size:16px;opacity:0.9">Plateforme LMS</p>
+        </div>
+
+        <!-- Contenu principal -->
+        <div style="padding:40px 30px">
+          <div style="text-align:center;margin-bottom:30px">
+            <div style="background:#f8f9ff;border-radius:50%;width:80px;height:80px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+              <span style="font-size:36px">🔑</span>
+            </div>
+            <h2 style="color:#2c3e50;margin:0;font-size:24px;font-weight:600">Demande de réinitialisation reçue</h2>
+          </div>
+
+          <p style="color:#5a6c7d;font-size:16px;line-height:1.6;margin-bottom:25px;text-align:center">
+            Nous avons reçu une demande de réinitialisation de votre mot de passe.
+            Utilisez le code sécurisé ci-dessous pour créer un nouveau mot de passe.
+          </p>
+
+          <!-- Code de réinitialisation avec style moderne -->
+          <div style="background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%);border-radius:12px;padding:25px;margin:30px 0;text-align:center;position:relative">
+            <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:20px;backdrop-filter:blur(10px)">
+              <p style="color:#ffffff;margin:0 0 10px 0;font-size:14px;font-weight:500;letter-spacing:1px">CODE DE RÉINITIALISATION</p>
+              <div style="background:#ffffff;border-radius:8px;padding:15px;margin:10px 0">
+                <p style="font-family:'Courier New',monospace;font-size:20px;font-weight:bold;color:#2c3e50;margin:0;letter-spacing:3px;word-break:break-all">${token}</p>
+              </div>
+              <p style="color:#ffffff;margin:10px 0 0 0;font-size:12px;opacity:0.9">⏰ Valide pendant 2 heures</p>
+            </div>
+          </div>
+
+          <!-- Bouton d'action principal -->
+          <div style="text-align:center;margin:35px 0">
+            <a href="${resetLink}"
+               style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:#ffffff;padding:16px 32px;text-decoration:none;border-radius:50px;font-weight:600;font-size:16px;display:inline-block;box-shadow:0 4px 15px rgba(102,126,234,0.4);transition:all 0.3s ease"
+               target="_blank">
+              🚀 Réinitialiser mon mot de passe
+            </a>
+          </div>
+
+          <!-- Instructions supplémentaires -->
+          <div style="background:#f8f9ff;border-left:4px solid #667eea;padding:20px;margin:30px 0;border-radius:0 8px 8px 0">
+            <h3 style="color:#667eea;margin:0 0 15px 0;font-size:16px;font-weight:600">📋 Instructions :</h3>
+            <ol style="color:#5a6c7d;margin:0;padding-left:20px;line-height:1.6">
+              <li>Cliquez sur le bouton ci-dessus ou copiez le code</li>
+              <li>Vous serez redirigé vers la page de réinitialisation</li>
+              <li>Saisissez votre nouveau mot de passe (minimum 6 caractères)</li>
+              <li>Confirmez votre nouveau mot de passe</li>
+            </ol>
+          </div>
+
+          <!-- Avertissement de sécurité -->
+          <div style="background:#fff3cd;border:1px solid #ffeaa7;border-radius:8px;padding:20px;margin:25px 0">
+            <div style="display:flex;align-items:flex-start">
+              <span style="font-size:20px;margin-right:12px">⚠️</span>
+              <div>
+                <h4 style="color:#d68910;margin:0 0 10px 0;font-size:16px">Sécurité importante</h4>
+                <p style="color:#856404;margin:0;font-size:14px;line-height:1.5">
+                  Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
+                  Votre mot de passe actuel reste inchangé et sécurisé.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background:#f8f9ff;padding:25px 30px;border-top:1px solid #e9ecef">
+          <div style="text-align:center">
+            <p style="color:#6c757d;margin:0 0 10px 0;font-size:14px">
+              Besoin d'aide ? Contactez notre support
+            </p>
+            <p style="margin:0">
+              <a href="mailto:tunirdigital@gmail.com" style="color:#667eea;text-decoration:none;font-weight:600">
+                📧 tunirdigital@gmail.com
+              </a>
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef">
+            <p style="color:#adb5bd;margin:0;font-size:12px">
+              © 2025 Plateforme LMS - Cet email a été envoyé automatiquement
+            </p>
+          </div>
+        </div>
+      </div>
+    `);
+  }
+}

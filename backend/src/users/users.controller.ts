@@ -39,8 +39,16 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    try {
+      console.log('UsersController: Fetching all users...');
+      const users = await this.usersService.findAll();
+      console.log('UsersController: Successfully fetched users:', users.length);
+      return users;
+    } catch (error) {
+      console.error('UsersController: Error fetching users:', error);
+      throw new NotFoundException('Failed to fetch users');
+    }
   }
 
   @Get('id/:id')
@@ -122,8 +130,16 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      console.log('UsersController: Deleting user with ID:', id);
+      const result = await this.usersService.remove(+id);
+      console.log('UsersController: User deleted successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('UsersController: Error deleting user:', error);
+      throw new NotFoundException(`Failed to delete user with ID ${id}: ${error.message}`);
+    }
   }
 
   @Patch('id/:id/photo')

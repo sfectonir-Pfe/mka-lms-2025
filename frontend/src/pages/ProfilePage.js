@@ -22,6 +22,7 @@ import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 import axios from "axios";
 
+
 const ProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();

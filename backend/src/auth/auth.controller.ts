@@ -8,7 +8,9 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -25,11 +27,10 @@ export class AuthController {
       console.log('Login request received:', {
         email: dto.email,
         rememberMe: dto.rememberMe,
-        
+
       });
 
-      // CAPTCHA verification disabled
-      console.log('CAPTCHA verification disabled');
+
 
       // Authentifier l'utilisateur
       const result = await this.authService.login(dto);
@@ -140,9 +141,13 @@ export class AuthController {
     @Body('token') token: string,
     @Body('newPass') newPass: string,
     @Body('confirmPass') confirmPass: string,
+    @Req() request: Request,
   ) {
     try {
-      const result = await this.authService.resetPassword(token, newPass, confirmPass);
+      // Extract IP address from request
+      const ipAddress = request.ip || request.connection.remoteAddress || request.headers['x-forwarded-for'] as string || 'Unknown';
+
+      const result = await this.authService.resetPassword(token, newPass, confirmPass, ipAddress);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(
@@ -165,6 +170,31 @@ export class AuthController {
       throw new HttpException(
         error.message || 'Erreur lors du changement de mot de passe',
         error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('logout')
+  async logout(@Body() body?: any) {
+    try {
+      console.log('Logout request received');
+
+      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
+      // Dans une vraie application avec JWT, on invaliderait le token ici
+
+      return {
+        success: true,
+        message: 'Déconnexion réussie',
+        data: {
+          loggedOut: true,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw new HttpException(
+        error.message || 'Erreur lors de la déconnexion',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

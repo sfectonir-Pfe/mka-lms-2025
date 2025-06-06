@@ -23,6 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
 const ConfigureSessionList = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);

@@ -1,9 +1,10 @@
 // src/pages/users/views/ContenusList.js
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Box, Button, Typography, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 
 const ContenusList = () => {
   const [contenus, setContenus] = useState([]);
@@ -28,7 +29,7 @@ const ContenusList = () => {
 
   const columns = [
     { valueGetter: (value) => {
-      
+
       return "Co-"+value
     },
      field: "id", headerName: "ID", width: 80 },

@@ -1,171 +1,186 @@
-// Utilitaires d'authentification
+// Authentication Utilities
+// Provides helper functions for authentication and user management
 
-/**
- * Fonction de déconnexion d'urgence qui peut être appelée depuis n'importe où
- * Cette fonction nettoie complètement l'état d'authentification
- */
-export const emergencyLogout = () => {
-  console.log("=== EMERGENCY LOGOUT INITIATED ===");
-  
+export const getStoredUser = () => {
   try {
-    // Sauvegarder les paramètres "Remember Me" si nécessaire
-    const rememberMe = localStorage.getItem("rememberMe") === "true";
-    const savedEmail = localStorage.getItem("savedEmail");
-    
-    console.log("Saving Remember Me settings:", { rememberMe, savedEmail });
-    
-    // Nettoyer complètement les storages
-    console.log("Clearing all storage data...");
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Restaurer les paramètres "Remember Me" si nécessaire
-    if (rememberMe && savedEmail) {
-      localStorage.setItem("rememberMe", "true");
-      localStorage.setItem("savedEmail", savedEmail);
-      console.log("Restored Remember Me settings");
+    // Check localStorage first (persistent login)
+    const persistentUser = localStorage.getItem('user');
+    if (persistentUser) {
+      return JSON.parse(persistentUser);
     }
-    
-    // Déclencher l'événement de déconnexion
-    console.log("Dispatching logout event...");
-    window.dispatchEvent(new CustomEvent('userLogout'));
-    
-    // Rediriger vers la page de connexion
-    console.log("Redirecting to login page...");
-    window.location.href = "/";
-    
-  } catch (error) {
-    console.error("Error during emergency logout:", error);
-    
-    // En cas d'erreur, forcer un rechargement complet
-    console.log("Forcing complete page reload as fallback...");
-    window.location.reload();
-  }
-};
 
-/**
- * Vérifie si l'utilisateur est connecté en examinant les storages
- */
-export const isUserLoggedIn = () => {
-  try {
-    const userInLocalStorage = localStorage.getItem("user");
-    const userInSessionStorage = sessionStorage.getItem("user");
-    
-    return !!(userInLocalStorage || userInSessionStorage);
-  } catch (error) {
-    console.error("Error checking login status:", error);
-    return false;
-  }
-};
+    // Check sessionStorage (session login)
+    const sessionUser = sessionStorage.getItem('user');
+    if (sessionUser) {
+      return JSON.parse(sessionUser);
+    }
 
-/**
- * Récupère les données utilisateur depuis le storage
- */
-export const getUserFromStorage = () => {
-  try {
-    // Vérifier d'abord dans localStorage
-    let userStr = localStorage.getItem("user");
-    
-    // Si pas trouvé, vérifier dans sessionStorage
-    if (!userStr) {
-      userStr = sessionStorage.getItem("user");
-    }
-    
-    if (!userStr) {
-      return null;
-    }
-    
-    return JSON.parse(userStr);
+    return null;
   } catch (error) {
-    console.error("Error getting user from storage:", error);
+    console.error('Error getting stored user:', error);
     return null;
   }
 };
 
-/**
- * Nettoie les données utilisateur expirées ou corrompues
- */
-export const cleanupUserData = () => {
+export const storeUser = (userData, rememberMe = false) => {
   try {
-    console.log("Cleaning up user data...");
-    
-    // Vérifier et nettoyer localStorage
-    const localUser = localStorage.getItem("user");
-    if (localUser) {
-      try {
-        JSON.parse(localUser);
-      } catch (error) {
-        console.log("Corrupted user data in localStorage, removing...");
-        localStorage.removeItem("user");
-      }
+    if (rememberMe) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      console.log('👤 User stored in localStorage (persistent)');
+    } else {
+      sessionStorage.setItem('user', JSON.stringify(userData));
+      console.log('👤 User stored in sessionStorage (session only)');
     }
-    
-    // Vérifier et nettoyer sessionStorage
-    const sessionUser = sessionStorage.getItem("user");
-    if (sessionUser) {
-      try {
-        JSON.parse(sessionUser);
-      } catch (error) {
-        console.log("Corrupted user data in sessionStorage, removing...");
-        sessionStorage.removeItem("user");
-      }
-    }
-    
-    console.log("User data cleanup completed");
+    return userData;
   } catch (error) {
-    console.error("Error during user data cleanup:", error);
+    console.error('Error storing user:', error);
+    return null;
   }
 };
 
-/**
- * Fonction de déconnexion sécurisée avec gestion d'erreurs
- */
-export const secureLogout = async (setUser = null, navigate = null) => {
-  console.log("=== SECURE LOGOUT INITIATED ===");
-  
+export const clearStoredUser = () => {
   try {
-    // Sauvegarder les paramètres "Remember Me"
-    const rememberMe = localStorage.getItem("rememberMe") === "true";
-    const savedEmail = localStorage.getItem("savedEmail");
-    
-    // Nettoyer les données utilisateur
-    localStorage.removeItem("user");
-    sessionStorage.removeItem("user");
-    
-    // Restaurer les paramètres "Remember Me" si nécessaire
-    if (rememberMe && savedEmail) {
-      localStorage.setItem("rememberMe", "true");
-      localStorage.setItem("savedEmail", savedEmail);
-    } else {
-      localStorage.removeItem("rememberMe");
-      localStorage.removeItem("savedEmail");
-    }
-    
-    // Déclencher l'événement de déconnexion
-    window.dispatchEvent(new CustomEvent('userLogout'));
-    
-    // Mettre à jour l'état si la fonction setUser est fournie
-    if (setUser) {
-      setUser(null);
-    }
-    
-    // Attendre un court délai pour s'assurer que l'état est mis à jour
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Naviguer si la fonction navigate est fournie
-    if (navigate) {
-      navigate("/", { replace: true });
-    } else {
-      // Sinon, rediriger directement
-      window.location.href = "/";
-    }
-    
-    console.log("=== SECURE LOGOUT COMPLETED ===");
-    
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+    return true;
   } catch (error) {
-    console.error("Error during secure logout:", error);
-    
-    // En cas d'erreur, utiliser la déconnexion d'urgence
-    emergencyLogout();
+    console.error('Error clearing stored user:', error);
+    return false;
   }
 };
+
+export const isUserLoggedIn = () => {
+  const user = getStoredUser();
+  return user !== null && user.id;
+};
+
+export const getUserRole = () => {
+  const user = getStoredUser();
+  return user?.role || 'Etudiant';
+};
+
+export const getUserEmail = () => {
+  const user = getStoredUser();
+  return user?.email || '';
+};
+
+export const getUserName = () => {
+  const user = getStoredUser();
+  return user?.name || '';
+};
+
+export const isAdmin = () => {
+  const role = getUserRole();
+  return role === 'Admin' || role === 'admin';
+};
+
+export const isTeacher = () => {
+  const role = getUserRole();
+  return role === 'Enseignant' || role === 'teacher';
+};
+
+export const isStudent = () => {
+  const role = getUserRole();
+  return role === 'Etudiant' || role === 'student';
+};
+
+export const hasRole = (requiredRole) => {
+  const userRole = getUserRole();
+  return userRole === requiredRole;
+};
+
+export const getAuthToken = () => {
+  const user = getStoredUser();
+  return user?.token || null;
+};
+
+export const isTokenValid = () => {
+  const token = getAuthToken();
+  if (!token) return false;
+
+  // Basic token validation (you can enhance this)
+  try {
+    // If token is JWT, you could decode and check expiration
+    // For now, just check if it exists and is not empty
+    return token.length > 0;
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return false;
+  }
+};
+
+
+
+export const secureLogout = async (setUser, navigate) => {
+  console.log('🚪 Performing secure logout...');
+
+  try {
+    const axios = (await import('axios')).default;
+
+    // Call backend logout API
+    try {
+      const response = await axios.post('http://localhost:8000/auth/logout', {}, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log('✅ Backend logout successful:', response.data);
+    } catch (apiError) {
+      console.warn('⚠️ Backend logout failed, continuing with local logout:', apiError.message);
+    }
+
+    // Clear local storage
+    const success = clearStoredUser();
+
+    if (success) {
+      console.log('✅ Local storage cleared');
+
+      // Update user state if setUser function is provided
+      if (setUser) {
+        setUser(null);
+      }
+
+      // Dispatch custom logout event
+      window.dispatchEvent(new CustomEvent('userLogout'));
+
+      // Navigate to home if navigate function is provided
+      if (navigate) {
+        navigate('/');
+      }
+
+      console.log('✅ Secure logout completed');
+      return true;
+    } else {
+      console.error('❌ Secure logout failed');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error during secure logout:', error);
+
+    // Fallback: clear storage anyway
+    const success = clearStoredUser();
+    if (setUser) setUser(null);
+    if (navigate) navigate('/');
+
+    return success;
+  }
+};
+
+const authUtils = {
+  getStoredUser,
+  storeUser,
+  clearStoredUser,
+  isUserLoggedIn,
+  getUserRole,
+  getUserEmail,
+  getUserName,
+  isAdmin,
+  isTeacher,
+  isStudent,
+  hasRole,
+  getAuthToken,
+  isTokenValid,
+  secureLogout
+};
+
+export default authUtils;

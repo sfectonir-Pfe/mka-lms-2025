@@ -4,6 +4,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 const CourseList = () => {
   const [courses, setCourses] = useState([]);
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const CourseList = () => {
 
   const columns = [
     { valueGetter: (value) => {
-      
+
       return "C-"+value
     },field: "id", headerName: "ID", width: 80 },
     { field: "title", headerName: "Titre", flex: 1 },

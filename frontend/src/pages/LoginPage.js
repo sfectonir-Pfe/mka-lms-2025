@@ -2,38 +2,39 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import axios from "axios";
-import showErrorToast from "../utils/toastError";
+import { showError } from "../utils/toastError";
 import { useTranslation } from "react-i18next";
-import ReCAPTCHA from "react-google-recaptcha";
-import { getRecaptchaSiteKey, validateRecaptchaToken, isRecaptchaConfigured } from "../config/recaptcha";
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+
 
 function LoginPage({ setUser }) {
   const { t } = useTranslation(); // Initialiser la fonction de traduction
+  const location = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   // Initialiser rememberMe à FALSE par défaut, pas à partir de localStorage
   const [rememberMe, setRememberMe] = useState(false);
-  const [errors, setErrors] = useState({ email: "", password: "", captcha: "" });
+  const [errors, setErrors] = useState({ email: "", password: "" });
   const [msgError, setMgsError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [isRecaptchaEnabled] = useState(isRecaptchaConfigured());
 
-  // Fonction pour gérer le changement de reCAPTCHA
-  const handleCaptchaChange = (value) => {
-    console.log("reCAPTCHA token received:", value ? "Valid token" : "No token");
-    setCaptchaToken(value);
 
-    // Effacer l'erreur de captcha si un token est reçu
-    if (value && errors.captcha) {
-      setErrors(prev => ({ ...prev, captcha: "" }));
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    // Extraire l'email de l'URL si présent
+    const emailFromUrl = params.get('email');
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
     }
-  };
+  }, [location]);
 
   const validate = () => {
     let valid = true;
-    const newErrors = { email: "", password: "", captcha: "" };
+    const newErrors = { email: "", password: "" };
 
     if (!email) {
       newErrors.email = "Email is required";
@@ -51,39 +52,16 @@ function LoginPage({ setUser }) {
       valid = false;
     }
 
-    // Validation reCAPTCHA (seulement si activé)
-    if (isRecaptchaEnabled) {
-      const captchaValidation = validateRecaptchaToken(captchaToken);
-      if (!captchaValidation.isValid) {
-        newErrors.captcha = captchaValidation.error || "Please complete the reCAPTCHA";
-        valid = false;
-      }
-    }
+
 
     setErrors(newErrors);
     return valid;
   };
 
-  // Charger l'email sauvegardé au chargement de la page SEULEMENT si "Remember me" était activé lors de la dernière connexion
+  // Initialiser remember me à false par défaut
   React.useEffect(() => {
-    console.log("LoginPage: Checking for saved login data...");
-
-    // Vérifier si "Remember me" était activé lors de la dernière connexion
-    const wasRememberMeEnabled = localStorage.getItem("rememberMe") === "true";
-    const savedEmail = localStorage.getItem("savedEmail");
-
-    console.log("Was Remember Me enabled:", wasRememberMeEnabled);
-    console.log("Saved email:", savedEmail);
-
-    if (wasRememberMeEnabled && savedEmail) {
-      console.log("Pre-filling email and checking Remember Me checkbox");
-      setEmail(savedEmail);
-      setRememberMe(true); // Cocher la case "Remember me" si elle était activée
-    } else {
-      console.log("No saved login data or Remember Me was disabled");
-      setRememberMe(false); // S'assurer que la case n'est pas cochée
-    }
-  }, []); // Exécuter seulement au montage du composant
+    setRememberMe(false);
+  }, []);
 
   const handleRequest = async (e) => {
     e.preventDefault();
@@ -98,8 +76,7 @@ function LoginPage({ setUser }) {
       const loginData = {
         email,
         password,
-        rememberMe: rememberMe, // Explicitement envoyer le booléen
-        captcha: captchaToken // Ajouter le token reCAPTCHA
+        rememberMe: rememberMe // Explicitement envoyer le booléen
       };
 
       console.log("Login request data:", loginData);
@@ -127,74 +104,15 @@ function LoginPage({ setUser }) {
 
       setUser(userData);
 
-      // Gérer "Remember Me" - LOGIQUE CORRIGÉE
-      try {
-        console.log("=== STORAGE LOGIC ===");
-        console.log("Remember Me is:", rememberMe ? "CHECKED" : "NOT CHECKED");
-
-        // TOUJOURS nettoyer d'abord toutes les données existantes pour éviter les conflits
-        console.log("Cleaning existing storage data...");
-        localStorage.removeItem("user");
-        sessionStorage.removeItem("user");
-        localStorage.removeItem("rememberMe");
-        localStorage.removeItem("savedEmail");
-
-        // Si "Remember Me" est coché, l'utilisateur reste connecté même après avoir fermé le navigateur
-        if (rememberMe) {
-          console.log("Remember Me is CHECKED - storing data in localStorage");
-
-          // Stocker les données utilisateur dans localStorage (persistant)
-          localStorage.setItem("user", JSON.stringify(userData));
-
-          // Sauvegarder l'état de "Remember Me" et l'email pour la prochaine connexion
-          localStorage.setItem("rememberMe", "true");
-          localStorage.setItem("savedEmail", email);
-
-          console.log("✅ User data saved to localStorage (Remember Me enabled)");
-        } else {
-          console.log("Remember Me is NOT CHECKED - storing data in sessionStorage");
-
-          // Si "Remember Me" n'est pas coché, l'utilisateur est déconnecté lorsqu'il ferme le navigateur
-          // Stocker les données utilisateur dans sessionStorage (temporaire)
-          sessionStorage.setItem("user", JSON.stringify(userData));
-
-          // S'assurer que localStorage reste vide (déjà nettoyé ci-dessus)
-          console.log("✅ User data saved to sessionStorage (Remember Me disabled)");
-        }
-
-        // Vérifier que les données ont été correctement stockées
-        const storedInLocalStorage = localStorage.getItem("user");
-        const storedInSessionStorage = sessionStorage.getItem("user");
-        const rememberMeStored = localStorage.getItem("rememberMe");
-
-        console.log("=== STORAGE VERIFICATION ===");
-        console.log("Data in localStorage:", storedInLocalStorage ? "Present" : "None");
-        console.log("Data in sessionStorage:", storedInSessionStorage ? "Present" : "None");
-        console.log("RememberMe flag in localStorage:", rememberMeStored || "None");
-
-        // Vérification de cohérence
-        if (rememberMe && !storedInLocalStorage) {
-          console.error("❌ ERROR: Remember Me was checked but data not in localStorage!");
-        }
-        if (!rememberMe && !storedInSessionStorage) {
-          console.error("❌ ERROR: Remember Me was not checked but data not in sessionStorage!");
-        }
-        if (rememberMe && storedInSessionStorage) {
-          console.error("❌ ERROR: Remember Me was checked but data is in sessionStorage!");
-        }
-        if (!rememberMe && storedInLocalStorage) {
-          console.error("❌ ERROR: Remember Me was not checked but data is in localStorage!");
-        }
-
-      } catch (storageError) {
-        console.error("Error storing user data:", storageError);
-        // En cas d'erreur, essayer de stocker dans sessionStorage comme solution de secours
-        try {
-          sessionStorage.setItem("user", JSON.stringify(userData));
-          console.log("Fallback: User data saved to sessionStorage");
-        } catch (fallbackError) {
-          console.error("Error in fallback storage:", fallbackError);
-        }
+      // Gérer "Remember Me" - Logique simplifiée
+      if (rememberMe) {
+        // Stocker dans localStorage pour une connexion persistante
+        localStorage.setItem("user", JSON.stringify(userData));
+        console.log("✅ User stored in localStorage (persistent login)");
+      } else {
+        // Stocker dans sessionStorage pour une session temporaire
+        sessionStorage.setItem("user", JSON.stringify(userData));
+        console.log("✅ User stored in sessionStorage (session only)");
       }
 
       window.location.href = `/`;
@@ -204,7 +122,7 @@ function LoginPage({ setUser }) {
         "Login failed. Please check your credentials. " +
         (error.response?.data?.message || "");
       setMgsError(message);
-      showErrorToast(message);
+      showError(message);
       setPassword("");
     }
   };
@@ -285,28 +203,13 @@ function LoginPage({ setUser }) {
               </div>
               <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
             </div>
-            {/* reCAPTCHA */}
-            {isRecaptchaEnabled && (
-              <div className="mb-3">
-                <ReCAPTCHA
-                  sitekey="6LeSskYrAAAAABcPVjhFszILVMoofTTB8UhMS4S0"
-                  onChange={handleCaptchaChange}
-                  theme="light"
-                  size="normal"
-                />
-                {errors.captcha && (
-                  <div className="text-danger mt-1">
-                    <small>{errors.captcha}</small>
-                  </div>
-                )}
-              </div>
-            )}
+
             {/* Submit button */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"
                 className="btn btn-primary px-5"
-                disabled={!email || !password || (isRecaptchaEnabled && !captchaToken)}
+                disabled={!email || !password}
               >
                 {t('common.login')}
               </button>
@@ -319,4 +222,3 @@ function LoginPage({ setUser }) {
 }
 
 export default LoginPage;
-
