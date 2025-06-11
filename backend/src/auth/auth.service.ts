@@ -22,6 +22,11 @@ export class AuthService {
       throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
     }
 
+    // Check if user is active
+    if (user.isActive === false) {
+      throw new HttpException('Account is deactivated. Please contact an administrator.', HttpStatus.FORBIDDEN);
+    }
+
     // Remove sensitive information before returning
     const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
     return safeUser;

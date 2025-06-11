@@ -58,6 +58,7 @@ model User {
   location   String?
   skills     String[]
   about      String?
+  isActive  Boolean  @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

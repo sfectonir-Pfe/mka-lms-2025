@@ -14,6 +14,7 @@ import { QuizModule } from './quiz/quiz.module';
 
 
 
+
 @Module({
   imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule],
   controllers: [AppController],

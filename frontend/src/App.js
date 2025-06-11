@@ -36,7 +36,8 @@ import ConfigureSessionPage from "./pages/ConfigureSessionPage";
 import SessionsOverviewPage from "./pages/SessionsOverviewPage";
 import AddQuizForm from "./pages/users/views/AddQuizForm";
 import PlayQuizPage from "./pages/users/views/PlayQuizPage";
-import seancePage from './pages/seancePage';
+
+
 // UI
 import Spinner from "react-bootstrap/Spinner";
 import { ToastContainer } from "react-toastify";
@@ -179,8 +180,8 @@ function App() {
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
                 </Route>
-
-                <Route path="seancePage" element={<seancePage />} />
+                
+                
                 <Route path="programs" element={<ProgramsPage />} />
                 <Route path="programs/add" element={<AddProgramList />} />
                 <Route path="module" element={<ModulePage />} />

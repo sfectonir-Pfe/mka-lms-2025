@@ -30,4 +30,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profilePic?: string; // chemin
+
+  @IsOptional()
+  @IsEnum(Role)
+  isActive?: boolean
 }
