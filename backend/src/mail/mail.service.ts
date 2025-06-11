@@ -237,4 +237,18 @@ export class MailService {
       </div>
     `);
   }
+  async sendEmailVerificationCode(to: string, code: string) {
+  const mailOptions = {
+    from: 'MKA LMS <your-email@gmail.com>',
+    to,
+    subject: 'Code de vérification',
+    html: `
+      <h3>Code de vérification</h3>
+      <p>Voici votre code : <strong>${code}</strong></p>
+      <p>Ce code est valable pendant 5 minutes.</p>
+    `,
+  };
+  await this.mailerService.sendMail(mailOptions);
+}
+
 }

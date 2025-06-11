@@ -8,6 +8,9 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 
 function LoginPage({ setUser }) {
   const { t } = useTranslation(); // Initialiser la fonction de traduction
@@ -18,8 +21,9 @@ function LoginPage({ setUser }) {
   // Initialiser rememberMe à FALSE par défaut, pas à partir de localStorage
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const [msgError, setMgsError] = useState("");
+  const [msgError, setMsgError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -51,8 +55,6 @@ function LoginPage({ setUser }) {
       newErrors.password = "Password must be at least 6 characters";
       valid = false;
     }
-
-
 
     setErrors(newErrors);
     return valid;
@@ -88,6 +90,18 @@ function LoginPage({ setUser }) {
       const responseData = response.data.data || {};
       console.log("Extracted response data:", responseData);
 
+      // 🔒 Redirection vers Firebase SMS si besoin
+      if (responseData.needsVerification) {
+        toast.warning("Votre compte n'est pas encore vérifié. Veuillez vérifier par SMS.");
+        navigate("/verify-sms", {
+          state: {
+            email: responseData.email,
+            phone: responseData.phone || "",
+          },
+        });
+        return;
+      }
+
       // Construire l'objet userData avec toutes les données nécessaires
       const userData = {
         id: responseData.id,
@@ -121,7 +135,7 @@ function LoginPage({ setUser }) {
       const message =
         "Login failed. Please check your credentials. " +
         (error.response?.data?.message || "");
-      setMgsError(message);
+      setMsgError(message);
       showError(message);
       setPassword("");
     }
@@ -204,7 +218,7 @@ function LoginPage({ setUser }) {
               <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
             </div>
 
-            {/* Submit button */}
+            {/* Submit */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"

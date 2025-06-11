@@ -1,19 +1,23 @@
-import { PrismaClient } from '@prisma/client';
-
+import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+
 const prisma = new PrismaClient();
 
 async function main() {
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash('123456', salt);
 
-  const admin = await prisma.user.create({
-    data: {
-      role: 'Admin',
+  const admin = await prisma.user.upsert({
+    where: { email: 'khalil@gmail.com' },
+    update: {},
+    create: {
+      role: Role.Admin, // ✅ Correct enum usage
       email: 'khalil@gmail.com',
       password: hashedPassword,
     },
   });
+
+  console.log('Admin seedé:', admin);
 }
 
 main()

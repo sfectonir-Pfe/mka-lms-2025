@@ -10,9 +10,9 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService, private readonly mailService: MailService) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+  const user = await this.prisma.user.findUnique({
+    where: { email: dto.email },
+  });
 
     if (!user) {
       throw new HttpException('Invalid email', HttpStatus.BAD_REQUEST);
@@ -30,7 +30,8 @@ export class AuthService {
     // Remove sensitive information before returning
     const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
     return safeUser;
-  }
+
+}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });

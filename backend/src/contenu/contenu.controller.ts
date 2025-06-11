@@ -6,7 +6,7 @@ import {
   Param,
   Body,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors,Patch,
 } from '@nestjs/common';
 import { ContenusService } from './contenu.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,13 +14,20 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PrismaService } from 'nestjs-prisma';
 
+const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.mp4', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
+
 const storage = diskStorage({
   destination: './uploads',
   filename: (req, file, cb) => {
-    const unique = `${Date.now()}${extname(file.originalname)}`;
+    const ext = extname(file.originalname).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return cb(new Error('Type de fichier non supporté'), '');
+    }
+    const unique = `${Date.now()}${ext}`;
     cb(null, unique);
   },
 });
+
 
 @Controller('contenus')
 export class ContenusController {
@@ -87,4 +94,6 @@ export class ContenusController {
   remove(@Param('id') id: string) {
     return this.contenusService.remove(+id);
   }
+ 
+
 }

@@ -33,6 +33,9 @@ enum FileType {
   PDF
   IMAGE
   VIDEO
+  WORD
+  EXCEL
+  PPT
 }
 
 enum ContenuType {
@@ -60,8 +63,9 @@ model User {
   about      String?
   isActive  Boolean  @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isVerified Boolean  @default(false)
 
   resetToken              String?
   resetTokenExpiry        DateTime?
@@ -117,39 +121,45 @@ model ResetToken {
 }
 
 model Program {
-  id       Int             @id @default(autoincrement())
-  name     String
-  modules  ProgramModule[]
-  sessions Session[]
+  id        Int     @id @default(autoincrement())
+  name      String
+  published Boolean @default(false)
+
+  modules      ProgramModule[]
+  buildProgram buildProgram[]
+  sessions2    Session2[]
 }
 
 model Module {
-  id             Int             @id @default(autoincrement())
-  name           String
-  periodUnit     PeriodUnit
-  duration       Int
-  programs       ProgramModule[]
-  courses        ModuleCourse[]
-  sessionModules SessionModule[]
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  periodUnit          PeriodUnit
+  duration            Int
+  programs            ProgramModule[]
+  courses             ModuleCourse[]
+  buildProgramModules buildProgramModule[]
+  session2Modules     Session2Module[]
 }
 
 model Course {
-  id             Int             @id @default(autoincrement())
-  title          String
-  modules        ModuleCourse[]
-  courseContenus CourseContenu[]
-  sessionCourses SessionCourse[]
+  id                  Int                  @id @default(autoincrement())
+  title               String
+  modules             ModuleCourse[]
+  courseContenus      CourseContenu[]
+  buildProgramCourses buildProgramCourse[]
+  session2Courses     Session2Course[]
 }
 
 model Contenu {
-  id              Int              @id @default(autoincrement())
-  title           String
-  fileUrl         String? // Optionnel dans le schéma Prisma
-  fileType        FileType?
-  type            ContenuType
-  courseContenus  CourseContenu[] // NEW many-to-many
-  sessionContenus SessionContenu[]
-  quiz            Quiz?
+  id                   Int                   @id @default(autoincrement())
+  title                String
+  fileUrl              String?
+  fileType             FileType?
+  type                 ContenuType
+  courseContenus       CourseContenu[] // NEW many-to-many
+  buildProgramContenus buildProgramContenu[]
+  session2Contenus     Session2Contenu[]
+  quiz                 Quiz?
 }
 
 model ProgramModule {
@@ -182,73 +192,91 @@ model CourseContenu {
   @@unique([courseId, contenuId])
 }
 
-model Session {
-  id        Int             @id @default(autoincrement())
-  program   Program         @relation(fields: [programId], references: [id], onDelete: Cascade)
+model buildProgram {
+  id        Int       @id @default(autoincrement())
+  program   Program   @relation(fields: [programId], references: [id], onDelete: Cascade)
   programId Int
-  startDate DateTime
-  endDate   DateTime
+  startDate DateTime?
+  endDate   DateTime?
   imageUrl  String?
-  modules   SessionModule[]
-  createdAt DateTime        @default(now())
+  level     String    @default("Basique")
+
+  modules   buildProgramModule[]
+  createdAt DateTime?            @default(now())
 }
 
-model SessionModule {
-  id        Int             @id @default(autoincrement())
-  session   Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  sessionId Int
-  module    Module          @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId  Int
-  courses   SessionCourse[]
+model buildProgramModule {
+  id             Int                  @id @default(autoincrement())
+  buildProgram   buildProgram         @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
+  buildProgramId Int
+  module         Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId       Int
+  courses        buildProgramCourse[]
 
-  @@unique([sessionId, moduleId])
+  @@unique([buildProgramId, moduleId])
 }
 
-model SessionCourse {
-  id              Int              @id @default(autoincrement())
-  sessionModule   SessionModule    @relation(fields: [sessionModuleId], references: [id], onDelete: Cascade)
-  sessionModuleId Int
-  course          Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId        Int
-  contenus        SessionContenu[]
+model buildProgramCourse {
+  id                   Int                   @id @default(autoincrement())
+  buildProgramModule   buildProgramModule    @relation(fields: [buildProgramModuleId], references: [id], onDelete: Cascade)
+  buildProgramModuleId Int
+  course               Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId             Int
+  contenus             buildProgramContenu[]
 
-  @@unique([sessionModuleId, courseId])
+  @@unique([buildProgramModuleId, courseId])
 }
 
-model SessionContenu {
-  id              Int           @id @default(autoincrement())
-  sessionCourse   SessionCourse @relation(fields: [sessionCourseId], references: [id], onDelete: Cascade)
-  sessionCourseId Int
-  contenu         Contenu       @relation(fields: [contenuId], references: [id], onDelete: Cascade)
-  contenuId       Int
+model buildProgramContenu {
+  id                   Int                @id @default(autoincrement())
+  buildProgramCourse   buildProgramCourse @relation(fields: [buildProgramCourseId], references: [id], onDelete: Cascade)
+  buildProgramCourseId Int
+  contenu              Contenu            @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  contenuId            Int
 
-  @@unique([sessionCourseId, contenuId])
+  @@unique([buildProgramCourseId, contenuId])
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  FILL_BLANK
+  IMAGE_CHOICE
 }
 
 model Quiz {
   id          Int          @id @default(autoincrement())
   contenu     Contenu      @relation(fields: [contenuId], references: [id], onDelete: Cascade)
   contenuId   Int          @unique
+  title       String?
+  description String?
+  timeLimit   Int? // in seconds (e.g., 600 for 10 mins)
   questions   Question[]
   userAnswers UserAnswer[]
 }
 
 model Question {
-  id      Int      @id @default(autoincrement())
-  text    String
-  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  quizId  Int
-  choices Choice[]
-  Answer  Answer[]
+  id           Int          @id @default(autoincrement())
+  text         String
+  imageUrl     String? // optional image with question
+  type         QuestionType @default(MCQ)
+  score        Int          @default(1) // points for correct answer
+  negativeMark Int          @default(0) // optional penalty
+  quiz         Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId       Int
+  choices      Choice[] // only for MCQ and IMAGE_CHOICE
+  correctText  String? // only for FILL_BLANK
+  answers      Answer[]
 }
 
 model Choice {
   id         Int      @id @default(autoincrement())
-  text       String
+  text       String?
+  imageUrl   String? // used for image-based answers
   isCorrect  Boolean  @default(false)
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
-  Answer     Answer[]
+  answers    Answer[]
 }
 
 model UserAnswer {
@@ -268,6 +296,54 @@ model Answer {
   userAnswerId Int
   question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int
-  selected     Choice     @relation(fields: [selectedId], references: [id], onDelete: Cascade)
-  selectedId   Int
+  selectedId   Int? // for MCQ/IMAGE_CHOICE
+  selected     Choice?    @relation(fields: [selectedId], references: [id])
+  textAnswer   String? // for FILL_BLANK
+}
+
+model Session2 {
+  id              Int              @id @default(autoincrement())
+  name            String
+  program         Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  programId       Int
+  startDate       DateTime?
+  endDate         DateTime?
+  imageUrl        String?
+  createdAt       DateTime         @default(now())
+  session2Modules Session2Module[]
+}
+
+model Session2Module {
+  id         Int      @id @default(autoincrement())
+  session2Id Int
+  session2   Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+
+  moduleId Int
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  courses Session2Course[]
+}
+
+model Session2Course {
+  id               Int            @id @default(autoincrement())
+  session2ModuleId Int
+  session2Module   Session2Module @relation(fields: [session2ModuleId], references: [id], onDelete: Cascade)
+
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  contenus Session2Contenu[]
+
+  @@unique([session2ModuleId, courseId])
+}
+
+model Session2Contenu {
+  id               Int            @id @default(autoincrement())
+  session2CourseId Int
+  session2Course   Session2Course @relation(fields: [session2CourseId], references: [id], onDelete: Cascade)
+
+  contenuId Int
+  contenu   Contenu @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+
+  @@unique([session2CourseId, contenuId])
 }

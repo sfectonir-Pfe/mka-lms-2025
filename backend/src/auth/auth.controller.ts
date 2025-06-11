@@ -12,14 +12,32 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiBody, ApiProperty } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
   ) { }
+  
+  @Post('verify')
+  async verifyAccount(@Body() body: { email: string }) {
+    try {
+      const user = await this.authService.getUserByEmail(body.email);
+      return { 
+        success: true, 
+        message: 'Compte vérifié avec succès', 
+        data: { user } 
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la vérification du compte',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
@@ -137,17 +155,13 @@ export class AuthController {
   }
 
   @Post('reset-password')
+
   async reset(
-    @Body('token') token: string,
-    @Body('newPass') newPass: string,
-    @Body('confirmPass') confirmPass: string,
-    @Req() request: Request,
+  
+    @Body() dto:ResetPassword
   ) {
     try {
-      // Extract IP address from request
-      const ipAddress = request.ip || request.connection.remoteAddress || request.headers['x-forwarded-for'] as string || 'Unknown';
-
-      const result = await this.authService.resetPassword(token, newPass, confirmPass, ipAddress);
+      const result = await this.authService.resetPassword(dto.token,dto. newPass,dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(
