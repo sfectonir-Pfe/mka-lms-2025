@@ -5,6 +5,7 @@ import { FaUsers } from "react-icons/fa";
 // import { MdFeedback , FaBookOpen, FaFolderOpen} from "react-icons/md";
 import { FaGraduationCap, FaBook, FaFileAlt } from "react-icons/fa"; // additional icons for clarity
 import { BiBookBookmark, } from "react-icons/bi";
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 
 // import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -17,7 +18,7 @@ export const sideBarData = [
   { text: "Courses", icon: <FaBook />, path: "courses", },
   { text: "Contenus", icon: <FaFileAlt />, path: "contenus" },
   { text: "Programs", icon: <FaGraduationCap />, path: "/programs" },
-
+{text: "Sessions", icon: <CalendarMonthIcon />,path: "/sessions"}
   // { text: "Vue Programmes", icon: <LibraryBooksIcon />, path: "/programs/overview" }
 
   // { text: "Modules (Test)", icon: <FaBookOpen />, path: "/programs/1/modules" }, // temp path with test ID

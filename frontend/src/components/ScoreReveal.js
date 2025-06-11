@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { Typography, Box } from "@mui/material";
 
 const quotes = [
-  "Bananas to you, that was excellent! 🍌",
+  
   "You're the real MVP 🏆",
   "Monkey-approved performance 🐵💯",
   "Well done! You crushed it 💥",
-  "You deserve a banana break now 🍌😎",
+  
 ];
 
 const ScoreReveal = ({ score, total }) => {

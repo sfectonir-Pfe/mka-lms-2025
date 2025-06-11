@@ -21,42 +21,52 @@ export class UsersService {
     return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const tempPassword = this.generateTempPassword();
-    const hashedPassword = await this.hashPassword(tempPassword);
+ async create(createUserDto: CreateUserDto) {
+  // ✅ Check if email already exists
+  const existingUser = await this.prisma.user.findUnique({
+    where: { email: createUserDto.email },
+  });
 
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: createUserDto.email,
-        password: hashedPassword,
-        role: createUserDto.role,
-        name: createUserDto.name,
-        phone: createUserDto.phone,
-        location: createUserDto.location,
-        about: createUserDto.about,
-        skills: createUserDto.skills ? [createUserDto.skills] : undefined,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        phone: true,
-        location: true,
-        about: true,
-        skills: true,
-        profilePic: true,
-      },
-    });
-
-    await this.mailService.sendWelcomeEmail(
-      newUser.email,
-      tempPassword,
-      newUser.role,
-    );
-
-    return newUser;
+  if (existingUser) {
+    throw new ConflictException('Cet utilisateur existe déjà.');
   }
+
+  const tempPassword = this.generateTempPassword();
+  const hashedPassword = await this.hashPassword(tempPassword);
+
+  const newUser = await this.prisma.user.create({
+    data: {
+      email: createUserDto.email,
+      password: hashedPassword,
+      role: createUserDto.role,
+      name: createUserDto.name,
+      phone: createUserDto.phone,
+      location: createUserDto.location,
+      about: createUserDto.about,
+      skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      phone: true,
+      location: true,
+      about: true,
+      skills: true,
+      profilePic: true,
+    },
+  });
+
+  await this.mailService.sendWelcomeEmail(
+    newUser.email,
+    tempPassword,
+    newUser.role,
+  );
+
+  return newUser;
+}
+
 
   async findAll() {
     return this.prisma.user.findMany({

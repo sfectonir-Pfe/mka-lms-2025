@@ -44,7 +44,13 @@ import PlayQuizPage from "./pages/users/views/PlayQuizPage";
 import BuildProgramView from "./pages/users/views/BuildProgramView";
 import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
 
-import ModuleList from './pages/users/views/ModuleList'; 
+import ModuleList from './pages/users/views/ModuleList';
+import EditProgramView from "./pages/users/views/EditProgramView";
+import SessionPage from "./pages/SessionPage";
+import EditQuizForm from "./pages/users/views/EditQuizForm";
+import VerifyAccountPage from './pages/VerifyAccountPage';
+
+
 
 
 
@@ -154,8 +160,14 @@ function App() {
 
                 <Route path="/programs/build/:programId" element={<BuildProgramView />} />
                 <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
-               <Route path="/modules" element={<ModuleList />} />
+                <Route path="/modules" element={<ModuleList />} />
+                <Route path="/programs/edit/:programId" element={<EditProgramView />} />
+                <Route path="/sessions" element={<SessionPage />} />
+<Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
 
+
+
+                
 
 
 
@@ -192,6 +204,10 @@ function App() {
                 <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
                 <Route path="reset-success" element={<ResetSuccessPage />} />
+              <Route path="/verify-sms" element={<VerifyAccountPage />} />
+
+               
+
               </Route>
             )}
 

@@ -23,8 +23,10 @@ export class ContenusService {
       });
     }
 
+
     return created;
   }
+  
 
   findAll() {
     return this.prisma.contenu.findMany({
@@ -35,15 +37,17 @@ export class ContenusService {
   remove(id: number) {
     return this.prisma.contenu.delete({ where: { id } });
   }
-  async update(id: number, data: any) {
-  return this.prisma.contenu.update({
-    where: { id },
-    data: {
-      title: data.title,
-      type: data.type,
-      fileType: data.fileType,
-    },
-  });
-}
+  // async update(id: number, data: any) {
+  // return this.prisma.contenu.update({
+  //   where: { id },
+  //   data: {
+  //     title: data.title,
+  //     type: data.type,
+  //     fileType: data.fileType,
+  //   },
+  // });
+ 
 
 }
+
+

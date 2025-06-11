@@ -5,7 +5,7 @@ import {
   Body,
   Param,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors,Patch
 } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto } from './dto/create-quiz.dto';
@@ -15,7 +15,7 @@ import { extname } from 'path';
 
 @Controller('quizzes') // 👈 required prefix!
 export class QuizController {
-  constructor(private readonly quizService: QuizService) {}
+  constructor(private readonly quizService: QuizService) { }
 
   @Post()
   create(@Body() createQuizDto: CreateQuizDto) {
@@ -31,6 +31,15 @@ export class QuizController {
   findOne(@Param('id') id: string) {
     return this.quizService.findOne(+id);
   }
+  @Patch('by-contenu/:contenuId')
+  updateByContenuId(
+    @Param('contenuId') contenuId: string,
+    @Body() data: { timeLimit: number; questions: any[] },
+  ) {
+    return this.quizService.updateByContenuId(+contenuId, data);
+  }
+
+
 
   // ✅ Upload route (matches frontend)
   @Post('upload-question-image')

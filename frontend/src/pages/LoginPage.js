@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
-import { Link } from "react-router-dom";
+import "bootstrap-icons/font/bootstrap-icons.css";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import showErrorToast from "../utils/toastError";
 
 function LoginPage({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
-  const [msgError, setMgsError] = useState("");
+  const [msgError, setMsgError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const validate = () => {
     let valid = true;
@@ -41,43 +43,59 @@ function LoginPage({ setUser }) {
   if (!validate()) return;
 
   try {
-    // Connexion de l'utilisateur
-    const response = await axios.post("http://localhost:8000/auth/login", {
+    const res = await axios.post("http://localhost:8000/auth/login", {
       email,
       password,
     });
 
-    console.log("Login response:", response.data);
+    const user = res.data.data;
 
-    // Création d'un objet utilisateur simplifié
+    // 🔒 Redirection vers Firebase SMS si besoin
+    if (user.needsVerification) {
+  toast.warning("Votre compte n’est pas encore vérifié. Veuillez vérifier par SMS.");
+  navigate("/verify-sms", {
+    state: {
+      email: user.email,
+      phone: user.phone || "",
+    },
+  });
+ 
+
+
+
+
+      return;
+    }
+
+    // ✅ Connexion normale
     const userData = {
-      id: response.data.id,
-      email: email,
-      role: response.data.role || "Etudiant", // Utiliser l'une des valeurs de l'énumération Role
-      name: response.data.name || email.split('@')[0],
-      profilePic: response.data.profilePic || null, // Ajouter la photo de profil
-      token: response.data.access_token
+      id: user.id,
+      email: user.email,
+      role: user.role || "Etudiant",
+      name: user.name || user.email.split("@")[0],
+      profilePic: user.profilePic || null,
+      token: user.access_token,
     };
 
-    console.log("User data to store:", userData);
-
-    // Stockage des données utilisateur
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userEmail", user.email);
 
-    // Naviguer vers la page d'accueil après la connexion
-    window.location.href = `/`; // Redirection vers la page d'accueil
+    window.location.href = `/`;
   } catch (error) {
     console.error("Login error:", error);
+
     const message =
       "Login failed. Please check your credentials. " +
       (error.response?.data?.message || "");
-    setMgsError(message);
+
+    setMsgError(message);
     showErrorToast(message);
     setPassword("");
   }
 };
+
+
   return (
     <div className="container-fluid p-3 my-5">
       <div className="row align-items-center">
@@ -113,7 +131,7 @@ function LoginPage({ setUser }) {
               )}
             </div>
 
-            {/* Password input avec icône œil */}
+            {/* Password input */}
             <div className="form-floating mb-4 position-relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -127,8 +145,6 @@ function LoginPage({ setUser }) {
               {errors.password && (
                 <div className="invalid-feedback">{errors.password}</div>
               )}
-
-              {/* Icône œil / œil barré */}
               <i
                 className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute top-50 end-0 translate-middle-y me-3`}
                 style={{ cursor: "pointer", fontSize: "1.2rem", zIndex: 10 }}
@@ -136,14 +152,10 @@ function LoginPage({ setUser }) {
               ></i>
             </div>
 
-            {/* Options supplémentaires */}
+            {/* Options */}
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="remember"
-                />
+                <input className="form-check-input" type="checkbox" id="remember" />
                 <label className="form-check-label" htmlFor="remember">
                   Remember me
                 </label>
@@ -151,7 +163,7 @@ function LoginPage({ setUser }) {
               <Link to="/forgot-password">Forgot password?</Link>
             </div>
 
-            {/* Submit button */}
+            {/* Submit */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"
