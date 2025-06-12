@@ -1,12 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UploadedFile,
+  UseInterceptors,Patch
+} from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
-
-@Controller('quizzes')
+@Controller('quizzes') // 👈 required prefix!
 export class QuizController {
-  constructor(private readonly quizService: QuizService) {}
+  constructor(private readonly quizService: QuizService) { }
 
   @Post()
   create(@Body() createQuizDto: CreateQuizDto) {
@@ -14,13 +23,40 @@ export class QuizController {
   }
 
   @Get('by-contenu/:contenuId')
-async getQuizByContenu(@Param('contenuId') contenuId: string) {
-  return this.quizService.getQuizWithQuestions(+contenuId);
-}
+  getQuizByContenu(@Param('contenuId') contenuId: string) {
+    return this.quizService.getQuizWithQuestions(+contenuId);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.quizService.findOne(+id);
   }
-}
+  @Patch('by-contenu/:contenuId')
+  updateByContenuId(
+    @Param('contenuId') contenuId: string,
+    @Body() data: { timeLimit: number; questions: any[] },
+  ) {
+    return this.quizService.updateByContenuId(+contenuId, data);
+  }
 
+
+
+  // ✅ Upload route (matches frontend)
+  @Post('upload-question-image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads', // must match static assets dir
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, uniqueSuffix + extname(file.originalname));
+        },
+      }),
+    }),
+  )
+  uploadQuestionImage(@UploadedFile() file: Express.Multer.File) {
+    return {
+      imageUrl: `http://localhost:8000/uploads/${file.filename}`,
+    };
+  }
+}

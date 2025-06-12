@@ -32,10 +32,23 @@ import ModulePage from "./pages/ModulePage";
 import AddModuleView from "./pages/users/views/AddModuleView";
 import CoursesPage from "./pages/CoursesPage";
 import ContenusPage from "./pages/ContenusPage";
-import ConfigureSessionPage from "./pages/ConfigureSessionPage";
-import SessionsOverviewPage from "./pages/SessionsOverviewPage";
+
+
+
 import AddQuizForm from "./pages/users/views/AddQuizForm";
 import PlayQuizPage from "./pages/users/views/PlayQuizPage";
+
+import BuildProgramView from "./pages/users/views/BuildProgramView";
+import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
+
+import ModuleList from './pages/users/views/ModuleList';
+import EditProgramView from "./pages/users/views/EditProgramView";
+import SessionPage from "./pages/SessionPage";
+import EditQuizForm from "./pages/users/views/EditQuizForm";
+import VerifyAccountPage from './pages/VerifyAccountPage';
+
+
+
 
 
 // UI
@@ -188,10 +201,23 @@ function App() {
                 <Route path="module/add" element={<AddModuleView />} />
                 <Route path="courses/*" element={<CoursesPage />} />
                 <Route path="contenus/*" element={<ContenusPage />} />
-                <Route path="/sessions/*" element={<ConfigureSessionPage />} />
-                <Route path="/sessions/overview" element={<SessionsOverviewPage />} />
+
+                <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
+
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+
+                <Route path="/programs/build/:programId" element={<BuildProgramView />} />
+                <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
+                <Route path="/modules" element={<ModuleList />} />
+                <Route path="/programs/edit/:programId" element={<EditProgramView />} />
+                <Route path="/sessions" element={<SessionPage />} />
+                <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
+
+
+
+              
+                {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
@@ -203,7 +229,8 @@ function App() {
                 <Route index element={<LoginPage setUser={setUser} />} />
                 <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
-                <Route path="/reset-success" element={<ResetSuccessPage />} />
+                <Route path="reset-success" element={<ResetSuccessPage />} />
+                <Route path="/verify-sms" element={<VerifyAccountPage />} />
 
               </Route>
             )}
@@ -211,7 +238,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      )}
+      )};
+      
     </div>
   );
 }

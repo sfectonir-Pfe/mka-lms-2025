@@ -10,6 +10,8 @@ import {
 import { ModulesService } from './modules.service';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Patch } from '@nestjs/common';
+
 
 @Controller('modules')
 export class ModulesController {
@@ -29,4 +31,6 @@ export class ModulesController {
   remove(@Param('id') id: string) {
     return this.modulesService.remove(+id);
   }
+  
+
 }

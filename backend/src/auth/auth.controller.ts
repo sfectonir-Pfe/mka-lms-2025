@@ -12,8 +12,9 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ChangePasswordDto } from './dto/create-auth.dto';
+import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
+import { ApiBody, ApiProperty } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -137,17 +138,13 @@ export class AuthController {
   }
 
   @Post('reset-password')
+
   async reset(
-    @Body('token') token: string,
-    @Body('newPass') newPass: string,
-    @Body('confirmPass') confirmPass: string,
-    @Req() request: Request,
+  
+    @Body() dto:ResetPassword
   ) {
     try {
-      // Extract IP address from request
-      const ipAddress = request.ip || request.connection.remoteAddress || request.headers['x-forwarded-for'] as string || 'Unknown';
-
-      const result = await this.authService.resetPassword(token, newPass, confirmPass, ipAddress);
+      const result = await this.authService.resetPassword(dto.token,dto. newPass,dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(
@@ -173,29 +170,17 @@ export class AuthController {
       );
     }
   }
-
-  @Post('logout')
-  async logout(@Body() body?: any) {
-    try {
-      console.log('Logout request received');
-
-      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
-      // Dans une vraie application avec JWT, on invaliderait le token ici
-
-      return {
-        success: true,
-        message: 'Déconnexion réussie',
-        data: {
-          loggedOut: true,
-          timestamp: new Date().toISOString()
-        }
-      };
-    } catch (error) {
-      console.error('Logout error:', error);
-      throw new HttpException(
-        error.message || 'Erreur lors de la déconnexion',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  @Post('verify')
+async verifyUser(@Body('email') email: string) {
+  try {
+    const result = await this.authService.verifyUser(email);
+    return { success: true, message: 'Utilisateur vérifié', data: result };
+  } catch (error) {
+    throw new HttpException(
+      error.message || 'Erreur de vérification',
+      error.status || HttpStatus.BAD_REQUEST,
+    );
   }
+}
+
 }

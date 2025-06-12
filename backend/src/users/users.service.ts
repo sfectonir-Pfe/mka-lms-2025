@@ -5,6 +5,7 @@ import type { UpdateUserDto } from "./dto/update-user.dto"
 import * as bcrypt from "bcrypt"
 import { MailService } from "../mail/mail.service" // Removed 'type' keyword
 import type { Role } from "@prisma/client"
+import { ConflictException } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -62,120 +63,52 @@ export class UsersService {
       .join("")
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const tempPassword = this.generateTempPassword()
-    console.log("🔑 Mot de passe temporaire généré:", tempPassword)
+ async create(createUserDto: CreateUserDto) {
+  // ✅ Check if email already exists
+  const existingUser = await this.prisma.user.findUnique({
+    where: { email: createUserDto.email },
+  });
 
-    try {
-      console.log("👤 Création d'un nouvel utilisateur:", createUserDto)
-
-      const hashedPassword = await this.hashPassword(tempPassword)
-
-      let formattedSkills
-      if (createUserDto.skills) {
-        console.log("🛠️ Skills avant traitement:", createUserDto.skills)
-        console.log("📝 Type de skills:", typeof createUserDto.skills)
-
-        if (typeof createUserDto.skills === "string") {
-          try {
-            if (createUserDto.skills.startsWith("[") && createUserDto.skills.endsWith("]")) {
-              formattedSkills = JSON.parse(createUserDto.skills)
-              console.log("✅ Skills après parsing JSON:", formattedSkills)
-            } else {
-              formattedSkills = [createUserDto.skills]
-              console.log("🔄 Skills convertis en tableau:", formattedSkills)
-            }
-          } catch (e) {
-            console.error("❌ Failed to parse skills:", e)
-            formattedSkills = []
-          }
-        } else if (Array.isArray(createUserDto.skills)) {
-          formattedSkills = createUserDto.skills
-          console.log("✅ Skills est déjà un tableau:", formattedSkills)
-        } else {
-          console.error("⚠️ Format de skills non reconnu, conversion en tableau vide")
-          formattedSkills = []
-        }
-      } else {
-        formattedSkills = []
-      }
-
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: createUserDto.email,
-          password: hashedPassword,
-          role: createUserDto.role,
-          name: createUserDto.name,
-          phone: createUserDto.phone,
-          location: createUserDto.location,
-          about: createUserDto.about,
-          skills: formattedSkills,
-          isActive: true,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          phone: true,
-          location: true,
-          about: true,
-          skills: true,
-          profilePic: true,
-          isActive: true,
-        },
-      })
-
-      console.log("✅ Nouvel utilisateur créé:", newUser)
-
-      // Envoi de l'email de bienvenue
-      try {
-        console.log("📧 Envoi de l'email de bienvenue à:", newUser.email)
-        const emailResult = await this.mailService.sendWelcomeEmail(newUser.email, tempPassword, newUser.role)
-        console.log("✅ Email de bienvenue envoyé avec succès:", emailResult)
-      } catch (emailError) {
-        console.error("❌ Erreur lors de l'envoi de l'email de bienvenue:", emailError)
-        // Ne pas faire échouer la création d'utilisateur si l'email échoue
-      }
-
-      return newUser
-    } catch (error) {
-      console.error("❌ Erreur lors de la création de l'utilisateur:", error)
-      console.log("🔄 Database error in create, using fallback creation")
-
-      const newUser = {
-        id: Math.floor(Math.random() * 1000) + 2,
-        email: createUserDto.email,
-        role: createUserDto.role,
-        name: createUserDto.name || createUserDto.email.split("@")[0],
-        phone: createUserDto.phone || null,
-        profilePic: null,
-        location: createUserDto.location || null,
-        skills: createUserDto.skills || [],
-        about: createUserDto.about || null,
-        isActive: true,
-      }
-
-      this.fallbackUsers.push(newUser)
-      console.log("💾 Utilisateur ajouté au stockage temporaire. Total:", this.fallbackUsers.length)
-
-      // Tentative d'envoi d'email même en mode fallback
-      try {
-        console.log("📧 Envoi de l'email de bienvenue (fallback) à:", createUserDto.email)
-        const emailResult = await this.mailService.sendWelcomeEmail(
-          createUserDto.email,
-          tempPassword,
-          createUserDto.role,
-        )
-        console.log("✅ Email de bienvenue (fallback) envoyé avec succès:", emailResult)
-      } catch (emailError) {
-        console.error("❌ Erreur lors de l'envoi de l'email de bienvenue (fallback):", emailError)
-        console.log("⚠️ Email sending failed, but user creation continues")
-      }
-
-      return newUser
-    }
+  if (existingUser) {
+    throw new ConflictException('Cet utilisateur existe déjà.');
   }
+
+  const tempPassword = this.generateTempPassword();
+  const hashedPassword = await this.hashPassword(tempPassword);
+
+  const newUser = await this.prisma.user.create({
+    data: {
+      email: createUserDto.email,
+      password: hashedPassword,
+      role: createUserDto.role,
+      name: createUserDto.name,
+      phone: createUserDto.phone,
+      location: createUserDto.location,
+      about: createUserDto.about,
+      skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      role: true,
+      phone: true,
+      location: true,
+      about: true,
+      skills: true,
+      profilePic: true,
+    },
+  });
+
+  await this.mailService.sendWelcomeEmail(
+    newUser.email,
+    tempPassword,
+    newUser.role,
+  );
+
+  return newUser;
+}
+
 
   async findAll() {
     try {

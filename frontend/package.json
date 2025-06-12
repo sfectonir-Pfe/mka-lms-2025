@@ -18,6 +18,8 @@
     "date-fns": "^4.1.0",
     "i18next": "^25.2.0",
     "i18next-browser-languagedetector": "^8.1.0",
+    "firebase": "^11.8.1",
+    "framer-motion": "^12.12.2",
     "mdb-react-ui-kit": "^9.0.0",
     "react": "^18.0.0",
     "react-bootstrap": "^2.10.9",

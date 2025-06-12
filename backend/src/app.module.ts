@@ -9,15 +9,15 @@ import { ModulesModule } from './modules/modules.module';
 import { CoursesModule } from './courses/courses.module';
 import { MailModule } from './mail/mail.module';
 import { ContenuModule } from './contenu/contenu.module';
-import { SessionModule } from './session/session.module';
+import { buildProgramModule } from './buildProgram/buildProgram.module';
 import { QuizModule } from './quiz/quiz.module';
-
+import { Session2Module } from './session2/session2.module';
 
 
 
 @Module({
-  imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, SessionModule, QuizModule],
+  imports: [PrismaModule.forRoot({ isGlobal: true }), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module,],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
