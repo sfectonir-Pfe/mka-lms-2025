@@ -32,9 +32,6 @@ import ModulePage from "./pages/ModulePage";
 import AddModuleView from "./pages/users/views/AddModuleView";
 import CoursesPage from "./pages/CoursesPage";
 import ContenusPage from "./pages/ContenusPage";
-
-
-
 import AddQuizForm from "./pages/users/views/AddQuizForm";
 import PlayQuizPage from "./pages/users/views/PlayQuizPage";
 
@@ -216,6 +213,14 @@ function App() {
 
 
 
+                
+
+
+
+
+
+
+
               
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
@@ -229,8 +234,10 @@ function App() {
                 <Route index element={<LoginPage setUser={setUser} />} />
                 <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
-                <Route path="reset-success" element={<ResetSuccessPage />} />
+                <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
+
+               
 
               </Route>
             )}

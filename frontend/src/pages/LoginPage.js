@@ -9,11 +9,39 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
 
-  const showErrorToast = (message) => {
-    toast.error(message, {
-      duration: 5000,
-      position: "top-center",
-    });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    // Extraire l'email de l'URL si présent
+    const emailFromUrl = params.get('email');
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    }
+  }, [location]);
+
+  const validate = () => {
+    let valid = true;
+    const newErrors = { email: "", password: "" };
+
+    if (!email) {
+      newErrors.email = "Email is required";
+      valid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Email is invalid";
+      valid = false;
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required";
+      valid = false;
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const handleRequest = async (e) => {
@@ -91,8 +119,8 @@ const LoginPage = () => {
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">Mot de passe</label>
+            {/* Password input with toggle */}
+            <div className="form-floating mb-4 position-relative">
               <input
                 type="password"
                 className="form-control"
@@ -102,9 +130,37 @@ const LoginPage = () => {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary w-100">
-              Se connecter
-            </button>
+            {/* Remember me checkbox */}
+            <div className="d-flex justify-content-between mb-4">
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="remember"
+                  checked={rememberMe}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    console.log("Remember Me checkbox changed to:", isChecked ? "CHECKED" : "NOT CHECKED");
+                    setRememberMe(isChecked);
+                  }}
+                />
+                <label className="form-check-label" htmlFor="remember">
+                  {t('common.rememberMe')}
+                </label>
+              </div>
+              <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
+            </div>
+
+            {/* Submit */}
+            <div className="text-center text-md-start mt-4 pt-2">
+              <button
+                type="submit"
+                className="btn btn-primary px-5"
+                disabled={!email || !password}
+              >
+                {t('common.login')}
+              </button>
+            </div>
           </form>
         </div>
       </div>

@@ -14,8 +14,6 @@ async function main() {
       role: Role.Admin, // ✅ Correct enum usage
       email: 'khalil@gmail.com',
       password: hashedPassword,
-      isVerified: true,
-      needsVerification: false, // ✅ Optional but good
     },
   });
 

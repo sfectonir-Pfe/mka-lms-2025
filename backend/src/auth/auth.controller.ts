@@ -21,6 +21,23 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
   ) { }
+  
+  @Post('verify')
+  async verifyAccount(@Body() body: { email: string }) {
+    try {
+      const user = await this.authService.getUserByEmail(body.email);
+      return { 
+        success: true, 
+        message: 'Compte vérifié avec succès', 
+        data: { user } 
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la vérification du compte',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
@@ -183,4 +200,29 @@ async verifyUser(@Body('email') email: string) {
   }
 }
 
+
+  @Post('logout')
+  async logout(@Body() body?: any) {
+    try {
+      console.log('Logout request received');
+
+      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
+      // Dans une vraie application avec JWT, on invaliderait le token ici
+
+      return {
+        success: true,
+        message: 'Déconnexion réussie',
+        data: {
+          loggedOut: true,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw new HttpException(
+        error.message || 'Erreur lors de la déconnexion',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
