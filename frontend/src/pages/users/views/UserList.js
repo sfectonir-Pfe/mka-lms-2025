@@ -65,7 +65,8 @@ export default function UserList() {
     try {
       console.log("🔄 Fetching users...")
       const response = await axios.get("http://localhost:8000/users")
-      
+      console.log("✅ Users fetched:", response.data)
+      setUsers(response.data)
     } catch (error) {
       console.error("❌ Fetch error:", error)
       showNotification("❌ Erreur de chargement des utilisateurs. Veuillez réessayer.", "error")

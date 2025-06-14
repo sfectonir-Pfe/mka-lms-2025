@@ -2,13 +2,16 @@
 CREATE TYPE "Role" AS ENUM ('Etudiant', 'Formateur', 'Admin', 'CreateurDeFormation', 'Etablissement');
 
 -- CreateEnum
-CREATE TYPE "FileType" AS ENUM ('PDF', 'IMAGE', 'VIDEO');
+CREATE TYPE "FileType" AS ENUM ('PDF', 'IMAGE', 'VIDEO', 'WORD', 'EXCEL', 'PPT');
 
 -- CreateEnum
 CREATE TYPE "ContenuType" AS ENUM ('Cours', 'Exercice', 'Quiz');
 
 -- CreateEnum
 CREATE TYPE "PeriodUnit" AS ENUM ('Day', 'Week', 'Month');
+
+-- CreateEnum
+CREATE TYPE "QuestionType" AS ENUM ('MCQ', 'TRUE_FALSE', 'FILL_BLANK', 'IMAGE_CHOICE');
 
 -- CreateTable
 CREATE TABLE "Mail" (
@@ -36,6 +39,11 @@ CREATE TABLE "User" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "needsVerification" BOOLEAN NOT NULL DEFAULT true,
+    "emailVerified" TIMESTAMP(3),
+    "emailVerificationCode" TEXT,
+    "codeExpiryDate" TIMESTAMP(3),
     "resetToken" TEXT,
     "resetTokenExpiry" TIMESTAMP(3),
 
@@ -100,6 +108,7 @@ CREATE TABLE "ResetToken" (
 CREATE TABLE "Program" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Program_pkey" PRIMARY KEY ("id")
 );
@@ -161,48 +170,52 @@ CREATE TABLE "CourseContenu" (
 );
 
 -- CreateTable
-CREATE TABLE "Session" (
+CREATE TABLE "buildProgram" (
     "id" SERIAL NOT NULL,
     "programId" INTEGER NOT NULL,
-    "startDate" TIMESTAMP(3) NOT NULL,
-    "endDate" TIMESTAMP(3) NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
     "imageUrl" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "level" TEXT NOT NULL DEFAULT 'Basique',
+    "createdAt" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "buildProgram_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "SessionModule" (
+CREATE TABLE "buildProgramModule" (
     "id" SERIAL NOT NULL,
-    "sessionId" INTEGER NOT NULL,
+    "buildProgramId" INTEGER NOT NULL,
     "moduleId" INTEGER NOT NULL,
 
-    CONSTRAINT "SessionModule_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "buildProgramModule_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "SessionCourse" (
+CREATE TABLE "buildProgramCourse" (
     "id" SERIAL NOT NULL,
-    "sessionModuleId" INTEGER NOT NULL,
+    "buildProgramModuleId" INTEGER NOT NULL,
     "courseId" INTEGER NOT NULL,
 
-    CONSTRAINT "SessionCourse_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "buildProgramCourse_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "SessionContenu" (
+CREATE TABLE "buildProgramContenu" (
     "id" SERIAL NOT NULL,
-    "sessionCourseId" INTEGER NOT NULL,
+    "buildProgramCourseId" INTEGER NOT NULL,
     "contenuId" INTEGER NOT NULL,
 
-    CONSTRAINT "SessionContenu_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "buildProgramContenu_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Quiz" (
     "id" SERIAL NOT NULL,
     "contenuId" INTEGER NOT NULL,
+    "title" TEXT,
+    "description" TEXT,
+    "timeLimit" INTEGER,
 
     CONSTRAINT "Quiz_pkey" PRIMARY KEY ("id")
 );
@@ -211,7 +224,12 @@ CREATE TABLE "Quiz" (
 CREATE TABLE "Question" (
     "id" SERIAL NOT NULL,
     "text" TEXT NOT NULL,
+    "imageUrl" TEXT,
+    "type" "QuestionType" NOT NULL DEFAULT 'MCQ',
+    "score" INTEGER NOT NULL DEFAULT 1,
+    "negativeMark" INTEGER NOT NULL DEFAULT 0,
     "quizId" INTEGER NOT NULL,
+    "correctText" TEXT,
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
 );
@@ -219,7 +237,8 @@ CREATE TABLE "Question" (
 -- CreateTable
 CREATE TABLE "Choice" (
     "id" SERIAL NOT NULL,
-    "text" TEXT NOT NULL,
+    "text" TEXT,
+    "imageUrl" TEXT,
     "isCorrect" BOOLEAN NOT NULL DEFAULT false,
     "questionId" INTEGER NOT NULL,
 
@@ -242,9 +261,50 @@ CREATE TABLE "Answer" (
     "id" SERIAL NOT NULL,
     "userAnswerId" INTEGER NOT NULL,
     "questionId" INTEGER NOT NULL,
-    "selectedId" INTEGER NOT NULL,
+    "selectedId" INTEGER,
+    "textAnswer" TEXT,
 
     CONSTRAINT "Answer_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Session2" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "programId" INTEGER NOT NULL,
+    "startDate" TIMESTAMP(3),
+    "endDate" TIMESTAMP(3),
+    "imageUrl" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Session2_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Session2Module" (
+    "id" SERIAL NOT NULL,
+    "session2Id" INTEGER NOT NULL,
+    "moduleId" INTEGER NOT NULL,
+
+    CONSTRAINT "Session2Module_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Session2Course" (
+    "id" SERIAL NOT NULL,
+    "session2ModuleId" INTEGER NOT NULL,
+    "courseId" INTEGER NOT NULL,
+
+    CONSTRAINT "Session2Course_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Session2Contenu" (
+    "id" SERIAL NOT NULL,
+    "session2CourseId" INTEGER NOT NULL,
+    "contenuId" INTEGER NOT NULL,
+
+    CONSTRAINT "Session2Contenu_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -263,16 +323,22 @@ CREATE UNIQUE INDEX "ModuleCourse_moduleId_courseId_key" ON "ModuleCourse"("modu
 CREATE UNIQUE INDEX "CourseContenu_courseId_contenuId_key" ON "CourseContenu"("courseId", "contenuId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SessionModule_sessionId_moduleId_key" ON "SessionModule"("sessionId", "moduleId");
+CREATE UNIQUE INDEX "buildProgramModule_buildProgramId_moduleId_key" ON "buildProgramModule"("buildProgramId", "moduleId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SessionCourse_sessionModuleId_courseId_key" ON "SessionCourse"("sessionModuleId", "courseId");
+CREATE UNIQUE INDEX "buildProgramCourse_buildProgramModuleId_courseId_key" ON "buildProgramCourse"("buildProgramModuleId", "courseId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SessionContenu_sessionCourseId_contenuId_key" ON "SessionContenu"("sessionCourseId", "contenuId");
+CREATE UNIQUE INDEX "buildProgramContenu_buildProgramCourseId_contenuId_key" ON "buildProgramContenu"("buildProgramCourseId", "contenuId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Quiz_contenuId_key" ON "Quiz"("contenuId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Session2Course_session2ModuleId_courseId_key" ON "Session2Course"("session2ModuleId", "courseId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Session2Contenu_session2CourseId_contenuId_key" ON "Session2Contenu"("session2CourseId", "contenuId");
 
 -- AddForeignKey
 ALTER TABLE "Formateur" ADD CONSTRAINT "Formateur_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -311,25 +377,25 @@ ALTER TABLE "CourseContenu" ADD CONSTRAINT "CourseContenu_courseId_fkey" FOREIGN
 ALTER TABLE "CourseContenu" ADD CONSTRAINT "CourseContenu_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Session" ADD CONSTRAINT "Session_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgram" ADD CONSTRAINT "buildProgram_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionModule" ADD CONSTRAINT "SessionModule_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramModule" ADD CONSTRAINT "buildProgramModule_buildProgramId_fkey" FOREIGN KEY ("buildProgramId") REFERENCES "buildProgram"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionModule" ADD CONSTRAINT "SessionModule_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramModule" ADD CONSTRAINT "buildProgramModule_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionCourse" ADD CONSTRAINT "SessionCourse_sessionModuleId_fkey" FOREIGN KEY ("sessionModuleId") REFERENCES "SessionModule"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramCourse" ADD CONSTRAINT "buildProgramCourse_buildProgramModuleId_fkey" FOREIGN KEY ("buildProgramModuleId") REFERENCES "buildProgramModule"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionCourse" ADD CONSTRAINT "SessionCourse_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramCourse" ADD CONSTRAINT "buildProgramCourse_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionContenu" ADD CONSTRAINT "SessionContenu_sessionCourseId_fkey" FOREIGN KEY ("sessionCourseId") REFERENCES "SessionCourse"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramContenu" ADD CONSTRAINT "buildProgramContenu_buildProgramCourseId_fkey" FOREIGN KEY ("buildProgramCourseId") REFERENCES "buildProgramCourse"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionContenu" ADD CONSTRAINT "SessionContenu_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "buildProgramContenu" ADD CONSTRAINT "buildProgramContenu_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -353,4 +419,25 @@ ALTER TABLE "Answer" ADD CONSTRAINT "Answer_userAnswerId_fkey" FOREIGN KEY ("use
 ALTER TABLE "Answer" ADD CONSTRAINT "Answer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Answer" ADD CONSTRAINT "Answer_selectedId_fkey" FOREIGN KEY ("selectedId") REFERENCES "Choice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Answer" ADD CONSTRAINT "Answer_selectedId_fkey" FOREIGN KEY ("selectedId") REFERENCES "Choice"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2" ADD CONSTRAINT "Session2_programId_fkey" FOREIGN KEY ("programId") REFERENCES "Program"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Module" ADD CONSTRAINT "Session2Module_session2Id_fkey" FOREIGN KEY ("session2Id") REFERENCES "Session2"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Module" ADD CONSTRAINT "Session2Module_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Course" ADD CONSTRAINT "Session2Course_session2ModuleId_fkey" FOREIGN KEY ("session2ModuleId") REFERENCES "Session2Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Course" ADD CONSTRAINT "Session2Course_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Contenu" ADD CONSTRAINT "Session2Contenu_session2CourseId_fkey" FOREIGN KEY ("session2CourseId") REFERENCES "Session2Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Session2Contenu" ADD CONSTRAINT "Session2Contenu_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;

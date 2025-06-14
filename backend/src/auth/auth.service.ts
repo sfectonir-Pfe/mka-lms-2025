@@ -289,3 +289,4 @@ return { ...safeUser, needsVerification: false }; // Always include this
 
   return { message: 'Utilisateur vérifié avec succès', user: updated };
   
+  }}

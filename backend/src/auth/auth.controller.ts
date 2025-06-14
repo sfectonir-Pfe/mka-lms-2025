@@ -187,18 +187,7 @@ export class AuthController {
       );
     }
   }
-  @Post('verify')
-async verifyUser(@Body('email') email: string) {
-  try {
-    const result = await this.authService.verifyUser(email);
-    return { success: true, message: 'Utilisateur vérifié', data: result };
-  } catch (error) {
-    throw new HttpException(
-      error.message || 'Erreur de vérification',
-      error.status || HttpStatus.BAD_REQUEST,
-    );
-  }
-}
+  
 
 
   @Post('logout')

@@ -15,7 +15,7 @@ export class UsersService {
       id: 1,
       email: "khalil@gmail.com",
       role: "Admin",
-      name: "Khalil Admin",
+      name: "Khalil ",
       phone: null,
       profilePic: null,
       location: null,
