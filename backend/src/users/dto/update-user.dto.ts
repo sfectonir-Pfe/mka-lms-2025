@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength, IsEmail, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { Role } from '@prisma/client';
 
 export class UpdateUserDto {
@@ -30,4 +30,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profilePic?: string; // chemin
+
+  @IsOptional()
+  @IsEnum(Role)
+  isActive?: boolean
 }

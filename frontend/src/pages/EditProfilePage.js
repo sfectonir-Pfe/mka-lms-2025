@@ -15,14 +15,13 @@ import {
   Divider,
   Stack,
   InputAdornment,
-  Modal,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   DialogContentText,
 } from "@mui/material";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowBack,
   PhotoCamera,
@@ -53,6 +52,8 @@ const EditProfilePage = () => {
   const [preview, setPreview] = useState("");
   const [newSkill, setNewSkill] = useState("");
   const [skills, setSkills] = useState([]);
+  const [imageQuality, setImageQuality] = useState(null);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
 
   // États pour le changement de mot de passe
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -94,10 +95,178 @@ const EditProfilePage = () => {
     return "forte";
   };
 
+  // Fonction pour analyser la qualité de l'image (détection de flou)
+  const analyzeImageQuality = (file) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      img.onload = () => {
+        // Redimensionner l'image pour l'analyse (pour des performances optimales)
+        const maxSize = 500;
+        let { width, height } = img;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Obtenir les données de l'image
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        // Calculer la variance des gradients (méthode de détection de flou)
+        let sum = 0;
+        let sumSquared = 0;
+        let count = 0;
+
+        // Calculer les gradients horizontaux et verticaux
+        for (let y = 1; y < height - 1; y++) {
+          for (let x = 1; x < width - 1; x++) {
+            const idx = (y * width + x) * 4;
+
+            // Convertir en niveaux de gris
+            const gray = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+            // Gradient horizontal
+            const grayLeft = 0.299 * data[idx - 4] + 0.587 * data[idx - 3] + 0.114 * data[idx - 2];
+            const grayRight = 0.299 * data[idx + 4] + 0.587 * data[idx + 5] + 0.114 * data[idx + 6];
+            const gradX = grayRight - grayLeft;
+
+            // Gradient vertical
+            const grayTop = 0.299 * data[idx - width * 4] + 0.587 * data[idx - width * 4 + 1] + 0.114 * data[idx - width * 4 + 2];
+            const grayBottom = 0.299 * data[idx + width * 4] + 0.587 * data[idx + width * 4 + 1] + 0.114 * data[idx + width * 4 + 2];
+            const gradY = grayBottom - grayTop;
+
+            // Magnitude du gradient
+            const magnitude = Math.sqrt(gradX * gradX + gradY * gradY);
+
+            sum += magnitude;
+            sumSquared += magnitude * magnitude;
+            count++;
+          }
+        }
+
+        // Calculer la variance
+        const mean = sum / count;
+        const variance = (sumSquared / count) - (mean * mean);
+
+        // Déterminer la qualité basée sur la variance
+        // Plus la variance est élevée, plus l'image est nette
+        let quality;
+        if (variance > 1000) {
+          quality = { level: 'excellent', score: variance, isBlurry: false };
+        } else if (variance > 500) {
+          quality = { level: 'good', score: variance, isBlurry: false };
+        } else if (variance > 200) {
+          quality = { level: 'acceptable', score: variance, isBlurry: false };
+        } else if (variance > 100) {
+          quality = { level: 'poor', score: variance, isBlurry: true };
+        } else {
+          quality = { level: 'very_poor', score: variance, isBlurry: true };
+        }
+
+        resolve(quality);
+      };
+
+      img.onerror = () => {
+        resolve({ level: 'error', score: 0, isBlurry: true });
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         setLoading(true);
+
+        // Vérifier d'abord si nous avons un utilisateur à éditer dans sessionStorage
+        // (cela serait défini lorsqu'on clique sur "Edit" dans la liste des utilisateurs)
+        const editingUserStr = sessionStorage.getItem("editingUser");
+        if (editingUserStr) {
+          try {
+            const editingUser = JSON.parse(editingUserStr);
+            console.log("Found user to edit in sessionStorage:", editingUser);
+
+            if (editingUser && editingUser.email) {
+              // Utiliser cet utilisateur comme point de départ
+              setUser(editingUser);
+              setForm(editingUser);
+
+              // Gérer les skills
+              if (editingUser.skills) {
+                if (typeof editingUser.skills === 'string') {
+                  try {
+                    const parsedSkills = JSON.parse(editingUser.skills);
+                    setSkills(Array.isArray(parsedSkills) ? parsedSkills : []);
+                  } catch (parseErr) {
+                    console.error("Error parsing skills:", parseErr);
+                    setSkills([]);
+                  }
+                } else if (Array.isArray(editingUser.skills)) {
+                  setSkills(editingUser.skills);
+                } else {
+                  setSkills([]);
+                }
+              } else {
+                setSkills([]);
+              }
+
+              // Récupérer les données complètes depuis le serveur
+              try {
+                console.log("Fetching complete user data for email:", editingUser.email);
+                const res = await axios.get(`http://localhost:8000/users/email/${editingUser.email}`);
+                console.log("Complete user data received:", res.data);
+
+                if (res.data) {
+                  setUser(res.data);
+                  setForm(res.data);
+
+                  // Mettre à jour les skills avec les données du serveur
+                  if (res.data.skills) {
+                    if (typeof res.data.skills === 'string') {
+                      try {
+                        const parsedSkills = JSON.parse(res.data.skills);
+                        setSkills(Array.isArray(parsedSkills) ? parsedSkills : []);
+                      } catch (parseErr) {
+                        console.error("Error parsing skills from server:", parseErr);
+                      }
+                    } else if (Array.isArray(res.data.skills)) {
+                      setSkills(res.data.skills);
+                    }
+                  }
+                }
+              } catch (serverErr) {
+                console.error("Error fetching complete user data:", serverErr);
+                // Continuer avec les données de sessionStorage
+              }
+
+              // Nettoyer sessionStorage après utilisation
+              sessionStorage.removeItem("editingUser");
+              setLoading(false);
+              return; // Sortir de la fonction car nous avons déjà les données
+            }
+          } catch (parseErr) {
+            console.error("Error parsing editing user from sessionStorage:", parseErr);
+          }
+        }
+
+        // Si nous n'avons pas trouvé d'utilisateur à éditer dans sessionStorage,
+        // continuer avec la logique existante basée sur l'email de l'URL
 
         // Si l'email n'est pas fourni dans l'URL, essayer de le récupérer depuis le localStorage
         let userEmail = email;
@@ -192,10 +361,55 @@ const EditProfilePage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
-    setSelectedFile(file);
-    if (file) setPreview(URL.createObjectURL(file));
+
+    if (!file) {
+      setSelectedFile(null);
+      setPreview("");
+      setImageQuality(null);
+      return;
+    }
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      toast.error("Veuillez sélectionner un fichier image valide.");
+      e.target.value = '';
+      return;
+    }
+
+    // Vérifier la taille du fichier (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("La taille du fichier ne doit pas dépasser 5MB.");
+      e.target.value = '';
+      return;
+    }
+
+    setPreview(URL.createObjectURL(file));
+    setIsAnalyzingImage(true);
+    setImageQuality(null);
+
+    try {
+      // Analyser la qualité de l'image
+      const quality = await analyzeImageQuality(file);
+      setImageQuality(quality);
+
+      if (quality.isBlurry) {
+        toast.warning(`Image détectée comme floue (qualité: ${quality.level}). Cliquez sur "Utiliser quand même" si vous souhaitez continuer.`);
+        // Ne pas définir le fichier automatiquement si l'image est floue
+        setSelectedFile(null);
+      } else {
+        toast.success(`Image de bonne qualité détectée (qualité: ${quality.level}).`);
+        setSelectedFile(file);
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'analyse de l'image:", error);
+      toast.error("Erreur lors de l'analyse de l'image. Veuillez réessayer.");
+      setImageQuality({ level: 'error', score: 0, isBlurry: true });
+      setSelectedFile(null);
+    } finally {
+      setIsAnalyzingImage(false);
+    }
   };
 
   const handleAddSkill = () => {
@@ -207,6 +421,15 @@ const EditProfilePage = () => {
 
   const handleRemoveSkill = (skillToRemove) => {
     setSkills(skills.filter(skill => skill !== skillToRemove));
+  };
+
+  // Fonction pour forcer l'utilisation d'une image floue
+  const handleForceUseBlurryImage = () => {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput && fileInput.files[0]) {
+      setSelectedFile(fileInput.files[0]);
+      toast.info("Image floue acceptée. Nous recommandons d'utiliser une image plus nette pour de meilleurs résultats.");
+    }
   };
 
   // Fonctions pour le changement de mot de passe
@@ -286,82 +509,194 @@ const EditProfilePage = () => {
     setSubmitting(true);
     setError("");
 
+    // Vérifier la qualité de l'image avant la soumission
+    if (selectedFile && imageQuality && imageQuality.isBlurry) {
+      const confirmUpload = window.confirm(
+        `Vous êtes sur le point de télécharger une image floue (qualité: ${imageQuality.level}). ` +
+        "Cela pourrait affecter la qualité de votre profil. Voulez-vous continuer ?"
+      );
+
+      if (!confirmUpload) {
+        setSubmitting(false);
+        return;
+      }
+    }
+
     try {
       // Utiliser l'email de l'utilisateur chargé plutôt que celui de l'URL
       const userEmail = user.email;
+      let userId = user.id;
+
+      // Vérifier si l'ID est une chaîne de caractères et la convertir en nombre si nécessaire
+      if (typeof userId === 'string') {
+        userId = parseInt(userId, 10);
+        if (isNaN(userId)) {
+          console.error("Invalid user ID format:", user.id);
+          // Essayer de récupérer l'ID depuis la réponse API
+          try {
+            const userResponse = await axios.get(`http://localhost:8000/users/email/${userEmail}`);
+            if (userResponse.data && userResponse.data.id) {
+              userId = userResponse.data.id;
+              console.log("Retrieved user ID from API:", userId);
+            }
+          } catch (idErr) {
+            console.error("Failed to retrieve user ID from API:", idErr);
+          }
+        }
+      }
 
       if (!userEmail) {
         throw new Error("No email available to update user data");
       }
 
-      console.log("Updating user data for email:", userEmail);
+      console.log("Updating user data for email:", userEmail, "with ID:", userId);
 
-      // Convertir les skills en JSON string pour éviter les problèmes de format
+      // Préparer les données utilisateur à mettre à jour
+      // S'assurer que skills est bien un tableau
+      let formattedSkills = skills;
+      if (!Array.isArray(formattedSkills)) {
+        if (typeof formattedSkills === 'string') {
+          try {
+            // Essayer de parser si c'est une chaîne JSON
+            formattedSkills = JSON.parse(formattedSkills);
+            if (!Array.isArray(formattedSkills)) {
+              formattedSkills = [formattedSkills]; // Convertir en tableau si ce n'est pas déjà un tableau
+            }
+          } catch (e) {
+            // Si ce n'est pas du JSON valide, le traiter comme une chaîne simple
+            formattedSkills = [formattedSkills];
+          }
+        } else if (formattedSkills) {
+          // Si c'est une valeur non-null/undefined mais pas un tableau ou une chaîne
+          formattedSkills = [String(formattedSkills)];
+        } else {
+          // Si c'est null ou undefined
+          formattedSkills = [];
+        }
+      }
+
+      // Filtrer les valeurs vides ou nulles
+      formattedSkills = formattedSkills.filter(skill => skill && skill.trim());
+
+      console.log("Formatted skills:", formattedSkills);
+
       const userData = {
         name: form.name || null,
         phone: form.phone || null,
         location: form.location || null,
         about: form.about || null,
-        skills: skills, // Le backend s'attend à un tableau
+        skills: formattedSkills, // Le backend s'attend à un tableau
       };
 
       console.log("User data to update:", userData);
 
       try {
+        // Mettre à jour les données utilisateur
         const updateResponse = await axios.patch(`http://localhost:8000/users/email/${userEmail}`, userData);
         console.log("Update response:", updateResponse.data);
 
-        // Mettre à jour l'utilisateur avec les données de la réponse
-        setUser(updateResponse.data);
+        if (!updateResponse.data) {
+          throw new Error("No data received from server after update");
+        }
 
-        // Mettre à jour les données utilisateur dans le localStorage
+        // Mettre à jour l'utilisateur avec les données de la réponse
+        const updatedUser = updateResponse.data;
+        setUser(updatedUser);
+
+        // Mettre à jour les données utilisateur dans le localStorage et sessionStorage
+        // seulement si l'utilisateur connecté est celui qui est en train d'être modifié
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
           try {
             const storedUserData = JSON.parse(storedUser);
-            // Utiliser les données de la réponse pour mettre à jour le localStorage
-            const updatedUserData = {
-              ...storedUserData,
-              name: updateResponse.data.name,
-              phone: updateResponse.data.phone,
-              location: updateResponse.data.location,
-              about: updateResponse.data.about,
-              skills: updateResponse.data.skills,
-              profilePic: updateResponse.data.profilePic
-            };
-            localStorage.setItem("user", JSON.stringify(updatedUserData));
-            console.log("Updated user data in localStorage:", updatedUserData);
+
+            // Vérifier si l'utilisateur connecté est celui qui est en train d'être modifié
+            if (storedUserData.email === userEmail) {
+              // Utiliser les données de la réponse pour mettre à jour le localStorage
+              const updatedUserData = {
+                ...storedUserData,
+                name: updatedUser.name,
+                phone: updatedUser.phone,
+                location: updatedUser.location,
+                about: updatedUser.about,
+                skills: updatedUser.skills,
+                profilePic: updatedUser.profilePic
+              };
+              localStorage.setItem("user", JSON.stringify(updatedUserData));
+              console.log("Updated user data in localStorage:", updatedUserData);
+
+              // Mettre à jour également dans sessionStorage si présent
+              const sessionUser = sessionStorage.getItem("user");
+              if (sessionUser) {
+                try {
+                  const sessionUserData = JSON.parse(sessionUser);
+                  if (sessionUserData.email === userEmail) {
+                    sessionStorage.setItem("user", JSON.stringify(updatedUserData));
+                    console.log("Updated user data in sessionStorage");
+                  }
+                } catch (err) {
+                  console.error("Error updating user data in sessionStorage:", err);
+                }
+              }
+            } else {
+              console.log("User being edited is not the logged-in user, not updating localStorage");
+            }
           } catch (err) {
             console.error("Error updating user data in localStorage:", err);
           }
         }
 
         // Télécharger la photo de profil si sélectionnée
-        if (selectedFile) {
+        if (selectedFile && userId) {
           try {
-            console.log("Uploading profile picture for user ID:", user.id);
+            console.log("Uploading profile picture for user ID:", userId);
             const formData = new FormData();
             formData.append("photo", selectedFile);
+
+            // Ajouter un log pour déboguer
+            console.log("Sending photo upload request to:", `http://localhost:8000/users/id/${userId}/photo`);
+            console.log("With form data:", selectedFile.name);
+
             const photoResponse = await axios.patch(
-              `http://localhost:8000/users/id/${user.id}/photo`,
+              `http://localhost:8000/users/id/${userId}/photo`,
               formData,
               { headers: { "Content-Type": "multipart/form-data" } }
             );
+
             console.log("Photo upload response:", photoResponse.data);
 
-            // Mettre à jour l'utilisateur avec la nouvelle photo
-            setUser(prev => ({ ...prev, profilePic: photoResponse.data.profilePic }));
+            if (photoResponse.data && photoResponse.data.profilePic) {
+              // Mettre à jour l'utilisateur avec la nouvelle photo
+              setUser(prev => ({ ...prev, profilePic: photoResponse.data.profilePic }));
 
-            // Mettre à jour le localStorage avec la nouvelle photo
-            const storedUser = localStorage.getItem("user");
-            if (storedUser) {
-              try {
-                const storedUserData = JSON.parse(storedUser);
-                storedUserData.profilePic = photoResponse.data.profilePic;
-                localStorage.setItem("user", JSON.stringify(storedUserData));
-                console.log("Updated profile picture in localStorage");
-              } catch (err) {
-                console.error("Error updating profile picture in localStorage:", err);
+              // Mettre à jour le localStorage avec la nouvelle photo si c'est l'utilisateur connecté
+              const storedUser = localStorage.getItem("user");
+              if (storedUser) {
+                try {
+                  const storedUserData = JSON.parse(storedUser);
+                  if (storedUserData.email === userEmail) {
+                    storedUserData.profilePic = photoResponse.data.profilePic;
+                    localStorage.setItem("user", JSON.stringify(storedUserData));
+                    console.log("Updated profile picture in localStorage");
+
+                    // Mettre à jour également dans sessionStorage si présent
+                    const sessionUser = sessionStorage.getItem("user");
+                    if (sessionUser) {
+                      try {
+                        const sessionUserData = JSON.parse(sessionUser);
+                        if (sessionUserData.email === userEmail) {
+                          sessionUserData.profilePic = photoResponse.data.profilePic;
+                          sessionStorage.setItem("user", JSON.stringify(sessionUserData));
+                          console.log("Updated profile picture in sessionStorage");
+                        }
+                      } catch (err) {
+                        console.error("Error updating profile picture in sessionStorage:", err);
+                      }
+                    }
+                  }
+                } catch (err) {
+                  console.error("Error updating profile picture in localStorage:", err);
+                }
               }
             }
           } catch (photoErr) {
@@ -372,10 +707,26 @@ const EditProfilePage = () => {
 
         toast.success("Profile updated successfully!");
 
-        // Naviguer vers la page de profil avec l'ID de l'utilisateur
+        // Rafraîchir la page principale et naviguer vers la page de profil
         setTimeout(() => {
-          if (user && user.id) {
-            navigate(`/ProfilePage/${user.id}`);
+          // Forcer un rafraîchissement des données utilisateur dans l'application principale
+          window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+            detail: { updatedUser: updatedUser || user }
+          }));
+
+          // Option 1: Navigation normale avec rafraîchissement des données
+          if (updatedUser && updatedUser.id) {
+            navigate(`/ProfilePage/${updatedUser.id}`);
+            // Forcer un rafraîchissement de la page après navigation pour s'assurer que tout est à jour
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
+          } else if (userId) {
+            navigate(`/ProfilePage/${userId}`);
+            // Forcer un rafraîchissement de la page après navigation
+            setTimeout(() => {
+              window.location.reload();
+            }, 100);
           } else {
             // Si l'ID n'est pas disponible, essayer de récupérer l'utilisateur depuis le localStorage
             const storedUser = localStorage.getItem("user");
@@ -384,14 +735,19 @@ const EditProfilePage = () => {
                 const userData = JSON.parse(storedUser);
                 if (userData && userData.id) {
                   navigate(`/ProfilePage/${userData.id}`);
+                  // Forcer un rafraîchissement de la page après navigation
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 100);
                   return;
                 }
               } catch (err) {
                 console.error("Error parsing user data from localStorage:", err);
               }
             }
-            // Si tout échoue, naviguer vers la page d'accueil
+            // Si tout échoue, naviguer vers la page d'accueil et rafraîchir
             navigate("/");
+            window.location.reload();
           }
         }, 1500);
       } catch (updateErr) {
@@ -467,8 +823,28 @@ const EditProfilePage = () => {
             Edit Profile
           </Typography>
           <Button
-            component={Link}
-            to={`/ProfilePage/${user.id}`}
+            onClick={() => {
+              // Naviguer vers la page de profil avec l'ID de l'utilisateur
+              if (user && user.id) {
+                navigate(`/ProfilePage/${user.id}`);
+              } else {
+                // Si l'ID n'est pas disponible, essayer de récupérer l'utilisateur depuis le localStorage
+                const storedUser = localStorage.getItem("user");
+                if (storedUser) {
+                  try {
+                    const userData = JSON.parse(storedUser);
+                    if (userData && userData.id) {
+                      navigate(`/ProfilePage/${userData.id}`);
+                      return;
+                    }
+                  } catch (err) {
+                    console.error("Error parsing user data from localStorage:", err);
+                  }
+                }
+                // Si tout échoue, naviguer vers la page d'accueil
+                navigate("/");
+              }
+            }}
             startIcon={<ArrowBack />}
             variant="outlined"
             sx={{ borderRadius: 20, px: 3 }}
@@ -524,6 +900,62 @@ const EditProfilePage = () => {
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
             Click camera icon to change photo
           </Typography>
+
+          {/* Indicateur d'analyse de l'image */}
+          {isAnalyzingImage && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+              <CircularProgress size={20} sx={{ mr: 1 }} />
+              <Typography variant="body2" color="primary">
+                Analyse de la qualité de l'image...
+              </Typography>
+            </Box>
+          )}
+
+          {/* Résultat de l'analyse de l'image */}
+          {imageQuality && !isAnalyzingImage && (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Alert
+                severity={imageQuality.isBlurry ? "warning" : "success"}
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  maxWidth: 400
+                }}
+              >
+                {imageQuality.isBlurry ? (
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      Image floue détectée
+                    </Typography>
+                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                      Qualité: {imageQuality.level} (Score: {Math.round(imageQuality.score)})
+                    </Typography>
+                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mb: 1 }}>
+                      Nous recommandons de choisir une image plus nette
+                    </Typography>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="warning"
+                      onClick={handleForceUseBlurryImage}
+                      sx={{ mt: 1, fontSize: '0.75rem' }}
+                    >
+                      Utiliser quand même
+                    </Button>
+                  </Box>
+                ) : (
+                  <>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      Image de bonne qualité
+                    </Typography>
+                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
+                      Qualité: {imageQuality.level} (Score: {Math.round(imageQuality.score)})
+                    </Typography>
+                  </>
+                )}
+              </Alert>
+            </Box>
+          )}
         </Box>
 
         {error && (

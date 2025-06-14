@@ -1,4 +1,4 @@
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from 'nestjs-prisma';
@@ -15,10 +15,9 @@ import { Session2Module } from './session2/session2.module';
 
 
 
-  @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module,],
-
+@Module({
+  imports: [PrismaModule.forRoot({ isGlobal: true }), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module,],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

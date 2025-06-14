@@ -10,7 +10,6 @@ import {
   Divider,
   Menu,
   MenuItem,
-  
   Avatar,
   Badge,
 } from "@mui/material";
@@ -26,11 +25,17 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { sideBarData } from "../constants/sideBarData";
 import ScrollToTopButton from "../components/ScrollToTopButton";
+import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
+import { secureLogout } from "../utils/authUtils";
+
+
 
 const drawerWidth = 260;
 
@@ -122,6 +127,7 @@ export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -134,9 +140,15 @@ export default function Main({ setUser, user }) {
 
       // Ensure role is set correctly
       if (!user.role || user.role === "user") {
-        const updatedUser = { ...user };
+        const updatedUser = { ...user, role: "Etudiant" };
         setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+        if (localStorage.getItem("user")) {
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(updatedUser));
+        }
         console.log("Updated user role to Etudiant");
       }
 
@@ -154,14 +166,13 @@ export default function Main({ setUser, user }) {
                 name: response.data.name || user.name,
                 role: response.data.role || user.role
               };
-
-              // Si l'utilisateur est khalil, s'assurer que son rôle est Admin
-              if (updatedUser.email === "khalil@gmail.com" && updatedUser.role !== "Admin") {
-                updatedUser.role = "Admin";
+              
+              // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+              if (localStorage.getItem("user")) {
+                localStorage.setItem("user", JSON.stringify(updatedUser));
+              } else {
+                sessionStorage.setItem("user", JSON.stringify(updatedUser));
               }
-
-              setUser(updatedUser);
-              localStorage.setItem("user", JSON.stringify(updatedUser));
               console.log("Updated user data with profile pic:", updatedUser);
             }
           }
@@ -177,11 +188,19 @@ export default function Main({ setUser, user }) {
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/");
+  const handleLogout = async () => {
+    console.log("=== LOGOUT INITIATED FROM MAIN COMPONENT ===");
+    console.log("Current user before logout:", user);
+
+    try {
+      // Utiliser la fonction de déconnexion sécurisée
+      await secureLogout(setUser, navigate);
+    } catch (error) {
+      console.error("Error during logout from Main component:", error);
+    }
   };
+
+
 
   // Menu déroulant pour le profil
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -286,6 +305,21 @@ export default function Main({ setUser, user }) {
       navigate("/");
     }
   };
+  function stringToColor(string) {
+  let hash = 0;
+  for (let i = 0; i < string.length; i++) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += (`00${value.toString(16)}`).slice(-2);
+  }
+
+  return color;
+};
+
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -306,11 +340,14 @@ export default function Main({ setUser, user }) {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
-              Master Knowledge Academy
+              {t('common.appTitle', 'Master Knowledge Academy')}
             </Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <LanguageSelectorWithFlags />
+
+
             <IconButton color="inherit">
               <StyledBadge badgeContent={4} color="error">
                 <NotificationsIcon />
@@ -332,24 +369,25 @@ export default function Main({ setUser, user }) {
               >
                 <Avatar
                   alt={user?.name || user?.email || "User"}
-                  src={user?.profilePic ?
-                    (user.profilePic.startsWith('/profile-pics/') ?
-                      `http://localhost:8000/uploads${user.profilePic}` :
-                      (user.profilePic.startsWith('http') ?
-                        user.profilePic :
-                        `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
-                      )
-                    ) :
-                    null
+                  src={
+                    user?.profilePic
+                      ? user.profilePic.startsWith('/profile-pics/')
+                        ? `http://localhost:8000/uploads${user.profilePic}`
+                        : user.profilePic.startsWith('http')
+                          ? user.profilePic
+                          : `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                      : null
                   }
                   sx={{
                     width: 36,
                     height: 36,
-                    bgcolor: 'primary.main' // Couleur de fond pour l'avatar par défaut
+                    bgcolor: user?.profilePic ? undefined : stringToColor(user?.email || user?.name || "User")
                   }}
                 >
                   {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
                 </Avatar>
+
+
               </IconButton>
 
               <Menu
@@ -404,14 +442,14 @@ export default function Main({ setUser, user }) {
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
-                  View Profile
+                  {t('profile.viewProfile')}
                 </MenuItem>
 
                 <MenuItem onClick={handleEditProfil}>
                   <ListItemIcon>
                     <AccountCircleIcon fontSize="small" />
                   </ListItemIcon>
-                  Edit Profile
+                  {t('profile.editProfile')}
                 </MenuItem>
 
                 <Divider />
@@ -420,7 +458,7 @@ export default function Main({ setUser, user }) {
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" />
                   </ListItemIcon>
-                  Logout
+                  {t('common.logout')}
                 </MenuItem>
 
               </Menu>

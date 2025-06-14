@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -42,7 +41,7 @@ function ForgotPasswordPage() {
                 <p className="mb-4">
                   Si un compte existe avec l'adresse email fournie, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
                 </p>
-                <Link to="/" className="btn btn-outline-primary">Retour à la connexion</Link>
+                <a href="/" className="btn btn-outline-primary">Retour à la connexion</a>
               </div>
             </div>
           </div>
@@ -94,7 +93,7 @@ function ForgotPasswordPage() {
               </form>
 
               <div className="text-center mt-4">
-                <Link to="/" className="text-decoration-none">Retour à la connexion</Link>
+                <a href="/" className="text-decoration-none">Retour à la connexion</a>
               </div>
             </div>
           </div>

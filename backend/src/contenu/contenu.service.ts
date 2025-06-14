@@ -6,8 +6,10 @@ import { CreateContenuDto } from './dto/create-contenu.dto';
 export class ContenusService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateContenuDto & { fileUrl: string }) {
+  async create(data: CreateContenuDto) {
     const { courseIds, ...contenuData } = data;
+
+    console.log('Creating content with data:', contenuData);
 
     const created = await this.prisma.contenu.create({
       data: contenuData,
@@ -19,7 +21,7 @@ export class ContenusService {
           courseId,
           contenuId: created.id,
         })),
-        skipDuplicates: true,
+
       });
     }
 

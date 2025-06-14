@@ -11,7 +11,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 // import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 export const sideBarData = [
-
   { text: "Home", icon: <MdSpaceDashboard />, path: "/" },
   { text: "Users", icon: <FaUsers />, path: "users" },
   { text: "Modules", icon: <BiBookBookmark />, path: "module", },
@@ -29,4 +28,3 @@ export const sideBarData = [
   // { text: "Student View", icon: <MdSpaceDashboard />, path: "student" }
 
 ];
-

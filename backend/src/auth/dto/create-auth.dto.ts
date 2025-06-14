@@ -13,6 +13,11 @@ export class LoginDto {
     @ApiProperty()
     @IsNotEmpty({ message: 'Mot de passe requis' })
     password: string;
+
+
+
+    @ApiProperty({ required: false, default: false })
+    rememberMe?: boolean;
 }
 
 export class RegisterDto {

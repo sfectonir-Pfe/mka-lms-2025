@@ -1,35 +1,48 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, UseInterceptors, UploadedFile } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  NotFoundException,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+} from "@nestjs/common"
+import { FileInterceptor } from "@nestjs/platform-express"
+import { diskStorage } from "multer"
+import { extname } from "path"
+import { UsersService } from "./users.service"
+import type { CreateUserDto } from "./dto/create-user.dto"
+import type { UpdateUserDto } from "./dto/update-user.dto"
+import type { Express } from "express"
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
   storage: diskStorage({
-    destination: './uploads',
+    destination: "./uploads",
     filename: (req, file, callback) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const ext = extname(file.originalname).toLowerCase();
-      const filename = `${file.fieldname}-${uniqueSuffix}${ext}`;
-      callback(null, filename);
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+      const ext = extname(file.originalname).toLowerCase()
+      const filename = `${file.fieldname}-${uniqueSuffix}${ext}`
+      callback(null, filename)
     },
   }),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
     if (!allowedTypes.includes(file.mimetype)) {
-      return cb(new Error('Seules les images .jpg, .jpeg, .png, et .webp sont autorisées'), false);
+      return cb(new Error("Seules les images .jpg, .jpeg, .png, et .webp sont autorisées"), false)
     }
-    cb(null, true);
+    cb(null, true)
   },
-};
+}
 
-@Controller('users')
+@Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -39,14 +52,20 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    try {
+      const users = await this.usersService.findAll()
+      return users
+    } catch (error) {
+      console.error("UsersController: Error fetching users:", error)
+      throw new NotFoundException("Failed to fetch users")
+    }
   }
 
   @Get('id/:id')
   async getUserById(@Param('id') id: string) {
     try {
-      const numericId = parseInt(id, 10);
+      const numericId = Number.parseInt(id, 10);
 
       if (isNaN(numericId)) {
         throw new NotFoundException('ID utilisateur invalide');
@@ -84,8 +103,8 @@ export class UsersController {
   }
 
   // Alias for updateByEmail for compatibility
-  @Patch('me/:email')
-  @UseInterceptors(FileInterceptor('profileFile', multerOptions))
+  @Patch("me/:email")
+  @UseInterceptors(FileInterceptor("profileFile", multerOptions))
   async updateUserProfile(
     @Param('email') email: string,
     @UploadedFile() file: Express.Multer.File,
@@ -93,60 +112,131 @@ export class UsersController {
   ) {
     // If file is provided, update the profile picture
     if (file) {
-      const profilePic = `/${file.filename}`;
-      body.profilePic = profilePic;
+      const profilePic = `/${file.filename}`
+      body.profilePic = profilePic
     }
 
-    return this.usersService.updateByEmail(email, body);
+    return this.usersService.updateByEmail(email, body)
   }
 
-  @Patch('email/:email')
+  @Patch("email/:email")
   async updateByEmail(@Param('email') email: string, @Body() updateUserDto: UpdateUserDto) {
     try {
-      console.log("Contrôleur: Mise à jour de l'utilisateur avec email:", email);
-      console.log("Contrôleur: Données reçues:", updateUserDto);
-      console.log("Contrôleur: Type de skills:", typeof updateUserDto.skills);
+      console.log("Contrôleur: Mise à jour de l'utilisateur avec email:", email)
+      console.log("Contrôleur: Données reçues:", updateUserDto)
+      console.log("Contrôleur: Type de skills:", typeof updateUserDto.skills)
 
-      const result = await this.usersService.updateByEmail(email, updateUserDto);
-      console.log("Contrôleur: Résultat de la mise à jour:", result);
-      return result;
+      const result = await this.usersService.updateByEmail(email, updateUserDto)
+      console.log("Contrôleur: Résultat de la mise à jour:", result)
+      return result
     } catch (error) {
-      console.error("Contrôleur: Erreur lors de la mise à jour de l'utilisateur:", error);
-      throw error;
+      console.error("Contrôleur: Erreur lors de la mise à jour de l'utilisateur:", error)
+      throw error
     }
   }
 
-  @Patch(':id')
+  @Patch(":id")
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(+id, updateUserDto)
+  }
+
+  // 🆕 Nouveau endpoint pour activer/désactiver un utilisateur par ID
+  @Patch(":id/toggle-status")
+  async toggleUserStatus(@Param('id') id: string, @Body() body: { isActive?: boolean }) {
+    try {
+      const numericId = Number.parseInt(id, 10)
+
+      if (isNaN(numericId)) {
+        throw new BadRequestException("ID utilisateur invalide")
+      }
+
+      console.log("UsersController: Toggling user status for ID:", numericId)
+      console.log("UsersController: New status:", body.isActive)
+
+      const result = await this.usersService.toggleUserStatus(numericId, body.isActive)
+      console.log("UsersController: User status updated successfully:", result)
+
+      return {
+        message: `Utilisateur ${result.isActive ? "activé" : "désactivé"} avec succès`,
+        user: result,
+      }
+    } catch (error) {
+      console.error("UsersController: Error toggling user status:", error)
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error
+      }
+      throw new BadRequestException(`Erreur lors de la modification du statut: ${error.message}`)
+    }
+  }
+
+  // 🆕 Endpoint pour activer/désactiver un utilisateur par email (pour compatibilité)
+  @Patch("email/:email/toggle-status")
+  async toggleUserStatusByEmail(@Param('email') email: string, @Body() body: { isActive?: boolean }) {
+    try {
+      console.log("UsersController: Toggling user status for email:", email)
+      console.log("UsersController: New status:", body.isActive)
+
+      const result = await this.usersService.toggleUserStatusByEmail(email, body.isActive)
+      console.log("UsersController: User status updated successfully:", result)
+
+      return {
+        message: `Utilisateur ${result.isActive ? "activé" : "désactivé"} avec succès`,
+        user: result,
+      }
+    } catch (error) {
+      console.error("UsersController: Error toggling user status by email:", error)
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error
+      }
+      throw new BadRequestException(`Erreur lors de la modification du statut: ${error.message}`)
+    }
+  }
+
+  // 🆕 Endpoints spécifiques pour activer/désactiver (pour compatibilité avec le frontend existant)
+  @Patch('email/:email/activate')
+  async activateUserByEmail(@Param('email') email: string) {
+    return this.toggleUserStatusByEmail(email, { isActive: true });
+  }
+
+  @Patch('email/:email/deactivate')
+  async deactivateUserByEmail(@Param('email') email: string) {
+    return this.toggleUserStatusByEmail(email, { isActive: false });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    try {
+      console.log('UsersController: Deleting user with ID:', id);
+      const result = await this.usersService.remove(+id);
+      console.log('UsersController: User deleted successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('UsersController: Error deleting user:', error);
+      throw new NotFoundException(`Failed to delete user with ID ${id}: ${error.message}`);
+    }
   }
 
-  @Patch('id/:id/photo')
+  @Patch("id/:id/photo")
   @UseInterceptors(
-    FileInterceptor('photo', {
+    FileInterceptor("photo", {
       storage: diskStorage({
-        destination: './uploads/profile-pics',
+        destination: "./uploads/profile-pics",
         filename: (req, file, cb) => {
           // Générer un nom de fichier unique
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
+            .join("")
           // Ajouter l'extension du fichier original
-          return cb(null, `${randomName}${extname(file.originalname)}`);
+          return cb(null, `${randomName}${extname(file.originalname)}`)
         },
       }),
       fileFilter: (req, file, cb) => {
         // Vérifier si le fichier est une image
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-          return cb(new Error('Seuls les fichiers image sont autorisés!'), false);
+          return cb(new Error("Seuls les fichiers image sont autorisés!"), false)
         }
-        cb(null, true);
+        cb(null, true)
       },
       limits: {
         fileSize: 5 * 1024 * 1024, // 5MB max
@@ -155,28 +245,28 @@ export class UsersController {
   )
   async uploadProfilePic(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     try {
-      const numericId = parseInt(id, 10);
+      const numericId = Number.parseInt(id, 10)
 
       if (isNaN(numericId)) {
-        throw new NotFoundException('ID utilisateur invalide');
+        throw new NotFoundException("ID utilisateur invalide")
       }
 
       if (!file) {
-        throw new Error('Aucun fichier téléchargé');
+        throw new Error("Aucun fichier téléchargé")
       }
 
       // Mettre à jour le champ profilePic de l'utilisateur avec le chemin du fichier
-      console.log("Fichier téléchargé:", file);
+      console.log("Fichier téléchargé:", file)
 
       // Construire le chemin relatif pour le stockage dans la base de données
       // Le chemin doit être relatif à la racine du serveur statique
-      const filePath = `/profile-pics/${file.filename}`;
-      console.log("Chemin de fichier à stocker:", filePath);
+      const filePath = `/profile-pics/${file.filename}`
+      console.log("Chemin de fichier à stocker:", filePath)
 
-      return this.usersService.updateProfilePic(numericId, filePath);
+      return this.usersService.updateProfilePic(numericId, filePath)
     } catch (error) {
-      console.error('Erreur lors du téléchargement de la photo de profil:', error);
-      throw error;
+      console.error("Erreur lors du téléchargement de la photo de profil:", error)
+      throw error
     }
   }
   

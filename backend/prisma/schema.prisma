@@ -61,6 +61,7 @@ model User {
   location   String?
   skills     String[]
   about      String?
+  isActive   Boolean  @default(true)
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -73,15 +74,15 @@ model User {
   emailVerificationCode String?
   codeExpiryDate        DateTime?
 
-  resetToken              String?
-  resetTokenExpiry        DateTime?
-  formateurs              Formateur[]
-  Etudiants               Etudiant[]
+  resetToken            String?
+  resetTokenExpiry      DateTime?
+  formateurs            Formateur[]
+  Etudiants             Etudiant[]
   Createurs_De_Formations Createur_De_Formation[]
-  Admins                  Admin[]
-  Etablissements          Etablissement[]
-  ResetToken              ResetToken[]
-  UserAnswer              UserAnswer[]
+  Admins                Admin[]
+  Etablissements        Etablissement[]
+  ResetToken            ResetToken[]
+  UserAnswer            UserAnswer[]
 }
 
 model Formateur {

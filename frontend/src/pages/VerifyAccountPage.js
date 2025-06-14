@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, TextField, Button, Alert, Box } from '@mui/material';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 // Firebase imports
 import { initializeApp, getApps } from "firebase/app";
@@ -42,8 +42,7 @@ const VerifyAccountPage = () => {
     const recaptchaWidgetId = useRef(null);
 
     const location = useLocation();
-    const navigate = useNavigate();
-
+    
     useEffect(() => {
         if (location.state?.phone) {
             setPhone(location.state.phone);
@@ -56,7 +55,7 @@ const VerifyAccountPage = () => {
         return () => {
             cleanupRecaptcha();
         };
-    }, []);
+    }, [location.state?.phone]); // Added location.state?.phone as dependency
 
     const cleanupRecaptcha = () => {
         if (recaptchaVerifierRef.current) {
@@ -200,76 +199,90 @@ const VerifyAccountPage = () => {
         }
     };
 
- const verifySmsCode = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
+    const verifySmsCode = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            setMessage(null);
 
-    if (!confirmationResultRef.current) {
-      setError('Pas de demande de vérification en cours. Renvoyez le code.');
-      setStep(1);
-      return;
-    }
+            if (!confirmationResultRef.current) {
+                setError('Pas de demande de vérification en cours. Renvoyez le code.');
+                setStep(1);
+                return;
+            }
 
-    if (!code || code.length !== 6) {
-      setError('Veuillez entrer un code à 6 chiffres');
-      return;
-    }
+            if (!code || code.length !== 6) {
+                setError('Veuillez entrer un code à 6 chiffres');
+                return;
+            }
 
-    const result = await confirmationResultRef.current.confirm(code);
-    console.log('Firebase verification successful:', result);
+            const result = await confirmationResultRef.current.confirm(code);
+            console.log('Firebase verification successful:', result);
 
-    // ✅ Now call your backend to mark user as verified
-    const email = location.state?.email;
-    if (!email) {
-      setError("Email introuvable pour la vérification backend");
-      return;
-    }
+            // ✅ Now call your backend to mark user as verified
+            const email = location.state?.email;
+            if (!email) {
+                setError("Email introuvable pour la vérification backend");
+                return;
+            }
 
-    const backendRes = await axios.post('http://localhost:8000/auth/verify', {
-      email: email,
-    });
+            console.log('Calling backend verification API with email:', email);
+            try {
+                // Try the update endpoint with minimal data
+                const backendRes = await axios.post('http://localhost:8000/auth/update-user', {
+                    email: email,
+                    verified: true
+                });
+                
+                console.log('Backend verification response:', backendRes.data);
 
-    if (backendRes.data.success) {
-      localStorage.setItem("user", JSON.stringify(backendRes.data.data.user));
-      setMessage('✅ Vérification complète réussie !');
-      setStep(3);
+                if (backendRes.data.success) {
+                    localStorage.setItem("user", JSON.stringify(backendRes.data.data.user));
+                    setMessage('✅ Vérification complète réussie !');
+                    setStep(3);
 
-      // Cleanup + redirect
-      cleanupRecaptcha();
-      setTimeout(() => {
-  window.location.href = "/";
-}, 2000);
+                    // Cleanup + redirect
+                    cleanupRecaptcha();
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 2000);
+                } else {
+                    console.error('Backend verification failed:', backendRes.data);
+                    setError(backendRes.data.message || "La vérification côté serveur a échoué");
+                }
+            } catch (backendError) {
+                console.error('Backend API error:', backendError);
+                if (backendError.response) {
+                    console.error('Error response:', backendError.response.data);
+                    setError(`Erreur serveur: ${backendError.response.data.message || backendError.message}`);
+                } else {
+                    setError(`Erreur de connexion au serveur: ${backendError.message}`);
+                }
+            }
 
-    } else {
-      setError("La vérification côté serveur a échoué");
-    }
+        } catch (error) {
+            console.error('Erreur de vérification:', error);
+            let errorMessage = 'Code invalide';
+            
+            switch (error.code) {
+                case 'auth/invalid-verification-code':
+                    errorMessage = 'Code de vérification invalide';
+                    break;
+                case 'auth/code-expired':
+                    errorMessage = 'Code expiré, demandez un nouveau code';
+                    break;
+                case 'auth/session-expired':
+                    errorMessage = 'Session expirée, demandez un nouveau code';
+                    break;
+                default:
+                    errorMessage = 'Erreur: ' + (error.message || 'Code invalide');
+            }
 
-  } catch (error) {
-    console.error('Erreur de vérification:', error);
-    let errorMessage = 'Code invalide ou expiré';
-
-    switch (error.code) {
-      case 'auth/invalid-verification-code':
-        errorMessage = 'Code de vérification invalide';
-        break;
-      case 'auth/code-expired':
-        errorMessage = 'Code expiré, demandez un nouveau code';
-        break;
-      case 'auth/session-expired':
-        errorMessage = 'Session expirée, demandez un nouveau code';
-        break;
-      default:
-        errorMessage = 'Erreur: ' + (error.message || 'Code invalide');
-    }
-
-    setError(errorMessage);
-  } finally {
-    setLoading(false);
-  }
-};
-
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const resendCode = async () => {
         setCode('');
@@ -283,113 +296,104 @@ const VerifyAccountPage = () => {
             initializeRecaptcha();
         }, 500);
     };
-
+    
     return (
-        <Container maxWidth="sm">
-            <Typography variant="h4" mt={4} mb={2}>Vérification SMS</Typography>
-
-            {/* Configuration Status */}
-           
-
-            {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
+        <Container maxWidth="sm" sx={{ mt: 4, mb: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom align="center">
+                Vérification du compte
+            </Typography>
+            
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+            
+            {message && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                    {message}
+                </Alert>
+            )}
+            
             {step === 1 && (
-                <Box>
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="body1" gutterBottom>
+                        Veuillez entrer votre numéro de téléphone pour recevoir un code de vérification par SMS.
+                    </Typography>
+                    
                     <TextField
                         fullWidth
                         label="Numéro de téléphone"
-                        placeholder="+21653701678"
+                        variant="outlined"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        helperText="Format: +[code pays][numéro] ex: +21653701678"
-                        sx={{ mb: 2 }}
+                        placeholder="+21653701678"
+                        margin="normal"
+                        disabled={loading}
                     />
                     
-                    {/* reCAPTCHA container */}
-                    <Box sx={{ mb: 2, textAlign: 'center' }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            Complétez la vérification reCAPTCHA:
-                        </Typography>
-                        <Box 
-                            id="recaptcha-container"
-                            sx={{ 
-                                minHeight: '78px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                border: recaptchaResolved ? '2px solid green' : '1px solid #ddd',
-                                borderRadius: 1,
-                                backgroundColor: recaptchaResolved ? '#f0f8f0' : 'transparent',
-                                p: 1
-                            }}
-                        />
-                        {recaptchaResolved && (
-                            <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
-                                ✓ reCAPTCHA vérifié
-                            </Typography>
-                        )}
-                    </Box>
+                    <Box id="recaptcha-container" sx={{ mt: 2, mb: 2 }}></Box>
                     
                     <Button
                         fullWidth
                         variant="contained"
+                        color="primary"
                         onClick={sendSmsCode}
                         disabled={loading || !phone || !recaptchaResolved}
                         sx={{ mt: 2 }}
                     >
-                        {loading ? 'Envoi...' : 'Envoyer le code SMS'}
+                        {loading ? "Envoi en cours..." : "Envoyer le code"}
                     </Button>
                 </Box>
             )}
-
+            
             {step === 2 && (
-                <Box>
-                    <Typography sx={{ mb: 2 }}>
-                        Code envoyé au: <strong>{phone}</strong>
+                <Box sx={{ mt: 3 }}>
+                    <Typography variant="body1" gutterBottom>
+                        Entrez le code à 6 chiffres reçu par SMS au {phone}.
                     </Typography>
                     
                     <TextField
                         fullWidth
-                        label="Code de vérification (6 chiffres)"
+                        label="Code de vérification"
+                        variant="outlined"
                         value={code}
-                        onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        placeholder="123456"
-                        inputProps={{ 
-                            maxLength: 6,
-                            style: { textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' }
-                        }}
-                        sx={{ mb: 2 }}
+                        onChange={(e) => setCode(e.target.value)}
+                        margin="normal"
+                        disabled={loading}
+                        inputProps={{ maxLength: 6 }}
                     />
                     
                     <Button
                         fullWidth
                         variant="contained"
+                        color="primary"
                         onClick={verifySmsCode}
-                        disabled={loading || code.length !== 6}
-                        sx={{ mb: 1 }}
+                        disabled={loading || !code || code.length !== 6}
+                        sx={{ mt: 2 }}
                     >
-                        {loading ? 'Vérification...' : 'Vérifier le code'}
+                        {loading ? "Vérification..." : "Vérifier le code"}
                     </Button>
                     
                     <Button
                         fullWidth
-                        variant="outlined"
+                        variant="text"
                         onClick={resendCode}
                         disabled={loading}
+                        sx={{ mt: 1 }}
                     >
-                        Renvoyer le code
+                        Je n'ai pas reçu de code, renvoyer
                     </Button>
                 </Box>
             )}
-
+            
             {step === 3 && (
-                <Box mt={3} textAlign="center">
-                    <Typography variant="h6" color="success.main">
-                        ✅ Vérification réussie !
+                <Box sx={{ mt: 3, textAlign: 'center' }}>
+                    <Typography variant="h5" gutterBottom>
+                        ✅ Vérification réussie!
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        Redirection vers le tableau de bord...
+                    <Typography variant="body1">
+                        Redirection vers la page d'accueil...
                     </Typography>
                 </Box>
             )}

@@ -22,13 +22,14 @@ import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 import axios from "axios";
 
+
 const ProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -228,7 +229,12 @@ const ProfilePage = () => {
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            onClick={() => navigate(`/EditProfile/${user.email}`)}
+            onClick={() => {
+              // Stocker temporairement l'utilisateur à éditer dans sessionStorage
+              console.log("Storing user data for editing:", user);
+              sessionStorage.setItem("editingUser", JSON.stringify(user));
+              navigate(`/EditProfile/${user.email}`);
+            }}
             sx={{
               borderRadius: 20,
               px: 3,
