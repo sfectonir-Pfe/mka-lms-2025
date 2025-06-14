@@ -79,10 +79,11 @@ model User {
   formateurs            Formateur[]
   Etudiants             Etudiant[]
   Createurs_De_Formations Createur_De_Formation[]
-  Admins                Admin[]
-  Etablissements        Etablissement[]
-  ResetToken            ResetToken[]
-  UserAnswer            UserAnswer[]
+  Admins                  Admin[]
+  Etablissements          Etablissement[]
+  ResetToken              ResetToken[]
+  UserAnswer              UserAnswer[]
+  SeanceFormateur         SeanceFormateur[]
 }
 
 model Formateur {
@@ -167,6 +168,7 @@ model Contenu {
   buildProgramContenus buildProgramContenu[]
   session2Contenus     Session2Contenu[]
   quiz                 Quiz?
+  published Boolean @default(false)
 }
 
 model ProgramModule {
@@ -195,6 +197,7 @@ model CourseContenu {
   courseId  Int
   contenu   Contenu @relation(fields: [contenuId], references: [id], onDelete: Cascade)
   contenuId Int
+  
 
   @@unique([courseId, contenuId])
 }
@@ -208,8 +211,10 @@ model buildProgram {
   imageUrl  String?
   level     String    @default("Basique")
 
-  modules   buildProgramModule[]
-  createdAt DateTime?            @default(now())
+  modules          buildProgramModule[]
+  seancesFormateur SeanceFormateur[]
+
+  createdAt DateTime? @default(now())
 }
 
 model buildProgramModule {
@@ -353,4 +358,29 @@ model Session2Contenu {
   contenu   Contenu @relation(fields: [contenuId], references: [id], onDelete: Cascade)
 
   @@unique([session2CourseId, contenuId])
+}
+
+model SeanceFormateur {
+  id        Int      @id @default(autoincrement())
+  title     String
+  startTime DateTime
+
+  formateur   User @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  formateurId Int
+
+  buildProgram   buildProgram  @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
+  buildProgramId Int
+  medias         SeanceMedia[]
+
+  createdAt DateTime @default(now())
+}
+
+model SeanceMedia {
+  id        Int      @id @default(autoincrement())
+  seanceId  Int
+  type      FileType
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  seance SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
 }

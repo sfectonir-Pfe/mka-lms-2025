@@ -38,11 +38,25 @@ const AddUserView = () => {
     alert("✅ Utilisateur créé. Le mot de passe temporaire a été envoyé par email.");
     navigate("/users");
   } catch (error) {
-    console.error(error);
+  console.error(error);
+
+  if (
+    error.response &&
+    error.response.status === 409 &&
+    error.response.data.message.includes("Email invalide")
+  ) {
+    setErrorMessage("❌ L'adresse email semble invalide ou non délivrée.");
+  } else if (
+    error.response &&
+    error.response.status === 409 &&
+    error.response.data.message.includes("existe déjà")
+  ) {
+    setErrorMessage("⚠️ Cet utilisateur existe déjà.");
+  } else {
     setErrorMessage("Erreur lors de la création de l'utilisateur.");
-  } finally {
-    setLoading(false);
   }
+}
+
 };
 
   return (
