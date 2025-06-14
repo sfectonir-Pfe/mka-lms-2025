@@ -1,13 +1,23 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState,useEffect } from "react";
+import { useNavigate ,useLocation,} from "react-router-dom";
 import axios from "axios";
+import { useTranslation } from 'react-i18next';
+
+
 import { toast } from "react-toastify";
+import showErrorToast from "../utils/toastError";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
+  const location = useLocation();
+const [rememberMe, setRememberMe] = useState(false);
+const [errors, setErrors] = useState({ email: "", password: "" });
+const { t } = useTranslation();
+
+
 
 
   useEffect(() => {
