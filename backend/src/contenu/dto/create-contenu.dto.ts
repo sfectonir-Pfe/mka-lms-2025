@@ -6,10 +6,12 @@ export class CreateContenuDto {
   title: string;
 
   @IsString()
-  fileUrl: string;
+  @IsOptional()
+  fileUrl?: string;
 
   @IsEnum(FileType)
-  fileType: FileType;
+  @IsOptional()
+  fileType?: FileType;
 
   @IsEnum(ContenuType)
   type: ContenuType;

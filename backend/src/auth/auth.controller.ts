@@ -8,24 +8,64 @@ import {
   Delete,
   HttpException,
   HttpStatus,
-  Put,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ApiBody, ApiProperty } from '@nestjs/swagger';
 
-
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) { }
+  
+  @Post('verify')
+  async verifyAccount(@Body() body: { email: string }) {
+    try {
+      const user = await this.authService.getUserByEmail(body.email);
+      return { 
+        success: true, 
+        message: 'Compte vérifié avec succès', 
+        data: { user } 
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Erreur lors de la vérification du compte',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
     try {
+      console.log('Login request received:', {
+        email: dto.email,
+        rememberMe: dto.rememberMe,
+
+      });
+
+
+
+      // Authentifier l'utilisateur
       const result = await this.authService.login(dto);
-      return { success: true, message: 'Connexion réussie', data: result };
+
+      // Ajouter une information sur rememberMe dans la réponse
+      return {
+        success: true,
+        message: 'Connexion réussie',
+        data: {
+          ...result,
+          rememberMe: dto.rememberMe || false,
+          // Ajouter un access_token fictif pour le moment (à remplacer par un vrai JWT plus tard)
+          access_token: `temp_token_${Date.now()}_${dto.rememberMe ? 'long' : 'short'}`
+        }
+      };
     } catch (error) {
+      console.error('Login error:', error);
       throw new HttpException(
         error.message || 'Échec de la connexion',
         error.status || HttpStatus.UNAUTHORIZED,
@@ -147,17 +187,31 @@ export class AuthController {
       );
     }
   }
-  @Post('verify')
-async verifyUser(@Body('email') email: string) {
-  try {
-    const result = await this.authService.verifyUser(email);
-    return { success: true, message: 'Utilisateur vérifié', data: result };
-  } catch (error) {
-    throw new HttpException(
-      error.message || 'Erreur de vérification',
-      error.status || HttpStatus.BAD_REQUEST,
-    );
-  }
-}
+  
 
+
+  @Post('logout')
+  async logout(@Body() body?: any) {
+    try {
+      console.log('Logout request received');
+
+      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
+      // Dans une vraie application avec JWT, on invaliderait le token ici
+
+      return {
+        success: true,
+        message: 'Déconnexion réussie',
+        data: {
+          loggedOut: true,
+          timestamp: new Date().toISOString()
+        }
+      };
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw new HttpException(
+        error.message || 'Erreur lors de la déconnexion',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

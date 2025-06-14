@@ -33,7 +33,11 @@ const ModuleList = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 80 },
+    { valueGetter: (value) => {
+
+      return "M-"+value
+    },
+     field: "id", headerName: "ID", width: 80 },
     { field: "name", headerName: "Nom du module", flex: 1 },
     { field: "periodUnit", headerName: "Période", width: 120 },
     { field: "duration", headerName: "Durée", width: 100 },

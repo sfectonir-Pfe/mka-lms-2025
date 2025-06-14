@@ -5,6 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+
 const ContenusList = () => {
   const [contenus, setContenus] = useState([]);
   const navigate = useNavigate();

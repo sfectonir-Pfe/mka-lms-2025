@@ -34,4 +34,62 @@ export class MailController {
 
     return { message: 'Reset email sent' };
   }
+
+  @Post('test-password-change-email')
+  async testPasswordChangeEmail(@Body() body: { email: string, ipAddress?: string }) {
+    try {
+      const timestamp = new Date().toLocaleString('fr-FR', {
+        timeZone: 'Europe/Paris',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      await this.mailService.sendPasswordChangeConfirmationEmail(
+        body.email,
+        timestamp,
+        body.ipAddress || '192.168.1.100'
+      );
+
+      return {
+        success: true,
+        message: 'Password change confirmation email sent successfully',
+        details: {
+          email: body.email,
+          timestamp,
+          ipAddress: body.ipAddress || '192.168.1.100'
+        }
+      };
+    } catch (error) {
+      throw new NotFoundException(`Failed to send email: ${error.message}`);
+    }
+  }
+
+  @Post('test-password-reset-v2')
+  async testPasswordResetV2(@Body() body: { email: string }) {
+    try {
+      // Générer un token de test
+      const token = crypto.randomBytes(32).toString('hex');
+
+      await this.mailService.sendPasswordResetEmailV2(
+        body.email,
+        token
+      );
+
+      return {
+        success: true,
+        message: 'New password reset email (V2) sent successfully',
+        details: {
+          email: body.email,
+          token: token.substring(0, 8) + '...', // Afficher seulement les premiers caractères pour la sécurité
+          template: 'Version 2 - Design moderne avec gradient'
+        }
+      };
+    } catch (error) {
+      throw new NotFoundException(`Failed to send email: ${error.message}`);
+    }
+  }
 }

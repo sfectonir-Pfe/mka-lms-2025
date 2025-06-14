@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Contenu" ALTER COLUMN "fileUrl" DROP NOT NULL,
-ALTER COLUMN "fileType" DROP NOT NULL;

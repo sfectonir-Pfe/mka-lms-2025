@@ -177,7 +177,7 @@ return { ...safeUser, needsVerification: false }; // Always include this
     }
   }
 
-  async resetPassword(token: string, newPass: string, confirmPass: string) {
+  async resetPassword(token: string, newPass: string, confirmPass: string, ipAddress?: string) {
     const user = await this.prisma.user.findFirst({
       where: {
         resetToken: token,
@@ -200,6 +200,29 @@ return { ...safeUser, needsVerification: false }; // Always include this
         resetTokenExpiry: null,
       },
     });
+
+    // Send password change confirmation email
+    try {
+      const timestamp = new Date().toLocaleString('fr-FR', {
+        timeZone: 'Europe/Paris',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      await this.mailService.sendPasswordChangeConfirmationEmail(
+        user.email,
+        timestamp,
+        ipAddress
+      );
+      console.log('Password change confirmation email sent to:', user.email);
+    } catch (emailError) {
+      console.error('Failed to send password change confirmation email:', emailError);
+      // Don't throw error here - password reset was successful, email is just a notification
+    }
 
     return { message: 'Password reset successful' };
   }
@@ -265,7 +288,5 @@ return { ...safeUser, needsVerification: false }; // Always include this
   });
 
   return { message: 'Utilisateur vérifié avec succès', user: updated };
-}
-
-
-}
+  
+  }}
