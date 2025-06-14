@@ -73,5 +73,11 @@ export class ContenusController {
     return this.contenusService.remove(+id);
   }
  
+@Patch(':id/publish')
+updatePublishStatus(@Param('id') id: string, @Body() body: { published: boolean }) {
+  return this.contenusService.updatePublishStatus(+id, body.published);
+}
+
+
 
 }
