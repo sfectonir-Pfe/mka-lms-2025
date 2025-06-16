@@ -47,6 +47,9 @@ import AddSeanceFormateurView from "./pages/users/views/AddSeanceFormateurView";
 import SeanceFormateurList from "./pages/users/views/SeanceFormateurList";
 import AnimerSeanceView from "./pages/users/views/AnimerSeanceView";
 
+import JitsiRoom from './components/JitsiRoom';
+
+
 
 
 
@@ -229,6 +232,9 @@ function App() {
 
 
 <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
+
+<Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
+
 
 
 

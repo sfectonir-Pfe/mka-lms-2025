@@ -216,9 +216,9 @@ const AnimerSeanceView = () => {
                     </Stack>
 
                     <Collapse in={expandedCourses[course.id]}>
-                     
-                       {course.contenus.map((ct) => (
-  <Box key={ct.contenu?.id ?? uuidv4()} // ← this avoids key warning
+
+                      {course.contenus.map((ct) => (
+                        <Box key={ct.contenu?.id ?? uuidv4()} // ← this avoids key warning
 
                           display="flex"
                           alignItems="center"
@@ -250,14 +250,14 @@ const AnimerSeanceView = () => {
                             }}
                           />
 
-                         <Button
-  size="small"
-  variant="outlined"
-  color={ct.contenu?.published ? "success" : "warning"}
-  onClick={() => handlePublishContenu(ct.contenu?.id)}
->
-  {ct.contenu?.published ? "Dépublier" : "Publier"}
-</Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color={ct.contenu?.published ? "success" : "warning"}
+                            onClick={() => handlePublishContenu(ct.contenu?.id)}
+                          >
+                            {ct.contenu?.published ? "Dépublier" : "Publier"}
+                          </Button>
 
                         </Box>
                       ))}
@@ -279,14 +279,28 @@ const AnimerSeanceView = () => {
 
   return (
     <Box p={2}>
-      {/* ----------- ZOOM PLACEHOLDER ----------- */}
-      <Paper sx={{ mb: 3, p: 3, background: "#f8fafc", minHeight: 220, display: "flex", alignItems: "center", justifyContent: "center", border: "2px dashed #bcbcbc" }}>
-        <Box textAlign="center">
-          <Typography variant="h5" gutterBottom>
-            🔗 Espace visioconférence (Zoom)
-          </Typography>
-        </Box>
-      </Paper>
+      {/* ----------- meet PLACEHOLDER ----------- */}
+     <Paper
+  sx={{
+    mb: 3,
+    p: 0,
+    background: "#f8fafc",
+    minHeight: "70vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "2px solid #bcbcbc",
+    overflow: "hidden",
+  }}
+>
+  <iframe
+    src={`https://meet.jitsi.local:8443/${seance?.title || "default-room"}`}
+    allow="camera; microphone; fullscreen; display-capture"
+    style={{ width: "100%", height: "70vh", border: "none" }}
+    title="Jitsi Meeting"
+  />
+</Paper>
+
 
       {/* ----------- PROGRAMME + MASQUER/CONTENU ----------- */}
       <Paper sx={{ p: 2, mb: 2 }}>
