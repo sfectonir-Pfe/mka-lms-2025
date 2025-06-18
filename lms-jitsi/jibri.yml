@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+  jibri:
+    image: jitsi/jibri:stable
+    restart: ${RESTART_POLICY:-unless-stopped}
+
+    volumes:
+      - ${CONFIG}/jibri:/config
+      - ${CONFIG}/jibri/recordings:/config/recordings
+      - /dev/shm:/dev/shm
+
+    shm_size: '2gb'
+    cap_add:
+      - SYS_ADMIN
+
+    environment:
+      - DISPLAY=:0
+      - JIBRI_XORG_HORIZ_SYNC=30.0-80.0
+      - JIBRI_XORG_VERT_REFRESH=60.0
+      - PUBLIC_URL=https://meet.jitsi.local
+
+      - JIBRI_RECORDING_DIR=/config/recordings
+      - JIBRI_FINALIZE_RECORDING_SCRIPT_PATH=/config/finalize.sh
+      - JIBRI_STRIP_DOMAIN_JID=muc
+      - JIBRI_BREWERY_MUC=jibribrewery
+      - JIBRI_RECORDER_USER=recorder
+      - JIBRI_RECORDER_PASSWORD=recchangeme123
+      - JIBRI_XMPP_USER=jibri
+      - JIBRI_XMPP_PASSWORD=changeme123
+      - XMPP_AUTH_DOMAIN=auth.meet.jitsi.local
+      - XMPP_INTERNAL_MUC_DOMAIN=internal-muc.meet.jitsi.local
+      - XMPP_MUC_DOMAIN=muc.meet.jitsi.local
+      - XMPP_RECORDER_DOMAIN=recorder.meet.jitsi.local
+      - XMPP_DOMAIN=meet.jitsi.local
+      - XMPP_SERVER=xmpp.meet.jitsi.local
+      - XMPP_PORT=5222
+      - XMPP_TRUST_ALL_CERTS=true
+      - ENABLE_STATS_D=true
+      - JIBRI_STATSD_HOST=localhost
+      - JIBRI_STATSD_PORT=8125
+      - JIBRI_HTTP_API_EXTERNAL_PORT=2222
+      - JIBRI_HTTP_API_INTERNAL_PORT=3333
+
+    depends_on:
+      - jicofo
+
+    networks:
+      meet.jitsi:
