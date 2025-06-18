@@ -12,11 +12,13 @@ import { ContenuModule } from './contenu/contenu.module';
 import { buildProgramModule } from './buildProgram/buildProgram.module';
 import { QuizModule } from './quiz/quiz.module';
 import { Session2Module } from './session2/session2.module';
+import { SeanceFormateurModule } from './seance-formateur/seance-formateur.module';
 
 
 
-@Module({
-  imports: [PrismaModule.forRoot({ isGlobal: true }), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module,],
+  @Module({
+imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module, SeanceFormateurModule,],
+
   controllers: [AppController],
   providers: [AppService],
 })

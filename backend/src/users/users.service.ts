@@ -7,6 +7,8 @@ import { MailService } from "../mail/mail.service" // Removed 'type' keyword
 import type { Role } from "@prisma/client"
 import { ConflictException } from '@nestjs/common';
 
+
+
 @Injectable()
 export class UsersService {
   // Stockage temporaire des utilisateurs quand la DB n'est pas disponible
