@@ -28,8 +28,8 @@ i18n
   // Initialisation de i18next
   .init({
     resources,
-    fallbackLng: 'en', // Langue par défaut
-    debug: true, // Désactiver en production
+    fallbackLng: 'en', // Langue de secours en anglais
+    debug: false, // Désactiver en production
 
     interpolation: {
       escapeValue: false, // Non nécessaire pour React
@@ -37,8 +37,14 @@ i18n
 
     // Options de détection de langue
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['localStorage', 'navigator', 'querystring', 'htmlTag'],
+      lookupLocalStorage: 'userLanguage',
       caches: ['localStorage'],
+    },
+    
+    react: {
+      useSuspense: true,
+      wait: true
     }
   });
 

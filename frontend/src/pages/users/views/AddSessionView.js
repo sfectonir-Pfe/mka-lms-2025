@@ -55,11 +55,16 @@ const [sessionName, setSessionName] = useState("");
     return;
   }
 
+  if (new Date(startDate) >= new Date(endDate)) {
+    toast.error("La date de début doit être antérieure à la date de fin");
+    return;
+  }
+
   const formData = new FormData();
   formData.append("programId", selectedProgramId);
   formData.append("startDate", startDate);
   formData.append("endDate", endDate);
-  formData.append("name", sessionName); // ✅ corrected here
+  formData.append("name", sessionName);
 
   if (image) {
     formData.append("image", image);
@@ -67,17 +72,18 @@ const [sessionName, setSessionName] = useState("");
 
   try {
     await axios.post("http://localhost:8000/session2", formData);
-    toast.success("✅ Session enregistrée avec succès !");
+    toast.success(" Session enregistrée avec succès !");
     setSelectedProgramId("");
     setStartDate("");
     setEndDate("");
     setImage(null);
     setStructure(null);
-    setSessionName(""); // ✅ clear name field
+    setSessionName("");
   } catch (error) {
     toast.error("Erreur lors de l'enregistrement de la session");
   }
 };
+
 
 
   return (

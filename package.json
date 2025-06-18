@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@n8n/chat": "^0.27.1",
     "firebase": "^11.9.1"
   }
 }

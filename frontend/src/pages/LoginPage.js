@@ -1,20 +1,25 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const LoginPage = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState({ email: "", password: "" });
 
+  const showErrorToast = (message) => toast.error(message);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-
-    // Extraire l'email de l'URL si présent
-    const emailFromUrl = params.get('email');
+    const emailFromUrl = params.get("email");
     if (emailFromUrl) {
       setEmail(emailFromUrl);
     }
@@ -48,6 +53,8 @@ const LoginPage = () => {
     e.preventDefault();
     setMsgError("");
 
+    if (!validate()) return;
+
     try {
       const res = await axios.post("http://localhost:8000/auth/login", {
         email,
@@ -79,14 +86,10 @@ const LoginPage = () => {
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("userEmail", user.email);
 
-      window.location.href = `/`;
+      window.location.href = "/";
     } catch (error) {
       console.error("Login error:", error);
-
-      const message =
-        "Login failed. Please check your credentials. " +
-        (error.response?.data?.message || "");
-
+      const message = "Login failed. " + (error.response?.data?.message || "");
       setMsgError(message);
       showErrorToast(message);
       setPassword("");
@@ -98,10 +101,11 @@ const LoginPage = () => {
       <div className="row align-items-center">
         <div className="col-md-6 mb-4">
           <img
-            src="/images/login-illustration.svg"
+            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
             alt="Login Illustration"
             className="img-fluid"
           />
+
         </div>
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
@@ -117,10 +121,11 @@ const LoginPage = () => {
                 required
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {errors.email && <div className="text-danger">{errors.email}</div>}
             </div>
 
-            {/* Password input with toggle */}
-            <div className="form-floating mb-4 position-relative">
+            <div className="mb-3">
+              <label className="form-label">Mot de passe</label>
               <input
                 type="password"
                 className="form-control"
@@ -128,9 +133,9 @@ const LoginPage = () => {
                 required
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {errors.password && <div className="text-danger">{errors.password}</div>}
             </div>
 
-            {/* Remember me checkbox */}
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
                 <input
@@ -138,27 +143,24 @@ const LoginPage = () => {
                   type="checkbox"
                   id="remember"
                   checked={rememberMe}
-                  onChange={(e) => {
-                    const isChecked = e.target.checked;
-                    console.log("Remember Me checkbox changed to:", isChecked ? "CHECKED" : "NOT CHECKED");
-                    setRememberMe(isChecked);
-                  }}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="remember">
-                  {t('common.rememberMe')}
+                  {t("common.rememberMe")}
                 </label>
               </div>
-              <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
+              <a href="/forgot-password" className="text-decoration-none">
+                {t("common.forgotPassword")}
+              </a>
             </div>
 
-            {/* Submit */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"
                 className="btn btn-primary px-5"
                 disabled={!email || !password}
               >
-                {t('common.login')}
+                {t("common.login")}
               </button>
             </div>
           </form>

@@ -15,9 +15,10 @@ import StudentProgramPage from "./pages/StudentProgramPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 
-// Auth / Main containers
+// Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
 import Main from "./apps/Main";
+
 
 // User-related pages
 import UsersPages from "./pages/users/UsersPages";
@@ -165,6 +166,7 @@ function App() {
   };
 
   return (
+    
     <div className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"}`}>
       <ToastContainer />
       <div className="d-flex justify-content-end">
@@ -245,7 +247,9 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      )};
+      )}
+      
+      
       
     </div>
   );

@@ -15,8 +15,9 @@ import { Session2Module } from './session2/session2.module';
 
 
 
+
 @Module({
-  imports: [PrismaModule.forRoot({ isGlobal: true }), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module,],
+  imports: [PrismaModule.forRoot({ isGlobal: true }), AuthModule, UsersModule, ProgramsModule, ModulesModule, MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module],
   controllers: [AppController],
   providers: [AppService],
 })

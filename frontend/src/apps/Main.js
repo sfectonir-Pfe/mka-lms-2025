@@ -131,59 +131,58 @@ export default function Main({ setUser, user }) {
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
-    console.log("User object in Main.js:", user);
-    if (user) {
-      console.log("User ID:", user.id);
-      console.log("User email:", user.email);
-      console.log("User role:", user.role);
-      console.log("User keys:", Object.keys(user));
+  console.log("User object in Main.js:", user);
+  if (user) {
+    console.log("User ID:", user.id);
+    console.log("User email:", user.email);
+    console.log("User role:", user.role);
+    console.log("User keys:", Object.keys(user));
 
-      // Ensure role is set correctly
-      if (!user.role || user.role === "user") {
-        const updatedUser = { ...user, role: "Etudiant" };
-        setUser(updatedUser);
+    // Ensure role is set correctly
+    if (!user.role || user.role === "user") {
+      const updatedUser = { ...user, role: "Etudiant" };
+      setUser(updatedUser);
 
-        // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
-        if (localStorage.getItem("user")) {
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-        } else {
-          sessionStorage.setItem("user", JSON.stringify(updatedUser));
-        }
-        console.log("Updated user role to Etudiant");
+      // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else {
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
       }
-
-      // Récupérer les données utilisateur à jour, y compris la photo de profil
-
-      const fetchUserData = async () => {
-        try {
-          if (user.email) {
-            const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
-            if (response.data) {
-              // Mettre à jour l'objet utilisateur avec les données à jour
-              const updatedUser = {
-                ...user,
-                profilePic: response.data.profilePic || user.profilePic,
-                name: response.data.name || user.name,
-                role: response.data.role || user.role
-              };
-              
-              // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
-              if (localStorage.getItem("user")) {
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-              } else {
-                sessionStorage.setItem("user", JSON.stringify(updatedUser));
-              }
-              console.log("Updated user data with profile pic:", updatedUser);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-
-      fetchUserData();
+      console.log("Updated user role to Etudiant");
     }
-  }, [user?.email]);
+
+    // Récupérer les données utilisateur à jour, y compris la photo de profil
+    const fetchUserData = async () => {
+      try {
+        if (user.email) {
+          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          if (response.data) {
+            // Mettre à jour l'objet utilisateur avec les données à jour
+            const updatedUser = {
+              ...user,
+              profilePic: response.data.profilePic || user.profilePic,
+              name: response.data.name || user.name,
+              role: response.data.role || user.role
+            };
+            
+            // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+            if (localStorage.getItem("user")) {
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+            } else {
+              sessionStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+            console.log("Updated user data with profile pic:", updatedUser);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }
+}, [user, setUser]); // Ajout des dépendances manquantes
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
