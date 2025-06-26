@@ -1,30 +1,26 @@
-import React, { useState,useEffect } from "react";
-import { useNavigate ,useLocation,} from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useTranslation } from 'react-i18next';
-
-
 import { toast } from "react-toastify";
-import showErrorToast from "../utils/toastError";
+import { useTranslation } from "react-i18next";
+import toastErrorUtils from "../utils/toastError";
 
 const LoginPage = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
-  const location = useLocation();
-const [rememberMe, setRememberMe] = useState(false);
-const [errors, setErrors] = useState({ email: "", password: "" });
-const { t } = useTranslation();
-
-
-
+  const [rememberMe, setRememberMe] = useState(false);
+  const [errors, setErrors] = useState({ email: "", password: "" });
+  
+  
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-
-    // Extraire l'email de l'URL si présent
-    const emailFromUrl = params.get('email');
+    const emailFromUrl = params.get("email");
     if (emailFromUrl) {
       setEmail(emailFromUrl);
     }
@@ -35,18 +31,18 @@ const { t } = useTranslation();
     const newErrors = { email: "", password: "" };
 
     if (!email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t('auth.emailRequired');
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t('auth.emailInvalid');
       valid = false;
     }
 
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t('auth.passwordRequired');
       valid = false;
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = t('auth.passwordTooShort');
       valid = false;
     }
 
@@ -57,6 +53,8 @@ const { t } = useTranslation();
   const handleRequest = async (e) => {
     e.preventDefault();
     setMsgError("");
+
+    if (!validate()) return;
 
     try {
       const res = await axios.post("http://localhost:8000/auth/login", {
@@ -89,16 +87,12 @@ const { t } = useTranslation();
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("userEmail", user.email);
 
-      window.location.href = `/`;
+      window.location.href = "/";
     } catch (error) {
       console.error("Login error:", error);
-
-      const message =
-        "Login failed. Please check your credentials. " +
-        (error.response?.data?.message || "");
-
+      const message = t('auth.loginFailed') + " " + (error.response?.data?.message || "");
       setMsgError(message);
-      showErrorToast(message);
+      toastErrorUtils.showError(message);
       setPassword("");
     }
   };
@@ -108,18 +102,19 @@ const { t } = useTranslation();
       <div className="row align-items-center">
         <div className="col-md-6 mb-4">
           <img
-            src="/images/login-illustration.svg"
+            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
             alt="Login Illustration"
             className="img-fluid"
           />
+
         </div>
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
-            <h2>Connexion</h2>
+            <h2>{t('auth.login')}</h2>
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
             <div className="mb-3">
-              <label className="form-label">Adresse email</label>
+              <label className="form-label">{t('auth.emailAddress')}</label>
               <input
                 type="email"
                 className="form-control"
@@ -127,10 +122,11 @@ const { t } = useTranslation();
                 required
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {errors.email && <div className="text-danger">{errors.email}</div>}
             </div>
 
-            {/* Password input with toggle */}
-            <div className="form-floating mb-4 position-relative">
+            <div className="mb-3">
+              <label className="form-label">{t('auth.password')}</label>
               <input
                 type="password"
                 className="form-control"
@@ -138,9 +134,9 @@ const { t } = useTranslation();
                 required
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {errors.password && <div className="text-danger">{errors.password}</div>}
             </div>
 
-            {/* Remember me checkbox */}
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
                 <input
@@ -148,27 +144,24 @@ const { t } = useTranslation();
                   type="checkbox"
                   id="remember"
                   checked={rememberMe}
-                  onChange={(e) => {
-                    const isChecked = e.target.checked;
-                    console.log("Remember Me checkbox changed to:", isChecked ? "CHECKED" : "NOT CHECKED");
-                    setRememberMe(isChecked);
-                  }}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label className="form-check-label" htmlFor="remember">
-                  {t('common.rememberMe')}
+                  {t("common.rememberMe")}
                 </label>
               </div>
-              <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
+              <a href="/forgot-password" className="text-decoration-none">
+                {t("common.forgotPassword")}
+              </a>
             </div>
 
-            {/* Submit */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"
                 className="btn btn-primary px-5"
                 disabled={!email || !password}
               >
-                {t('common.login')}
+                {t("common.login")}
               </button>
             </div>
           </form>

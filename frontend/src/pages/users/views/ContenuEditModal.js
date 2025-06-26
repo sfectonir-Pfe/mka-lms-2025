@@ -8,9 +8,11 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 
 const ContenuEditModal = ({ open, onClose, contenu, onSave }) => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [type, setType] = useState("");
   const [fileType, setFileType] = useState("");
@@ -29,11 +31,11 @@ const ContenuEditModal = ({ open, onClose, contenu, onSave }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>📝 Modifier Contenu</DialogTitle>
+      <DialogTitle>📝 {t('content.editContent')}</DialogTitle>
       <DialogContent>
         <TextField
           fullWidth
-          label="Titre"
+          label={t('common.title')}
           margin="normal"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -41,32 +43,32 @@ const ContenuEditModal = ({ open, onClose, contenu, onSave }) => {
         <TextField
           select
           fullWidth
-          label="Type"
+          label={t('content.contentType')}
           margin="normal"
           value={type}
           onChange={(e) => setType(e.target.value)}
         >
-          <MenuItem value="Cours">Cours</MenuItem>
-          <MenuItem value="Exercice">Exercice</MenuItem>
-          <MenuItem value="Quiz">Quiz</MenuItem>
+          <MenuItem value="Cours">{t('content.course')}</MenuItem>
+          <MenuItem value="Exercice">{t('content.exercise')}</MenuItem>
+          <MenuItem value="Quiz">{t('content.quiz')}</MenuItem>
         </TextField>
         <TextField
           select
           fullWidth
-          label="Type de fichier"
+          label={t('content.fileType')}
           margin="normal"
           value={fileType}
           onChange={(e) => setFileType(e.target.value)}
         >
           <MenuItem value="PDF">PDF</MenuItem>
           <MenuItem value="IMAGE">Image</MenuItem>
-          <MenuItem value="VIDEO">Vidéo</MenuItem>
+          <MenuItem value="VIDEO">{t('content.video')}</MenuItem>
         </TextField>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Annuler</Button>
+        <Button onClick={onClose}>{t('common.cancel')}</Button>
         <Button variant="contained" onClick={handleSave}>
-          Enregistrer
+          {t('common.save')}
         </Button>
       </DialogActions>
     </Dialog>

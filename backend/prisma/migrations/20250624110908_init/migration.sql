@@ -138,6 +138,7 @@ CREATE TABLE "Contenu" (
     "fileUrl" TEXT,
     "fileType" "FileType",
     "type" "ContenuType" NOT NULL,
+    "published" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Contenu_pkey" PRIMARY KEY ("id")
 );
@@ -307,6 +308,58 @@ CREATE TABLE "Session2Contenu" (
     CONSTRAINT "Session2Contenu_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "SeanceFormateur" (
+    "id" SERIAL NOT NULL,
+    "title" TEXT NOT NULL,
+    "startTime" TIMESTAMP(3) NOT NULL,
+    "formateurId" INTEGER NOT NULL,
+    "buildProgramId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SeanceFormateur_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SeanceMedia" (
+    "id" SERIAL NOT NULL,
+    "seanceId" INTEGER NOT NULL,
+    "type" "FileType" NOT NULL,
+    "fileUrl" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "SeanceMedia_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Feedback" (
+    "id" SERIAL NOT NULL,
+    "message" TEXT NOT NULL,
+    "type" TEXT,
+    "rating" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "category" TEXT,
+    "tags" TEXT[],
+    "likes" INTEGER NOT NULL DEFAULT 0,
+    "dislikes" INTEGER NOT NULL DEFAULT 0,
+    "senderId" INTEGER,
+    "receiverId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Feedback_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "FeedbackResponse" (
+    "id" SERIAL NOT NULL,
+    "response" TEXT NOT NULL,
+    "feedbackId" INTEGER NOT NULL,
+    "responderId" INTEGER,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "FeedbackResponse_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Mail_email_key" ON "Mail"("email");
 
@@ -441,3 +494,24 @@ ALTER TABLE "Session2Contenu" ADD CONSTRAINT "Session2Contenu_session2CourseId_f
 
 -- AddForeignKey
 ALTER TABLE "Session2Contenu" ADD CONSTRAINT "Session2Contenu_contenuId_fkey" FOREIGN KEY ("contenuId") REFERENCES "Contenu"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SeanceFormateur" ADD CONSTRAINT "SeanceFormateur_formateurId_fkey" FOREIGN KEY ("formateurId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SeanceFormateur" ADD CONSTRAINT "SeanceFormateur_buildProgramId_fkey" FOREIGN KEY ("buildProgramId") REFERENCES "buildProgram"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SeanceMedia" ADD CONSTRAINT "SeanceMedia_seanceId_fkey" FOREIGN KEY ("seanceId") REFERENCES "SeanceFormateur"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FeedbackResponse" ADD CONSTRAINT "FeedbackResponse_feedbackId_fkey" FOREIGN KEY ("feedbackId") REFERENCES "Feedback"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FeedbackResponse" ADD CONSTRAINT "FeedbackResponse_responderId_fkey" FOREIGN KEY ("responderId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

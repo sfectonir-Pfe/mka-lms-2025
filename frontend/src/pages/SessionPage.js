@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Container, Button, Stack } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 
 import AddSessionView from "./users/views/AddSessionView";
 import SessionList from "./users/views/SessionList";
 
 
 const SessionPage = () => {
+  const { t } = useTranslation();
   const [showList, setShowList] = useState(false);
 
   return (
@@ -15,13 +17,13 @@ const SessionPage = () => {
           variant={!showList ? "contained" : "outlined"}
           onClick={() => setShowList(false)}
         >
-          ➕ Ajouter une session
+          ➕ {t('session.addSession')}
         </Button>
         <Button
           variant={showList ? "contained" : "outlined"}
           onClick={() => setShowList(true)}
         >
-          📋 Liste des sessions
+          📋 {t('session.sessionList')}
         </Button>
       </Stack>
 

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import AddQuizForm from "./AddQuizForm"; // Reuse logic (or copy/paste structure if needed)
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
 const EditQuizForm = () => {
+  const { t } = useTranslation();
   const { contenuId } = useParams();
   const [quizData, setQuizData] = useState(null);
 
@@ -16,15 +18,15 @@ const EditQuizForm = () => {
           questions: res.data.questions,
         });
       } catch (err) {
-        console.error("Erreur de chargement du quiz", err);
-        alert("❌ Erreur lors du chargement du quiz.");
+        console.error(t('quiz.loadError'), err);
+        alert(t('quiz.loadError'));
       }
     };
 
     fetchQuiz();
   }, [contenuId]);
 
-  if (!quizData) return <p>⏳ Chargement du quiz...</p>;
+  if (!quizData) return <p>⏳ {t('quiz.loading')}</p>;
 
   return (
     <AddQuizForm

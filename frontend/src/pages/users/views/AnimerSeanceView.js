@@ -14,6 +14,7 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import ReactPlayer from "react-player";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -27,6 +28,7 @@ import ZoomInMapIcon from "@mui/icons-material/ZoomInMap";
 import { v4 as uuidv4 } from "uuid";
 
 const AnimerSeanceView = () => {
+  const { t } = useTranslation();
   const { id: seanceId } = useParams();
   const [seance, setSeance] = useState(null);
   const [programDetails, setProgramDetails] = useState(null); // NEW
@@ -107,7 +109,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "IMAGE");
       setSessionImages((prev) => [...prev, media]);
     } catch (err) {
-      alert("Erreur upload image");
+      alert(t('seance.uploadImageError'));
     }
   };
 
@@ -119,7 +121,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "VIDEO");
       setSessionVideos((prev) => [...prev, media]);
     } catch (err) {
-      alert("Erreur upload vidéo");
+      alert(t('seance.uploadVideoError'));
     }
   };
 
@@ -127,7 +129,7 @@ const AnimerSeanceView = () => {
   const handleSaveSession = async () => {
     setSaving(true);
     setTimeout(() => setSaving(false), 1000); // Fake wait
-    alert("Contenu spécifique de la séance sauvegardé !");
+    alert(t('seance.saveSuccess'));
   };
 
   const handleChatSend = () => {

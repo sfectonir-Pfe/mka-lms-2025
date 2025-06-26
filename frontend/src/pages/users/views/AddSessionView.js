@@ -11,15 +11,17 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const AddSessionView = () => {
+  const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
   const [selectedProgramId, setSelectedProgramId] = useState("");
   const [structure, setStructure] = useState(null);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [image, setImage] = useState(null);
-const [sessionName, setSessionName] = useState("");
+  const [sessionName, setSessionName] = useState("");
 
   // Fetch published programs
   useEffect(() => {
@@ -29,7 +31,7 @@ const [sessionName, setSessionName] = useState("");
         const published = res.data.filter((p) => p.published);
         setPrograms(published);
       })
-      .catch(() => toast.error("Erreur chargement des programmes"));
+      .catch(() => toast.error(t("sessions.loadError")));
   }, []);
 
   // Fetch program structure (preview)
@@ -38,7 +40,7 @@ const [sessionName, setSessionName] = useState("");
       const res = await axios.get(`http://localhost:8000/buildProgram/program/${programId}`);
       setStructure(res.data);
     } catch {
-      toast.error("Erreur chargement de la structure du programme");
+      toast.error(t("sessions.loadError"));
     }
   };
 
@@ -51,7 +53,12 @@ const [sessionName, setSessionName] = useState("");
   // ✅ Correct and working submit function
   const handleSubmit = async () => {
   if (!selectedProgramId || !startDate || !endDate || !sessionName.trim()) {
-    toast.error("Veuillez remplir tous les champs obligatoires");
+    toast.error(t("sessions.fillAllFields"));
+    return;
+  }
+
+  if (new Date(startDate) >= new Date(endDate)) {
+    toast.error(t("sessions.startBeforeEnd"));
     return;
   }
 
@@ -59,7 +66,7 @@ const [sessionName, setSessionName] = useState("");
   formData.append("programId", selectedProgramId);
   formData.append("startDate", startDate);
   formData.append("endDate", endDate);
-  formData.append("name", sessionName); // ✅ corrected here
+  formData.append("name", sessionName);
 
   if (image) {
     formData.append("image", image);
@@ -67,29 +74,30 @@ const [sessionName, setSessionName] = useState("");
 
   try {
     await axios.post("http://localhost:8000/session2", formData);
-    toast.success("✅ Session enregistrée avec succès !");
+    toast.success(t("sessions.sessionSaved"));
     setSelectedProgramId("");
     setStartDate("");
     setEndDate("");
     setImage(null);
     setStructure(null);
-    setSessionName(""); // ✅ clear name field
+    setSessionName("");
   } catch (error) {
-    toast.error("Erreur lors de l'enregistrement de la session");
+    toast.error(t("sessions.saveError"));
   }
 };
+
 
 
   return (
     <Paper sx={{ p: 4 }}>
       <Typography variant="h5" gutterBottom>
-        ➕ Créer une nouvelle session
+        ➕ {t("sessions.addSession")}
       </Typography>
 
       <Stack spacing={2} mt={2}>
         <TextField
           select
-          label="Programme publié"
+          label={t("sessions.publishedProgram")}
           fullWidth
           value={selectedProgramId}
           onChange={handleProgramSelect}
@@ -101,7 +109,7 @@ const [sessionName, setSessionName] = useState("");
           ))}
         </TextField>
         <TextField
-  label="Nom de la session"
+  label={t("sessions.sessionName")}
   fullWidth
   value={sessionName}
   onChange={(e) => setSessionName(e.target.value)}
@@ -110,7 +118,7 @@ const [sessionName, setSessionName] = useState("");
 
         <TextField
           type="date"
-          label="Date de début"
+          label={t("sessions.startDate")}
           InputLabelProps={{ shrink: true }}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
@@ -118,14 +126,14 @@ const [sessionName, setSessionName] = useState("");
 
         <TextField
           type="date"
-          label="Date de fin"
+          label={t("sessions.endDate")}
           InputLabelProps={{ shrink: true }}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
         />
 
         <Button variant="outlined" component="label">
-          📷 Télécharger une image
+          📷 {t("sessions.uploadImage")}
           <input
             hidden
             type="file"
@@ -136,14 +144,14 @@ const [sessionName, setSessionName] = useState("");
 
         {image && (
           <Typography variant="body2" color="text.secondary">
-            Image sélectionnée : {image.name}
+            {t("sessions.selectedImage")} : {image.name}
           </Typography>
         )}
 
         {structure && (
           <>
             <Divider />
-            <Typography variant="subtitle1">🧱 Aperçu du programme</Typography>
+            <Typography variant="subtitle1">🧱 {t("sessions.programPreview")}</Typography>
             {structure.modules.map((mod) => (
               <Box key={mod.id} mt={1}>
                 <Typography fontWeight="bold">📦 {mod.module.name}</Typography>
@@ -165,7 +173,7 @@ const [sessionName, setSessionName] = useState("");
         )}
 
         <Button variant="contained" color="primary" onClick={handleSubmit}>
-          📤 Enregistrer la session
+          📤 {t("sessions.saveSession")}
         </Button>
       </Stack>
     </Paper>

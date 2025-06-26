@@ -1,0 +1,13 @@
+{
+  "addSeance": {
+    "title": "➕ Créer une nouvelle séance de formation",
+    "titleField": "Titre de la séance",
+    "date": "Date de la séance",
+    "time": "Heure de début",
+    "program": "Sélectionner un programme publié",
+    "programPreview": "🧩 Aperçu détaillé du programme sélectionné",
+    "createButton": "CRÉER LA SÉANCE DE FORMATION",
+    "fillAllFields": "Veuillez remplir tous les champs obligatoires.",
+    "creationError": "Une erreur s'est produite lors de la création de la séance."
+  }
+}

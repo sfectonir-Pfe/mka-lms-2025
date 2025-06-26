@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 
 const CourseList = () => {
+  const { t } = useTranslation();
   const [courses, setCourses] = useState([]);
   const navigate = useNavigate();
 
@@ -16,7 +18,7 @@ const CourseList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer ce cours ?")) return;
+    if (!window.confirm(t('courses.confirmDelete'))) return;
     await axios.delete(`http://localhost:8000/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c.id !== id));
   };
@@ -26,10 +28,10 @@ const CourseList = () => {
 
       return "C-"+value
     },field: "id", headerName: "ID", width: 80 },
-    { field: "title", headerName: "Titre", flex: 1 },
+    { field: "title", headerName: t('common.title'), flex: 1 },
     {
   field: "actions",
-  headerName: "Actions",
+  headerName: t('courses.actions'),
   flex: 1,
   renderCell: (params) => (
     <>
@@ -40,7 +42,7 @@ const CourseList = () => {
         onClick={() => navigate(`/courses/${params.row.id}/contenus`)}
         style={{ marginRight: 8 }}
       >
-        Voir Contenus
+        {t('courses.viewContent')}
       </Button>
 
       <Button
@@ -49,7 +51,7 @@ const CourseList = () => {
         size="small"
         onClick={() => handleDelete(params.row.id)}
       >
-        Supprimer
+        {t('common.delete')}
       </Button>
     </>
   ),
@@ -59,9 +61,9 @@ const CourseList = () => {
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Liste des cours</Typography>
+        <Typography variant="h5">{t('courses.courseList')}</Typography>
         <Button variant="contained" onClick={() => navigate("/courses/add")}>
-          ➕ Ajouter un cours
+          ➕ {t('courses.addCourse')}
         </Button>
       </Grid>
 

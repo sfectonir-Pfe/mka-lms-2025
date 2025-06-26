@@ -9,9 +9,11 @@ import {
   Collapse,
   Divider,
 } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 const SeanceFormateurList = () => {
+  const { t } = useTranslation();
   const [seances, setSeances] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState({});
@@ -31,7 +33,7 @@ const SeanceFormateurList = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Confirmer la suppression de cette séance ?")) {
+    if (window.confirm(t('seances.confirmDelete'))) {
       axios
         .delete(`http://localhost:8000/seance-formateur/${id}`)
         .then(() => fetchSeances());
@@ -57,11 +59,11 @@ const SeanceFormateurList = () => {
   return (
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>
-        📅 Mes séances
+        📅 {t('seances.mySessions')}
       </Typography>
 
       {seances.length === 0 ? (
-        <Typography color="text.secondary">Aucune séance pour le moment.</Typography>
+        <Typography color="text.secondary">{t('seances.noSessions')}</Typography>
       ) : (
         seances.map((s) => (
           <Paper key={s.id} elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -72,7 +74,7 @@ const SeanceFormateurList = () => {
 
             <Stack direction="row" spacing={1} mt={1}>
               <Chip
-                label={`Programme : ${s.buildProgram.program.name}`}
+                label={`${t('seances.program')}: ${s.buildProgram.program.name}`}
                 color="info"
               />
             </Stack>
@@ -82,7 +84,7 @@ const SeanceFormateurList = () => {
                 variant="outlined"
                 onClick={() => (window.location.href = `/formateur/seance/${s.id}`)}
               >
-                Animer la séance
+                {t('seances.animateSession')}
               </Button>
 
               <Button
@@ -90,7 +92,7 @@ const SeanceFormateurList = () => {
                 color="primary"
                 onClick={() => toggleDetails(s)}
               >
-                {expandedId === s.id ? "Masquer" : "Détails"}
+                {expandedId === s.id ? t('common.hide') : t('common.details')}
               </Button>
 
               <Button
@@ -98,7 +100,7 @@ const SeanceFormateurList = () => {
                 color="error"
                 onClick={() => handleDelete(s.id)}
               >
-                Supprimer
+                {t('common.delete')}
               </Button>
             </Box>
 
@@ -106,25 +108,25 @@ const SeanceFormateurList = () => {
             <Collapse in={expandedId === s.id}>
   <Box mt={2} pl={2}>
     <Typography variant="subtitle1" gutterBottom>
-      📘 Détails du programme
+      📘 {t('seances.programDetails')}
     </Typography>
     {details[s.id] ? (
       <>
         <Typography variant="body1" fontWeight="bold">
-          Programme : {details[s.id].program.name}
+          {t('seances.program')}: {details[s.id].program.name}
         </Typography>
 
         {details[s.id].modules.map((mod, modIndex) => (
           <Box key={modIndex} pl={2} mt={2}>
-            <Typography>📗 Module : {mod.module.name}</Typography>
+            <Typography>📗 {t('seances.module')}: {mod.module.name}</Typography>
 
             {mod.courses.map((course, courseIndex) => (
               <Box key={courseIndex} pl={2} mt={1}>
-                <Typography>📘 Cours : {course.course.title}</Typography>
+                <Typography>📘 {t('seances.course')}: {course.course.title}</Typography>
 
                 {course.contenus.map((ct, ctIndex) => (
                   <Typography key={ctIndex} pl={4}>
-                    📄 Contenu : {ct.contenu.title}
+                    📄 {t('seances.content')}: {ct.contenu.title}
                   </Typography>
                 ))}
               </Box>
@@ -134,7 +136,7 @@ const SeanceFormateurList = () => {
         ))}
       </>
     ) : (
-      <Typography color="text.secondary">Chargement...</Typography>
+      <Typography color="text.secondary">{t('common.loading')}</Typography>
     )}
   </Box>
 </Collapse>

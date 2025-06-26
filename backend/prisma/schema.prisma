@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // directUrl=env("DIRECT_URL")
 }
 
 enum Role {
@@ -74,16 +75,19 @@ model User {
   emailVerificationCode String?
   codeExpiryDate        DateTime?
 
-  resetToken            String?
-  resetTokenExpiry      DateTime?
-  formateurs            Formateur[]
-  Etudiants             Etudiant[]
+  resetToken              String?
+  resetTokenExpiry        DateTime?
+  formateurs              Formateur[]
+  Etudiants               Etudiant[]
   Createurs_De_Formations Createur_De_Formation[]
   Admins                  Admin[]
   Etablissements          Etablissement[]
   ResetToken              ResetToken[]
   UserAnswer              UserAnswer[]
   SeanceFormateur         SeanceFormateur[]
+  sentFeedback            Feedback[]              @relation("SentFeedback")
+  receivedFeedback        Feedback[]              @relation("ReceivedFeedback")
+  feedbackResponses       FeedbackResponse[]
 }
 
 model Formateur {
@@ -168,7 +172,7 @@ model Contenu {
   buildProgramContenus buildProgramContenu[]
   session2Contenus     Session2Contenu[]
   quiz                 Quiz?
-  published Boolean @default(false)
+  published            Boolean               @default(false)
 }
 
 model ProgramModule {
@@ -197,7 +201,6 @@ model CourseContenu {
   courseId  Int
   contenu   Contenu @relation(fields: [contenuId], references: [id], onDelete: Cascade)
   contenuId Int
-  
 
   @@unique([courseId, contenuId])
 }
@@ -383,4 +386,39 @@ model SeanceMedia {
   createdAt DateTime @default(now())
 
   seance SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  message   String
+  type      String?
+  rating    Float    @default(0)
+  category  String?
+  tags      String[]
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+
+  sender     User?   @relation("SentFeedback", fields: [senderId], references: [id])
+  senderId   Int?
+
+  receiver   User?   @relation("ReceivedFeedback", fields: [receiverId], references: [id])
+  receiverId Int?
+
+  responses  FeedbackResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeedbackResponse {
+  id         Int      @id @default(autoincrement())
+  response   String
+
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  feedbackId Int
+
+  responder  User?    @relation(fields: [responderId], references: [id])
+  responderId Int?
+
+  createdAt  DateTime @default(now())
 }

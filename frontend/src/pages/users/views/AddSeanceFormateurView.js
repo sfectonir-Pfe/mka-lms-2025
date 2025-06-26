@@ -14,8 +14,10 @@ import {
   Divider,
 } from "@mui/material";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const AddSeanceFormateurView = ({ onSeanceCreated }) => {
+  const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
   const [selectedProgram, setSelectedProgram] = useState("");
   const [programData, setProgramData] = useState(null);
@@ -51,7 +53,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
   const handleSubmit = async () => {
     if (!programData || !user?.id || !date || !time || !title) {
-      alert("Remplissez tous les champs.");
+      alert(t("addSeance.fillAllFields"));
       return;
     }
 
@@ -69,19 +71,19 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
       if (onSeanceCreated) onSeanceCreated(res.data);
     } catch (err) {
       console.error("❌ Erreur création séance :", err);
-      alert("Erreur lors de la création.");
+      alert(t("addSeance.creationError"));
     }
   };
 
   return (
     <Box p={2}>
       <Typography variant="h5" gutterBottom>
-        ➕ Créer une nouvelle séance
+        {t("addSeance.title")}
       </Typography>
 
       <TextField
         fullWidth
-        label="Titre"
+        label={t("addSeance.titleField")}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         margin="normal"
@@ -89,7 +91,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
       <TextField
         fullWidth
-        label="Date"
+        label={t("addSeance.date")}
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
@@ -99,7 +101,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
       <TextField
         fullWidth
-        label="Heure"
+        label={t("addSeance.time")}
         type="time"
         value={time}
         onChange={(e) => setTime(e.target.value)}
@@ -108,11 +110,11 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
       />
 
       <FormControl fullWidth margin="normal">
-        <InputLabel>Programme publié</InputLabel>
+        <InputLabel>{t("addSeance.program")}</InputLabel>
         <Select
           value={selectedProgram}
           onChange={(e) => setSelectedProgram(e.target.value)}
-          label="Programme"
+          label={t("addSeance.program")}
         >
           {programs.map((p) => (
             <MenuItem key={p.id} value={p.id}>
@@ -125,7 +127,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
       {programData && (
         <Box component={Paper} variant="outlined" sx={{ mt: 3, p: 2 }}>
           <Typography variant="h6" gutterBottom>
-            🧩 Aperçu du programme sélectionné
+            {t("addSeance.programPreview")}
           </Typography>
 
           {programData.modules.map((m) => (
@@ -170,7 +172,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
           fullWidth
           onClick={handleSubmit}
         >
-          CRÉER LA SÉANCE
+          {t("addSeance.createButton")}
         </Button>
       </Box>
     </Box>

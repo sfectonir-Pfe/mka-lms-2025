@@ -12,31 +12,33 @@ import {
   Paper,
   TextField,
 } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import ScoreReveal from "../../../components/ScoreReveal"; 
 
 const PlayQuizPage = () => {
+  const { t } = useTranslation();
   const { contenuId } = useParams();
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
-  const [timeLeft, setTimeLeft] = useState(null); // in seconds
+  const [timeLeft, setTimeLeft] = useState(null);
   const [timerExpired, setTimerExpired] = useState(false);
   const [showTimer, setShowTimer] = useState(true);
 
-  // Load questions and quiz time
+
   useEffect(() => {
     axios
   .get(`http://localhost:8000/quizzes/by-contenu/${contenuId}`)
   .then((res) => {
     const quiz = res.data;
-    setQuestions(quiz.questions); // ✅ THIS is the array
+    setQuestions(quiz.questions);
     if (quiz.timeLimit) setTimeLeft(quiz.timeLimit);
   });
 
   }, [contenuId]);
 
-  // Timer countdown
+
   useEffect(() => {
     if (timeLeft === null || score !== null) return;
 
@@ -53,7 +55,7 @@ const PlayQuizPage = () => {
     return () => clearInterval(timer);
   }, [timeLeft, score]);
 
-  // Select answer
+
   const handleSelect = (questionId, value) => {
     setAnswers((prev) => ({
       ...prev,
@@ -61,7 +63,7 @@ const PlayQuizPage = () => {
     }));
   };
 
-  // Submit and calculate score
+
   const handleSubmit = () => {
     let total = 0;
     let earned = 0;
@@ -86,16 +88,16 @@ const PlayQuizPage = () => {
       }
     });
 
-    setScore(Math.max(0, earned)); // never negative
+    setScore(Math.max(0, earned));
   };
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        🎯 Prendre le Quiz
+        🎯 {t('quiz.takeQuiz')}
       </Typography>
 
-      {/* Timer */}
+
       {timeLeft !== null && (
   <Box display="flex" justifyContent="flex-end" alignItems="center" gap={2} mb={2}>
    <Typography
@@ -112,7 +114,7 @@ const PlayQuizPage = () => {
     gap: "6px"
   }}
 >
-  ⏱️ Temps restant :
+  ⏱️ {t('quiz.timeRemaining')}:
   {showTimer ? (
     <span style={{ fontWeight: 600 }}>
       {" "}
@@ -120,7 +122,7 @@ const PlayQuizPage = () => {
     </span>
   ) : (
     <span style={{ fontStyle: "italic", fontWeight: 400, opacity: 0.5 }}>
-      (masqué)
+      ({t('quiz.hidden')})
     </span>
   )}
 </Typography>
@@ -138,14 +140,14 @@ const PlayQuizPage = () => {
       }}
       startIcon={<span>{showTimer ? "🐵" : "🙈"}</span>}
     >
-      {showTimer ? "Cacher le timer" : "Afficher le timer"}
+      {showTimer ? t('quiz.hideTimer') : t('quiz.showTimer')}
     </Button>
   </Box>
 )}
 
     
 
-      {/* Questions */}
+
       {!timerExpired && questions.map((q, index) => (
        <Paper
   key={q.id}
@@ -159,7 +161,7 @@ const PlayQuizPage = () => {
   }}
 >
   <Typography variant="h6" fontWeight="bold" mb={1}>
-    🧠 Question {index + 1}
+    🧠 {t('quiz.question')} {index + 1}
   </Typography>
 
   <Typography variant="subtitle1" mb={2}>
@@ -170,7 +172,7 @@ const PlayQuizPage = () => {
     <Box textAlign="center" mb={2}>
       <img
         src={q.imageUrl}
-        alt="question"
+        alt={t('quiz.questionImage')}
         style={{ maxWidth: "100%", borderRadius: 8 }}
       />
     </Box>
@@ -191,7 +193,7 @@ const PlayQuizPage = () => {
               q.type === "IMAGE_CHOICE" ? (
                 <img
                   src={choice.imageUrl}
-                  alt={`Choix ${choice.id}`}
+                  alt={`${t('quiz.choice')} ${choice.id}`}
                   style={{
                     width: "180px",
                     borderRadius: 8,
@@ -223,7 +225,7 @@ const PlayQuizPage = () => {
   {q.type === "FILL_BLANK" && (
     <TextField
       fullWidth
-      label="Votre réponse"
+      label={t('quiz.yourAnswer')}
       value={answers[q.id] || ""}
       onChange={(e) => handleSelect(q.id, e.target.value)}
       sx={{ mt: 2 }}
@@ -233,23 +235,23 @@ const PlayQuizPage = () => {
 
       ))}
 
-      {/* Time expired message */}
+
       {timerExpired && (
         <Typography color="error" textAlign="center" mt={4}>
-          ⛔ Temps écoulé ! Le quiz a été soumis automatiquement.
+          ⛔ {t('quiz.timeExpired')}
         </Typography>
       )}
 
-      {/* Submit Button */}
+
       {questions.length > 0 && score === null && !timerExpired && (
         <Box textAlign="center" mt={3}>
           <Button variant="contained" onClick={handleSubmit}>
-            ✅ Soumettre le Quiz
+            ✅ {t('quiz.submitQuiz')}
           </Button>
         </Box>
       )}
 
-      {/* Final Score */}
+
      {score !== null && (
   <ScoreReveal
     score={score}

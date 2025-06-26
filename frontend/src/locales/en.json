@@ -1,0 +1,13 @@
+{
+  "addSeance": {
+    "title": "➕ Create New Training Session",
+    "titleField": "Session Title",
+    "date": "Session Date",
+    "time": "Start Time",
+    "program": "Select Published Program",
+    "programPreview": "🧩 Detailed Preview of Selected Program",
+    "createButton": "CREATE TRAINING SESSION",
+    "fillAllFields": "Please fill in all required fields.",
+    "creationError": "An error occurred while creating the session."
+  }
+}

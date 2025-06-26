@@ -18,6 +18,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const AddQuizForm = ({
   contenuId: propContenuId,
@@ -25,6 +26,7 @@ const AddQuizForm = ({
   initialQuestions = [],
   editMode = false,
 }) => {
+  const { t } = useTranslation();
   const params = useParams();
   const navigate = useNavigate();
 
@@ -54,8 +56,8 @@ const AddQuizForm = ({
     if (field === "type") {
       if (value === "TRUE_FALSE") {
         updated[index].choices = [
-          { text: "True", isCorrect: false },
-          { text: "False", isCorrect: false },
+          { text: t('quiz.true'), isCorrect: false },
+          { text: t('quiz.false'), isCorrect: false },
         ];
       } else if (value === "IMAGE_CHOICE") {
         updated[index].choices = [
@@ -95,7 +97,7 @@ const AddQuizForm = ({
         updated[qIndex].choices[cIndex].imageUrl = res.data.imageUrl;
         setQuestions(updated);
       } catch (err) {
-        alert("❌ Erreur de téléchargement d'image.");
+        alert(t('quiz.imageUploadError'));
       }
     };
     input.click();
@@ -147,7 +149,7 @@ const AddQuizForm = ({
         updated[qIndex].imageUrl = res.data.imageUrl;
         setQuestions(updated);
       } catch (err) {
-        alert("❌ Erreur de téléchargement d'image.");
+        alert(t('quiz.imageUploadError'));
       }
     };
     input.click();
@@ -157,22 +159,22 @@ const AddQuizForm = ({
   // ✅ Validate first
   for (const [i, q] of questions.entries()) {
     if (!q.text.trim()) {
-      alert(`❌ La question ${i + 1} doit avoir un texte.`);
+      alert(`❌ ${t('quiz.questionRequired')} ${i + 1}.`);
       return;
     }
 
     if (q.type !== "FILL_BLANK" && !q.choices.some((c) => c.isCorrect)) {
-      alert(`❌ La question ${i + 1} doit avoir au moins une bonne réponse.`);
+      alert(`❌ ${t('quiz.correctAnswerRequired')} ${i + 1}.`);
       return;
     }
 
     if (q.type !== "FILL_BLANK" && q.choices.some((c) => !c.text.trim() && !c.imageUrl)) {
-      alert(`❌ Tous les choix de la question ${i + 1} doivent avoir un texte ou une image.`);
+      alert(`❌ ${t('quiz.choiceTextRequired')} ${i + 1}.`);
       return;
     }
 
     if (q.type === "FILL_BLANK" && !q.correctText.trim()) {
-      alert(`❌ La question ${i + 1} de type "Remplir le blanc" doit avoir une réponse correcte.`);
+      alert(`❌ ${t('quiz.fillBlankAnswerRequired')} ${i + 1}.`);
       return;
     }
   }
@@ -191,24 +193,24 @@ const AddQuizForm = ({
       questions,
     });
 
-    alert(editMode ? "✅ Quiz modifié avec succès !" : "✅ Quiz créé avec succès !");
+    alert(editMode ? t('quiz.quizUpdatedSuccess') : t('quiz.quizCreatedSuccess'));
     navigate("/contenus");
   } catch (err) {
-    console.error("Erreur soumission quiz", err);
-    alert("❌ Échec lors de la soumission du quiz.");
+    console.error(t('quiz.submitError'), err);
+    alert(t('quiz.submitError'));
   }
 };
 
   return (
     <Box maxWidth="900px" mx="auto" mt={4} pb={8}>
       <Typography variant="h4" gutterBottom>
-        🧠 Créer un quiz
+        🧠 {t('quiz.createQuiz')}
       </Typography>
 
       {questions.map((q, qIndex) => (
         <Paper key={qIndex} sx={{ p: 3, mt: 3, borderRadius: 3 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">Question {qIndex + 1}</Typography>
+            <Typography variant="h6">{t('quiz.question')} {qIndex + 1}</Typography>
             <IconButton color="error" onClick={() => removeQuestion(qIndex)}>
               <DeleteIcon />
             </IconButton>
@@ -216,7 +218,7 @@ const AddQuizForm = ({
 
           <TextField
             fullWidth
-            label="Intitulé de la question"
+            label={t('quiz.questionText')}
             value={q.text}
             onChange={(e) => updateQuestion(qIndex, "text", e.target.value)}
             sx={{ my: 2 }}
@@ -224,28 +226,28 @@ const AddQuizForm = ({
 
           <Stack direction="row" spacing={2} mt={2}>
             <FormControl fullWidth>
-              <InputLabel>Type</InputLabel>
+              <InputLabel>{t('quiz.type')}</InputLabel>
               <Select
                 value={q.type}
                 label="Type"
                 onChange={(e) => updateQuestion(qIndex, "type", e.target.value)}
               >
-                <MenuItem value="MCQ">MCQ</MenuItem>
-                <MenuItem value="TRUE_FALSE">True/False</MenuItem>
-                <MenuItem value="FILL_BLANK">Fill in the Blank</MenuItem>
-                <MenuItem value="IMAGE_CHOICE">Image Choice</MenuItem>
+                <MenuItem value="MCQ">{t('quiz.mcq')}</MenuItem>
+                <MenuItem value="TRUE_FALSE">{t('quiz.trueFalse')}</MenuItem>
+                <MenuItem value="FILL_BLANK">{t('quiz.fillBlank')}</MenuItem>
+                <MenuItem value="IMAGE_CHOICE">{t('quiz.imageChoice')}</MenuItem>
               </Select>
             </FormControl>
 
             <TextField
-              label="Score"
+              label={t('quiz.score')}
               type="number"
               value={q.score}
               onChange={(e) => updateQuestion(qIndex, "score", parseInt(e.target.value))}
             />
 
             <Button onClick={() => handleImageUpload(qIndex)}>
-              📤 Ajouter une image
+              📤 {t('quiz.addImage')}
             </Button>
           </Stack>
 
@@ -262,7 +264,7 @@ const AddQuizForm = ({
           {q.type === "FILL_BLANK" && (
             <TextField
               fullWidth
-              label="Bonne réponse attendue"
+              label={t('quiz.correctAnswer')}
               value={q.correctText}
               onChange={(e) => updateQuestion(qIndex, "correctText", e.target.value)}
               sx={{ mt: 2 }}
@@ -272,7 +274,7 @@ const AddQuizForm = ({
           {q.type !== "FILL_BLANK" && (
             <Box mt={2}>
               <Typography variant="subtitle1" gutterBottom>
-                Choix de réponse :
+                {t('quiz.answerChoices')} :
               </Typography>
               <Stack spacing={1}>
                 {q.choices.map((choice, cIndex) => (
@@ -284,7 +286,7 @@ const AddQuizForm = ({
                     flexWrap="wrap"
                   >
                     <TextField
-                      label={`Choix ${cIndex + 1}`}
+                      label={`${t('quiz.choice')} ${cIndex + 1}`}
                       value={choice.text || ""}
                       onChange={(e) => updateChoiceText(qIndex, cIndex, e.target.value)}
                       fullWidth
@@ -295,7 +297,7 @@ const AddQuizForm = ({
                         size="small"
                         onClick={() => updateChoiceImage(qIndex, cIndex)}
                       >
-                        📸 Ajouter une image
+📸 {t('quiz.addChoiceImage')}
                       </Button>
                     )}
 
@@ -312,10 +314,10 @@ const AddQuizForm = ({
                       color="success"
                       onClick={() => updateChoiceCorrect(qIndex, cIndex)}
                     >
-                      {choice.isCorrect ? "✅ Bonne réponse" : "Marquer correcte"}
+                      {choice.isCorrect ? `✅ ${t('quiz.correctChoice')}` : t('quiz.markCorrect')}
                     </Button>
 
-                    <Tooltip title="Supprimer ce choix">
+                    <Tooltip title={t('quiz.deleteChoice')}>
                       <IconButton color="error" onClick={() => removeChoice(qIndex, cIndex)}>
                         <ClearIcon />
                       </IconButton>
@@ -325,7 +327,7 @@ const AddQuizForm = ({
               </Stack>
               {q.type !== "TRUE_FALSE" && (
                 <Button onClick={() => addChoice(qIndex)} size="small" sx={{ mt: 1 }}>
-                  ➕ Ajouter un choix
+➕ {t('quiz.addChoice')}
                 </Button>
               )}
             </Box>
@@ -347,7 +349,7 @@ const AddQuizForm = ({
         borderTop={"1px solid #ccc"}
       >
         <TextField
-          label="⏱️ Durée du quiz (minutes)"
+          label={`⏱️ ${t('quiz.duration')}`}
           type="number"
           value={timeLimitMinutes}
           onChange={(e) => setTimeLimitMinutes(parseInt(e.target.value))}
@@ -356,10 +358,10 @@ const AddQuizForm = ({
 
         <Box display="flex" gap={2}>
           <Button variant="outlined" color="secondary" onClick={addQuestion}>
-            ➕ Ajouter une question
+            ➕ {t('quiz.addQuestion')}
           </Button>
           <Button variant="contained" color="primary" onClick={handleSubmit}>
-            💾 Enregistrer le quiz
+            💾 {t('quiz.saveQuiz')}
           </Button>
         </Box>
       </Box>

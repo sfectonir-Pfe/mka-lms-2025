@@ -36,10 +36,12 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const EditProfilePage = () => {
+  const { t } = useTranslation();
   const { email } = useParams();
   const navigate = useNavigate();
 
@@ -90,9 +92,9 @@ const EditProfilePage = () => {
     strength += hasSpecialChar ? 1 : 0;
 
     // Détermination de la force
-    if (strength <= 2) return "faible";
-    if (strength <= 4) return "moyenne";
-    return "forte";
+    if (strength <= 2) return t('profile.passwordStrengthWeak');
+    if (strength <= 4) return t('profile.passwordStrengthMedium');
+    return t('profile.passwordStrengthStrong');
   };
 
   // Fonction pour analyser la qualité de l'image (détection de flou)
@@ -373,14 +375,14 @@ const EditProfilePage = () => {
 
     // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
-      toast.error("Veuillez sélectionner un fichier image valide.");
+      toast.error(t('profile.invalidImageFile'));
       e.target.value = '';
       return;
     }
 
     // Vérifier la taille du fichier (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("La taille du fichier ne doit pas dépasser 5MB.");
+      toast.error(t('profile.fileSizeError'));
       e.target.value = '';
       return;
     }
@@ -820,7 +822,7 @@ const EditProfilePage = () => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            Edit Profile
+            {t('profile.editProfile')}
           </Typography>
           <Button
             onClick={() => {
@@ -849,7 +851,7 @@ const EditProfilePage = () => {
             variant="outlined"
             sx={{ borderRadius: 20, px: 3 }}
           >
-            Back to Profile
+            {t('profile.backToProfile')}
           </Button>
         </Box>
 
@@ -898,7 +900,7 @@ const EditProfilePage = () => {
             </IconButton>
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-            Click camera icon to change photo
+            {t('profile.clickCameraToChange')}
           </Typography>
 
           {/* Indicateur d'analyse de l'image */}
@@ -970,11 +972,11 @@ const EditProfilePage = () => {
             <Grid item xs={12} md={6}>
               <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                 <Person color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Personal Information
+                {t('profile.personalInfo')}
               </Typography>
 
               <TextField
-                label="Full Name"
+                label={t('profile.fullName')}
                 name="name"
                 fullWidth
                 value={form.name || ""}
@@ -992,7 +994,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label="Email"
+                label={t('profile.email')}
                 name="email"
                 fullWidth
                 value={form.email || ""}
@@ -1010,7 +1012,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label="Phone"
+                label={t('profile.phone')}
                 name="phone"
                 fullWidth
                 value={form.phone || ""}
@@ -1028,7 +1030,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label="Location"
+                label={t('profile.location')}
                 name="location"
                 fullWidth
                 value={form.location || ""}
@@ -1059,7 +1061,7 @@ const EditProfilePage = () => {
                     fontWeight: 500
                   }}
                 >
-                  Change Password
+                  {t('profile.changePassword')}
                 </Button>
               </Box>
             </Grid>
@@ -1068,17 +1070,17 @@ const EditProfilePage = () => {
             <Grid item xs={12} md={6}>
               <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                 <Work color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                Professional Details
+                {t('profile.professionalDetails')}
               </Typography>
 
               <TextField
-                label="Role"
+                label={t('profile.role')}
                 name="role"
                 fullWidth
                 value={form.role || "Etudiant"}
                 disabled
                 margin="normal"
-                helperText="Contact admin to change role"
+                helperText={t('profile.contactAdminRole')}
                 InputProps={{
                   sx: {
                     textTransform: 'capitalize'
@@ -1087,7 +1089,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label="About Me"
+                label={t('profile.aboutMe')}
                 name="about"
                 fullWidth
                 multiline
@@ -1100,7 +1102,7 @@ const EditProfilePage = () => {
 
               <Box sx={{ mt: 3 }}>
                 <Typography variant="subtitle1" gutterBottom>
-                  Skills & Expertise
+                  {t('profile.skillsExpertise')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                   {skills.map((skill, idx) => (
@@ -1117,7 +1119,7 @@ const EditProfilePage = () => {
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField
-                    label="Add Skill"
+                    label={t('profile.addSkill')}
                     value={newSkill}
                     onChange={(e) => setNewSkill(e.target.value)}
                     size="small"
@@ -1129,7 +1131,7 @@ const EditProfilePage = () => {
                     startIcon={<Add />}
                     sx={{ whiteSpace: 'nowrap' }}
                   >
-                    Add
+                    {t('common.add')}
                   </Button>
                 </Box>
               </Box>
@@ -1158,10 +1160,10 @@ const EditProfilePage = () => {
                   {submitting ? (
                     <>
                       <CircularProgress size={24} sx={{ mr: 1 }} />
-                      Saving...
+                      {t('common.saving')}
                     </>
                   ) : (
-                    "Save Changes"
+                    t('common.saveChanges')
                   )}
                 </Button>
               </Box>
@@ -1178,7 +1180,7 @@ const EditProfilePage = () => {
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: 600 }}>
-          Change Password
+          {t('profile.changePassword')}
         </DialogTitle>
 
         <DialogContent>
@@ -1189,11 +1191,11 @@ const EditProfilePage = () => {
           )}
 
           <DialogContentText sx={{ mb: 2 }}>
-            Please enter your current password and a new password to update your account security.
+            {t('profile.changePasswordDescription')}
           </DialogContentText>
 
           <TextField
-            label="Current Password"
+            label={t('profile.currentPassword')}
             name="currentPassword"
             type={showCurrentPassword ? "text" : "password"}
             value={passwordForm.currentPassword}
@@ -1215,7 +1217,7 @@ const EditProfilePage = () => {
           />
 
           <TextField
-            label="New Password"
+            label={t('profile.newPassword')}
             name="newPassword"
             type={showNewPassword ? "text" : "password"}
             value={passwordForm.newPassword}
@@ -1330,7 +1332,7 @@ const EditProfilePage = () => {
           )}
 
           <TextField
-            label="Confirm New Password"
+            label={t('profile.confirmNewPassword')}
             name="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
             value={passwordForm.confirmPassword}
@@ -1358,7 +1360,7 @@ const EditProfilePage = () => {
             variant="outlined"
             disabled={changingPassword}
           >
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleChangePassword}
@@ -1366,7 +1368,7 @@ const EditProfilePage = () => {
             disabled={changingPassword}
             startIcon={changingPassword ? <CircularProgress size={20} /> : <Lock />}
           >
-            {changingPassword ? "Updating..." : "Update Password"}
+            {changingPassword ? t('common.updating') : t('profile.updatePassword')}
           </Button>
         </DialogActions>
       </Dialog>

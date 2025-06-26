@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { TextField, Button, Container, Box } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddProgramList = () => {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
@@ -18,21 +20,21 @@ const AddProgramList = () => {
       if (res.data && res.data.id) {
         navigate(`/programs/build/${res.data.id}`); // Redirection vers le builder
       } else {
-        alert("Erreur : la réponse du serveur ne contient pas d'identifiant.");
+        alert(t('programs.serverError'));
       }
 
     } catch (err) {
       console.error("Erreur lors de la création du programme", err);
-      alert("Erreur : échec de l'enregistrement du programme.");
+      alert(t('programs.saveError'));
     }
   };
 
   return (
     <Container maxWidth="sm">
-      <h3>Ajouter un programme</h3>
+      <h3>{t('programs.addProgram')}</h3>
 
       <TextField
-        label="Nom du programme"
+        label={t('programs.programName')}
         fullWidth
         margin="normal"
         value={name}
@@ -41,10 +43,10 @@ const AddProgramList = () => {
 
       <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
         <Button variant="outlined" color="error" onClick={() => navigate("/programs")}>
-          Annuler
+          {t('common.cancel')}
         </Button>
         <Button variant="contained" onClick={handleSubmit}>
-          Enregistrer
+          {t('common.save')}
         </Button>
       </Box>
     </Container>
