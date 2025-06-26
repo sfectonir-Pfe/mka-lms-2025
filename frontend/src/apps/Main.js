@@ -74,8 +74,8 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+  shouldForwardProp: (prop) => prop !== "open" && prop !== "isRTL",
+})(({ theme, open, isRTL }) => ({
   zIndex: theme.zIndex.drawer + 1,
   backgroundColor: alpha(theme.palette.background.paper, 0.8),
   backdropFilter: "blur(8px)",
@@ -87,7 +87,7 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    marginLeft: drawerWidth,
+    ...(isRTL ? { marginRight: drawerWidth, marginLeft: 0 } : { marginLeft: drawerWidth, marginRight: 0 }),
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
@@ -127,7 +127,8 @@ export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -323,7 +324,7 @@ export default function Main({ setUser, user }) {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} isRTL={isRTL}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -466,7 +467,7 @@ export default function Main({ setUser, user }) {
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} anchor={isRTL ? "right" : "left"}>
         <DrawerHeader>
           <Typography variant="h6" sx={{ fontWeight: 700, opacity: open ? 1 : 0 }}>
             MENU
@@ -510,7 +511,7 @@ export default function Main({ setUser, user }) {
                       {elem.icon}
                     </ListItemIcon>
                     <ListItemText
-                      primary={elem.text}
+                      primary={t(elem.text)}
                       sx={{
                         opacity: open ? 1 : 0,
                         '& .MuiTypography-root': {
@@ -524,7 +525,7 @@ export default function Main({ setUser, user }) {
             );
 
             return open ? item : (
-              <Tooltip title={elem.text} placement="right" key={index}>
+              <Tooltip title={t(elem.text)} placement="right" key={index}>
                 {item}
               </Tooltip>
             );

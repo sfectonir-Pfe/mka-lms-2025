@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useTranslation } from 'react-i18next'
 import axios from "axios"
 import {
   Box,
@@ -47,6 +48,7 @@ import {
 } from "@mui/icons-material"
 
 export default function UserList() {
+  const { t } = useTranslation()
   const theme = useTheme()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -69,7 +71,7 @@ export default function UserList() {
       setUsers(response.data)
     } catch (error) {
       console.error("❌ Fetch error:", error)
-      showNotification("❌ Erreur de chargement des utilisateurs. Veuillez réessayer.", "error")
+      showNotification(t('users.loadError'), "error")
       setUsers([])
     } finally {
       setLoading(false)
@@ -88,11 +90,11 @@ export default function UserList() {
       console.log("🗑️ Deleting user:", deleteDialog.user.id)
       await axios.delete(`http://localhost:8000/users/${deleteDialog.user.id}`)
       setUsers(users.filter((u) => u.id !== deleteDialog.user.id))
-      showNotification(`✅ L'utilisateur ${deleteDialog.user.name || deleteDialog.user.email} a été supprimé avec succès`, "success")
+      showNotification(t('users.deleteSuccess'), "success")
       console.log("✅ User deleted successfully")
     } catch (error) {
       console.error("❌ Delete error:", error)
-      showNotification(`❌ Erreur lors de la suppression de l'utilisateur ${deleteDialog.user.name || deleteDialog.user.email}`, "error")
+      showNotification(t('users.deleteError'), "error")
     } finally {
       setActionLoading(false)
       setDeleteDialog({ open: false, user: null })
@@ -194,8 +196,7 @@ export default function UserList() {
         // Mettre à jour l'état local
         setUsers((prevUsers) => prevUsers.map((u) => (u.id === user.id ? { ...u, isActive: newStatus } : u)))
 
-        const statusText = newStatus ? "activé" : "désactivé"
-        showNotification(`✅ Le compte de ${user.name || user.email} a été ${statusText} avec succès`, "success")
+        showNotification(t('users.statusUpdateSuccess'), "success")
         console.log("🎉 Status toggle completed successfully")
 
         // Rafraîchir la liste après un délai pour vérifier la synchronisation
@@ -207,24 +208,7 @@ export default function UserList() {
     } catch (error) {
       console.error("💥 Unexpected error:", error)
 
-      // Gestion d'erreur détaillée
-      let errorMessage = "Erreur lors de la modification du statut"
-
-      if (error.code === "ECONNREFUSED") {
-        errorMessage = "❌ Serveur inaccessible - Vérifiez que le backend est démarré"
-      } else if (error.code === "ENOTFOUND") {
-        errorMessage = "❌ Serveur introuvable - Vérifiez l'URL du backend"
-      } else if (error.response?.status === 404) {
-        errorMessage = "❌ Utilisateur introuvable"
-      } else if (error.response?.status === 500) {
-        errorMessage = "❌ Erreur serveur interne"
-      } else if (error.response?.status === 400) {
-        errorMessage = "❌ Données invalides"
-      } else if (error.response?.data?.message) {
-        errorMessage = `❌ ${error.response.data.message}`
-      }
-
-      showNotification(`${errorMessage}`, "error")
+      showNotification(t('users.statusUpdateError'), "error")
 
       // Log détaillé pour le debugging
       console.error("🔍 Error debugging info:", {
@@ -315,10 +299,10 @@ export default function UserList() {
                 mb: 1,
               }}
             >
-              Gestion des Utilisateurs
+              {t('users.userManagement')}
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              Tableau de bord administrateur
+              {t('users.usersSection')}
             </Typography>
           </Box>
           
@@ -328,7 +312,7 @@ export default function UserList() {
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Total Utilisateurs"
+              title={t('users.totalUsers')}
               value={users.length}
               icon={<People fontSize="large" />}
               color="#1976d2"
@@ -337,7 +321,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Comptes Actifs"
+              title={t('users.activeAccounts')}
               value={activeUsers}
               icon={<TrendingUp fontSize="large" />}
               color="#388e3c"
@@ -346,7 +330,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Comptes Inactifs"
+              title={t('users.inactiveAccounts')}
               value={users.length - activeUsers}
               icon={<Security fontSize="large" />}
               color="#d32f2f"
@@ -355,7 +339,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Taux d'Activité"
+              title={t('users.activityRate')}
               value={`${users.length > 0 ? Math.round((activeUsers / users.length) * 100) : 0}%`}
               icon={<Analytics fontSize="large" />}
               color="#7b1fa2"
@@ -377,7 +361,7 @@ export default function UserList() {
             <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <TextField
-                  placeholder="Rechercher par nom, email ou rôle..."
+                  placeholder={t('users.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -407,7 +391,7 @@ export default function UserList() {
                   },
                 }}
               >
-                Ajouter Utilisateur
+                {t('users.addUser')}
               </Button>
             </Box>
           </Box>
@@ -418,7 +402,7 @@ export default function UserList() {
               <Box sx={{ textAlign: "center" }}>
                 <CircularProgress size={48} thickness={4} />
                 <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
-                  Chargement...
+                  {t('common.loading')}
                 </Typography>
               </Box>
             </Box>
@@ -426,13 +410,13 @@ export default function UserList() {
             <Box sx={{ textAlign: "center", p: 6 }}>
               <People sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
               <Typography variant="h5" gutterBottom>
-                Aucun utilisateur trouvé
+                {t('users.noUsersFound')}
               </Typography>
               <Typography color="text.secondary" sx={{ mb: 3 }}>
-                {searchTerm ? "Aucun résultat pour votre recherche" : "Commencez par ajouter un utilisateur"}
+                {searchTerm ? t('users.noSearchResults') : t('users.startByAddingUser')}
               </Typography>
               <Button variant="contained" startIcon={<Add />} onClick={() => (window.location.href = "/users/add")}>
-                Ajouter un utilisateur
+                {t('users.addUser')}
               </Button>
             </Box>
           ) : (
@@ -440,11 +424,11 @@ export default function UserList() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: "grey.50" }}>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Utilisateur</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Rôle</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Statut</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.user')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.email')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.role')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.status')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('common.actions')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -495,7 +479,7 @@ export default function UserList() {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={user.isActive ? "Actif" : "Inactif"}
+                          label={user.isActive ? t('users.active') : t('users.inactive')}
                           color={user.isActive ? "success" : "error"}
                           size="small"
                           sx={{ borderRadius: 2, fontWeight: 600 }}

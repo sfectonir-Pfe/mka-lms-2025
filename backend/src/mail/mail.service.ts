@@ -7,18 +7,19 @@ export class MailService {
 
   private async send(to: string, subject: string, html: string) {
     try {
-      const response =await  this.mailerService.sendMail({
-      from: 'LMS Platform <tunirdigital@gmail.com>',
-      to,
-      subject,
-      html,
-    });
-    console.log("Email sent successfully:", response)
-    return response;
+      const response = await this.mailerService.sendMail({
+        from: 'LMS Platform <majdlabidi666@gmail.com>',
+        to,
+        subject,
+        html,
+      });
+      console.log("Email sent successfully:", response)
+      return response;
     } catch (error) {
-      console.log("Failed to send email:", error);
+      console.error("Failed to send email:", error);
+      // Ne pas échouer complètement si l'email ne peut pas être envoyé
+      return { success: false, error: error.message };
     }
-    
   }
 
   async sendPasswordResetEmail(to: string, token: string) {
@@ -250,5 +251,27 @@ export class MailService {
   };
   await this.mailerService.sendMail(mailOptions);
 }
+  async sendWelcomeEmailverification(to: string, tempPassword: string, role: string) {
+const trackingPixel = `<img src="https://0de3-196-177-86-16.ngrok-free.app/track/open?email=${encodeURIComponent(to)}" width="1" height="1" style="display:none;" />`;
 
+    await this.mailerService.sendMail({
+      to,
+      subject: '🎉 Bienvenue sur la plateforme',
+      html: `
+        <h3>Bienvenue sur notre plateforme !</h3>
+        <p>Votre compte a été créé avec succès. Voici vos informations de connexion :</p>
+        <ul>
+          <li><strong>Mot de passe temporaire :</strong> ${tempPassword}</li>
+          <li><strong>Rôle :</strong> ${role}</li>
+        </ul>
+        <p>Merci de vous connecter et de changer votre mot de passe dès que possible.</p>
+        ${trackingPixel}
+        <br/>
+        <p>– Équipe LMS</p>
+      `,
+    });
+  }
 }
+
+  
+  

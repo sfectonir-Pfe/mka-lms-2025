@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, Grid,Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 
 const ContenusList = () => {
+  const { t } = useTranslation();
   const [contenus, setContenus] = useState([]);
   const navigate = useNavigate();
 
@@ -17,12 +19,12 @@ const ContenusList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer ce contenu ?")) return;
+    if (!window.confirm(t('content.confirmDelete'))) return;
     try {
       await axios.delete(`http://localhost:8000/contenus/${id}`);
       setContenus((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      alert("Erreur lors de la suppression");
+      alert(t('content.deleteError'));
       console.error(err);
     }
   };
@@ -33,12 +35,12 @@ const ContenusList = () => {
       return "Co-"+value
     },field: "id", headerName: "ID", width: 80 },
   
-  { field: "title", headerName: "Titre", flex: 1 },
-  { field: "type", headerName: "Type", width: 130 },
-  { field: "fileType", headerName: "Fichier", width: 130 },
+  { field: "title", headerName: t('content.title'), flex: 1 },
+  { field: "type", headerName: t('content.type'), width: 130 },
+  { field: "fileType", headerName: t('content.file'), width: 130 },
   {
     field: "fileUrl",
-    headerName: "Lien",
+    headerName: t('content.link'),
     flex: 1,
     renderCell: (params) => {
       const isQuiz = params.row.type === "Quiz";
@@ -52,7 +54,7 @@ const ContenusList = () => {
               color="primary"
               onClick={() => navigate(`/quizzes/play/${params.row.id}`)}
             >
-              Prendre le quiz
+              {t('content.takeQuiz')}
             </Button>
             <Button
               variant="outlined"
@@ -60,7 +62,7 @@ const ContenusList = () => {
               color="secondary"
               onClick={() => navigate(`/quizzes/edit/${params.row.id}`)}
             >
-              Modifier
+              {t('common.edit')}
             </Button>
           </Stack>
         );
@@ -72,11 +74,11 @@ const ContenusList = () => {
             color="info"
             onClick={() => window.open(params.row.fileUrl, "_blank")}
           >
-            Voir
+            {t('content.view')}
           </Button>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            Aucun fichier
+            {t('content.noFile')}
           </Typography>
         );
       }
@@ -84,7 +86,7 @@ const ContenusList = () => {
   },
   {
     field: "actions",
-    headerName: "Actions",
+    headerName: t('content.actions'),
     flex: 1,
     renderCell: (params) => (
       <Button
@@ -93,7 +95,7 @@ const ContenusList = () => {
         size="small"
         onClick={() => handleDelete(params.row.id)}
       >
-        Supprimer
+        {t('common.delete')}
       </Button>
     ),
   },
@@ -103,9 +105,9 @@ const ContenusList = () => {
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Liste des contenus</Typography>
+        <Typography variant="h5">{t('content.contentList')}</Typography>
         <Button variant="contained" onClick={() => navigate("/contenus/add")}>
-          ➕ Ajouter contenu
+          ➕ {t('content.addContent')}
         </Button>
       </Grid>
 

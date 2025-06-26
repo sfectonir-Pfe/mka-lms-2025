@@ -7,6 +7,8 @@ import { MailService } from "../mail/mail.service" // Removed 'type' keyword
 import type { Role } from "@prisma/client"
 import { ConflictException } from '@nestjs/common';
 
+
+
 @Injectable()
 export class UsersService {
   // Stockage temporaire des utilisateurs quand la DB n'est pas disponible
@@ -64,49 +66,61 @@ export class UsersService {
   }
 
  async create(createUserDto: CreateUserDto) {
-  // ✅ Check if email already exists
-  const existingUser = await this.prisma.user.findUnique({
-    where: { email: createUserDto.email },
-  });
+  try {
+    // ✅ Check if email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
 
-  if (existingUser) {
-    throw new ConflictException('Cet utilisateur existe déjà.');
+    if (existingUser) {
+      throw new ConflictException('Cet utilisateur existe déjà.');
+    }
+
+    const tempPassword = this.generateTempPassword();
+    const hashedPassword = await this.hashPassword(tempPassword);
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: hashedPassword,
+        role: createUserDto.role,
+        name: createUserDto.name,
+        phone: createUserDto.phone,
+        location: createUserDto.location,
+        about: createUserDto.about,
+        skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+
+    try {
+      // Tentative d'envoi d'email, mais ne pas échouer si l'email ne peut pas être envoyé
+      await this.mailService.sendWelcomeEmail(
+        newUser.email,
+        tempPassword,
+        newUser.role,
+      );
+      console.log(`✅ Email de bienvenue envoyé à ${newUser.email}`);
+    } catch (emailError) {
+      console.error(`❌ Erreur lors de l'envoi de l'email à ${newUser.email}:`, emailError);
+      // Ne pas échouer la création d'utilisateur si l'email échoue
+    }
+
+    return newUser;
+  } catch (error) {
+    console.error("❌ Erreur lors de la création de l'utilisateur:", error);
+    throw error;
   }
-
-  const tempPassword = this.generateTempPassword();
-  const hashedPassword = await this.hashPassword(tempPassword);
-
-  const newUser = await this.prisma.user.create({
-    data: {
-      email: createUserDto.email,
-      password: hashedPassword,
-      role: createUserDto.role,
-      name: createUserDto.name,
-      phone: createUserDto.phone,
-      location: createUserDto.location,
-      about: createUserDto.about,
-      skills: createUserDto.skills ? [createUserDto.skills] : undefined,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      phone: true,
-      location: true,
-      about: true,
-      skills: true,
-      profilePic: true,
-    },
-  });
-
-  await this.mailService.sendWelcomeEmail(
-    newUser.email,
-    tempPassword,
-    newUser.role,
-  );
-
-  return newUser;
 }
 
 

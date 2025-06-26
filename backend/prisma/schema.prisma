@@ -11,6 +11,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // directUrl=env("DIRECT_URL")
 }
 
 enum Role {
@@ -83,6 +84,10 @@ model User {
   Etablissements          Etablissement[]
   ResetToken              ResetToken[]
   UserAnswer              UserAnswer[]
+  SeanceFormateur         SeanceFormateur[]
+  sentFeedback            Feedback[]              @relation("SentFeedback")
+  receivedFeedback        Feedback[]              @relation("ReceivedFeedback")
+  feedbackResponses       FeedbackResponse[]
 }
 
 model Formateur {
@@ -167,6 +172,7 @@ model Contenu {
   buildProgramContenus buildProgramContenu[]
   session2Contenus     Session2Contenu[]
   quiz                 Quiz?
+  published            Boolean               @default(false)
 }
 
 model ProgramModule {
@@ -208,8 +214,10 @@ model buildProgram {
   imageUrl  String?
   level     String    @default("Basique")
 
-  modules   buildProgramModule[]
-  createdAt DateTime?            @default(now())
+  modules          buildProgramModule[]
+  seancesFormateur SeanceFormateur[]
+
+  createdAt DateTime? @default(now())
 }
 
 model buildProgramModule {
@@ -355,4 +363,62 @@ model Session2Contenu {
   @@unique([session2CourseId, contenuId])
 }
 
+model SeanceFormateur {
+  id        Int      @id @default(autoincrement())
+  title     String
+  startTime DateTime
 
+  formateur   User @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  formateurId Int
+
+  buildProgram   buildProgram  @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
+  buildProgramId Int
+  medias         SeanceMedia[]
+
+  createdAt DateTime @default(now())
+}
+
+model SeanceMedia {
+  id        Int      @id @default(autoincrement())
+  seanceId  Int
+  type      FileType
+  fileUrl   String
+  createdAt DateTime @default(now())
+
+  seance SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  message   String
+  type      String?
+  rating    Float    @default(0)
+  category  String?
+  tags      String[]
+  likes     Int      @default(0)
+  dislikes  Int      @default(0)
+
+  sender     User?   @relation("SentFeedback", fields: [senderId], references: [id])
+  senderId   Int?
+
+  receiver   User?   @relation("ReceivedFeedback", fields: [receiverId], references: [id])
+  receiverId Int?
+
+  responses  FeedbackResponse[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeedbackResponse {
+  id         Int      @id @default(autoincrement())
+  response   String
+
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  feedbackId Int
+
+  responder  User?    @relation(fields: [responderId], references: [id])
+  responderId Int?
+
+  createdAt  DateTime @default(now())
+}

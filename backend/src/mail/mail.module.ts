@@ -1,6 +1,7 @@
-import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { MailService } from './mail.service';
+import { PixelController } from './pixel.controller'; // ✅ Don't forget to create this file
 
 @Module({
   imports: [
@@ -9,9 +10,9 @@ import { MailService } from './mail.service';
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
-        auth: {                                     //sender
-          user: 'tunirdigital@gmail.com',
-          pass: 'xvkf rxww cxxt lmec',
+        auth: {
+          user: 'majdlabidi666@gmail.com',
+          pass: 'ycig zjlq oesp rgqq',
         },
       },
       defaults: {
@@ -19,6 +20,7 @@ import { MailService } from './mail.service';
       },
     }),
   ],
+  controllers: [PixelController], // ✅ Added here
   providers: [MailService],
   exports: [MailService],
 })

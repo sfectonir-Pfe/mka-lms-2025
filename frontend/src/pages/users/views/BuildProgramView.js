@@ -7,15 +7,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-const steps = [
-  "Modules, cours et contenus",
-  "Niveau du programme"
-];
-
 const BuildProgramView = () => {
+  const { t } = useTranslation();
+  
+  const steps = [
+    t('buildProgram.modulesCoursesContents'),
+    t('buildProgram.programLevel')
+  ];
+
   const navigate = useNavigate();
   const { programId } = useParams();
 
@@ -68,7 +71,7 @@ const BuildProgramView = () => {
 
   const handleSubmit = async () => {
     if (!programId || !level || selectedModules.length === 0) {
-      alert("Veuillez remplir tous les champs nécessaires.");
+      alert(t('buildProgram.fillAllFields'));
       return;
     }
 
@@ -97,10 +100,10 @@ const BuildProgramView = () => {
       await axios.post("http://localhost:8000/buildProgram", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      alert("✅ Programme construit avec succès !");
+      alert(t('buildProgram.buildSuccess'));
       navigate("/programs");
     } catch {
-      alert("❌ Erreur lors de la construction du programme.");
+      alert(t('buildProgram.buildError'));
     }
   };
 
@@ -108,7 +111,7 @@ const BuildProgramView = () => {
   <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
     <Paper sx={{ p: 4, width: "100%", maxWidth: 1000, borderRadius: 4 }}>
       <Typography variant="h5" align="center" gutterBottom>
-        🎓 Construire un Programme
+        🎓 {t('buildProgram.buildProgram')}
       </Typography>
 
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
@@ -119,7 +122,7 @@ const BuildProgramView = () => {
 
       {activeStep === 0 && (
         <>
-          <Typography variant="h6">📦 Sélectionner les Modules</Typography>
+          <Typography variant="h6">📦 {t('buildProgram.selectModules')}</Typography>
           <FormGroup>
             {modules.map((m) => (
               <FormControlLabel
@@ -146,7 +149,7 @@ const BuildProgramView = () => {
                     />
                     {(selectedCourses[moduleId] || []).includes(course.id) && contenusByCourse[course.id]?.length > 0 && (
                       <Box ml={4} mt={1}>
-                        <Typography variant="body2" fontWeight="bold">📄 Contenus :</Typography>
+                        <Typography variant="body2" fontWeight="bold">📄 {t('buildProgram.contents')} :</Typography>
                         <FormGroup>
                           {contenusByCourse[course.id].map((ct) => (
                             <FormControlLabel
@@ -166,10 +169,10 @@ const BuildProgramView = () => {
 
           <Box mt={3} display="flex" justifyContent="space-between">
             <Button variant="outlined" color="error" onClick={() => navigate("/programs")}>
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button variant="contained" onClick={() => setActiveStep(1)}>
-              Suivant
+              {t('common.next')}
             </Button>
           </Box>
         </>
@@ -177,9 +180,9 @@ const BuildProgramView = () => {
 
       {activeStep === 1 && (
         <>
-          <Typography variant="h6">🎯 Niveau du programme</Typography>
+          <Typography variant="h6">🎯 {t('buildProgram.programLevel')}</Typography>
           <FormGroup>
-            {["Basique", "Intermédiaire", "Avancé"].map((lvl) => (
+            {[t('buildProgram.basic'), t('buildProgram.intermediate'), t('buildProgram.advanced')].map((lvl) => (
               <FormControlLabel
                 key={lvl}
                 control={<Checkbox checked={level === lvl} onChange={() => setLevel(lvl)} />}
@@ -190,14 +193,14 @@ const BuildProgramView = () => {
 
           <Box mt={3} display="flex" justifyContent="space-between">
             <Button variant="outlined" onClick={() => setActiveStep(0)}>
-              Retour
+              {t('common.back')}
             </Button>
             <Box>
               <Button variant="outlined" color="error" sx={{ mr: 2 }} onClick={() => navigate("/programs")}>
-                Annuler
+                {t('common.cancel')}
               </Button>
               <Button variant="contained" color="primary" onClick={handleSubmit}>
-                Enregistrer
+                {t('common.save')}
               </Button>
             </Box>
           </Box>

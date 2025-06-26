@@ -9,9 +9,11 @@ import {
   Grid,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 const StudentLandingPage = () => {
+  const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
   const navigate = useNavigate();
 
@@ -31,11 +33,11 @@ const StudentLandingPage = () => {
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom fontWeight="bold">
-        🎓 Choose a Program
+        🎓 {t('studentLanding.title')}
       </Typography>
 
       <Typography variant="h6" sx={{ mb: 2 }}>
-        👋 Welcome! Select a program below to start learning.
+        👋 {t('studentLanding.welcome')}
       </Typography>
 
       <Grid container spacing={3}>
@@ -51,7 +53,7 @@ const StudentLandingPage = () => {
               <CardContent>
                 <Typography variant="h6">{program.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {program.description || "No description provided."}
+                  {program.description || t('studentLanding.noDescription')}
                 </Typography>
                 <Button
                   variant="contained"
@@ -59,7 +61,7 @@ const StudentLandingPage = () => {
                   sx={{ mt: 1 }}
                   onClick={() => navigate(`/student/program/${program.id}`)}
                 >
-                  View Program
+                  {t('studentLanding.viewProgram')}
                 </Button>
               </CardContent>
             </Card>

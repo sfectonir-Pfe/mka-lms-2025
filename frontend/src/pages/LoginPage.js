@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import toastErrorUtils from "../utils/toastError";
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -14,8 +15,8 @@ const LoginPage = () => {
   const [msgError, setMsgError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
-
-  const showErrorToast = (message) => toast.error(message);
+  
+  
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -30,18 +31,18 @@ const LoginPage = () => {
     const newErrors = { email: "", password: "" };
 
     if (!email) {
-      newErrors.email = "Email is required";
+      newErrors.email = t('auth.emailRequired');
       valid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = t('auth.emailInvalid');
       valid = false;
     }
 
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t('auth.passwordRequired');
       valid = false;
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = t('auth.passwordTooShort');
       valid = false;
     }
 
@@ -89,9 +90,9 @@ const LoginPage = () => {
       window.location.href = "/";
     } catch (error) {
       console.error("Login error:", error);
-      const message = "Login failed. " + (error.response?.data?.message || "");
+      const message = t('auth.loginFailed') + " " + (error.response?.data?.message || "");
       setMsgError(message);
-      showErrorToast(message);
+      toastErrorUtils.showError(message);
       setPassword("");
     }
   };
@@ -109,11 +110,11 @@ const LoginPage = () => {
         </div>
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
-            <h2>Connexion</h2>
+            <h2>{t('auth.login')}</h2>
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
             <div className="mb-3">
-              <label className="form-label">Adresse email</label>
+              <label className="form-label">{t('auth.emailAddress')}</label>
               <input
                 type="email"
                 className="form-control"
@@ -125,7 +126,7 @@ const LoginPage = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Mot de passe</label>
+              <label className="form-label">{t('auth.password')}</label>
               <input
                 type="password"
                 className="form-control"
