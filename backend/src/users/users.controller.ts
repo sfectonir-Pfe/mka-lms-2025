@@ -269,5 +269,14 @@ export class UsersController {
       throw error
     }
   }
-  
+  @Post(':id/join-session2/:session2Id')
+async joinSession2(@Param('id') userId: string, @Param('session2Id') session2Id: string) {
+  return this.usersService.addUserToSession2(Number(userId), Number(session2Id));
+}
+
+@Get(':id/sessions2')
+async getUserSessions2(@Param('id') userId: string) {
+  return this.usersService.getSessionsForUser(Number(userId));
+}
+
 }

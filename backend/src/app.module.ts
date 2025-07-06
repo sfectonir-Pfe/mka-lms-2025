@@ -13,13 +13,21 @@ import { buildProgramModule } from './buildProgram/buildProgram.module';
 import { QuizModule } from './quiz/quiz.module';
 import { Session2Module } from './session2/session2.module';
 import { SeanceFormateurModule } from './seance-formateur/seance-formateur.module';
+import { ChatMessagesModule } from './chat-messages/chat-messages.module';
+import { WhiteboardModule } from './whiteboard/whiteboard.module';
+
+import { Session2ChatModule } from './session2-chat/session2-chat.module';
+
+
+
 
 
 
   @Module({
-imports: [PrismaModule.forRoot({isGlobal:true}), AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module, SeanceFormateurModule,],
+imports: [PrismaModule.forRoot({isGlobal:true}),ChatMessagesModule, AuthModule, UsersModule, ProgramsModule, ModulesModule,MailModule, CoursesModule, ContenuModule, buildProgramModule, QuizModule, Session2Module, SeanceFormateurModule, WhiteboardModule, Session2ChatModule,],
 
   controllers: [AppController],
   providers: [AppService],
+
 })
 export class AppModule { }

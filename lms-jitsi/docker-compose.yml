@@ -1,12 +1,19 @@
 services:
     # Frontend
     web:
-        image: jitsi/web:${JITSI_IMAGE_VERSION:-unstable}
+        image: jitsi/web:${JITSI_IMAGE_VERSION}
         restart: ${RESTART_POLICY:-unless-stopped}
         ports:
             - '${HTTP_PORT}:80'
             - '${HTTPS_PORT}:443'
+        extra_hosts:
+            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "localhost:172.17.0.1"
+
+     
         volumes:
+            - ./config/web/config.js:/config/config.js:ro
             - ${CONFIG}/web:/config:Z
             - ${CONFIG}/web/crontabs:/var/spool/cron/crontabs:Z
             - ${CONFIG}/transcripts:/usr/share/jitsi-meet/transcripts:Z
@@ -190,7 +197,7 @@ services:
 
     # XMPP server
     prosody:
-        image: jitsi/prosody:${JITSI_IMAGE_VERSION:-unstable}
+        image: jitsi/prosody:${JITSI_IMAGE_VERSION}
         restart: ${RESTART_POLICY:-unless-stopped}
         expose:
             - '${XMPP_PORT:-5222}'
@@ -199,9 +206,15 @@ services:
             - '${PROSODY_HTTP_PORT:-5280}'
         labels:
             service: "jitsi-prosody"
+        extra_hosts:
+            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "localhost:172.17.0.1"   
         volumes:
             - ${CONFIG}/prosody/config:/config:Z
             - ${CONFIG}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
+            - ${CONFIG}/prosody/conf.d:/config/conf.d:Z
+
         environment:
             - AUTH_TYPE
             - DISABLE_POLLS
@@ -340,10 +353,14 @@ services:
 
     # Focus component
     jicofo:
-        image: jitsi/jicofo:${JITSI_IMAGE_VERSION:-unstable}
+        image: jitsi/jicofo:${JITSI_IMAGE_VERSION}
         restart: ${RESTART_POLICY:-unless-stopped}
         ports:
             - '127.0.0.1:${JICOFO_REST_PORT:-8888}:8888'
+        extra_hosts:
+            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "localhost:172.17.0.1"    
         volumes:
             - ${CONFIG}/jicofo:/config:Z
         labels:
@@ -436,16 +453,21 @@ services:
 
     # Video bridge
     jvb:
-        image: jitsi/jvb:${JITSI_IMAGE_VERSION:-unstable}
+        image: jitsi/jvb:${JITSI_IMAGE_VERSION}
         restart: ${RESTART_POLICY:-unless-stopped}
         ports:
             - '${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp'
             - '127.0.0.1:${JVB_COLIBRI_PORT:-8080}:8080'
+        extra_hosts:
+            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "localhost:172.17.0.1"    
         volumes:
             - ${CONFIG}/jvb:/config:Z
         labels:
             service: "jitsi-jvb"
         environment:
+            # - JVB_ADVERTISE_IP=127.0.0.1
             - AUTOSCALER_SIDECAR_KEY_FILE
             - AUTOSCALER_SIDECAR_KEY_ID
             - AUTOSCALER_SIDECAR_GROUP_NAME

@@ -1,0 +1,6 @@
+<img
+  src="/images/mka-logo.png"
+  alt="MKA Logo"
+  className="img-fluid"
+  style={{ maxWidth: "80%", height: "auto" }}
+/>

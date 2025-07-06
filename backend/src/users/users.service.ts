@@ -65,51 +65,56 @@ export class UsersService {
       .join("")
   }
 
- async create(createUserDto: CreateUserDto) {
-  // ✅ Check if email already exists
-  const existingUser = await this.prisma.user.findUnique({
-    where: { email: createUserDto.email },
-  });
+  async create(createUserDto: CreateUserDto) {
+    // ✅ Check if email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
 
-  if (existingUser) {
-    throw new ConflictException('Cet utilisateur existe déjà.');
+    if (existingUser) {
+      throw new ConflictException('Cet utilisateur existe déjà.');
+    }
+
+    const tempPassword = this.generateTempPassword();
+    const hashedPassword = await this.hashPassword(tempPassword);
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: hashedPassword,
+        role: createUserDto.role,
+        name: createUserDto.name,
+        phone: createUserDto.phone,
+        location: createUserDto.location,
+        about: createUserDto.about,
+        skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        location: true,
+        about: true,
+        skills: true,
+        profilePic: true,
+      },
+    });
+    if (createUserDto.session2Ids && createUserDto.session2Ids.length > 0) {
+  for (const sessionId of createUserDto.session2Ids) {
+    await this.addUserToSession2(newUser.id, sessionId);
   }
-
-  const tempPassword = this.generateTempPassword();
-  const hashedPassword = await this.hashPassword(tempPassword);
-
-  const newUser = await this.prisma.user.create({
-    data: {
-      email: createUserDto.email,
-      password: hashedPassword,
-      role: createUserDto.role,
-      name: createUserDto.name,
-      phone: createUserDto.phone,
-      location: createUserDto.location,
-      about: createUserDto.about,
-      skills: createUserDto.skills ? [createUserDto.skills] : undefined,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-      phone: true,
-      location: true,
-      about: true,
-      skills: true,
-      profilePic: true,
-    },
-  });
-
-  await this.mailService.sendWelcomeEmail(
-    newUser.email,
-    tempPassword,
-    newUser.role,
-  );
-
-  return newUser;
 }
+
+    await this.mailService.sendWelcomeEmail(
+      newUser.email,
+      tempPassword,
+      newUser.role,
+    );
+
+    return newUser;
+  }
 
 
   async findAll() {
@@ -513,4 +518,18 @@ export class UsersService {
       throw error
     }
   }
+  // users.service.ts
+  async addUserToSession2(userId: number, session2Id: number) {
+    // (Check if already exists, or Prisma unique will throw)
+    return this.prisma.userSession2.create({
+      data: { userId, session2Id }
+    });
+  }
+  async getSessionsForUser(userId: number) {
+    return this.prisma.userSession2.findMany({
+      where: { userId },
+      include: { session2: true }
+    });
+  }
+
 }

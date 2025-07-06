@@ -37,4 +37,11 @@ export class Session2Controller {
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
+  @Post(':session2Id/add-user')
+  async addUserToSession(
+    @Param('session2Id') session2Id: string,
+    @Body('email') email: string,
+  ) {
+    return this.service.addUserToSession(Number(session2Id), email);
+  }
 }

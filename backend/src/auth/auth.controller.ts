@@ -214,4 +214,17 @@ export class AuthController {
       );
     }
   }
+  @Post('update-user')
+async updateUser(@Body() body: { email: string }) {
+  try {
+    const result = await this.authService.verifyUser(body.email);
+    return { success: true, message: 'Utilisateur mis à jour', data: result };
+  } catch (error) {
+    throw new HttpException(
+      error.message || 'Erreur lors de la mise à jour',
+      error.status || HttpStatus.BAD_REQUEST
+    );
+  }
+}
+
 }

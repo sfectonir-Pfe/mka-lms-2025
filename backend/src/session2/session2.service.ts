@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 @Injectable()
 export class Session2Service {
   constructor(private readonly prisma: PrismaService) {}
@@ -100,5 +100,19 @@ export class Session2Service {
     },
   });
 }
+ async addUserToSession(session2Id: number, email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundException("Utilisateur introuvable");
 
+    const exists = await this.prisma.userSession2.findUnique({
+      where: { userId_session2Id: { userId: user.id, session2Id } },
+    });
+    if (exists) throw new BadRequestException("Utilisateur déjà dans la session");
+
+    await this.prisma.userSession2.create({
+      data: { userId: user.id, session2Id },
+    });
+
+    return { message: "Utilisateur ajouté à la session !" };
+  }
 }
