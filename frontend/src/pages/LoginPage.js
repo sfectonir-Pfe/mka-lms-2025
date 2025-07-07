@@ -2,10 +2,10 @@ import React, { useState,useEffect } from "react";
 import { useNavigate ,useLocation,} from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
-
-
-import { toast } from "react-toastify";
-import showErrorToast from "../utils/toastError";
+import toastErrorUtils from "../utils/toastError";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
+import { toast } from "react-toastify"; 
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ const LoginPage = () => {
   const [msgError, setMsgError] = useState("");
   const location = useLocation();
 const [rememberMe, setRememberMe] = useState(false);
-const [errors, setErrors] = useState({ email: "", password: "" });
+// const [errors, setErrors] = useState({ email: "", password: "" });
 const { t } = useTranslation();
 
 
@@ -30,34 +30,34 @@ const { t } = useTranslation();
     }
   }, [location]);
 
-  const validate = () => {
-    let valid = true;
-    const newErrors = { email: "", password: "" };
+  // const validate = () => {
+  //   let valid = true;
+  //   const newErrors = { email: "", password: "" };
 
-    if (!email) {
-      newErrors.email = "Email is required";
-      valid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid";
-      valid = false;
-    }
+  //   if (!email) {
+  //     newErrors.email = "Email is required";
+  //     valid = false;
+  //   } else if (!/\S+@\S+\.\S+/.test(email)) {
+  //     newErrors.email = "Email is invalid";
+  //     valid = false;
+  //   }
 
-    if (!password) {
-      newErrors.password = "Password is required";
-      valid = false;
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-      valid = false;
-    }
+  //   if (!password) {
+  //     newErrors.password = "Password is required";
+  //     valid = false;
+  //   } else if (password.length < 6) {
+  //     newErrors.password = "Password must be at least 6 characters";
+  //     valid = false;
+  //   }
 
-    setErrors(newErrors);
-    return valid;
-  };
+  //   setErrors(newErrors);
+  //   return valid;
+  // };
 
   const handleRequest = async (e) => {
     e.preventDefault();
     setMsgError("");
-
+  // if (!validate()) return;
     try {
       const res = await axios.post("http://localhost:8000/auth/login", {
         email,
@@ -98,7 +98,8 @@ const { t } = useTranslation();
         (error.response?.data?.message || "");
 
       setMsgError(message);
-      showErrorToast(message);
+      toastErrorUtils.showError(message);
+
       setPassword("");
     }
   };
@@ -108,9 +109,9 @@ const { t } = useTranslation();
       <div className="row align-items-center">
         <div className="col-md-6 mb-4">
           <img
-            src="/images/login-illustration.svg"
-            alt="Login Illustration"
+            src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
             className="img-fluid"
+            alt="Login Illustration"
           />
         </div>
         <div className="col-md-6">
@@ -118,27 +119,40 @@ const { t } = useTranslation();
             <h2>Connexion</h2>
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
-            <div className="mb-3">
-              <label className="form-label">Adresse email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <div className="mb-3 position-relative">
+  <label className="form-label">Adresse email</label>
+  <div className="input-group">
+    <span className="input-group-text">
+      <i className="bi bi-envelope"></i>
+    </span>
+    <input
+      type="email"
+      className="form-control"
+      placeholder="Entrez votre email"
+      value={email}
+      required
+      onChange={(e) => setEmail(e.target.value)}
+    />
+  </div>
+</div>
 
-            {/* Password input with toggle */}
-            <div className="form-floating mb-4 position-relative">
-              <input
-                type="password"
-                className="form-control"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+<div className="mb-4 position-relative">
+  <label className="form-label">Mot de passe</label>
+  <div className="input-group">
+    <span className="input-group-text">
+      <i className="bi bi-lock"></i>
+    </span>
+    <input
+      type="password"
+      className="form-control"
+      placeholder="Entrez votre mot de passe"
+      value={password}
+      required
+      onChange={(e) => setPassword(e.target.value)}
+    />
+  </div>
+</div>
+
 
             {/* Remember me checkbox */}
             <div className="d-flex justify-content-between mb-4">

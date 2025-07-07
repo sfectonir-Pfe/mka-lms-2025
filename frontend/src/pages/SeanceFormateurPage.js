@@ -1,28 +1,45 @@
-// src/pages/SeanceFormateurPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
-// ✅ Corriger les chemins ici
 import AddSeanceFormateurView from "./users/views/AddSeanceFormateurView";
 import SeanceFormateurList from "./users/views/SeanceFormateurList";
 import AnimerSeanceView from "./users/views/AnimerSeanceView";
 
 const SeanceFormateurPage = () => {
+  const { sessionId } = useParams();
   const [selectedSeance, setSelectedSeance] = useState(null);
+  const [seances, setSeances] = useState([]);
 
-  const handleAnimer = (seance) => {
-    setSelectedSeance(seance);
+  const fetchSeances = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/seance-formateur/session/${sessionId}`);
+      setSeances(res.data);
+    } catch (err) {
+      // handle error
+    }
   };
 
-  const handleRetour = () => {
-    setSelectedSeance(null);
+  useEffect(() => {
+    fetchSeances();
+  }, [sessionId]);
+
+  const handleAnimer = (seance) => setSelectedSeance(seance);
+  const handleRetour = () => setSelectedSeance(null);
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Confirmer la suppression de cette séance ?")) {
+      await axios.delete(`http://localhost:8000/seance-formateur/${id}`);
+      fetchSeances();
+    }
   };
 
   return (
     <Container>
       <Box mt={4}>
         <Typography variant="h4" gutterBottom>
-          🎓 Gérer mes Séances
+          🎓 Gérer mes Séances de la session {sessionId}
         </Typography>
 
         {selectedSeance ? (
@@ -36,9 +53,14 @@ const SeanceFormateurPage = () => {
           </>
         ) : (
           <>
-            <AddSeanceFormateurView />
+            <AddSeanceFormateurView onSeanceCreated={fetchSeances} />
+
             <Box mt={4}>
-              <SeanceFormateurList onAnimer={handleAnimer} />
+              <SeanceFormateurList
+                seances={seances}
+                onAnimer={handleAnimer}
+                onDelete={handleDelete}
+              />
             </Box>
           </>
         )}

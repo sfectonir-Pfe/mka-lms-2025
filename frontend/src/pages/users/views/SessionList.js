@@ -10,10 +10,42 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 const SessionList = () => {
+  const [showAddUserId, setShowAddUserId] = useState(null);
+const [userEmail, setUserEmail] = useState("");
+const [addLoading, setAddLoading] = useState(false);
+
+const handleAddUser = async (sessionId) => {
+  if (!userEmail) {
+    toast.error("Veuillez entrer un email.");
+    return;
+  }
+  setAddLoading(true);
+  try {
+    await axios.post(`http://localhost:8000/session2/${sessionId}/add-user`, {
+      email: userEmail,
+    });
+    toast.success("Utilisateur ajouté à la session !");
+    setShowAddUserId(null);
+    setUserEmail("");
+  } catch (e) {
+    toast.error(
+      e.response?.data?.message ||
+      "Erreur lors de l'ajout de l'utilisateur"
+    );
+  } finally {
+    setAddLoading(false);
+  }
+};
+
   const [sessions, setSessions] = useState([]);
 
+const navigate = useNavigate();
   const fetchSessions = async () => {
     try {
       const res = await axios.get("http://localhost:8000/session2");
@@ -79,23 +111,72 @@ const SessionList = () => {
 
             {/* 🧾 Session Info */}
             <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={1}
-            >
-              <Typography variant="h6" fontWeight="bold" color="primary">
-                🧾 {session.name}
-              </Typography>
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => handleDelete(session.id)}
-              >
-                🗑️ Supprimer
-              </Button>
-            </Stack>
+  direction="row"
+  justifyContent="space-between"
+  alignItems="center"
+  mb={1}
+>
+  <Typography variant="h6" fontWeight="bold" color="primary">
+    🧾 {session.name}
+  </Typography>
+  <Box>
+    <Button
+      variant="outlined"
+      color="error"
+      size="small"
+      onClick={() => handleDelete(session.id)}
+    >
+      🗑️ Supprimer
+    </Button>
+    <Button
+      variant="contained"
+      color="primary"
+      size="small"
+      onClick={() => navigate(`/sessions/${session.id}/seances`)}
+      sx={{ ml: 2 }}
+    >
+      🚀 Rejoindre
+    </Button>
+    <Button
+  variant="outlined"
+  color="secondary"
+  size="small"
+  sx={{ ml: 2 }}
+  onClick={() => setShowAddUserId(session.id === showAddUserId ? null : session.id)}
+>
+  ➕ Ajouter un utilisateur
+</Button>
+{showAddUserId === session.id && (
+  <Box mt={2} display="flex" gap={1} alignItems="center">
+    <input
+      type="email"
+      placeholder="Email utilisateur"
+      value={userEmail}
+      onChange={e => setUserEmail(e.target.value)}
+      style={{ padding: 8, borderRadius: 6, border: '1px solid #ddd', minWidth: 220 }}
+    />
+    <Button
+      variant="contained"
+      size="small"
+      color="secondary"
+      onClick={() => handleAddUser(session.id)}
+      disabled={addLoading}
+    >
+      {addLoading ? "Ajout..." : "Ajouter"}
+    </Button>
+    <Button
+      variant="text"
+      size="small"
+      onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
+    >
+      Annuler
+    </Button>
+  </Box>
+)}
+
+  </Box>
+</Stack>
+
 
             <Typography variant="body2" mb={0.5}>
               📚 Programme : <strong>{session.program?.name || "Inconnu"}</strong>

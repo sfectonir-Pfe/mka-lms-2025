@@ -6,7 +6,9 @@ import { FaUsers } from "react-icons/fa";
 import { FaGraduationCap, FaBook, FaFileAlt } from "react-icons/fa"; // additional icons for clarity
 import { BiBookBookmark, } from "react-icons/bi";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import SchoolIcon from "@mui/icons-material/School";
+// import SchoolIcon from "@mui/icons-material/School";
+// import DesktopMacIcon from '@mui/icons-material/DesktopMac';
+
 
 
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
@@ -27,7 +29,8 @@ export const sideBarData = [
 },
 
   { text: "Sessions", icon: <CalendarMonthIcon />, path: "/sessions" },
-  {text: "Séances", icon: <SchoolIcon />, path: "/formateur/seances" },
+//  {text: "Séances", icon: <DesktopMacIcon />, path: "/formateur/seances" },
+
 
 
 

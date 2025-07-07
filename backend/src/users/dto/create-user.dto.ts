@@ -32,4 +32,10 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   skills?: string;
+
+
+  @IsOptional()
+
+  session2Ids?: number[];
+
 }

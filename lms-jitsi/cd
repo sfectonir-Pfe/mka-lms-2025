@@ -1,9 +1,0 @@
-      PID    PPID    PGID     WINPID   TTY         UID    STIME COMMAND
-      523     330     523       3484  cons2     197610 17:56:44 /c/Program Files/nodejs/node
-     4092       1    4092      19100  cons0     197610 01:49:39 /usr/bin/bash
-      330       1     330      15560  cons2     197610 17:55:45 /usr/bin/bash
-     1526     312    1526       9512  cons1     197610 18:57:40 /c/Program Files/nodejs/node
-      312       1     312      15516  cons1     197610 17:55:45 /usr/bin/bash
-     4161       1    4161      13024  cons3     197610 01:50:20 /usr/bin/bash
-     5015       1    5015       6976  cons4     197610 03:03:57 /usr/bin/bash
-     5265    5015    5265      17104  cons4     197610 03:18:16 /usr/bin/PS

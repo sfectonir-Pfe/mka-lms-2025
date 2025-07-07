@@ -48,6 +48,8 @@ import SeanceFormateurList from "./pages/users/views/SeanceFormateurList";
 import AnimerSeanceView from "./pages/users/views/AnimerSeanceView";
 
 import JitsiRoom from './components/JitsiRoom';
+// import TestChatPage from "./pages/TestChatPage";
+import WhiteboardPage from "./pages/WhiteboardPage";
 
 
 
@@ -228,12 +230,15 @@ function App() {
 <Route path="/seances-formateur" element={<SeanceFormateurList />} />
 
 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+<Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage  />} />
 
 
 
 <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
 
 <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
+ {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
+<Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
 
 
 
