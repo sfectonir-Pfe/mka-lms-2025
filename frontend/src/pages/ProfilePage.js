@@ -292,15 +292,14 @@ const ProfilePage = () => {
 
             <Chip
               icon={<WorkIcon />}
-              label={user.role || "Etudiant"}
+              label={user.role ? t(`role.${user.role.toLowerCase()}`) : t('role.etudiant')}
               color="primary"
               variant="outlined"
               sx={{
                 borderRadius: 2,
                 px: 1,
                 fontSize: '0.9rem',
-                fontWeight: 500,
-                textTransform: 'capitalize'
+                fontWeight: 500
               }}
             />
 

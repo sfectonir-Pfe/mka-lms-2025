@@ -11,7 +11,32 @@ export class ModulesService {
   }
 
   findAll() {
-    return this.prisma.module.findMany();
+    return this.prisma.module.findMany({
+      include: {
+        programs: {
+          include: {
+            program: {
+              select: {
+                name: true
+              }
+            }
+          }
+        },
+        buildProgramModules: {
+          include: {
+            buildProgram: {
+              include: {
+                program: {
+                  select: {
+                    name: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
   remove(id: number) {

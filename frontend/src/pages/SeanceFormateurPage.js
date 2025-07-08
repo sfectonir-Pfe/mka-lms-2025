@@ -11,6 +11,7 @@ import AnimerSeanceView from "./users/views/AnimerSeanceView";
 const SeanceFormateurPage = () => {
   const { t } = useTranslation();
   const [selectedSeance, setSelectedSeance] = useState(null);
+  const [refreshSeancesList, setRefreshSeancesList] = useState(null);
 
   const handleAnimer = (seance) => {
     setSelectedSeance(seance);
@@ -18,6 +19,18 @@ const SeanceFormateurPage = () => {
 
   const handleRetour = () => {
     setSelectedSeance(null);
+  };
+
+  const handleSeanceCreated = (newSeance) => {
+    console.log('New seance created:', newSeance);
+    // Refresh the list
+    if (refreshSeancesList) {
+      refreshSeancesList();
+    }
+  };
+
+  const handleRefreshCallback = (refreshFn) => {
+    setRefreshSeancesList(() => refreshFn);
   };
 
   return (
@@ -38,9 +51,12 @@ const SeanceFormateurPage = () => {
           </>
         ) : (
           <>
-            <AddSeanceFormateurView />
+            <AddSeanceFormateurView onSeanceCreated={handleSeanceCreated} />
             <Box mt={4}>
-              <SeanceFormateurList onAnimer={handleAnimer} />
+              <SeanceFormateurList 
+                onAnimer={handleAnimer} 
+                onRefresh={handleRefreshCallback}
+              />
             </Box>
           </>
         )}

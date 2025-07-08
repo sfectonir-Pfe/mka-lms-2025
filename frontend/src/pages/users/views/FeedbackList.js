@@ -29,79 +29,14 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import FlagIcon from "@mui/icons-material/Flag";
 import ReplyIcon from "@mui/icons-material/Reply";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import feedbackService from "../../../services/feedbackService";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import FeedbackResponse from "./FeedbackResponse";
 
-// Extended dummy data for demonstration
-const dummyFeedbacks = [
-  {
-    id: 1,
-    from: "Etudiant1",
-    to: "Formateur1",
-    message: "Great explanation of the module content! The examples were very helpful in understanding the concepts.",
-    timestamp: "2025-05-06T10:15:00",
-    type: "etudiant-formateur",
-    rating: 4.5,
-    category: "course",
-    tags: ["Content", "Examples"],
-    likes: 3,
-    dislikes: 0
-  },
-  {
-    id: 2,
-    from: "Formateur1",
-    to: "Etudiant2",
-    message: "Excellent project work, well done! Your implementation shows a deep understanding of the material.",
-    timestamp: "2025-05-06T11:30:00",
-    type: "formateur-etudiant",
-    rating: 5,
-    category: "instructor",
-    tags: ["Project", "Implementation"],
-    likes: 2,
-    dislikes: 0
-  },
-  {
-    id: 3,
-    from: "Etudiant3",
-    to: "Admin",
-    message: "The platform is sometimes slow to load videos. Could you please look into this issue?",
-    timestamp: "2025-05-07T09:20:00",
-    type: "general",
-    rating: 3,
-    category: "technical",
-    tags: ["Video Quality", "Performance"],
-    likes: 5,
-    dislikes: 1
-  },
-  {
-    id: 4,
-    from: "Etudiant4",
-    to: "Formateur2",
-    message: "The pace of the course is too fast. Could we have more time to practice the concepts?",
-    timestamp: "2025-05-08T14:45:00",
-    type: "etudiant-formateur",
-    rating: 3.5,
-    category: "course",
-    tags: ["Pace", "Practice"],
-    likes: 8,
-    dislikes: 1
-  },
-  {
-    id: 5,
-    from: "Formateur2",
-    to: "Etudiant1",
-    message: "Your quiz results show great improvement. Keep up the good work!",
-    timestamp: "2025-05-09T16:30:00",
-    type: "formateur-etudiant",
-    rating: 4,
-    category: "instructor",
-    tags: ["Quizzes", "Progress"],
-    likes: 1,
-    dislikes: 0
-  }
-];
+// No more dummy data - fully dynamic feedback system
 
 export default function FeedbackList() {
   const { t } = useTranslation();
@@ -112,26 +47,30 @@ export default function FeedbackList() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(null);
   const itemsPerPage = 6;
 
+  const fetchFeedbacks = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch dynamic data from the backend
+      const data = await feedbackService.getAllFeedback();
+      console.log('✅ Fetched dynamic feedback data:', data);
+      setFeedbacks(data || []);
+      setTotalPages(Math.ceil((data?.length || 0) / itemsPerPage));
+    } catch (error) {
+      console.error("❌ Failed to fetch feedbacks:", error);
+      setError(error.message || "Failed to load feedback data");
+      // Show empty state instead of dummy data
+      setFeedbacks([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchFeedbacks = async () => {
-      setLoading(true);
-      try {
-        // Try to fetch from the backend
-        const data = await feedbackService.getAllFeedback();
-        const feedbackData = data.length > 0 ? data : dummyFeedbacks;
-        setFeedbacks(feedbackData);
-        setTotalPages(Math.ceil(feedbackData.length / itemsPerPage));
-      } catch (error) {
-        console.error("Failed to fetch feedbacks:", error);
-        setFeedbacks(dummyFeedbacks);
-        setTotalPages(Math.ceil(dummyFeedbacks.length / itemsPerPage));
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchFeedbacks();
   }, []);
 
@@ -156,40 +95,46 @@ export default function FeedbackList() {
   
   const handleLike = async (id) => {
     try {
-      // Try to use the backend service
-      await feedbackService.likeFeedback(id);
-      
-      // Update local state
-      setFeedbacks(feedbacks.map(fb => 
-        fb.id === id ? { ...fb, likes: fb.likes + 1 } : fb
+      console.log(`👍 Liking feedback ${id}`);
+      const updatedFeedback = await feedbackService.likeFeedback(id);
+
+      // Update local state with server response
+      setFeedbacks(feedbacks.map(fb =>
+        fb.id === id ? { ...fb, likes: updatedFeedback.likes } : fb
       ));
+      console.log(`✅ Successfully liked feedback ${id}`);
     } catch (error) {
-      console.error("Failed to like feedback:", error);
+      console.error("❌ Failed to like feedback:", error);
+      alert(t("feedback.errorLiking", "Failed to like feedback. Please try again."));
     }
   };
-  
+
   const handleDislike = async (id) => {
     try {
-      // Try to use the backend service
-      await feedbackService.dislikeFeedback(id);
-      
-      // Update local state
-      setFeedbacks(feedbacks.map(fb => 
-        fb.id === id ? { ...fb, dislikes: fb.dislikes + 1 } : fb
+      console.log(`👎 Disliking feedback ${id}`);
+      const updatedFeedback = await feedbackService.dislikeFeedback(id);
+
+      // Update local state with server response
+      setFeedbacks(feedbacks.map(fb =>
+        fb.id === id ? { ...fb, dislikes: updatedFeedback.dislikes } : fb
       ));
+      console.log(`✅ Successfully disliked feedback ${id}`);
     } catch (error) {
-      console.error("Failed to dislike feedback:", error);
+      console.error("❌ Failed to dislike feedback:", error);
+      alert(t("feedback.errorDisliking", "Failed to dislike feedback. Please try again."));
     }
   };
-  
+
   const handleReport = async (id) => {
     try {
-      // Try to use the backend service
+      console.log(`🚩 Reporting feedback ${id}`);
       await feedbackService.reportFeedback(id);
-      
-      alert(t("feedback.reportSubmitted", "Report submitted"));
+
+      alert(t("feedback.reportSubmitted", "Report submitted successfully"));
+      console.log(`✅ Successfully reported feedback ${id}`);
     } catch (error) {
-      console.error("Failed to report feedback:", error);
+      console.error("❌ Failed to report feedback:", error);
+      alert(t("feedback.errorReporting", "Failed to report feedback. Please try again."));
     }
   };
   
@@ -271,6 +216,17 @@ export default function FeedbackList() {
         />
         
         <Box sx={{ display: "flex", gap: 2, width: { xs: "100%", md: "auto" } }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={fetchFeedbacks}
+            disabled={loading}
+            startIcon={<RefreshIcon />}
+            sx={{ minWidth: 120 }}
+          >
+            {loading ? t("feedback.refreshing", "Refreshing...") : t("feedback.refresh", "Refresh")}
+          </Button>
+
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel id="filter-type-label">
               {t("feedback.filterByType", "Filter by Type")}
@@ -323,11 +279,47 @@ export default function FeedbackList() {
         <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
           <CircularProgress />
         </Box>
+      ) : error ? (
+        <Box sx={{ textAlign: "center", my: 4, p: 3, bgcolor: "#ffebee", borderRadius: 1, border: "1px solid #ffcdd2" }}>
+          <ErrorOutlineIcon sx={{ fontSize: 48, color: "#f44336", mb: 2 }} />
+          <Typography variant="h6" color="error" gutterBottom>
+            {t("feedback.errorTitle", "Unable to Load Feedback")}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={fetchFeedbacks}
+            startIcon={<RefreshIcon />}
+          >
+            {t("feedback.tryAgain", "Try Again")}
+          </Button>
+        </Box>
       ) : paginatedFeedbacks.length === 0 ? (
         <Box sx={{ textAlign: "center", my: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 1 }}>
-          <Typography variant="body1" color="text.secondary">
-            {t("feedback.noFeedbackFound", "No feedback found matching your criteria")}
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            {feedbacks.length === 0
+              ? t("feedback.noFeedbackYet", "No feedback submitted yet")
+              : t("feedback.noFeedbackFound", "No feedback found matching your criteria")
+            }
           </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {feedbacks.length === 0
+              ? t("feedback.noFeedbackDescription", "Be the first to submit feedback!")
+              : t("feedback.tryDifferentFilters", "Try adjusting your search or filters")
+            }
+          </Typography>
+          {feedbacks.length === 0 && (
+            <Button
+              variant="outlined"
+              onClick={fetchFeedbacks}
+              startIcon={<RefreshIcon />}
+            >
+              {t("feedback.checkForNew", "Check for New Feedback")}
+            </Button>
+          )}
         </Box>
       ) : (
         <>

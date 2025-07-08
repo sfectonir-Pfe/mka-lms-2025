@@ -305,7 +305,6 @@ export default function UserList() {
               {t('users.usersSection')}
             </Typography>
           </Box>
-          
         </Box>
 
         {/* Stats Cards */}
@@ -471,7 +470,7 @@ export default function UserList() {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={user.role || "user"}
+                          label={t(`role.${(user.role || 'user').toLowerCase()}`)}
                           color={user.role === "Admin" ? "primary" : user.role === "Instructor" ? "info" : "default"}
                           size="small"
                           sx={{ borderRadius: 2, fontWeight: 600, textTransform: "capitalize" }}
@@ -550,16 +549,16 @@ export default function UserList() {
                 <Delete />
               </Avatar>
               <Typography variant="h6" fontWeight={600}>
-                Confirmer la suppression
+                {t('users.confirmDelete')}
               </Typography>
             </Box>
           </DialogTitle>
           <DialogContent>
             <Typography>
-              Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{deleteDialog.user?.name || ''}</strong> (<strong>{deleteDialog.user?.email}</strong>) ?
+              {t('users.deleteConfirmMessage', { name: deleteDialog.user?.name || '', email: deleteDialog.user?.email })}
               <br />
               <br />
-              Cette action est <strong>irréversible</strong>.
+              {t('users.irreversibleAction')}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -568,7 +567,7 @@ export default function UserList() {
               sx={{ borderRadius: 2 }}
               disabled={actionLoading}
             >
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleDelete}
@@ -577,7 +576,7 @@ export default function UserList() {
               sx={{ borderRadius: 2, minWidth: 120 }}
               disabled={actionLoading}
             >
-              {actionLoading ? <CircularProgress size={20} color="inherit" /> : "Supprimer"}
+              {actionLoading ? <CircularProgress size={20} color="inherit" /> : t('users.deleteButton')}
             </Button>
           </DialogActions>
         </Dialog>
@@ -599,20 +598,21 @@ export default function UserList() {
                 {toggleDialog.user?.isActive ? <Block /> : <LockOpen />}
               </Avatar>
               <Typography variant="h6" fontWeight={600}>
-                {toggleDialog.user?.isActive ? "Désactiver" : "Activer"} le compte
+                {t(toggleDialog.user?.isActive ? 'users.confirmToggleTitleActive' : 'users.confirmToggleTitleInactive')}
               </Typography>
             </Box>
           </DialogTitle>
           <DialogContent>
             <Typography>
-              {toggleDialog.user?.isActive ? "Désactiver" : "Activer"} le compte de{" "}
-              <strong>{toggleDialog.user?.name || ''}</strong> (<strong>{toggleDialog.user?.email}</strong>) ?
+              {t(toggleDialog.user?.isActive ? 'users.confirmToggleMessageActive' : 'users.confirmToggleMessageInactive', {
+                name: toggleDialog.user?.name || '',
+                email: toggleDialog.user?.email || ''
+              })}
               <br />
               <br />
               <strong>ID:</strong> {toggleDialog.user?.id}
               <br />
-              
-              <strong>Statut actuel:</strong> {toggleDialog.user?.isActive ? "Actif" : "Inactif"}
+              <strong>{t('users.currentStatus')}:</strong> {t(toggleDialog.user?.isActive ? 'users.statusActive' : 'users.statusInactive')}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -621,7 +621,7 @@ export default function UserList() {
               sx={{ borderRadius: 2 }}
               disabled={actionLoading}
             >
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleToggleStatus}
@@ -632,11 +632,7 @@ export default function UserList() {
             >
               {actionLoading ? (
                 <CircularProgress size={20} color="inherit" />
-              ) : toggleDialog.user?.isActive ? (
-                "Désactiver"
-              ) : (
-                "Activer"
-              )}
+              ) : t(toggleDialog.user?.isActive ? 'users.deactivateUser' : 'users.activateUser')}
             </Button>
           </DialogActions>
         </Dialog>

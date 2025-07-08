@@ -79,26 +79,9 @@ export class Session2Service {
     });
   }
   async findAll() {
-  return this.prisma.session2.findMany({
-    include: {
-      program: true,
-      session2Modules: {
-        include: {
-          module: true,
-          courses: {
-            include: {
-              course: true,
-              contenus: {
-                include: {
-                  contenu: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-}
+    return this.prisma.session2.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+  }
 
 }

@@ -81,6 +81,10 @@ const AnimerSeanceView = () => {
       .then(res => {
         setSessionImages(res.data.filter(m => m.type === "IMAGE"));
         setSessionVideos(res.data.filter(m => m.type === "VIDEO"));
+      })
+      .catch(err => {
+        console.error("Erreur chargement médias:", err);
+        // Continuer sans médias
       });
   }, [seanceId]);
 
@@ -141,9 +145,21 @@ const AnimerSeanceView = () => {
   const handlePublishContenu = async (contenuId) => {
     if (!contenuId) return alert("contenuId is undefined!");
     try {
+      // Récupérer l'état actuel du contenu
+      const currentContenu = programDetails.modules
+        .flatMap(m => m.courses)
+        .flatMap(c => c.contenus)
+        .find(ct => ct.contenu.id === contenuId);
+      
+      if (!currentContenu) {
+        alert("Contenu non trouvé");
+        return;
+      }
+
       const res = await axios.patch(`http://localhost:8000/contenus/${contenuId}/publish`, {
-        published: true // Or toggle depending on your backend logic
+        published: !currentContenu.contenu.published // Toggle l'état actuel
       });
+      
       // Refresh UI
       const detailRes = await axios.get(
         `http://localhost:8000/seance-formateur/details/${seance.buildProgramId}`
@@ -296,7 +312,7 @@ const AnimerSeanceView = () => {
   }}
 >
   <iframe
-    src={`https://meet.jitsi.local:8443/${seance?.title || "default-room"}`}
+    src={`http://localhost:8000/meet/${encodeURIComponent(seance?.title || "default-room")}`}
     allow="camera; microphone; fullscreen; display-capture"
     style={{ width: "100%", height: "70vh", border: "none" }}
     title="Jitsi Meeting"

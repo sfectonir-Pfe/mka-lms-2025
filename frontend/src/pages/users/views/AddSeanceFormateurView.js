@@ -59,19 +59,37 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
     const payload = {
       title,
-      startTime: new Date(`${date}T${time}`), // ✅ valid date
+      startTime: new Date(`${date}T${time}`).toISOString(),
       formateurId: user.id,
       buildProgramId: programData.id,
     };
 
     console.log("🟢 Payload ready:", payload);
+    console.log("🟢 User data:", user);
+    console.log("🟢 Program data:", programData);
 
     try {
       const res = await axios.post("http://localhost:8000/seance-formateur", payload);
+      console.log("✅ Séance créée avec succès:", res.data);
+      alert("Séance créée avec succès !");
       if (onSeanceCreated) onSeanceCreated(res.data);
+      
+      // Reset form
+      setTitle("");
+      setDate("");
+      setTime("");
+      setSelectedProgram("");
+      setProgramData(null);
+      
+      // Trigger refresh of parent component if callback provided
+      // The parent component will handle the refresh
     } catch (err) {
       console.error("❌ Erreur création séance :", err);
-      alert(t("addSeance.creationError"));
+      console.error("❌ Response data:", err.response?.data);
+      console.error("❌ Response status:", err.response?.status);
+      
+      const errorMessage = err.response?.data?.message || err.message || "Erreur inconnue";
+      alert(`Erreur lors de la création de la séance: ${errorMessage}`);
     }
   };
 
@@ -133,7 +151,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
           {programData.modules.map((m) => (
             <Box key={m.module.id} mb={2}>
               <Typography fontWeight="bold" color="primary.main">
-                📦 {m.module.title}
+                📦 {m.module.name}
               </Typography>
 
               {(m.courses || []).map((c) => (

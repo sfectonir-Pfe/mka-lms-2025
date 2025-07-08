@@ -8,17 +8,14 @@ import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth
 
 // Firebase configuration
 const firebaseConfig = {
-
-    
-  apiKey: "AIzaSyDSKoRERJHn3qZhZbj6e381g3v2DCLI62g",
-  authDomain: "mka-lms-test.firebaseapp.com",
-  projectId: "mka-lms-test",
-  storageBucket: "mka-lms-test.firebasestorage.app",
-  messagingSenderId: "1032006293905",
-  appId: "1:1032006293905:web:d40dd3fd611ab4f8206230",
-  measurementId: "G-9331TS7RY5"
-
-};
+    apiKey: "AIzaSyCEhNa5WP12dhiHzy-IPOSXB1Vhb9ml-tw",
+    authDomain: "lms-test2-e6fff.firebaseapp.com",
+    projectId: "lms-test2-e6fff",
+    storageBucket: "lms-test2-e6fff.appspot.com",
+    messagingSenderId: "325598933327",
+    appId: "1:325598933327:web:2932e02f96df545094d53a",
+    measurementId: "G-CE9G3G2JP8"
+  };
 
 // Initialize Firebase
 let app;

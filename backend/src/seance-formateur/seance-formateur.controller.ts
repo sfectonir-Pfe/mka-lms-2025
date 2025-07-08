@@ -61,12 +61,43 @@ export class SeanceFormateurController {
 
   @Post()
   async create(@Body() body: any, @Req() req: any) {
-    const formateurId = req.user?.id || body.formateurId; // 🔐 use auth later
-    return this.service.create(body, formateurId);
+    try {
+      console.log('Received body:', body);
+      const formateurId = req.user?.id || body.formateurId;
+      console.log('Using formateurId:', formateurId);
+      
+      if (!formateurId) {
+        return { error: 'formateurId is required', status: 400 };
+      }
+      
+      // Validate required fields
+      const { title, startTime, buildProgramId } = body;
+      if (!title || !startTime || !buildProgramId) {
+        return { 
+          error: 'Missing required fields: title, startTime, buildProgramId', 
+          status: 400,
+          received: { title, startTime, buildProgramId }
+        };
+      }
+      
+      return await this.service.create(body, formateurId);
+    } catch (error) {
+      console.error('Controller error:', error);
+      return { 
+        error: error.message || 'Internal server error', 
+        status: 500,
+        details: error.stack
+      };
+    }
   }
 
   @Get()
   async findAll() {
+    return this.service.findAll();
+  }
+
+  @Get('debug/all')
+  async debugAll() {
     return this.service.findAll();
   }
 

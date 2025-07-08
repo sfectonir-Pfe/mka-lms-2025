@@ -14,6 +14,7 @@ const ContenusList = () => {
 
   useEffect(() => {
     axios.get("http://localhost:8000/contenus").then((res) => {
+      console.log('Contenus data:', res.data);
       setContenus(res.data);
     });
   }, []);
@@ -31,13 +32,39 @@ const ContenusList = () => {
 
  const columns = [
   { valueGetter: (value) => {
-
       return "Co-"+value
-    },field: "id", headerName: "ID", width: 80 },
+    },field: "id", headerName: t('table.id'), width: 80 },
   
   { field: "title", headerName: t('content.title'), flex: 1 },
   { field: "type", headerName: t('content.type'), width: 130 },
   { field: "fileType", headerName: t('content.file'), width: 130 },
+  { 
+    field: "coursAssocie", 
+    headerName: t('common.associatedCourse'), 
+    width: 200,
+    renderCell: (params) => {
+      console.log('Row data:', params.row);
+      
+      // Check buildProgramContenus for associated courses (from built programs)
+      const buildProgramCourses = params.row.buildProgramContenus?.map(bpc => bpc.buildProgramCourse?.course?.title).filter(Boolean) || [];
+      
+      // Check courseContenus for direct course associations
+      const directCourses = params.row.courseContenus?.map(cc => cc.course?.title).filter(Boolean) || [];
+      
+      // Check coursAssocie field
+      const coursAssocieValue = params.row.coursAssocie;
+      
+      if (buildProgramCourses.length > 0) {
+        return buildProgramCourses.join(', ');
+      } else if (directCourses.length > 0) {
+        return directCourses.join(', ');
+      } else if (coursAssocieValue) {
+        return coursAssocieValue;
+      } else {
+        return '-';
+      }
+    }
+  },
   {
     field: "fileUrl",
     headerName: t('content.link'),
@@ -118,6 +145,10 @@ const ContenusList = () => {
           pageSize={5}
           rowsPerPageOptions={[5, 10, 100]}
           getRowId={(row) => row.id}
+          localeText={{
+            noRowsLabel: t('table.noRows'),
+            labelRowsPerPage: t('table.rowsPerPage')
+          }}
         />
       </Box>
     </Box>

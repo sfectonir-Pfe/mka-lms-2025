@@ -7,60 +7,9 @@ import axios from "axios";
 
 
 const ModuleList = () => {
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
   const [modules, setModules] = useState([]);
   const navigate = useNavigate();
-  
-  const getText = (key) => {
-    const translations = {
-      confirmDelete: {
-        fr: 'Êtes-vous sûr de vouloir supprimer ce module ?',
-        en: 'Are you sure you want to delete this module?',
-        ar: 'هل أنت متأكد من حذف هذه الوحدة؟'
-      },
-      moduleName: {
-        fr: 'Nom du Module',
-        en: 'Module Name', 
-        ar: 'اسم الوحدة'
-      },
-      period: {
-        fr: 'Période',
-        en: 'Period',
-        ar: 'الفترة'
-      },
-      duration: {
-        fr: 'Durée',
-        en: 'Duration',
-        ar: 'المدة'
-      },
-      actions: {
-        fr: 'Actions',
-        en: 'Actions',
-        ar: 'الإجراءات'
-      },
-      viewCourses: {
-        fr: 'Voir Cours',
-        en: 'View Courses',
-        ar: 'عرض الدروس'
-      },
-      delete: {
-        fr: 'Supprimer',
-        en: 'Delete',
-        ar: 'حذف'
-      },
-      moduleList: {
-        fr: 'Liste des Modules',
-        en: 'Module List',
-        ar: 'قائمة الوحدات'
-      },
-      addModule: {
-        fr: 'Ajouter Module',
-        en: 'Add Module',
-        ar: 'إضافة وحدة'
-      }
-    };
-    return translations[key][i18n.language] || translations[key]['en'];
-  };
 
   const fetchModules = async () => {
     try {
@@ -76,7 +25,7 @@ const ModuleList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm(getText('confirmDelete'))) return;
+    if (!window.confirm(t('modules.confirmDelete'))) return;
     try {
       await axios.delete(`http://localhost:8000/modules/${id}`);
       setModules((prev) => prev.filter((m) => m.id !== id));
@@ -87,16 +36,35 @@ const ModuleList = () => {
 
   const columns = [
     { valueGetter: (value) => {
-
       return "M-"+value
     },
-     field: "id", headerName: "ID", width: 80 },
-    { field: "name", headerName: getText('moduleName'), flex: 1 },
-    { field: "periodUnit", headerName: getText('period'), width: 120 },
-    { field: "duration", headerName: getText('duration'), width: 100 },
+     field: "id", headerName: t('table.id'), width: 80 },
+    { field: "name", headerName: t('modules.moduleName'), flex: 1 },
+    { field: "periodUnit", headerName: t('modules.period'), width: 120 },
+    { field: "duration", headerName: t('modules.duration'), width: 100 },
+    { 
+      field: "programmeAssocie", 
+      headerName: t('common.associatedProgram'), 
+      width: 200,
+      renderCell: (params) => {
+        // Check buildProgramModules for associated programs (from built programs)
+        const buildPrograms = params.row.buildProgramModules?.map(bpm => bpm.buildProgram?.program?.name).filter(Boolean) || [];
+        
+        // Check programs for direct program associations
+        const directPrograms = params.row.programs?.map(pm => pm.program?.name).filter(Boolean) || [];
+        
+        if (buildPrograms.length > 0) {
+          return buildPrograms.join(', ');
+        } else if (directPrograms.length > 0) {
+          return directPrograms.join(', ');
+        } else {
+          return '-';
+        }
+      }
+    },
     {
   field: "actions",
-  headerName: getText('actions'),
+  headerName: t('modules.actions'),
   flex: 1,
   renderCell: (params) => (
     <>
@@ -106,29 +74,27 @@ const ModuleList = () => {
         onClick={() => navigate(`/modules/${params.row.id}/courses`)}
         style={{ marginRight: 8 }}
       >
-        {getText('viewCourses')}
+        {t('modules.viewCourses')}
       </Button>
-
       <Button
         variant="outlined"
         color="error"
         size="small"
         onClick={() => handleDelete(params.row.id)}
       >
-        {getText('delete')}
+        {t('common.delete')}
       </Button>
     </>
   ),
 }
-
   ];
 
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">{getText('moduleList')}</Typography>
+        <Typography variant="h5">{t('modules.moduleList')}</Typography>
         <Button variant="contained" onClick={() => navigate("/module/add")}>
-  ➕ {getText('addModule')}
+  ➕ {t('modules.addModule')}
 </Button>
 
       </Grid>
@@ -140,6 +106,10 @@ const ModuleList = () => {
           pageSize={5}
           rowsPerPageOptions={[5]}
           getRowId={(row) => row.id}
+          localeText={{
+            noRowsLabel: t('table.noRows'),
+            labelRowsPerPage: t('table.rowsPerPage')
+          }}
         />
       </Box>
     </Box>

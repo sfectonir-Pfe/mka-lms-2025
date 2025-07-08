@@ -88,6 +88,7 @@ model User {
   sentFeedback            Feedback[]              @relation("SentFeedback")
   receivedFeedback        Feedback[]              @relation("ReceivedFeedback")
   feedbackResponses       FeedbackResponse[]
+  chatMemories            ChatMemory[]
 }
 
 model Formateur {
@@ -168,6 +169,7 @@ model Contenu {
   fileUrl              String?
   fileType             FileType?
   type                 ContenuType
+  coursAssocie         String?               // Nouvelle colonne pour le cours associé
   courseContenus       CourseContenu[] // NEW many-to-many
   buildProgramContenus buildProgramContenu[]
   session2Contenus     Session2Contenu[]
@@ -421,4 +423,21 @@ model FeedbackResponse {
   responderId Int?
 
   createdAt  DateTime @default(now())
+}
+
+model ChatMemory {
+  id          Int      @id @default(autoincrement())
+  sessionId   String   // Identifiant unique de session pour grouper les conversations
+  userId      Int?     // Optionnel: lier à un utilisateur spécifique
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  userMessage String   // Message de l'utilisateur
+  botResponse String   // Réponse du chatbot
+  context     String?  // Contexte additionnel (fichiers traités, etc.)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sessionId])
+  @@index([userId])
 }

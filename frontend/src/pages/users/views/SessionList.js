@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   IconButton,
   TextField,
 } from "@mui/material";
@@ -18,6 +17,7 @@ import { Close, Facebook, Twitter, LinkedIn, ContentCopy } from "@mui/icons-mate
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
+import html2canvas from "html2canvas";
 
 const SessionList = () => {
   const { t } = useTranslation();
@@ -73,6 +73,19 @@ const SessionList = () => {
     }
   };
 
+  const handleDownloadPreview = async () => {
+    const element = document.getElementById("session-preview");
+    if (!element) return;
+
+    const canvas = await html2canvas(element);
+    const dataURL = canvas.toDataURL("image/png");
+
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = `session-${shareModal.session?.name || "preview"}.png`;
+    link.click();
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
       <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -96,7 +109,6 @@ const SessionList = () => {
               border: "1px solid #e0e0e0",
             }}
           >
-            {/* 📸 Image */}
             {session.imageUrl && (
               <Box mb={2} display="flex" justifyContent="center">
                 <img
@@ -106,14 +118,12 @@ const SessionList = () => {
                     maxWidth: "100%",
                     maxHeight: 180,
                     borderRadius: 16,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     objectFit: "cover",
                   }}
                 />
               </Box>
             )}
 
-            {/* 🧾 Session Info + Boutons */}
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -151,7 +161,6 @@ const SessionList = () => {
               <strong>{session.endDate?.slice(0, 10)}</strong>
             </Typography>
 
-            {/* 📦 Modules + Contenus */}
             {session.session2Modules?.length > 0 && (
               <>
                 <Divider sx={{ my: 2 }} />
@@ -195,7 +204,7 @@ const SessionList = () => {
           </Paper>
         ))
       )}
-      
+
       {/* Share Modal */}
       <Dialog open={shareModal.open} onClose={() => setShareModal({ open: false, session: null })} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -205,88 +214,109 @@ const SessionList = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ mb: 3, p: 2, bgcolor: '#f8f9ff', borderRadius: 2, border: '1px solid #e3f2fd' }}>
-            <Typography variant="h6" sx={{ color: '#1976d2', mb: 1 }}>🎓 {shareModal.session?.name}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {t("sessions.sharePreview")}
-            </Typography>
+
+          {/* 💎 Widget stylé */}
+          <Box
+            id="session-preview"
+            sx={{
+              borderRadius: 4,
+              overflow: "hidden",
+              bgcolor: "#ffffff",
+              border: "2px solid #1976d2",
+              boxShadow: 3,
+              mb: 3,
+              maxWidth: 800,
+              mx: "auto"
+            }}
+          >
+            <Box
+              sx={{
+                background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+                color: "#fff",
+                p: 3,
+                textAlign: "center"
+              }}
+            >
+              <Typography variant="h5" fontWeight="bold">
+                🎓 {shareModal.session?.name}
+              </Typography>
+              <Typography variant="subtitle1">
+                🚀 {t("sessions.newOpportunity") || "Nouvelle opportunité à ne pas rater!"}
+              </Typography>
+            </Box>
+
+            {shareModal.session?.imageUrl && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  backgroundColor: "#e3f2fd",
+                  p: 2
+                }}
+              >
+                <img
+                  src={shareModal.session.imageUrl}
+                  alt="Session"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 240,
+                    borderRadius: 12,
+                    objectFit: "cover",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.15)"
+                  }}
+                />
+              </Box>
+            )}
+
+            <Box sx={{ p: 3 }}>
+              <Typography fontSize={16} mb={1}>
+                📚 <strong>{t("sessions.program")}</strong> : {shareModal.session?.program?.name}
+              </Typography>
+              <Typography fontSize={16} mb={2}>
+                📅 <strong>{t("sessions.period")}</strong> :{" "}
+                {shareModal.session?.startDate?.slice(0, 10)} ➜ {shareModal.session?.endDate?.slice(0, 10)}
+              </Typography>
+
+              {shareModal.session?.session2Modules?.length > 0 && (
+                <>
+                  <Typography fontWeight="bold" fontSize={16} mb={1}>
+                    🧱 {t("sessions.modulesContent")}
+                  </Typography>
+                  <ul style={{ paddingLeft: 20 }}>
+                    {shareModal.session.session2Modules.map((mod) => (
+                      <li key={mod.id}>
+                        <Typography fontSize={14}>✅ {mod.module?.name}</Typography>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+
+              <Typography fontSize={14} mt={3} color="text.secondary">
+                #Formation #Éducation #LMS #Apprentissage #Succès
+              </Typography>
+            </Box>
           </Box>
-          
+
+          {/* Champs texte + boutons */}
           <TextField
             multiline
-            rows={10}
+            rows={8}
             fullWidth
             value={shareText}
             onChange={(e) => setShareText(e.target.value)}
             variant="outlined"
             label={`📝 ${t("sessions.customizePost")}`}
-            sx={{ 
-              mb: 3,
-              '& .MuiOutlinedInput-root': {
-                fontSize: '14px',
-                lineHeight: 1.6
-              }
-            }}
+            sx={{ mb: 3 }}
           />
-          
-          <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 2, mb: 2 }}>
-            <Typography variant="subtitle1" mb={2} sx={{ fontWeight: 600 }}>🚀 {t("sessions.choosePlatform")} :</Typography>
-            <Stack direction="row" spacing={2} flexWrap="wrap" gap={1}>
-              <Button
-                variant="contained"
-                startIcon={<Facebook />}
-                onClick={() => handleSocialShare('facebook')}
-                sx={{ 
-                  bgcolor: '#1877f2',
-                  '&:hover': { bgcolor: '#166fe5' },
-                  borderRadius: 3,
-                  px: 3
-                }}
-              >
-                Facebook
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<Twitter />}
-                onClick={() => handleSocialShare('twitter')}
-                sx={{ 
-                  bgcolor: '#1da1f2',
-                  '&:hover': { bgcolor: '#1a91da' },
-                  borderRadius: 3,
-                  px: 3
-                }}
-              >
-                Twitter
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<LinkedIn />}
-                onClick={() => handleSocialShare('linkedin')}
-                sx={{ 
-                  bgcolor: '#0077b5',
-                  '&:hover': { bgcolor: '#006ba1' },
-                  borderRadius: 3,
-                  px: 3
-                }}
-              >
-                LinkedIn
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<ContentCopy />}
-                onClick={handleCopyText}
-                sx={{ 
-                  borderRadius: 3,
-                  px: 3,
-                  borderColor: '#1976d2',
-                  color: '#1976d2',
-                  '&:hover': { bgcolor: '#f3f4f6' }
-                }}
-              >
-                {t("sessions.copyText")}
-              </Button>
-            </Stack>
-          </Box>
+
+          <Stack direction="row" spacing={2} flexWrap="wrap" gap={1} mb={2}>
+            <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={{ bgcolor: '#1877f2' }}>Facebook</Button>
+            <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
+            <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
+            <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
+            <Button variant="outlined" onClick={handleDownloadPreview}>🖼️ {t("sessions.downloadImage")}</Button>
+          </Stack>
         </DialogContent>
       </Dialog>
     </Paper>

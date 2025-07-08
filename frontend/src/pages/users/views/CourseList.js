@@ -27,8 +27,28 @@ const CourseList = () => {
     { valueGetter: (value) => {
 
       return "C-"+value
-    },field: "id", headerName: "ID", width: 80 },
+    },field: "id", headerName: t('table.id'), width: 80 },
     { field: "title", headerName: t('common.title'), flex: 1 },
+    { 
+      field: "moduleAssocie", 
+      headerName: t('common.associatedModule'), 
+      width: 200,
+      renderCell: (params) => {
+        // Check buildProgramCourses for associated modules (from built programs)
+        const buildProgramModules = params.row.buildProgramCourses?.map(bpc => bpc.buildProgramModule?.module?.name).filter(Boolean) || [];
+        
+        // Check modules for direct module associations
+        const directModules = params.row.modules?.map(mc => mc.module?.name).filter(Boolean) || [];
+        
+        if (buildProgramModules.length > 0) {
+          return buildProgramModules.join(', ');
+        } else if (directModules.length > 0) {
+          return directModules.join(', ');
+        } else {
+          return '-';
+        }
+      }
+    },
     {
   field: "actions",
   headerName: t('courses.actions'),
@@ -74,6 +94,11 @@ const CourseList = () => {
           pageSize={5}
           rowsPerPageOptions={[5]}
           getRowId={(row) => row.id}
+          localeText={{
+            noRowsLabel: t('table.noRows'),
+            toolbarDensity: t('table.rowsPerPage'),
+            rowsPerPage: t('table.rowsPerPage')
+          }}
         />
       </Box>
     </Box>

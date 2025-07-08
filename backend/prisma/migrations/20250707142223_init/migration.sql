@@ -138,6 +138,7 @@ CREATE TABLE "Contenu" (
     "fileUrl" TEXT,
     "fileType" "FileType",
     "type" "ContenuType" NOT NULL,
+    "coursAssocie" TEXT,
     "published" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Contenu_pkey" PRIMARY KEY ("id")
@@ -360,6 +361,20 @@ CREATE TABLE "FeedbackResponse" (
     CONSTRAINT "FeedbackResponse_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ChatMemory" (
+    "id" SERIAL NOT NULL,
+    "sessionId" TEXT NOT NULL,
+    "userId" INTEGER,
+    "userMessage" TEXT NOT NULL,
+    "botResponse" TEXT NOT NULL,
+    "context" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ChatMemory_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Mail_email_key" ON "Mail"("email");
 
@@ -392,6 +407,12 @@ CREATE UNIQUE INDEX "Session2Course_session2ModuleId_courseId_key" ON "Session2C
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session2Contenu_session2CourseId_contenuId_key" ON "Session2Contenu"("session2CourseId", "contenuId");
+
+-- CreateIndex
+CREATE INDEX "ChatMemory_sessionId_idx" ON "ChatMemory"("sessionId");
+
+-- CreateIndex
+CREATE INDEX "ChatMemory_userId_idx" ON "ChatMemory"("userId");
 
 -- AddForeignKey
 ALTER TABLE "Formateur" ADD CONSTRAINT "Formateur_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -515,3 +536,6 @@ ALTER TABLE "FeedbackResponse" ADD CONSTRAINT "FeedbackResponse_feedbackId_fkey"
 
 -- AddForeignKey
 ALTER TABLE "FeedbackResponse" ADD CONSTRAINT "FeedbackResponse_responderId_fkey" FOREIGN KEY ("responderId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatMemory" ADD CONSTRAINT "ChatMemory_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

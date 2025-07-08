@@ -12,11 +12,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
-const SeanceFormateurList = () => {
+
+const SeanceFormateurList = ({ onAnimer, onRefresh }) => {
   const { t } = useTranslation();
   const [seances, setSeances] = useState([]);
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState({});
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [selectedSeance, setSelectedSeance] = useState(null);
   const user = JSON.parse(localStorage.getItem("user")); // 🔐
 
   useEffect(() => {
@@ -25,11 +28,59 @@ const SeanceFormateurList = () => {
     }
   }, [user?.id]);
 
+  // Exposer la fonction de rafraîchissement
+  useEffect(() => {
+    if (onRefresh) {
+      onRefresh(refreshSeances);
+    }
+  }, [onRefresh]);
+
   const fetchSeances = () => {
+    console.log('Fetching seances for user:', user.id);
+    
+    // Debug: Vérifier toutes les séances d'abord
+    axios.get('http://localhost:8000/seance-formateur')
+      .then(allRes => {
+        console.log('ALL seances in database:', allRes.data);
+      })
+      .catch(err => console.log('Error fetching all seances:', err));
+    
     axios
       .get(`http://localhost:8000/seance-formateur/formateur/${user.id}`)
-      .then((res) => setSeances(res.data))
-      .catch((err) => console.error("Erreur chargement des séances:", err));
+      .then((res) => {
+        console.log('Seances received for user', user.id, ':', res.data);
+        if (res.data.length === 0) {
+          console.log('No seances found for user, trying fallback...');
+          // Récupérer les Session2 comme fallback
+          axios.get('http://localhost:8000/session2/simple')
+            .then(sessionRes => {
+              console.log('Session2 fallback data:', sessionRes.data);
+              const adaptedSessions = sessionRes.data.map(s => ({
+                id: s.id,
+                title: s.name,
+                startTime: s.createdAt,
+                buildProgram: { program: { name: 'Session générale' } }
+              }));
+              setSeances(adaptedSessions);
+            })
+            .catch(() => {
+              console.log('No Session2 fallback available');
+              setSeances([]);
+            });
+        } else {
+          console.log('Setting seances:', res.data);
+          setSeances(res.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Erreur chargement des séances:", err);
+        setSeances([]);
+      });
+  };
+
+  // Fonction pour rafraîchir les séances (exposée pour être utilisée par d'autres composants)
+  const refreshSeances = () => {
+    fetchSeances();
   };
 
   const handleDelete = (id) => {
@@ -59,8 +110,21 @@ const SeanceFormateurList = () => {
   return (
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>
-        📅 {t('seances.mySessions')}
+        📅 {t('seances.mySessions')} (User ID: {user?.id})
       </Typography>
+      
+      <Button 
+        variant="outlined" 
+        size="small" 
+        onClick={() => {
+          console.log('Current user:', user);
+          console.log('Current seances:', seances);
+          fetchSeances();
+        }}
+        sx={{ mb: 2 }}
+      >
+        🔍 Debug & Refresh
+      </Button>
 
       {seances.length === 0 ? (
         <Typography color="text.secondary">{t('seances.noSessions')}</Typography>
@@ -80,11 +144,21 @@ const SeanceFormateurList = () => {
             </Stack>
 
             <Box mt={2} display="flex" gap={1}>
+              {onAnimer && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={() => onAnimer(s)}
+                >
+                  {t('seances.animateSession')}
+                </Button>
+              )}
+              
               <Button
                 variant="outlined"
-                onClick={() => (window.location.href = `/formateur/seance/${s.id}`)}
+                onClick={() => window.open(`/formateur/seance/${s.id}`, '_blank')}
               >
-                {t('seances.animateSession')}
+                Ouvrir dans un nouvel onglet
               </Button>
 
               <Button
@@ -93,6 +167,25 @@ const SeanceFormateurList = () => {
                 onClick={() => toggleDetails(s)}
               >
                 {expandedId === s.id ? t('common.hide') : t('common.details')}
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="info"
+                onClick={fetchSeances}
+              >
+                🔄 Actualiser
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setSelectedSeance(s);
+                  setFeedbackOpen(true);
+                }}
+              >
+                💬 Feedback
               </Button>
 
               <Button
@@ -144,6 +237,8 @@ const SeanceFormateurList = () => {
           </Paper>
         ))
       )}
+      
+
     </Box>
   );
 };

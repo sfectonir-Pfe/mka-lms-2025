@@ -51,6 +51,7 @@ import SeanceFormateurList from "./pages/users/views/SeanceFormateurList";
 import AnimerSeanceView from "./pages/users/views/AnimerSeanceView";
 import SessionDetail from "./pages/SessionDetail";
 
+
 import JitsiRoom from './components/JitsiRoom';
 import Chatbot from './components/Chatbot';
 
@@ -228,16 +229,12 @@ function App() {
                 <Route path="/programs/edit/:programId" element={<EditProgramView />} />
                 <Route path="/sessions" element={<SessionPage />} />
                 <Route path="/session/:id" element={<SessionDetail />} />
-<Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
-<Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-<Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
-<Route path="/seances-formateur" element={<SeanceFormateurList />} />
-
-<Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-
-
-
-<Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
+                <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
+                <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
+                <Route path="/seances-formateur" element={<SeanceFormateurList />} />
+                
 
 <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
 

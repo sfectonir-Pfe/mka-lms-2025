@@ -357,7 +357,7 @@ export default function Main({ setUser, user }) {
             <Typography variant="body1" noWrap>
               {user?.name || "Utilisateur"} |{" "}
               <span style={{ textTransform: "capitalize" }}>
-                {user?.role || "Rôle"}
+                {t('role.' + ((user?.role || 'user').toLowerCase()))}
               </span>
             </Typography>
 
@@ -470,7 +470,7 @@ export default function Main({ setUser, user }) {
       <Drawer variant="permanent" open={open} anchor={isRTL ? "right" : "left"}>
         <DrawerHeader>
           <Typography variant="h6" sx={{ fontWeight: 700, opacity: open ? 1 : 0 }}>
-            MENU
+            {t('sidebar.menu')}
           </Typography>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}

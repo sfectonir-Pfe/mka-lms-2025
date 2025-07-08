@@ -38,7 +38,7 @@ const ProgramList = () => {
     { valueGetter: (value) => {
 
       return "P-"+value
-    },field: "id", headerName: "ID", width: 80 },
+    },field: "id", headerName: t('table.id'), width: 80 },
     { field: "name", headerName: t('programs.programName'), flex: 1 },
     {
       field: "actions",
@@ -101,6 +101,10 @@ const ProgramList = () => {
           pageSize={5}
           rowsPerPageOptions={[5]}
           getRowId={(row) => row.id}
+          localeText={{
+            noRowsLabel: t('table.noRows'),
+            labelRowsPerPage: t('table.rowsPerPage')
+          }}
         />
       </Box>
     </Box>
