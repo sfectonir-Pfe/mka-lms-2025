@@ -1,24 +1,41 @@
-// src/pages/SeanceFormateurPage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { useTranslation } from 'react-i18next';
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
-// ✅ Corriger les chemins ici
 import AddSeanceFormateurView from "./users/views/AddSeanceFormateurView";
 import SeanceFormateurList from "./users/views/SeanceFormateurList";
 import AnimerSeanceView from "./users/views/AnimerSeanceView";
 
 const SeanceFormateurPage = () => {
   const { t } = useTranslation();
-  const [selectedSeance, setSelectedSeance] = useState(null);
   const [refreshSeancesList, setRefreshSeancesList] = useState(null);
+  const { sessionId } = useParams();
+  const [selectedSeance, setSelectedSeance] = useState(null);
+  const [seances, setSeances] = useState([]);
 
-  const handleAnimer = (seance) => {
-    setSelectedSeance(seance);
+  const fetchSeances = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/seance-formateur/session/${sessionId}`);
+      setSeances(res.data);
+    } catch (err) {
+      // handle error
+    }
   };
 
-  const handleRetour = () => {
-    setSelectedSeance(null);
+  useEffect(() => {
+    fetchSeances();
+  }, [sessionId]);
+
+  const handleAnimer = (seance) => setSelectedSeance(seance);
+  const handleRetour = () => setSelectedSeance(null);
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Confirmer la suppression de cette séance ?")) {
+      await axios.delete(`http://localhost:8000/seance-formateur/${id}`);
+      fetchSeances();
+    }
   };
 
   const handleSeanceCreated = (newSeance) => {
@@ -37,7 +54,7 @@ const SeanceFormateurPage = () => {
     <Container>
       <Box mt={4}>
         <Typography variant="h4" gutterBottom>
-          🎓 {t('seanceFormateur.title')}
+          {t('seanceFormateur.manageSessionsOfSession2', { sessionId })}
         </Typography>
 
         {selectedSeance ? (
@@ -51,11 +68,13 @@ const SeanceFormateurPage = () => {
           </>
         ) : (
           <>
-            <AddSeanceFormateurView onSeanceCreated={handleSeanceCreated} />
+            <AddSeanceFormateurView onSeanceCreated={fetchSeances} />
+
             <Box mt={4}>
-              <SeanceFormateurList 
-                onAnimer={handleAnimer} 
-                onRefresh={handleRefreshCallback}
+              <SeanceFormateurList
+                seances={seances}
+                onAnimer={handleAnimer}
+                onDelete={handleDelete}
               />
             </Box>
           </>

@@ -4,14 +4,20 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { CreateFeedbackResponseDto } from './dto/create-feedback-response.dto';
 import { QueryFeedbackDto } from './dto/query-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { CreateGeneralFeedbackDto } from './dto/create-general-feedback.dto';
 
 @Controller('feedback')
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
   @Post()
-  create(@Body() createFeedbackDto: CreateFeedbackDto) {
-    return this.feedbackService.create(createFeedbackDto);
+  create(@Body() dto: CreateFeedbackDto) {
+    return this.feedbackService.create(dto);
+  }
+
+  @Post('general')
+  createGeneralFeedback(@Body() dto: CreateGeneralFeedbackDto) {
+    return this.feedbackService.createGeneralFeedback(dto);
   }
 
   @Get()
@@ -33,21 +39,15 @@ export class FeedbackController {
   findOne(@Param('id') id: string) {
     return this.feedbackService.findOne(+id);
   }
-  
+
   @Post(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFeedbackDto: UpdateFeedbackDto,
-  ) {
-    return this.feedbackService.update(+id, updateFeedbackDto);
+  update(@Param('id') id: string, @Body() dto: UpdateFeedbackDto) {
+    return this.feedbackService.update(+id, dto);
   }
 
   @Post(':id/respond')
-  respond(
-    @Param('id') id: string,
-    @Body() createResponseDto: CreateFeedbackResponseDto,
-  ) {
-    return this.feedbackService.createResponse(+id, createResponseDto);
+  respond(@Param('id') id: string, @Body() dto: CreateFeedbackResponseDto) {
+    return this.feedbackService.createResponse(+id, dto);
   }
 
   @Post(':id/like')
@@ -60,14 +60,28 @@ export class FeedbackController {
     return this.feedbackService.dislike(+id);
   }
 
-  @Post(':id/report')
-  report(@Param('id') id: string) {
-    // For now, just return the feedback
-    return this.feedbackService.findOne(+id);
-  }
-  
   @Post(':id/delete')
   remove(@Param('id') id: string) {
     return this.feedbackService.remove(+id);
+  }
+
+  @Post('seance')
+  createSeanceFeedback(@Body() dto: any) {
+    return this.feedbackService.createSeanceFeedback(dto);
+  }
+
+  @Get('seance/:seanceId')
+  getSeanceFeedbacks(@Param('seanceId') seanceId: string) {
+    return this.feedbackService.getSeanceFeedbacks(Number(seanceId));
+  }
+
+  @Post('session')
+  createSessionFeedback(@Body() dto: any) {
+    return this.feedbackService.createSessionFeedback(dto);
+  }
+
+  @Get('session/:sessionId')
+  getSessionFeedbacks(@Param('sessionId') sessionId: string) {
+    return this.feedbackService.getSessionFeedbacks(Number(sessionId));
   }
 }

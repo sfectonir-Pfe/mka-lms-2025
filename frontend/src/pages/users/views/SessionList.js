@@ -12,18 +12,71 @@ import {
   DialogContent,
   IconButton,
   TextField,
+  Collapse,
 } from "@mui/material";
-import { Close, Facebook, Twitter, LinkedIn, ContentCopy } from "@mui/icons-material";
+import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
 import html2canvas from "html2canvas";
 
+
+import { useNavigate } from "react-router-dom";
+import SessionFeedbackForm from '../../../components/session-feedback-form';
+
+
+
+
 const SessionList = () => {
-  const { t } = useTranslation();
+  const [showAddUserId, setShowAddUserId] = useState(null);
+const [userEmail, setUserEmail] = useState("");
+const [addLoading, setAddLoading] = useState(false);
+const { t } = useTranslation();
+const handleAddUser = async (sessionId) => {
+  if (!userEmail) {
+    toast.error(t("sessions.enterEmail"));
+    return;
+  }
+  setAddLoading(true);
+  try {
+    await axios.post(`http://localhost:8000/session2/${sessionId}/add-user`, {
+      email: userEmail,
+    });
+    toast.success(t("sessions.userAdded"));
+    setShowAddUserId(null);
+    setUserEmail("");
+  } catch (e) {
+    toast.error(
+      e.response?.data?.message ||
+      t("sessions.addUserError")
+    );
+  } finally {
+    setAddLoading(false);
+  }
+};
+
   const [sessions, setSessions] = useState([]);
   const [shareModal, setShareModal] = useState({ open: false, session: null });
   const [shareText, setShareText] = useState('');
+  const [showFeedback, setShowFeedback] = useState({});
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
+
+const navigate = useNavigate();
+
+  const toggleFeedback = (sessionId) => {
+    setShowFeedback(prev => ({
+      ...prev,
+      [sessionId]: !prev[sessionId]
+    }));
+  };
+
+  const openFeedbackForm = (session) => {
+    console.log("openFeedbackForm called with session:", session);
+    setSelectedSession(session);
+    setOpenFeedbackDialog(true);
+    console.log("openFeedbackDialog set to true");
+  };
 
   const fetchSessions = async () => {
     try {
@@ -125,33 +178,85 @@ const SessionList = () => {
             )}
 
             <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={1}
-            >
-              <Typography variant="h6" fontWeight="bold" color="primary">
-                🧾 {session.name}
-              </Typography>
-              <Stack direction="row" spacing={1}>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={() => handleShare(session)}
-                >
-                  📤 {t("sessions.share")}
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  onClick={() => handleDelete(session.id)}
-                >
-                  🗑️ {t("common.delete")}
-                </Button>
-              </Stack>
-            </Stack>
+  direction="row"
+  justifyContent="space-between"
+  alignItems="center"
+  mb={1}
+>
+  <Typography variant="h6" fontWeight="bold" color="primary">
+    🧾 {session.name}
+  </Typography>
+  <Box>
+    <Button
+      variant="outlined"
+      color="error"
+      size="small"
+      onClick={() => handleDelete(session.id)}
+    >
+      🗑️ {t("sessions.delete")}
+    </Button>
+    <Button
+      variant="contained"
+      color="primary"
+      size="small"
+      onClick={() => navigate(`/sessions/${session.id}/seances`)}
+      sx={{ ml: 2 }}
+    >
+      🚀 {t("sessions.join")}
+    </Button>
+    <Button
+  variant="outlined"
+  color="secondary"
+  size="small"
+  sx={{ ml: 2 }}
+  onClick={() => setShowAddUserId(session.id === showAddUserId ? null : session.id)}
+>
+  ➕ {t("sessions.addUser")}
+</Button>
+<Button
+  variant="contained"
+  color="info"
+  size="small"
+  sx={{ ml: 2 }}
+  startIcon={<Feedback />}
+  onClick={() => {
+    console.log("Button clicked for session:", session.name);
+    openFeedbackForm(session);
+  }}
+>
+  📝 {t("sessions.feedback")}
+</Button>
+{showAddUserId === session.id && (
+  <Box mt={2} display="flex" gap={1} alignItems="center">
+    <input
+      type="email"
+      placeholder={t("sessions.userEmailPlaceholder")}
+      value={userEmail}
+      onChange={e => setUserEmail(e.target.value)}
+      style={{ padding: 8, borderRadius: 6, border: '1px solid #ddd', minWidth: 220 }}
+    />
+    <Button
+      variant="contained"
+      size="small"
+      color="secondary"
+      onClick={() => handleAddUser(session.id)}
+      disabled={addLoading}
+    >
+      {addLoading ? t("sessions.adding") : t("sessions.add")}
+    </Button>
+    <Button
+      variant="text"
+      size="small"
+      onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
+    >
+      {t("sessions.cancel")}
+    </Button>
+  </Box>
+)}
+
+  </Box>
+</Stack>
+
 
             <Typography variant="body2" mb={0.5}>
               📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>
@@ -201,6 +306,8 @@ const SessionList = () => {
                 ))}
               </>
             )}
+
+            {/* Section Feedback - Supprimée car maintenant en dialog */}
           </Paper>
         ))
       )}
@@ -241,7 +348,7 @@ const SessionList = () => {
                 🎓 {shareModal.session?.name}
               </Typography>
               <Typography variant="subtitle1">
-                🚀 {t("sessions.newOpportunity") || "Nouvelle opportunité à ne pas rater!"}
+                🚀 {t("sessions.newOpportunity")}
               </Typography>
             </Box>
 
@@ -319,6 +426,13 @@ const SessionList = () => {
           </Stack>
         </DialogContent>
       </Dialog>
+
+      {/* Feedback Dialog */}
+      <SessionFeedbackForm 
+        open={openFeedbackDialog} 
+        onClose={() => setOpenFeedbackDialog(false)}
+        session={selectedSession}
+      />
     </Paper>
   );
 };

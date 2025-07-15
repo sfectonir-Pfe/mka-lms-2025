@@ -57,16 +57,6 @@ const CourseList = () => {
     <>
       <Button
         variant="outlined"
-        color="primary"
-        size="small"
-        onClick={() => navigate(`/courses/${params.row.id}/contenus`)}
-        style={{ marginRight: 8 }}
-      >
-        {t('courses.viewContent')}
-      </Button>
-
-      <Button
-        variant="outlined"
         color="error"
         size="small"
         onClick={() => handleDelete(params.row.id)}

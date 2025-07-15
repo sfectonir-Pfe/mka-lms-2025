@@ -4,195 +4,173 @@ import {
   Button,
   TextField,
   Typography,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Paper,
   Stack,
   Chip,
   Divider,
+  Collapse,
 } from "@mui/material";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 
-const AddSeanceFormateurView = ({ onSeanceCreated }) => {
-  const { t } = useTranslation();
-  const [programs, setPrograms] = useState([]);
-  const [selectedProgram, setSelectedProgram] = useState("");
-  const [programData, setProgramData] = useState(null);
 
+import { useParams } from "react-router-dom";
+import { Eye, EyeOff, PlusCircle } from "lucide-react"; // Or any icons you prefer
+
+const AddSeanceFormateurView = ({ onSeanceCreated }) => {
+  const { sessionId } = useParams();
+  const [sessionData, setSessionData] = useState(null);
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [showAddBlock, setShowAddBlock] = useState(false); // Hide by default
 
-  const user = JSON.parse(localStorage.getItem("user")); // 🔐
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8000/buildProgram")
-      .then((res) => {
-        const published = res.data.filter((p) => p.program?.published);
-        setPrograms(published.map((p) => p.program));
-      })
-      .catch((err) => console.error("Erreur chargement programmes:", err));
-  }, []);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (selectedProgram) {
+    if (sessionId) {
       axios
-        .get(`http://localhost:8000/buildProgram/program/${selectedProgram}`)
-        .then((res) => setProgramData(res.data))
+        .get(`http://localhost:8000/seance-formateur/details/${sessionId}`)
+        .then((res) => setSessionData(res.data))
         .catch((err) =>
-          console.error("Erreur chargement programme complet:", err)
+          console.error("Erreur chargement session complète:", err)
         );
     } else {
-      setProgramData(null);
+      setSessionData(null);
     }
-  }, [selectedProgram]);
+  }, [sessionId]);
 
   const handleSubmit = async () => {
-    if (!programData || !user?.id || !date || !time || !title) {
-      alert(t("addSeance.fillAllFields"));
+    if (!sessionData || !user?.id || !date || !time || !title) {
+      alert(t("addSeance.fillAllFieldsAlert"));
       return;
     }
 
     const payload = {
       title,
-      startTime: new Date(`${date}T${time}`).toISOString(),
+      startTime: new Date(`${date}T${time}`),
       formateurId: user.id,
-      buildProgramId: programData.id,
+      session2Id: Number(sessionId),
     };
 
-    console.log("🟢 Payload ready:", payload);
-    console.log("🟢 User data:", user);
-    console.log("🟢 Program data:", programData);
-
     try {
-      const res = await axios.post("http://localhost:8000/seance-formateur", payload);
-      console.log("✅ Séance créée avec succès:", res.data);
-      alert("Séance créée avec succès !");
-      if (onSeanceCreated) onSeanceCreated(res.data);
-      
-      // Reset form
+      await axios.post("http://localhost:8000/seance-formateur", payload);
       setTitle("");
       setDate("");
       setTime("");
-      setSelectedProgram("");
-      setProgramData(null);
-      
-      // Trigger refresh of parent component if callback provided
-      // The parent component will handle the refresh
+      if (onSeanceCreated) onSeanceCreated();
+      setShowAddBlock(false); // Optionally close form after submit
     } catch (err) {
       console.error("❌ Erreur création séance :", err);
       console.error("❌ Response data:", err.response?.data);
       console.error("❌ Response status:", err.response?.status);
       
-      const errorMessage = err.response?.data?.message || err.message || "Erreur inconnue";
-      alert(`Erreur lors de la création de la séance: ${errorMessage}`);
+      const errorMessage = err.response?.data?.message || err.message || t("addSeance.creationErrorAlert");
+      alert(`${t("addSeance.creationErrorAlert")}: ${errorMessage}`);
     }
   };
 
   return (
-    <Box p={2}>
-      <Typography variant="h5" gutterBottom>
-        {t("addSeance.title")}
-      </Typography>
+    <Box p={2} width="100%">
+      <Box display="flex" flexDirection="column" alignItems="center">
 
-      <TextField
-        fullWidth
-        label={t("addSeance.titleField")}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        margin="normal"
-      />
+      <Button
+      
+        variant={showAddBlock ? "outlined" : "contained"}
+        color="primary"
+        startIcon={showAddBlock ? <EyeOff size={18} /> : <PlusCircle size={18} />}
+        onClick={() => setShowAddBlock((prev) => !prev)}
+        sx={{ mb: 2 }}
+      >
+        {showAddBlock ? t("addSeance.hideForm") : t("addSeance.createNewSession")}
+      </Button>
 
-      <TextField
-        fullWidth
-        label={t("addSeance.date")}
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
-
-      <TextField
-        fullWidth
-        label={t("addSeance.time")}
-        type="time"
-        value={time}
-        onChange={(e) => setTime(e.target.value)}
-        margin="normal"
-        InputLabelProps={{ shrink: true }}
-      />
-
-      <FormControl fullWidth margin="normal">
-        <InputLabel>{t("addSeance.program")}</InputLabel>
-        <Select
-          value={selectedProgram}
-          onChange={(e) => setSelectedProgram(e.target.value)}
-          label={t("addSeance.program")}
-        >
-          {programs.map((p) => (
-            <MenuItem key={p.id} value={p.id}>
-              {p.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      {programData && (
-        <Box component={Paper} variant="outlined" sx={{ mt: 3, p: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            {t("addSeance.programPreview")}
+      <Collapse in={showAddBlock}>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            ➕ {t("addSeance.createNewSessionTitle")}
           </Typography>
 
-          {programData.modules.map((m) => (
-            <Box key={m.module.id} mb={2}>
-              <Typography fontWeight="bold" color="primary.main">
-                📦 {m.module.name}
-              </Typography>
+          <TextField
+            fullWidth
+            label={t("addSeance.title")}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            margin="normal"
+          />
 
-              {(m.courses || []).map((c) => (
-                <Box key={c.course.id} ml={2} mt={1}>
-                  <Typography variant="body2" fontWeight="bold">
-                    📘 {c.course.title}
+          <TextField
+            fullWidth
+            label={t("addSeance.date")}
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+
+          <TextField
+            fullWidth
+            label={t("addSeance.time")}
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+
+          {sessionData && (
+            <Box component={Paper} variant="outlined" sx={{ mt: 3, p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                🧩 {t("addSeance.sessionPreview")}
+              </Typography>
+              {sessionData.session2Modules.map((m) => (
+                <Box key={m.id} mb={2}>
+                  <Typography fontWeight="bold" color="primary.main">
+                    📦 {m.module.name}
                   </Typography>
-                  <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
-                    {(c.contenus || []).map((ct) => (
-                      <Chip
-                        key={ct.contenu.id}
-                        label={`📄 ${ct.contenu.title}`}
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                        onClick={() =>
-                          window.open(ct.contenu.fileUrl, "_blank")
-                        }
-                        sx={{ cursor: "pointer" }}
-                      />
-                    ))}
-                  </Stack>
+                  {(m.courses || []).map((c) => (
+                    <Box key={c.id} ml={2} mt={1}>
+                      <Typography variant="body2" fontWeight="bold">
+                        📘 {c.course.title}
+                      </Typography>
+                      <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                        {(c.contenus || []).map((ct) => (
+                          <Chip
+                            key={ct.id}
+                            label={`📄 ${ct.contenu.title}`}
+                            size="small"
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() =>
+                              window.open(ct.contenu.fileUrl, "_blank")
+                            }
+                            sx={{ cursor: "pointer" }}
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  ))}
+                  <Divider sx={{ my: 1 }} />
                 </Box>
               ))}
-
-              <Divider sx={{ my: 1 }} />
             </Box>
-          ))}
-        </Box>
-      )}
+          )}
 
-      <Box mt={3}>
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleSubmit}
-        >
-          {t("addSeance.createButton")}
-        </Button>
-      </Box>
+          <Box mt={3}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleSubmit}
+            >
+              {t("addSeance.createSessionButton")}
+            </Button>
+          </Box>
+        </Box>
+      </Collapse>
+    </Box>
     </Box>
   );
 };

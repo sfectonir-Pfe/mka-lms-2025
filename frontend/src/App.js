@@ -54,6 +54,9 @@ import SessionDetail from "./pages/SessionDetail";
 
 import JitsiRoom from './components/JitsiRoom';
 import Chatbot from './components/Chatbot';
+// import TestChatPage from "./pages/TestChatPage";
+import WhiteboardPage from "./pages/WhiteboardPage";
+import FeedbackListPage from "./pages/FeedbackListPage";
 
 
 
@@ -182,7 +185,7 @@ function App() {
 
 
   return (
-    
+
     <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
       <div className="d-flex justify-content-end">
@@ -209,8 +212,8 @@ function App() {
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
                 </Route>
-                
-                
+
+
                 <Route path="programs" element={<ProgramsPage />} />
                 <Route path="programs/add" element={<AddProgramList />} />
                 <Route path="module" element={<ModulePage />} />
@@ -228,21 +231,21 @@ function App() {
                 <Route path="/modules" element={<ModuleList />} />
                 <Route path="/programs/edit/:programId" element={<EditProgramView />} />
                 <Route path="/sessions" element={<SessionPage />} />
-                <Route path="/session/:id" element={<SessionDetail />} />
                 <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-                <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
                 <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
-                <Route path="/seances-formateur" element={<SeanceFormateurList />} />
-                
-
-<Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
 
 
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
 
 
 
-                
+                <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
+
+                <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
+                {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
+                <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
 
 
 
@@ -250,11 +253,18 @@ function App() {
 
 
 
-              
+
+
+
+
+
+
+
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
+                <Route path="feedback-list" element={<FeedbackListPage />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
               </Route>
@@ -266,7 +276,7 @@ function App() {
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
 
-               
+
 
               </Route>
             )}
@@ -275,9 +285,9 @@ function App() {
           </Routes>
         </BrowserRouter>
       )}
-      
-      
-      
+
+
+
     </div>
   );
 }

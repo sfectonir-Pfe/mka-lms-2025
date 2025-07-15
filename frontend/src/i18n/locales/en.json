@@ -29,7 +29,8 @@
     "changeLanguage": "Change language",
     "associatedCourse": "Associated Course",
     "associatedModule": "Associated Module",
-    "associatedProgram": "Associated Program"
+    "associatedProgram": "Associated Program",
+    "search": "Search"
   },
   "role": {
     "etudiant": "Student",
@@ -242,6 +243,38 @@
     "all": "All",
     "from": "From",
     "to": "To",
+    "feedbackTypes": {
+      "bug": "Bug Report",
+      "feature": "Feature Request",
+      "improvement": "Improvement",
+      "complaint": "Complaint"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "steps": {
+      "type": "Feedback Type",
+      "category": "Category & Priority",
+      "description": "Detailed Description",
+      "technical": "Technical Information",
+      "contact": "Contact & Finalization"
+    },
+    "form": {
+      "title": "Feedback title",
+      "description": "Detailed description",
+      "stepsToReproduce": "Steps to reproduce",
+      "expectedBehavior": "Expected behavior",
+      "actualBehavior": "Actual behavior",
+      "browser": "Browser used",
+      "device": "Device used",
+      "contactInfo": "Contact information",
+      "allowContact": "I allow the team to contact me if necessary"
+    },
+    "success": "Thank you for your feedback! We have received your request and will examine it as soon as possible.",
+    "preview": "Preview of your feedback",
     "noFeedbackFound": "No feedback found matching your criteria",
     "like": "Like",
     "dislike": "Dislike",
@@ -349,7 +382,10 @@
     "resetButton": "Reset Password"
   },
   "seanceFormateur": {
-    "title": "Manage My Sessions"
+    "title": "Manage My Sessions",
+    "manageMySessions": "Manage My Sessions",
+    "manageSessionsOf": "🎓 Manage My Sessions of session",
+    "manageSessionsOfSession2": "🎓 Manage My Sessions - Session {{sessionId}} 🎓"
   },
   "session": {
     "addSession": "Add cohort",
@@ -380,7 +416,54 @@
     "module": "Module",
     "course": "Course",
     "content": "Content",
-    "confirmDelete": "Are you sure you want to delete this session?"
+    "confirmDelete": "Are you sure you want to delete this session?",
+    "uploadImageError": "Error uploading image",
+    "uploadVideoError": "Error uploading video",
+    "saveSuccess": "Session saved successfully!",
+    "loadingProgram": "Loading program...",
+    "loadingSession": "Loading session...",
+    "program": "Program",
+    "hide": "Hide",
+    "show": "Show",
+    "hideHierarchy": "Hide hierarchy",
+    "showHierarchy": "Show hierarchy",
+    "sessionAdditions": "Session additions",
+    "quizComing": "Quiz (coming soon)",
+    "notesChat": "Notes / Chat",
+    "whiteboard": "Whiteboard",
+    "feedback": "Feedback",
+    "sessionImages": "Session-specific images",
+    "sessionVideos": "Session-specific videos",
+    "sessionNotes": "Session-specific notes",
+    "notesPlaceholder": "Take your notes here...",
+    "saving": "Saving...",
+    "saveSession": "Save session",
+    "quizFeature": "The \"Quiz\" feature",
+    "sessionChat": "Session chat",
+    "writeMessage": "Write a message…",
+    "send": "Send",
+    "fileReady": "File ready to send",
+    "anonymous": "Anonymous",
+    "sessionFeedback": "Session feedback",
+    "hideFeedback": "Hide feedback",
+    "showFeedback": "Show feedback",
+    "feedbackInstructions": "Click \"Show feedback\" to fill out the session evaluation form",
+    "unpublish": "Unpublish",
+    "publish": "Publish",
+    "statusChangeError": "Error changing status.",
+    "fileUploadError": "File upload error",
+    "deleteMessageError": "Cannot delete (you are not the author of the message)",
+    "sessionsList": "Sessions of this cohort",
+    "noSessions": "No sessions at the moment.",
+    "animateSession": "Animate session",
+    "refresh": "Refresh",
+    "feedback": "Feedback",
+    "programDetails": "Program details",
+    "program": "Program",
+    "module": "Module",
+    "course": "Course",
+    "content": "Content",
+    "loading": "Loading..."
   },
   "addSeance": {
     "title": "Create New Session",
@@ -391,7 +474,15 @@
     "programPreview": "Program Preview",
     "createButton": "Create Session",
     "fillAllFields": "Please fill in all required fields.",
-    "creationError": "Error creating session. Please try again."
+    "creationError": "Error creating session. Please try again.",
+    "hideForm": "Hide form",
+    "createNewSession": "Create new session",
+    "createNewSessionTitle": "Create new session",
+    "title": "Title",
+    "sessionPreview": "Selected session preview",
+    "createSessionButton": "CREATE SESSION",
+    "fillAllFieldsAlert": "Fill in all fields.",
+    "creationErrorAlert": "Error creating session"
   },
   "sessions": {
     "sessionList": "Session List",
@@ -424,7 +515,22 @@
     "period": "From",
     "to": "to",
     "unknown": "Unknown",
-    "modulesContent": "Modules and Content"
+    "modulesContent": "Modules and Content",
+    "downloadImage": "Download image",
+    "newOpportunity": "New opportunity not to be missed!",
+    "delete": "Delete",
+    "join": "Join",
+    "addUser": "Add user",
+    "feedback": "Feedback",
+    "hideFeedback": "Hide Feedback",
+    "sessionFeedback": "Session Feedback",
+    "userEmailPlaceholder": "User email",
+    "add": "Add",
+    "adding": "Adding...",
+    "cancel": "Cancel",
+    "enterEmail": "Please enter an email.",
+    "userAdded": "User added to session!",
+    "addUserError": "Error adding user"
   },
   "users": {
     "loadError": "Error loading users",
@@ -483,6 +589,9 @@
     "emailPlaceholder": "Enter email",
     "phonePlaceholder": "Enter phone number",
     "creating": "Creating...",
+    "assignSessions": "Sessions to assign",
+    "noSessionsAvailable": "No sessions available",
+    "selectMultipleSessions": "You can select one or more sessions.",
     "createSuccess": "User created successfully!",
     "emailInvalidOrUndeliverable": "Email is invalid or undeliverable.",
     "userAlreadyExists": "User already exists.",
@@ -597,5 +706,17 @@
     "english": "English", "french": "French", "spanish": "Spanish", "german": "German", "arabic": "Arabic", "chinese": "Chinese", "japanese": "Japanese", "portuguese": "Portuguese", "italian": "Italian", "russian": "Russian",
     "ecommerce": "E-commerce", "fintech": "FinTech", "healthtech": "HealthTech", "edtech": "EdTech", "gaming": "Gaming", "automotive": "Automotive", "realestate": "Real Estate", "logistics": "Logistics", "retail": "Retail",
     "contentwriting": "Content Writing", "copywriting": "Copywriting", "technicalwriting": "Technical Writing", "blogwriting": "Blog Writing", "socialcontent": "Social Media Content", "videoediting": "Video Editing", "podcasting": "Podcasting"
+  },
+  "whiteboard": {
+    "title": "Interactive Whiteboard",
+    "collaborativeWhiteboard": "Collaborative Whiteboard",
+    "tools": {
+      "pen": "Pen",
+      "text": "Text",
+      "table": "Table",
+      "color": "Change Color",
+      "undo": "Undo",
+      "redo": "Redo"
+    }
   }
 }

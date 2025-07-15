@@ -18,6 +18,7 @@ import { UsersService } from "./users.service"
 import type { CreateUserDto } from "./dto/create-user.dto"
 import type { UpdateUserDto } from "./dto/update-user.dto"
 import type { Express } from "express"
+import { S3Service } from "../s3/s3.service"
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
@@ -44,7 +45,10 @@ const multerOptions = {
 
 @Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly s3Service: S3Service
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -217,32 +221,7 @@ export class UsersController {
   }
 
   @Patch("id/:id/photo")
-  @UseInterceptors(
-    FileInterceptor("photo", {
-      storage: diskStorage({
-        destination: "./uploads/profile-pics",
-        filename: (req, file, cb) => {
-          // Générer un nom de fichier unique
-          const randomName = Array(32)
-            .fill(null)
-            .map(() => Math.round(Math.random() * 16).toString(16))
-            .join("")
-          // Ajouter l'extension du fichier original
-          return cb(null, `${randomName}${extname(file.originalname)}`)
-        },
-      }),
-      fileFilter: (req, file, cb) => {
-        // Vérifier si le fichier est une image
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-          return cb(new Error("Seuls les fichiers image sont autorisés!"), false)
-        }
-        cb(null, true)
-      },
-      limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB max
-      },
-    }),
-  )
+  @UseInterceptors(FileInterceptor("photo"))
   async uploadProfilePic(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     try {
       const numericId = Number.parseInt(id, 10)
@@ -255,19 +234,32 @@ export class UsersController {
         throw new Error("Aucun fichier téléchargé")
       }
 
-      // Mettre à jour le champ profilePic de l'utilisateur avec le chemin du fichier
-      console.log("Fichier téléchargé:", file)
+      // Vérifier le type de fichier
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        throw new BadRequestException("Seules les images sont autorisées");
+      }
 
-      // Construire le chemin relatif pour le stockage dans la base de données
-      // Le chemin doit être relatif à la racine du serveur statique
-      const filePath = `/profile-pics/${file.filename}`
-      console.log("Chemin de fichier à stocker:", filePath)
+      // Upload vers S3
+      const result = await this.s3Service.uploadFile(file, 'profile-pics');
+      
+      console.log("Fichier uploadé vers S3:", result);
 
-      return this.usersService.updateProfilePic(numericId, filePath)
+      // Mettre à jour le profil utilisateur avec l'URL S3
+      return this.usersService.updateProfilePic(numericId, result.url)
     } catch (error) {
       console.error("Erreur lors du téléchargement de la photo de profil:", error)
       throw error
     }
   }
-  
+  @Post(':id/join-session2/:session2Id')
+async joinSession2(@Param('id') userId: string, @Param('session2Id') session2Id: string) {
+  return this.usersService.addUserToSession2(Number(userId), Number(session2Id));
+}
+
+@Get(':id/sessions2')
+async getUserSessions2(@Param('id') userId: string) {
+  return this.usersService.getSessionsForUser(Number(userId));
+}
+
 }

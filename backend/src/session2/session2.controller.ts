@@ -29,7 +29,16 @@ export class Session2Controller {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any
   ) {
-    return this.service.create(body, file);
+    try {
+      console.log('🔍 Session2 controller - Received request body:', body);
+      const result = await this.service.create(body, file);
+      console.log('✅ Session2 controller - Success:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Session2 controller - Error:', error.message);
+      console.error('❌ Session2 controller - Stack:', error.stack);
+      throw error;
+    }
   }
 
   @Get()
@@ -47,5 +56,12 @@ export class Session2Controller {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
+  }
+  @Post(':session2Id/add-user')
+  async addUserToSession(
+    @Param('session2Id') session2Id: string,
+    @Body('email') email: string,
+  ) {
+    return this.service.addUserToSession(Number(session2Id), email);
   }
 }

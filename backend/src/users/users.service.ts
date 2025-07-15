@@ -65,8 +65,7 @@ export class UsersService {
       .join("")
   }
 
- async create(createUserDto: CreateUserDto) {
-  try {
+  async create(createUserDto: CreateUserDto) {
     // ✅ Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
@@ -103,8 +102,13 @@ export class UsersService {
       },
     });
 
+    if (createUserDto.session2Ids && createUserDto.session2Ids.length > 0) {
+      for (const sessionId of createUserDto.session2Ids) {
+        await this.addUserToSession2(newUser.id, sessionId);
+      }
+    }
+
     try {
-      // Tentative d'envoi d'email, mais ne pas échouer si l'email ne peut pas être envoyé
       await this.mailService.sendWelcomeEmail(
         newUser.email,
         tempPassword,
@@ -113,16 +117,10 @@ export class UsersService {
       console.log(`✅ Email de bienvenue envoyé à ${newUser.email}`);
     } catch (emailError) {
       console.error(`❌ Erreur lors de l'envoi de l'email à ${newUser.email}:`, emailError);
-      // Ne pas échouer la création d'utilisateur si l'email échoue
     }
 
     return newUser;
-  } catch (error) {
-    console.error("❌ Erreur lors de la création de l'utilisateur:", error);
-    throw error;
   }
-}
-
 
   async findAll() {
     try {
@@ -524,5 +522,18 @@ export class UsersService {
       console.error("❌ Erreur dans updateProfilePic:", error)
       throw error
     }
+  }
+
+  async addUserToSession2(userId: number, session2Id: number) {
+    return this.prisma.userSession2.create({
+      data: { userId, session2Id }
+    });
+  }
+
+  async getSessionsForUser(userId: number) {
+    return this.prisma.userSession2.findMany({
+      where: { userId },
+      include: { session2: true }
+    });
   }
 }

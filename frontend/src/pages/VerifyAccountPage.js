@@ -1,3 +1,6 @@
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, TextField, Button, Alert, Box } from '@mui/material';
 import { useLocation } from 'react-router-dom';
@@ -8,16 +11,15 @@ import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth
 
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCEhNa5WP12dhiHzy-IPOSXB1Vhb9ml-tw",
-    authDomain: "lms-test2-e6fff.firebaseapp.com",
-    projectId: "lms-test2-e6fff",
-    storageBucket: "lms-test2-e6fff.appspot.com",
-    messagingSenderId: "325598933327",
-    appId: "1:325598933327:web:2932e02f96df545094d53a",
-    measurementId: "G-CE9G3G2JP8"
-  };
+  apiKey: "AIzaSyCEhNa5WP12dhiHzy-IPOSXB1Vhb9ml-tw",
+  authDomain: "lms-test2-e6fff.firebaseapp.com",
+  projectId: "lms-test2-e6fff",
+  storageBucket: "lms-test2-e6fff.appspot.com",
+  messagingSenderId: "325598933327",
+  appId: "1:325598933327:web:2932e02f96df545094d53a",
+  measurementId: "G-CE9G3G2JP8"
+};
 
-// Initialize Firebase
 let app;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
@@ -87,24 +89,28 @@ const VerifyAccountPage = () => {
 
             console.log('Initializing reCAPTCHA...');
             
-            // Create reCAPTCHA verifier with invisible type to avoid DOM issues
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                size: 'normal',
-                callback: (response) => {
-                    console.log('reCAPTCHA solved:', response);
-                    setRecaptchaResolved(true);
-                    setError(null);
+            // Create reCAPTCHA verifier with correct argument order
+            recaptchaVerifierRef.current = new RecaptchaVerifier(
+                'recaptcha-container',
+                {
+                    size: 'normal',
+                    callback: (response) => {
+                        console.log('reCAPTCHA solved:', response);
+                        setRecaptchaResolved(true);
+                        setError(null);
+                    },
+                    'expired-callback': () => {
+                        console.warn('reCAPTCHA expired');
+                        setRecaptchaResolved(false);
+                        setError('reCAPTCHA expired, please solve it again');
+                    },
+                    'error-callback': (error) => {
+                        console.error('reCAPTCHA error:', error);
+                        setError('reCAPTCHA error occurred');
+                    }
                 },
-                'expired-callback': () => {
-                    console.warn('reCAPTCHA expired');
-                    setRecaptchaResolved(false);
-                    setError('reCAPTCHA expired, please solve it again');
-                },
-                'error-callback': (error) => {
-                    console.error('reCAPTCHA error:', error);
-                    setError('reCAPTCHA error occurred');
-                }
-            });
+                auth
+            );
 
             // Render the reCAPTCHA
             recaptchaWidgetId.current = await recaptchaVerifierRef.current.render();

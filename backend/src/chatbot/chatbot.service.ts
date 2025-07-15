@@ -1570,12 +1570,24 @@ Soyez concis, pratique et utilisez un langage accessible.`;
       const truncatedUserMessage = userMessage.length > 500 ? userMessage.substring(0, 500) + '...' : userMessage;
       const truncatedBotResponse = botResponse.length > 1000 ? botResponse.substring(0, 1000) + '...' : botResponse;
       
+      // Store user message
       await prisma.chatMemory.create({
-        data: { 
+        data: {
           userId,
           sessionId: `user_${userId}_${Date.now()}`,
-          userMessage: truncatedUserMessage, 
-          botResponse: truncatedBotResponse
+          role: 'user',
+          userMessage: truncatedUserMessage,
+          content: truncatedUserMessage, // or whatever you want for 'content'
+        }
+      });
+      // Store bot response
+      await prisma.chatMemory.create({
+        data: {
+          userId,
+          sessionId: `user_${userId}_${Date.now()}`,
+          role: 'bot',
+          userMessage: truncatedBotResponse,
+          content: truncatedBotResponse, // or whatever you want for 'content'
         }
       });
       

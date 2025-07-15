@@ -15,3 +15,6 @@ prisma studio
 
 # runing seed file (ajouter data inside database 'postgres' )
 prisma db seed or yarn run seed
+
+# Delete all migration history
+rm -rf prisma/migrations

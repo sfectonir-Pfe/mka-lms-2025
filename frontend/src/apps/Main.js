@@ -34,6 +34,7 @@ import { Tooltip } from "@mui/material";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
+import Session2ChatPopup from "../components/Session2ChatPopup";
 
 
 
@@ -554,6 +555,8 @@ export default function Main({ setUser, user }) {
           <Outlet />
         </Box>
         <ScrollToTopButton />
+        {user && <Session2ChatPopup user={user} />}
+
       </Box>
     </Box >
   );

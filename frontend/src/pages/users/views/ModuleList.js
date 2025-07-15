@@ -70,14 +70,6 @@ const ModuleList = () => {
     <>
       <Button
         variant="outlined"
-        size="small"
-        onClick={() => navigate(`/modules/${params.row.id}/courses`)}
-        style={{ marginRight: 8 }}
-      >
-        {t('modules.viewCourses')}
-      </Button>
-      <Button
-        variant="outlined"
         color="error"
         size="small"
         onClick={() => handleDelete(params.row.id)}

@@ -12,7 +12,7 @@ export class CreateFeedbackDto {
   @IsNumber()
   @Min(0)
   @Max(5)
-  rating?: number;
+  rating: number;
 
   @IsOptional()
   @IsString()

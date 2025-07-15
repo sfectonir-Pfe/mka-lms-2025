@@ -147,38 +147,70 @@ const Chatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="card animate__animated animate__fadeInUp" style={{ position: 'absolute', bottom: 80, right: 0, width: 370, maxWidth: '95vw', height: 520, borderRadius: 22, boxShadow: '0 8px 32px rgba(0,0,0,0.18)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ 
+          position: 'absolute', 
+          bottom: 80, 
+          right: 0, 
+          width: 370, 
+          maxWidth: '95vw', 
+          height: 520, 
+          borderRadius: 22, 
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)', 
+          overflow: 'hidden', 
+          display: 'flex', 
+          flexDirection: 'column',
+          background: 'white'
+        }}>
           {/* Header */}
-          <div className="card-header bg-primary text-white d-flex align-items-center justify-content-start"
-            style={{
-              borderTopLeftRadius: 22,
-              borderTopRightRadius: 22,
-              minHeight: 64,
-              height: 64,
-              padding: '0 20px',
-              boxSizing: 'border-box',
-              overflow: 'hidden',
-              gap: 12
-            }}>
+          <div style={{
+            background: '#007bff',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            borderTopLeftRadius: 22,
+            borderTopRightRadius: 22,
+            minHeight: 64,
+            height: 64,
+            padding: '0 20px',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
+            gap: 12,
+            flexShrink: 0
+          }}>
             <img src={BOT_AVATAR} alt="Bot" style={{ width: 40, height: 40, borderRadius: '50%', background: '#fff', flexShrink: 0 }} />
             <div style={{ fontWeight: 600, fontSize: 20, lineHeight: '1.2', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {uiMessages.chatTitle}
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="card-body p-3 flex-grow-1 overflow-auto d-flex flex-column" style={{ background: '#f7f8fa', minHeight: 0, direction: LanguageService.getTextDirection(userLanguage) }}>
+          {/* Messages Container */}
+          <div style={{ 
+            background: '#f7f8fa', 
+            flex: 1, 
+            overflow: 'auto', 
+            padding: '12px',
+            display: 'flex',
+            flexDirection: 'column',
+            direction: LanguageService.getTextDirection(userLanguage)
+          }}>
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`d-flex mb-2 ${msg.isBot ? 'align-items-start' : 'justify-content-end'}`}
+                style={{
+                  display: 'flex',
+                  marginBottom: '8px',
+                  alignItems: msg.isBot ? 'flex-start' : 'flex-end',
+                  justifyContent: msg.isBot ? 'flex-start' : 'flex-end'
+                }}
               >
                 {msg.isBot && (
                   <img src={BOT_AVATAR} alt="Bot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8, alignSelf: 'flex-end' }} />
                 )}
                 <div
-                  className={msg.isBot ? 'bg-white text-dark' : 'bg-primary text-white'}
                   style={{
+                    background: msg.isBot ? 'white' : '#007bff',
+                    color: msg.isBot ? '#333' : 'white',
                     borderRadius: msg.isBot ? '18px 18px 18px 4px' : '18px 18px 4px 18px',
                     padding: '10px 16px',
                     maxWidth: '75%',
@@ -193,9 +225,16 @@ const Chatbot = () => {
               </div>
             ))}
             {isLoading && (
-              <div className="d-flex align-items-center mb-2">
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                 <img src={BOT_AVATAR} alt="Bot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }} />
-                <div className="bg-white text-dark" style={{ borderRadius: '18px 18px 18px 4px', padding: '10px 16px', fontSize: 15, opacity: 0.7 }}>
+                <div style={{ 
+                  background: 'white', 
+                  color: '#333', 
+                  borderRadius: '18px 18px 18px 4px', 
+                  padding: '10px 16px', 
+                  fontSize: 15, 
+                  opacity: 0.7 
+                }}>
                   <span className="spinner-border spinner-border-sm text-secondary me-2" role="status" />
                   ...
                 </div>
@@ -209,9 +248,16 @@ const Chatbot = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="card-footer p-2 bg-white" style={{ borderBottomLeftRadius: 22, borderBottomRightRadius: 22 }}>
-            <form className="d-flex" onSubmit={sendMessage} autoComplete="off">
+          {/* Input Container */}
+          <div style={{ 
+            background: 'white', 
+            padding: '8px', 
+            borderBottomLeftRadius: 22, 
+            borderBottomRightRadius: 22, 
+            flexShrink: 0,
+            borderTop: '1px solid #e0e3e8'
+          }}>
+            <form style={{ display: 'flex' }} onSubmit={sendMessage} autoComplete="off">
               <input
                 type="text"
                 className="form-control me-2"

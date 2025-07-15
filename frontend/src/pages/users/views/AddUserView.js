@@ -30,6 +30,18 @@ const AddUserView = () => {
     };
   }, []);
 
+  // New: session selection
+  const [sessions, setSessions] = useState([]);
+  const [selectedSessions, setSelectedSessions] = useState([]);
+
+  useEffect(() => {
+    // Fetch sessions on mount
+    axios
+      .get("http://localhost:8000/session2")
+      .then(res => setSessions(res.data))
+      .catch(() => setSessions([]));
+  }, []);
+
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
@@ -153,7 +165,7 @@ const AddUserView = () => {
             type="email"
             className="form-control"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             placeholder={t('users.emailPlaceholder')}
           />
@@ -234,7 +246,7 @@ const AddUserView = () => {
           <select
             className="form-select"
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={e => setRole(e.target.value)}
           >
             {roleOptions.map((r) => (
               <option key={r.value} value={r.value}>
@@ -243,6 +255,41 @@ const AddUserView = () => {
             ))}
           </select>
         </div>
+
+        <div className="mb-3">
+  <label className="form-label">{t('users.assignSessions')} :</label>
+  <div style={{ maxHeight: 140, overflowY: "auto", border: "1px solid #eee", borderRadius: 4, padding: 8, background: "#fafbfc" }}>
+    {sessions.length === 0 && (
+      <div className="text-muted">{t('users.noSessionsAvailable')}</div>
+    )}
+    {sessions.map((s) => (
+      <div key={s.id} className="form-check">
+        <input
+          className="form-check-input"
+          type="checkbox"
+          id={`session-${s.id}`}
+          value={s.id}
+          checked={selectedSessions.includes(String(s.id))}
+          onChange={e => {
+            const id = String(s.id);
+            setSelectedSessions(selectedSessions =>
+              e.target.checked
+                ? [...selectedSessions, id]
+                : selectedSessions.filter(val => val !== id)
+            );
+          }}
+        />
+        <label className="form-check-label" htmlFor={`session-${s.id}`}>
+          {s.name || `Session ${s.id}`}
+        </label>
+      </div>
+    ))}
+  </div>
+  <div className="form-text">
+    <small>{t('users.selectMultipleSessions')}</small>
+  </div>
+</div>
+
 
         {errorMessage && (
           <div className="alert alert-danger mt-3">{errorMessage}</div>

@@ -1,71 +1,57 @@
-import { Injectable } from '@nestjs/common';
+// src/seance-formateur/seance-formateur.service.ts
+
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import { FileType } from '@prisma/client';
+
+// DTOs pour typage fort
+interface CreateSeanceDto {
+  title: string;
+  startTime: string | Date;
+  session2Id: number;
+}
+
+interface AddMediaDto {
+  seanceId: number;
+  type: FileType;
+  fileUrl: string;
+}
 
 @Injectable()
 export class SeanceFormateurService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: any, formateurId: number) {
+  async create(data: CreateSeanceDto, formateurId: number): Promise<{ message: string; seanceId: number }> {
+    const { title, startTime, session2Id } = data;
+    if (!title || !startTime || !session2Id || !formateurId) {
+      throw new BadRequestException('Tous les champs sont obligatoires');
+    }
     try {
-      const { title, startTime, buildProgramId } = data;
-      
-      console.log('Creating seance with data:', { title, startTime, buildProgramId, formateurId });
-      
-      if (!title || !startTime || !buildProgramId || !formateurId) {
-        throw new Error('Missing required fields: title, startTime, buildProgramId, formateurId');
-      }
-
-      // Verify that the user exists and has the right to create seances
-      const user = await this.prisma.user.findUnique({
-        where: { id: Number(formateurId) }
-      });
-      
-      if (!user) {
-        throw new Error(`User with id ${formateurId} not found`);
-      }
-      
-      console.log('User found:', user.email, user.role);
-      
-      // Verify that the buildProgram exists
-      const buildProgram = await this.prisma.buildProgram.findUnique({
-        where: { id: Number(buildProgramId) },
-        include: { program: true }
-      });
-      
-      if (!buildProgram) {
-        throw new Error(`BuildProgram with id ${buildProgramId} not found`);
-      }
-      
-      console.log('BuildProgram found:', buildProgram.program.name);
-
       const seance = await this.prisma.seanceFormateur.create({
         data: {
           title,
           startTime: new Date(startTime),
-          buildProgramId: Number(buildProgramId),
-          formateurId: Number(formateurId),
+          session2Id: Number(session2Id),
+          formateurId,
         },
       });
-
-      console.log('Seance created successfully:', seance);
       return { message: 'Séance créée ✅', seanceId: seance.id };
     } catch (error) {
-      console.error('Error creating seance:', error);
       if (error.code === 'P2002') {
-        throw new Error('Une séance avec ces paramètres existe déjà');
+        throw new BadRequestException('Une séance avec ces paramètres existe déjà');
       }
       if (error.code === 'P2003') {
-        throw new Error('Référence invalide - vérifiez que l\'utilisateur et le programme existent');
+        throw new BadRequestException('Référence invalide - vérifiez que l\'utilisateur et le programme existent');
       }
-      throw error;
+      throw new BadRequestException(error.message || 'Erreur lors de la création de la séance');
     }
   }
 
-  async findAll() {
+  async findAll(): Promise<any[]> {
     return this.prisma.seanceFormateur.findMany({
       include: {
         formateur: true,
-        buildProgram: {
+        session2: {
           include: { program: true },
         },
       },
@@ -73,132 +59,94 @@ export class SeanceFormateurService {
     });
   }
 
-  async findByFormateur(formateurId: number) {
+  async findByFormateur(formateurId: number): Promise<any[]> {
+    if (!formateurId) throw new BadRequestException('formateurId requis');
     return this.prisma.seanceFormateur.findMany({
       where: { formateurId },
       include: {
-        buildProgram: {
+        session2: {
           include: { program: true },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
   }
-  async findOne(id: number) {
-  return this.prisma.seanceFormateur.findUnique({
-    where: { id },
-    include: {
-      formateur: true,
-      buildProgram: {
-        include: { program: true },
-      },
-    },
-  });
-}
-async remove(id: number) {
-  await this.prisma.seanceFormateur.delete({ where: { id } });
-  return { message: 'Séance supprimée 🗑️' };
-}
-async getProgramDetails(buildProgramId: number) {
-  return this.prisma.buildProgram.findUnique({
-    where: { id: buildProgramId },
-    select: {
-      program: {
-        select: { name: true },
-      },
-      seancesFormateur: {
-        select: {
-          id: true,
-          title: true,
-          startTime: true,
-          formateur: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+
+  async findOne(id: number): Promise<any> {
+    if (!id) throw new BadRequestException('id requis');
+    const seance = await this.prisma.seanceFormateur.findUnique({
+      where: { id },
+      include: {
+        formateur: true,
+        session2: {
+          include: { program: true },
         },
       },
-      modules: {
-        select: {
-          id: true,
-          module: {
-            select: { name: true },
-          },
-          courses: {
-            select: {
-              id: true,
-              course: {
-                select: { title: true },
-              },
-              contenus: {
-                select: {
-                  id: true,
-                  contenu: {
-                    select: {
-                      id: true,
-                      title: true,
-                      fileUrl: true,
-                      published: true,
-                      fileType: true
-                    },
-                  },
-                },
+    });
+    if (!seance) throw new NotFoundException('Séance non trouvée');
+    return seance;
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    if (!id) throw new BadRequestException('id requis');
+    await this.prisma.seanceFormateur.delete({ where: { id } });
+    return { message: 'Séance supprimée 🗑️' };
+  }
+
+  async getSession2Details(session2Id: number): Promise<any> {
+    if (!session2Id) throw new BadRequestException('session2Id requis');
+    const session2 = await this.prisma.session2.findUnique({
+      where: { id: session2Id },
+      include: {
+        program: true,
+        session2Modules: {
+          include: {
+            module: true,
+            courses: {
+              include: {
+                course: true,
+                contenus: { include: { contenu: true } },
               },
             },
           },
         },
       },
-    },
-  });
+    });
+    if (!session2) throw new NotFoundException('Session2 non trouvée');
+    return session2;
+  }
 
+  async addMediaToSeance(data: AddMediaDto): Promise<any> {
+    const { seanceId, type, fileUrl } = data;
+    if (!seanceId || !type || !fileUrl) {
+      throw new BadRequestException('Tous les champs sont obligatoires pour le média');
+    }
+    return this.prisma.seanceMedia.create({
+      data: { seanceId, type, fileUrl },
+    });
+  }
 
-}
-// Dans seance-formateur.service.ts
-async getProgramsByFormateur(formateurId: number) {
-  // 1. Récupérer tous les buildProgramId où ce formateur a des séances
-  const seances = await this.prisma.seanceFormateur.findMany({
-    where: { formateurId },
-    select: { buildProgramId: true },
-  });
+  async removeMedia(id: number): Promise<any> {
+    if (!id) throw new BadRequestException('id requis');
+    return this.prisma.seanceMedia.delete({ where: { id } });
+  }
 
-  const buildProgramIds = Array.from(new Set(seances.map((s) => s.buildProgramId)));
+  async getMediaForSeance(seanceId: number): Promise<any[]> {
+    if (!seanceId) throw new BadRequestException('seanceId requis');
+    return this.prisma.seanceMedia.findMany({ where: { seanceId } });
+  }
 
-  // 2. Renvoyer les programmes + modules/cours/contenus liés
-  return this.prisma.buildProgram.findMany({
-    where: { id: { in: buildProgramIds } },
-    include: {
-      program: true,
-      modules: {
-        include: {
-          module: true,
-          courses: {
-            include: {
-              course: true,
-              contenus: {
-                include: { contenu: true },
-              },
-            },
-          },
+  async findBySession2(session2Id: number): Promise<any[]> {
+    if (!session2Id) throw new BadRequestException('session2Id requis');
+    return this.prisma.seanceFormateur.findMany({
+      where: { session2Id },
+      include: {
+        formateur: true,
+        session2: {
+          include: { program: true },
         },
       },
-    },
-  });
-}
-async addMediaToSeance({ seanceId, type, fileUrl }) {
-  return this.prisma.seanceMedia.create({
-    data: { seanceId, type, fileUrl },
-  });
-}
-
-async getMediaForSeance(seanceId: number) {
-  return this.prisma.seanceMedia.findMany({ where: { seanceId } });
-}
-
-async removeMedia(id: number) {
-  // (optionnel: supprime le fichier du disque aussi)
-  return this.prisma.seanceMedia.delete({ where: { id } });
-}
-
-
+      orderBy: { createdAt: 'desc' },
+    });
+  }
 }

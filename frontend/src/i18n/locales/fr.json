@@ -29,7 +29,8 @@
     "changeLanguage": "Changer la langue",
     "associatedCourse": "Cours Associé",
     "associatedModule": "Module Associé",
-    "associatedProgram": "Programme Associé"
+    "associatedProgram": "Programme Associé",
+    "search": "Rechercher"
   },
   "role": {
     "etudiant": "Étudiant",
@@ -242,6 +243,38 @@
     "all": "Tous",
     "from": "De",
     "to": "À",
+    "feedbackTypes": {
+      "bug": "Signalement de Bug",
+      "feature": "Demande de Fonctionnalité",
+      "improvement": "Amélioration",
+      "complaint": "Réclamation"
+    },
+    "priorities": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée",
+      "critical": "Critique"
+    },
+    "steps": {
+      "type": "Type de Feedback",
+      "category": "Catégorie & Priorité",
+      "description": "Description Détaillée",
+      "technical": "Informations Techniques",
+      "contact": "Contact & Finalisation"
+    },
+    "form": {
+      "title": "Titre du feedback",
+      "description": "Description détaillée",
+      "stepsToReproduce": "Étapes pour reproduire",
+      "expectedBehavior": "Comportement attendu",
+      "actualBehavior": "Comportement actuel",
+      "browser": "Navigateur utilisé",
+      "device": "Appareil utilisé",
+      "contactInfo": "Informations de contact",
+      "allowContact": "J'autorise l'équipe à me recontacter si nécessaire"
+    },
+    "success": "Merci pour votre feedback ! Nous avons bien reçu votre demande et nous l'examinerons dans les plus brefs délais.",
+    "preview": "Aperçu de votre feedback",
     "noFeedbackFound": "Aucun commentaire trouvé correspondant à vos critères",
     "like": "J'aime",
     "dislike": "Je n'aime pas",
@@ -359,7 +392,10 @@
     "resetButton": "Réinitialiser le mot de passe"
   },
   "seanceFormateur": {
-    "title": "Gérer mes Séances"
+    "title": "Gérer mes Séances",
+    "manageMySessions": "Gérer mes Séances",
+    "manageSessionsOf": "🎓 Gérer mes Séances de la session",
+    "manageSessionsOfSession2": "🎓 Gérer mes Séances de la Session {{sessionId}} 🎓"
   },
   "session": {
     "addSession": "Ajouter une session",
@@ -390,7 +426,54 @@
     "module": "Module",
     "course": "Cours",
     "content": "Contenu",
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette séance ?"
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette séance ?",
+    "uploadImageError": "Erreur lors du téléchargement de l'image",
+    "uploadVideoError": "Erreur lors du téléchargement de la vidéo",
+    "saveSuccess": "Séance sauvegardée avec succès !",
+    "loadingProgram": "Chargement du programme...",
+    "loadingSession": "Chargement de la séance...",
+    "program": "Programme",
+    "hide": "Masquer",
+    "show": "Afficher",
+    "hideHierarchy": "Masquer la hiérarchie",
+    "showHierarchy": "Afficher la hiérarchie",
+    "sessionAdditions": "Ajouts séance",
+    "quizComing": "Quiz (à venir)",
+    "notesChat": "Notes / Chat",
+    "whiteboard": "Whiteboard",
+    "feedback": "Feedback",
+    "sessionImages": "Images propres à la séance",
+    "sessionVideos": "Vidéos propres à la séance",
+    "sessionNotes": "Notes propres à la séance",
+    "notesPlaceholder": "Prends tes notes ici...",
+    "saving": "Sauvegarde...",
+    "saveSession": "Sauvegarder la séance",
+    "quizFeature": "La fonctionnalité \"Quiz\"",
+    "sessionChat": "Chat de séance",
+    "writeMessage": "Ecris un message…",
+    "send": "Envoyer",
+    "fileReady": "Fichier prêt à envoyer",
+    "anonymous": "Anonyme",
+    "sessionFeedback": "Feedback de la séance",
+    "hideFeedback": "Masquer le feedback",
+    "showFeedback": "Afficher le feedback",
+    "feedbackInstructions": "Cliquez sur \"Afficher le feedback\" pour remplir le formulaire d'évaluation de la séance",
+    "unpublish": "Dépublier",
+    "publish": "Publier",
+    "statusChangeError": "Erreur lors du changement de statut.",
+    "fileUploadError": "Erreur upload fichier",
+    "deleteMessageError": "Suppression impossible (vous n'êtes pas l'auteur du message)",
+    "sessionsList": "Séances de cette session",
+    "noSessions": "Aucune séance pour le moment.",
+    "animateSession": "Animer la séance",
+    "refresh": "Actualiser",
+    "feedback": "Feedback",
+    "programDetails": "Détails du programme",
+    "program": "Programme",
+    "module": "Module",
+    "course": "Cours",
+    "content": "Contenu",
+    "loading": "Chargement..."
   },
   "addSeance": {
     "title": "Créer une Nouvelle Séance",
@@ -401,7 +484,15 @@
     "programPreview": "Aperçu du Programme",
     "createButton": "Créer la Séance",
     "fillAllFields": "Veuillez remplir tous les champs obligatoires.",
-    "creationError": "Erreur lors de la création de la séance. Veuillez réessayer."
+    "creationError": "Erreur lors de la création de la séance. Veuillez réessayer.",
+    "hideForm": "Masquer le formulaire",
+    "createNewSession": "Créer une nouvelle séance",
+    "createNewSessionTitle": "Créer une nouvelle séance",
+    "title": "Titre",
+    "sessionPreview": "Aperçu de la session sélectionnée",
+    "createSessionButton": "CRÉER LA SÉANCE",
+    "fillAllFieldsAlert": "Remplissez tous les champs.",
+    "creationErrorAlert": "Erreur lors de la création de la séance"
   },
   "sessions": {
     "sessionList": "Liste des Sessions",
@@ -434,7 +525,22 @@
     "period": "Du",
     "to": "au",
     "unknown": "Inconnu",
-    "modulesContent": "Modules et Contenus"
+    "modulesContent": "Modules et Contenus",
+    "downloadImage": "Télécharger l'image",
+    "newOpportunity": "Nouvelle opportunité à ne pas rater!",
+    "delete": "Supprimer",
+    "join": "Rejoindre",
+    "addUser": "Ajouter un utilisateur",
+    "feedback": "Feedback",
+    "hideFeedback": "Masquer Feedback",
+    "sessionFeedback": "Feedback de la Session",
+    "userEmailPlaceholder": "Email utilisateur",
+    "add": "Ajouter",
+    "adding": "Ajout...",
+    "cancel": "Annuler",
+    "enterEmail": "Veuillez entrer un email.",
+    "userAdded": "Utilisateur ajouté à la session !",
+    "addUserError": "Erreur lors de l'ajout de l'utilisateur"
   },
   "users": {
     "loadError": "Erreur lors du chargement des utilisateurs",
@@ -502,7 +608,10 @@
     "createError": "Erreur lors de la création de l'utilisateur.",
     "emailPlaceholder": "Entrez l'email de l'utilisateur",
     "phonePlaceholder": "Entrez le numéro de téléphone",
-    "creating": "Création en cours..."
+    "creating": "Création en cours...",
+    "assignSessions": "Sessions à assigner",
+    "noSessionsAvailable": "Aucune session disponible",
+    "selectMultipleSessions": "Vous pouvez cocher une ou plusieurs sessions."
   },
   "modules": {
     "moduleList": "Liste des Modules",
@@ -613,5 +722,17 @@
     "english": "Anglais", "french": "Français", "spanish": "Espagnol", "german": "Allemand", "arabic": "Arabe", "chinese": "Chinois", "japanese": "Japonais", "portuguese": "Portugais", "italian": "Italien", "russian": "Russe",
     "ecommerce": "E-commerce", "fintech": "FinTech", "healthtech": "HealthTech", "edtech": "EdTech", "gaming": "Jeux vidéo", "automotive": "Automobile", "realestate": "Immobilier", "logistics": "Logistique", "retail": "Commerce de détail",
     "contentwriting": "Rédaction de contenu", "copywriting": "Copywriting", "technicalwriting": "Rédaction technique", "blogwriting": "Rédaction de blog", "socialcontent": "Contenu réseaux sociaux", "videoediting": "Montage vidéo", "podcasting": "Podcasting"
+  },
+  "whiteboard": {
+    "title": "Tableau Blanc Interactif",
+    "collaborativeWhiteboard": "Tableau Blanc Collaboratif",
+    "tools": {
+      "pen": "Stylo",
+      "text": "Texte",
+      "table": "Tableau",
+      "color": "Changer la Couleur",
+      "undo": "Annuler",
+      "redo": "Refaire"
+    }
   }
 }

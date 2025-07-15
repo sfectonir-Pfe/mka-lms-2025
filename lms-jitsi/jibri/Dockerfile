@@ -42,7 +42,5 @@ RUN apt-dpkg-wrap apt-get update && \
     esac && \
     wget -qO /usr/bin/shm-check https://github.com/saghul/shm-check/releases/download/v1.0.0/shm-check-${SC_ARCH} && \
     chmod +x /usr/bin/shm-check
-RUN apt-get update && apt-get install -y chromium
-
 
 VOLUME /config

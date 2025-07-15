@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8001';
+const API_URL = 'http://localhost:8000';
 
 /**
  * Service for handling feedback-related API calls
@@ -63,6 +63,36 @@ export const feedbackService = {
       return response.data;
     } catch (error) {
       console.error('Error submitting feedback:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Submit general feedback
+   * @param {Object} feedbackData - General feedback data to submit
+   * @returns {Promise} - Promise with created feedback
+   */
+  submitGeneralFeedback: async (feedbackData) => {
+    try {
+      const response = await axios.post(`${API_URL}/feedback/general`, feedbackData);
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting general feedback:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Submit seance feedback
+   * @param {Object} feedbackData - Seance feedback data to submit
+   * @returns {Promise} - Promise with created feedback
+   */
+  submitSeanceFeedback: async (feedbackData) => {
+    try {
+      const response = await axios.post('/feedback/seance', feedbackData);
+      return response.data;
+    } catch (error) {
+      console.error('Error submitting seance feedback:', error);
       throw error;
     }
   },
@@ -139,6 +169,21 @@ export const feedbackService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching users for feedback:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get feedbacks for a specific session
+   * @param {number} sessionId - ID of the session
+   * @returns {Promise} - Promise with feedbacks data
+   */
+  getSessionFeedbacks: async (sessionId) => {
+    try {
+      const response = await axios.get(`${API_URL}/feedback/session/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching session feedbacks:', error);
       throw error;
     }
   }
