@@ -45,6 +45,11 @@ export class SeanceFormateurController {
     return this.service.findAll();
   }
 
+  @Get('debug/all')
+  async debugAll() {
+    return this.service.findAll();
+  }
+
   @Get('formateur/:id')
   async findByFormateur(@Param('id') id: string) {
     return this.service.findByFormateur(+id);

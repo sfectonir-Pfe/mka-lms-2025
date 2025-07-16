@@ -89,24 +89,28 @@ const VerifyAccountPage = () => {
 
             console.log('Initializing reCAPTCHA...');
             
-            // Create reCAPTCHA verifier with invisible type to avoid DOM issues
-            recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                size: 'normal',
-                callback: (response) => {
-                    console.log('reCAPTCHA solved:', response);
-                    setRecaptchaResolved(true);
-                    setError(null);
+            // Create reCAPTCHA verifier with correct argument order
+            recaptchaVerifierRef.current = new RecaptchaVerifier(
+                'recaptcha-container',
+                {
+                    size: 'normal',
+                    callback: (response) => {
+                        console.log('reCAPTCHA solved:', response);
+                        setRecaptchaResolved(true);
+                        setError(null);
+                    },
+                    'expired-callback': () => {
+                        console.warn('reCAPTCHA expired');
+                        setRecaptchaResolved(false);
+                        setError('reCAPTCHA expired, please solve it again');
+                    },
+                    'error-callback': (error) => {
+                        console.error('reCAPTCHA error:', error);
+                        setError('reCAPTCHA error occurred');
+                    }
                 },
-                'expired-callback': () => {
-                    console.warn('reCAPTCHA expired');
-                    setRecaptchaResolved(false);
-                    setError('reCAPTCHA expired, please solve it again');
-                },
-                'error-callback': (error) => {
-                    console.error('reCAPTCHA error:', error);
-                    setError('reCAPTCHA error occurred');
-                }
-            });
+                auth
+            );
 
             // Render the reCAPTCHA
             recaptchaWidgetId.current = await recaptchaVerifierRef.current.render();

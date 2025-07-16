@@ -75,8 +75,8 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+  shouldForwardProp: (prop) => prop !== "open" && prop !== "isRTL",
+})(({ theme, open, isRTL }) => ({
   zIndex: theme.zIndex.drawer + 1,
   backgroundColor: alpha(theme.palette.background.paper, 0.8),
   backdropFilter: "blur(8px)",
@@ -88,7 +88,7 @@ const AppBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    marginLeft: drawerWidth,
+    ...(isRTL ? { marginRight: drawerWidth, marginLeft: 0 } : { marginLeft: drawerWidth, marginRight: 0 }),
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
@@ -128,63 +128,63 @@ export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
-    console.log("User object in Main.js:", user);
-    if (user) {
-      console.log("User ID:", user.id);
-      console.log("User email:", user.email);
-      console.log("User role:", user.role);
-      console.log("User keys:", Object.keys(user));
+  console.log("User object in Main.js:", user);
+  if (user) {
+    console.log("User ID:", user.id);
+    console.log("User email:", user.email);
+    console.log("User role:", user.role);
+    console.log("User keys:", Object.keys(user));
 
-      // Ensure role is set correctly
-      if (!user.role || user.role === "user") {
-        const updatedUser = { ...user, role: "Etudiant" };
-        setUser(updatedUser);
+    // Ensure role is set correctly
+    if (!user.role || user.role === "user") {
+      const updatedUser = { ...user, role: "Etudiant" };
+      setUser(updatedUser);
 
-        // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
-        if (localStorage.getItem("user")) {
-          localStorage.setItem("user", JSON.stringify(updatedUser));
-        } else {
-          sessionStorage.setItem("user", JSON.stringify(updatedUser));
-        }
-        console.log("Updated user role to Etudiant");
+      // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else {
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
       }
-
-      // Récupérer les données utilisateur à jour, y compris la photo de profil
-
-      const fetchUserData = async () => {
-        try {
-          if (user.email) {
-            const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
-            if (response.data) {
-              // Mettre à jour l'objet utilisateur avec les données à jour
-              const updatedUser = {
-                ...user,
-                profilePic: response.data.profilePic || user.profilePic,
-                name: response.data.name || user.name,
-                role: response.data.role || user.role
-              };
-              
-              // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
-              if (localStorage.getItem("user")) {
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-              } else {
-                sessionStorage.setItem("user", JSON.stringify(updatedUser));
-              }
-              console.log("Updated user data with profile pic:", updatedUser);
-            }
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-
-      fetchUserData();
+      console.log("Updated user role to Etudiant");
     }
-  }, [user?.email]);
+
+    // Récupérer les données utilisateur à jour, y compris la photo de profil
+    const fetchUserData = async () => {
+      try {
+        if (user.email) {
+          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          if (response.data) {
+            // Mettre à jour l'objet utilisateur avec les données à jour
+            const updatedUser = {
+              ...user,
+              profilePic: response.data.profilePic || user.profilePic,
+              name: response.data.name || user.name,
+              role: response.data.role || user.role
+            };
+            
+            // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+            if (localStorage.getItem("user")) {
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+            } else {
+              sessionStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+            console.log("Updated user data with profile pic:", updatedUser);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }
+}, [user, setUser]); // Ajout des dépendances manquantes
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
@@ -325,7 +325,7 @@ export default function Main({ setUser, user }) {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} isRTL={isRTL}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -358,7 +358,7 @@ export default function Main({ setUser, user }) {
             <Typography variant="body1" noWrap>
               {user?.name || "Utilisateur"} |{" "}
               <span style={{ textTransform: "capitalize" }}>
-                {user?.role || "Rôle"}
+                {t('role.' + ((user?.role || 'user').toLowerCase()))}
               </span>
             </Typography>
 
@@ -468,10 +468,10 @@ export default function Main({ setUser, user }) {
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} anchor={isRTL ? "right" : "left"}>
         <DrawerHeader>
           <Typography variant="h6" sx={{ fontWeight: 700, opacity: open ? 1 : 0 }}>
-            MENU
+            {t('sidebar.menu')}
           </Typography>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -512,7 +512,7 @@ export default function Main({ setUser, user }) {
                       {elem.icon}
                     </ListItemIcon>
                     <ListItemText
-                      primary={elem.text}
+                      primary={t(elem.text)}
                       sx={{
                         opacity: open ? 1 : 0,
                         '& .MuiTypography-root': {
@@ -526,7 +526,7 @@ export default function Main({ setUser, user }) {
             );
 
             return open ? item : (
-              <Tooltip title={elem.text} placement="right" key={index}>
+              <Tooltip title={t(elem.text)} placement="right" key={index}>
                 {item}
               </Tooltip>
             );

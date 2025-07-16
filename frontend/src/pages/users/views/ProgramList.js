@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid, Typography } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 const ProgramList = () => {
+  const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ const ProgramList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer ce programme ?")) return;
+    if (!window.confirm(t('programs.confirmDelete'))) return;
 
     try {
       await axios.delete(`http://localhost:8000/programs/${id}`);
@@ -33,11 +35,14 @@ const ProgramList = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 80 },
-    { field: "name", headerName: "Nom du programme", flex: 1 },
+    { valueGetter: (value) => {
+
+      return "P-"+value
+    },field: "id", headerName: t('table.id'), width: 80 },
+    { field: "name", headerName: t('programs.programName'), flex: 1 },
     {
       field: "actions",
-      headerName: "Actions",
+      headerName: t('common.actions'),
       flex: 1,
       renderCell: (params) => (
         <>
@@ -47,7 +52,7 @@ const ProgramList = () => {
   size="small"
   onClick={() => navigate(`/programs/overview/${params.row.id}`)}
 >
-  Voir programme
+  {t('programs.viewProgram')}
 </Button>
 
 
@@ -58,7 +63,7 @@ const ProgramList = () => {
             onClick={() => handleDelete(params.row.id)}
             style={{ marginLeft: "8px" }}
           >
-            Supprimer
+            {t('common.delete')}
           </Button>
         </>
       ),
@@ -68,7 +73,7 @@ const ProgramList = () => {
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Liste des programmes</Typography>
+        <Typography variant="h5">{t('programs.programList')}</Typography>
 
         <Box>
           <Button
@@ -76,14 +81,14 @@ const ProgramList = () => {
             onClick={() => navigate("/programs/add")}
             sx={{ mr: 2 }}
           >
-            ➕ Ajouter un programme
+            ➕ {t('programs.addProgram')}
           </Button>
           <Button
             variant="outlined"
             startIcon={<VisibilityIcon />}
             onClick={() => navigate("/programs/overview")}
           >
-            Voir Programmes
+            {t('programs.viewPrograms')}
           </Button>
         </Box>
       </Grid>
@@ -96,6 +101,10 @@ const ProgramList = () => {
           pageSize={5}
           rowsPerPageOptions={[5]}
           getRowId={(row) => row.id}
+          localeText={{
+            noRowsLabel: t('table.noRows'),
+            labelRowsPerPage: t('table.rowsPerPage')
+          }}
         />
       </Box>
     </Box>

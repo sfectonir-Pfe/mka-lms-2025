@@ -46,10 +46,11 @@ model User {
   UserAnswer              UserAnswer[]
   chatMessages            ChatMessage[]
   whiteboardActions       WhiteboardAction[]
-  userSessions2 UserSession2[]
-  session2ChatMessages Session2ChatMessage[] @relation("UserSession2ChatMessages")
-
-
+  userSessions2           UserSession2[]
+  session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
+  feedbacks               Feedback[]              @relation("UserFeedback")
+  chatMemories            ChatMemory[]            @relation("UserChatMemory")
+  sessionFeedbacks        SessionFeedback[]
 }
 
 model Formateur {
@@ -130,6 +131,7 @@ model Contenu {
   fileType             FileType?
   type                 ContenuType
   published            Boolean               @default(false)
+  coursAssocie         String?
   courseContenus       CourseContenu[]
   quiz                 Quiz?
   session2Contenus     Session2Contenu[]
@@ -268,18 +270,18 @@ model Answer {
 }
 
 model Session2 {
-  id              Int               @id @default(autoincrement())
+  id              Int                   @id @default(autoincrement())
   name            String
   programId       Int
   startDate       DateTime?
   endDate         DateTime?
   imageUrl        String?
-  createdAt       DateTime          @default(now())
+  createdAt       DateTime              @default(now())
   SeanceFormateur SeanceFormateur[]
-  program         Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
   session2Modules Session2Module[]
-  userSessions2 UserSession2[]
-  chatMessages Session2ChatMessage[]
+  userSessions2   UserSession2[]
+  chatMessages    Session2ChatMessage[]
 }
 
 model Session2Module {
@@ -342,13 +344,14 @@ model ChatMessage {
   seanceId Int
   seance   SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
 
-  senderId Int?
-  sender   User? @relation(fields: [senderId], references: [id])
+  senderId  Int?
+  sender    User?    @relation(fields: [senderId], references: [id])
   messageId Int?
   type      String // "text" | "image" | "video" | "audio"
   content   String // text or file URL
   createdAt DateTime @default(now())
 }
+
 // model ChatSeen {
 //   id        Int      @id @default(autoincrement())
 //   userId    Int
@@ -362,7 +365,6 @@ model ChatMessage {
 //   @@unique([userId, seanceId]) // Each user can only have one "last seen" per chat
 // }
 
-
 model WhiteboardAction {
   id          Int      @id @default(autoincrement())
   seanceId    Int
@@ -371,33 +373,107 @@ model WhiteboardAction {
   createdAt   DateTime @default(now())
   createdById Int?
 
-  seance      SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  seance        SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
   createdBy     User?           @relation(fields: [createdById], references: [id])
   SeanceMedia   SeanceMedia?    @relation(fields: [seanceMediaId], references: [id])
   seanceMediaId Int?
 }
+
 model UserSession2 {
   id         Int      @id @default(autoincrement())
   userId     Int
   session2Id Int
   createdAt  DateTime @default(now())
-  
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session2   Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session2 Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
 
   @@unique([userId, session2Id])
 }
+
 model Session2ChatMessage {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   session2Id Int
-  session2   Session2  @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+  session2   Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
   senderId   Int?
-  sender     User?     @relation("UserSession2ChatMessages", fields: [senderId], references: [id])
-  type       String    // "text" | "image" | "video" | "audio"
-  content    String    // text or file URL
-  createdAt  DateTime  @default(now())
+  sender     User?    @relation("UserSession2ChatMessages", fields: [senderId], references: [id])
+  type       String // "text" | "image" | "video" | "audio"
+  content    String // text or file URL
+  createdAt  DateTime @default(now())
 }
 
+model Feedback {
+  id        Int                @id @default(autoincrement())
+  rating    Int
+  message   String?
+  category  String? // ← ajouté
+  type      String? // ← ajouté
+  likes     Int                @default(0) // ← ajouté
+  dislikes  Int                @default(0) // ← ajouté
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt // ← ajouté
+  userId    Int?
+  user      User?              @relation("UserFeedback", fields: [userId], references: [id])
+  responses FeedbackResponse[]
+}
+
+model FeedbackResponse {
+  id         Int      @id @default(autoincrement())
+  feedbackId Int
+  response   String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model SeanceFeedback {
+  id                  Int      @id @default(autoincrement())
+  seanceId            Int
+  userId              Int?
+  sessionRating       Int
+  contentQuality      Int
+  sessionDuration     String
+  sessionOrganization Int
+  objectivesAchieved  Int
+  trainerRating       Int
+  trainerClarity      Int
+  trainerAvailability Int
+  trainerPedagogy     Int
+  trainerInteraction  Int
+  teamRating          Int
+  teamCollaboration   Int
+  teamParticipation   Int
+  teamCommunication   Int
+  sessionComments     String?
+  trainerComments     String?
+  teamComments        String?
+  suggestions         String?
+  wouldRecommend      String?
+  improvementAreas    String?
+  createdAt           DateTime @default(now())
+}
+
+model SessionFeedback {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  userId    Int?
+  rating    Int
+  comments  String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model ChatMemory {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  sessionId   String?
+  userMessage String
+  botResponse String? // ✅ champ ajouté
+  role        String // "user" | "assistant"
+  content     String
+  createdAt   DateTime @default(now())
+  user        User?    @relation("UserChatMemory", fields: [userId], references: [id])
+}
 
 enum Role {
   Etudiant

@@ -2,7 +2,7 @@ import { MdSpaceDashboard } from "react-icons/md";
 import { FaUsers } from "react-icons/fa";
 // import { PiPathBold } from "react-icons/pi";
 // import { TbListDetails } from "react-icons/tb";
-// import { MdFeedback , FaBookOpen, FaFolderOpen} from "react-icons/md";
+import { MdFeedback } from "react-icons/md";
 import { FaGraduationCap, FaBook, FaFileAlt } from "react-icons/fa"; // additional icons for clarity
 import { BiBookBookmark, } from "react-icons/bi";
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -14,21 +14,25 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 export const sideBarData = [
-  { text: "Home", icon: <MdSpaceDashboard />, path: "/" },
-  { text: "Users", icon: <FaUsers />, path: "users" },
-  { text: "Modules", icon: <BiBookBookmark />, path: "module", },
-  { text: "Courses", icon: <FaBook />, path: "courses", },
-  { text: "Contenus", icon: <FaFileAlt />, path: "contenus" },
+  { text: "sidebar.home", icon: <MdSpaceDashboard />, path: "/" },
+  { text: "sidebar.users", icon: <FaUsers />, path: "users" },
+  { text: "sidebar.modules", icon: <BiBookBookmark />, path: "module", },
+  { text: "sidebar.courses", icon: <FaBook />, path: "courses", },
+  { text: "sidebar.contents", icon: <FaFileAlt />, path: "contenus" },
   { 
-  text: "Programs", 
+  text: "sidebar.programs", 
   icon: <FaGraduationCap />, 
   path: "/programs",
   children: [
-    { text: "Vue Programmes", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+    { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
   ]
 },
+  
+  
 
-  { text: "Sessions", icon: <CalendarMonthIcon />, path: "/sessions" },
+  { text: "sidebar.sessions", icon: <CalendarMonthIcon />, path: "/sessions" },
+  { text: "sidebar.feedback", icon: <MdFeedback />, path: "/feedback" },
+  { text: "sidebar.feedbackList", icon: <MdFeedback />, path: "/feedback-list" },
 //  {text: "Séances", icon: <DesktopMacIcon />, path: "/formateur/seances" },
 
 

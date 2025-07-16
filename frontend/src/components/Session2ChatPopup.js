@@ -29,6 +29,7 @@ export default function UnifiedSessionChatPopup({ user }) {
   const [newMsg, setNewMsg] = useState("");
   const [newFile, setNewFile] = useState(null);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const chatBottomRef = useRef();
   const fileInputRef = useRef();
@@ -238,15 +239,15 @@ export default function UnifiedSessionChatPopup({ user }) {
     <>
       {/* Floating Red Button */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
         style={{
           position: "fixed",
-          bottom: 32,
-          right: 32,
+          bottom: 100,
+          right: 24,
           width: 60,
           height: 60,
           borderRadius: "50%",
-          background: "#d32f2f",
+          backgroundColor: "#dc3545",
           color: "#fff",
           fontSize: 28,
           boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
@@ -255,9 +256,28 @@ export default function UnifiedSessionChatPopup({ user }) {
           cursor: "pointer",
         }}
         aria-label="Chat session"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
       >
         {open ? "✕" : "💬"}
       </button>
+      {/* Tooltip au survol */}
+      {showTooltip && (
+        <div style={{
+          position: "fixed",
+          bottom: 166,
+          right: 24,
+          fontSize: "12px",
+          color: "white",
+          background: "rgba(0,0,0,0.8)",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          whiteSpace: "nowrap",
+          zIndex: 2001
+        }}>
+          Chat de session
+        </div>
+      )}
 
       {/* Popup */}
       {open && (
@@ -276,28 +296,28 @@ export default function UnifiedSessionChatPopup({ user }) {
             p: 2,
           }}
         >
-            {/* Tabs always visible */}
-  <Box display="flex" gap={2} mb={1} justifyContent="center">
-    <Button
-      variant={selectedTab === "session" ? "contained" : "outlined"}
-      onClick={() => setSelectedTab("session")}
-      color="error"
-      size="small"
-      sx={{ flex: 1, fontWeight: 600 }}
-    >
-      💬 Session Chat
-    </Button>
-    <Button
-      variant={selectedTab === "seance" ? "contained" : "outlined"}
-      onClick={() => setSelectedTab("seance")}
-      color="primary"
-      size="small"
-      disabled={!seanceId}
-      sx={{ flex: 1, fontWeight: 600 }}
-    >
-      💬 Séance Chat
-    </Button>
-  </Box>
+          {/* Tabs always visible */}
+          <Box display="flex" gap={2} mb={1} justifyContent="center">
+            <Button
+              variant={selectedTab === "session" ? "contained" : "outlined"}
+              onClick={() => setSelectedTab("session")}
+              color="error"
+              size="small"
+              sx={{ flex: 1, fontWeight: 600 }}
+            >
+              💬 Session Chat
+            </Button>
+            <Button
+              variant={selectedTab === "seance" ? "contained" : "outlined"}
+              onClick={() => setSelectedTab("seance")}
+              color="primary"
+              size="small"
+              disabled={!seanceId}
+              sx={{ flex: 1, fontWeight: 600 }}
+            >
+              💬 Séance Chat
+            </Button>
+          </Box>
           {/* Session selector (if needed) */}
           {session2s.length > 1 && (
             <select

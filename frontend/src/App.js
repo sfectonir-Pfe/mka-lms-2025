@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import './i18n';
+import { useTranslation } from 'react-i18next';
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -15,9 +17,10 @@ import StudentProgramPage from "./pages/StudentProgramPage";
 import ProfilePage from "./pages/ProfilePage";
 import EditProfilePage from "./pages/EditProfilePage";
 
-// Auth / Main containers
+// Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
 import Main from "./apps/Main";
+
 
 // User-related pages
 import UsersPages from "./pages/users/UsersPages";
@@ -46,10 +49,14 @@ import SeanceFormateurPage from "./pages/SeanceFormateurPage";
 import AddSeanceFormateurView from "./pages/users/views/AddSeanceFormateurView";
 import SeanceFormateurList from "./pages/users/views/SeanceFormateurList";
 import AnimerSeanceView from "./pages/users/views/AnimerSeanceView";
+import SessionDetail from "./pages/SessionDetail";
+
 
 import JitsiRoom from './components/JitsiRoom';
+import Chatbot from './components/Chatbot';
 // import TestChatPage from "./pages/TestChatPage";
 import WhiteboardPage from "./pages/WhiteboardPage";
+import FeedbackListPage from "./pages/FeedbackListPage";
 
 
 
@@ -74,7 +81,7 @@ import { GoSun } from "react-icons/go";
 
 function App() {
   const [user, setUser] = useState(null);
-  const [mode, setMode] = useState("light");
+  const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
 
@@ -175,18 +182,18 @@ function App() {
     };
   }, []);
 
-  const handleMode = () => {
-    setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-  };
+
 
   return (
-    <div className={`${mode === "light" ? "" : "text-white bg-dark position-fixed h-100 w-100"}`}>
+
+    <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
       <div className="d-flex justify-content-end">
-        <button className="btn btn-light d-flex align-items-center" onClick={handleMode}>
-          {mode === "light" ? <FaRegMoon /> : <GoSun />}
+        <button className="btn btn-light d-flex align-items-center" onClick={() => setDarkMode(!darkMode)}>
+          {darkMode ? <GoSun /> : <FaRegMoon />}
         </button>
       </div>
+      {user && <Chatbot />}
 
       {loading ? (
         <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
@@ -205,8 +212,8 @@ function App() {
                   <Route index element={<UserList />} />
                   <Route path="add" element={<AddUserView />} />
                 </Route>
-                
-                
+
+
                 <Route path="programs" element={<ProgramsPage />} />
                 <Route path="programs/add" element={<AddProgramList />} />
                 <Route path="module" element={<ModulePage />} />
@@ -224,27 +231,21 @@ function App() {
                 <Route path="/modules" element={<ModuleList />} />
                 <Route path="/programs/edit/:programId" element={<EditProgramView />} />
                 <Route path="/sessions" element={<SessionPage />} />
-<Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
-<Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-<Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
-<Route path="/seances-formateur" element={<SeanceFormateurList />} />
-
-<Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-<Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage  />} />
+                <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
 
 
-
-<Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
-
-<Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
- {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
-<Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
 
 
 
+                <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
 
-
-                
+                <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
+                {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
+                <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
 
 
 
@@ -252,11 +253,18 @@ function App() {
 
 
 
-              
+
+
+
+
+
+
+
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
+                <Route path="feedback-list" element={<FeedbackListPage />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
               </Route>
@@ -268,7 +276,7 @@ function App() {
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
 
-               
+
 
               </Route>
             )}
@@ -276,8 +284,10 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      )};
-      
+      )}
+
+
+
     </div>
   );
 }

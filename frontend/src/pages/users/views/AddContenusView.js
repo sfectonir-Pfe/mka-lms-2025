@@ -8,9 +8,11 @@ import {
   Box,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 const AddContenusView = () => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [type, setType] = useState("Cours");
   const [fileType, setFileType] = useState("PDF");
@@ -22,8 +24,8 @@ const AddContenusView = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title) return alert("Le titre est obligatoire.");
-    if (type !== "Quiz" && !file) return alert("Veuillez choisir un fichier.");
+    if (!title) return alert(t('content.titleRequired'));
+    if (type !== "Quiz" && !file) return alert(t('content.fileRequired'));
 
     const formData = new FormData();
     formData.append("title", title);
@@ -47,20 +49,20 @@ const AddContenusView = () => {
       }
     } catch (err) {
       console.error("❌ Erreur ajout contenu :", err);
-      alert("Erreur lors de l'enregistrement.");
+      alert(t('content.saveError'));
     }
   };
 
   return (
   <Container maxWidth="sm">
     <Typography variant="h5" mt={4} mb={2}>
-      Ajouter un contenu
+      {t('content.addContent')}
     </Typography>
 
     <form onSubmit={handleSubmit}>
       <TextField
         fullWidth
-        label="Titre"
+        label={t('common.title')}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         margin="normal"
@@ -70,14 +72,14 @@ const AddContenusView = () => {
       <TextField
         select
         fullWidth
-        label="Type de contenu"
+        label={t('content.contentType')}
         value={type}
         onChange={(e) => setType(e.target.value)}
         margin="normal"
       >
-        <MenuItem value="Cours">Cours</MenuItem>
-        <MenuItem value="Exercice">Exercice</MenuItem>
-        <MenuItem value="Quiz">Quiz</MenuItem>
+        <MenuItem value="Cours">{t('content.course')}</MenuItem>
+        <MenuItem value="Exercice">{t('content.exercise')}</MenuItem>
+        <MenuItem value="Quiz">{t('content.quiz')}</MenuItem>
       </TextField>
 
       {type !== "Quiz" && (
@@ -85,14 +87,14 @@ const AddContenusView = () => {
           <TextField
             select
             fullWidth
-            label="Type de fichier"
+            label={t('content.fileType')}
             value={fileType}
             onChange={(e) => setFileType(e.target.value)}
             margin="normal"
           >
             <MenuItem value="PDF">PDF</MenuItem>
-            <MenuItem value="IMAGE">Image</MenuItem>
-            <MenuItem value="VIDEO">Vidéo</MenuItem>
+            <MenuItem value="IMAGE">{t('content.image')}</MenuItem>
+            <MenuItem value="VIDEO">{t('content.video')}</MenuItem>
             <MenuItem value="WORD">Word (.docx)</MenuItem>
             <MenuItem value="EXCEL">Excel (.xlsx)</MenuItem>
             <MenuItem value="PPT">PowerPoint (.pptx)</MenuItem>
@@ -104,7 +106,7 @@ const AddContenusView = () => {
             fullWidth
             sx={{ mt: 2 }}
           >
-            📎 Choisir un fichier {fileType && `(${fileType})`}
+            📎 {t('content.chooseFile')} {fileType && `(${fileType})`}
             <input
               hidden
               type="file"
@@ -129,7 +131,7 @@ const AddContenusView = () => {
 
           {file && (
             <Typography variant="caption" color="text.secondary" mt={1}>
-              Fichier sélectionné : {file.name}
+              {t('content.selectedFile')}: {file.name}
             </Typography>
           )}
         </>
@@ -137,16 +139,16 @@ const AddContenusView = () => {
 
       {type === "Quiz" && (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Le fichier n'est pas nécessaire. Vous pourrez créer le quiz après avoir enregistré.
+          {t('content.quizNote')}
         </Typography>
       )}
 
       <Box mt={3} display="flex" justifyContent="space-between">
         <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
-          Annuler
+          {t('common.cancel')}
         </Button>
         <Button type="submit" variant="contained">
-          Enregistrer
+          {t('common.save')}
         </Button>
       </Box>
     </form>
