@@ -101,26 +101,21 @@ export class UsersService {
         profilePic: true,
       },
     });
-
     if (createUserDto.session2Ids && createUserDto.session2Ids.length > 0) {
-      for (const sessionId of createUserDto.session2Ids) {
-        await this.addUserToSession2(newUser.id, sessionId);
-      }
-    }
+  for (const sessionId of createUserDto.session2Ids) {
+    await this.addUserToSession2(newUser.id, sessionId);
+  }
+}
 
-    try {
-      await this.mailService.sendWelcomeEmail(
-        newUser.email,
-        tempPassword,
-        newUser.role,
-      );
-      console.log(`✅ Email de bienvenue envoyé à ${newUser.email}`);
-    } catch (emailError) {
-      console.error(`❌ Erreur lors de l'envoi de l'email à ${newUser.email}:`, emailError);
-    }
+    await this.mailService.sendWelcomeEmail(
+      newUser.email,
+      tempPassword,
+      newUser.role,
+    );
 
     return newUser;
   }
+
 
   async findAll() {
     try {
@@ -523,17 +518,18 @@ export class UsersService {
       throw error
     }
   }
-
+  // users.service.ts
   async addUserToSession2(userId: number, session2Id: number) {
+    // (Check if already exists, or Prisma unique will throw)
     return this.prisma.userSession2.create({
       data: { userId, session2Id }
     });
   }
-
   async getSessionsForUser(userId: number) {
     return this.prisma.userSession2.findMany({
       where: { userId },
       include: { session2: true }
     });
   }
+
 }

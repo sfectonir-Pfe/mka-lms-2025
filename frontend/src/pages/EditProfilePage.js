@@ -36,12 +36,10 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const EditProfilePage = () => {
-  const { t } = useTranslation();
   const { email } = useParams();
   const navigate = useNavigate();
 
@@ -54,27 +52,6 @@ const EditProfilePage = () => {
   const [preview, setPreview] = useState("");
   const [newSkill, setNewSkill] = useState("");
   const [skills, setSkills] = useState([]);
-  const [showSkillsDropdown, setShowSkillsDropdown] = useState(false);
-  
-  const predefinedSkillKeys = [
-    "javascript", "python", "java", "cpp", "csharp", "php", "ruby", "go", "rust", "swift", "kotlin", "scala", "r", "matlab", "perl",
-    "react", "vuejs", "angular", "htmlcss", "sass", "less", "bootstrap", "tailwind", "jquery", "webpack", "vite",
-    "nodejs", "expressjs", "django", "flask", "springboot", "laravel", "rails", "aspnet", "fastapi",
-    "mysql", "postgresql", "mongodb", "redis", "sqlite", "oracle", "sqlserver", "cassandra", "dynamodb", "firebase",
-    "aws", "azure", "googlecloud", "docker", "kubernetes", "jenkins", "gitlabci", "githubactions", "terraform", "ansible",
-    "reactnative", "flutter", "iosdev", "androiddev", "xamarin", "ionic",
-    "dataanalysis", "machinelearning", "deeplearning", "ai", "tensorflow", "pytorch", "pandas", "numpy", "tableau", "powerbi",
-    "uiuxdesign", "figma", "adobexd", "sketch", "photoshop", "illustrator", "indesign", "aftereffects", "blender",
-    "digitalmarketing", "seo", "sem", "socialmedia", "contentmarketing", "emailmarketing", "googleanalytics", "facebookads",
-    "projectmanagement", "agile", "scrum", "kanban", "jira", "trello", "asana", "mondaycom", "slack",
-    "git", "linux", "windowsserver", "cybersecurity", "blockchain", "iot", "apidev", "microservices", "graphql", "restapi",
-    "leadership", "communication", "problemsolving", "criticalthinking", "teammanagement", "publicspeaking", "negotiation",
-    "english", "french", "spanish", "german", "arabic", "chinese", "japanese", "portuguese", "italian", "russian",
-    "ecommerce", "fintech", "healthtech", "edtech", "gaming", "automotive", "realestate", "logistics", "retail",
-    "contentwriting", "copywriting", "technicalwriting", "blogwriting", "socialcontent", "videoediting", "podcasting"
-  ];
-  
-  const predefinedSkills = predefinedSkillKeys.map(key => t(`skills.${key}`));
   const [imageQuality, setImageQuality] = useState(null);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
 
@@ -91,13 +68,6 @@ const EditProfilePage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState("");
-
-  // Fonction pour traduire le rôle
-  const translateRole = (role) => {
-    if (!role) return t('role.etudiant');
-    const roleKey = role.toLowerCase();
-    return t(`role.${roleKey}`);
-  };
 
   // Fonction pour évaluer la force du mot de passe
   const getPasswordStrength = (password) => {
@@ -120,9 +90,9 @@ const EditProfilePage = () => {
     strength += hasSpecialChar ? 1 : 0;
 
     // Détermination de la force
-    if (strength <= 2) return t('profile.passwordStrengthWeak');
-    if (strength <= 4) return t('profile.passwordStrengthMedium');
-    return t('profile.passwordStrengthStrong');
+    if (strength <= 2) return "faible";
+    if (strength <= 4) return "moyenne";
+    return "forte";
   };
 
   // Fonction pour analyser la qualité de l'image (détection de flou)
@@ -218,19 +188,6 @@ const EditProfilePage = () => {
       img.src = URL.createObjectURL(file);
     });
   };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.skills-dropdown-container')) {
-        setShowSkillsDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -416,14 +373,14 @@ const EditProfilePage = () => {
 
     // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
-      toast.error(t('profile.invalidImageFile'));
+      toast.error("Veuillez sélectionner un fichier image valide.");
       e.target.value = '';
       return;
     }
 
     // Vérifier la taille du fichier (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error(t('profile.fileSizeError'));
+      toast.error("La taille du fichier ne doit pas dépasser 5MB.");
       e.target.value = '';
       return;
     }
@@ -438,16 +395,16 @@ const EditProfilePage = () => {
       setImageQuality(quality);
 
       if (quality.isBlurry) {
-        toast.warning(t('profile.blurryImageWarning', { quality: quality.level }));
+        toast.warning(`Image détectée comme floue (qualité: ${quality.level}). Cliquez sur "Utiliser quand même" si vous souhaitez continuer.`);
         // Ne pas définir le fichier automatiquement si l'image est floue
         setSelectedFile(null);
       } else {
-        toast.success(t('profile.goodQualityImage', { quality: quality.level }));
+        toast.success(`Image de bonne qualité détectée (qualité: ${quality.level}).`);
         setSelectedFile(file);
       }
     } catch (error) {
       console.error("Erreur lors de l'analyse de l'image:", error);
-      toast.error(t('profile.imageAnalysisError'));
+      toast.error("Erreur lors de l'analyse de l'image. Veuillez réessayer.");
       setImageQuality({ level: 'error', score: 0, isBlurry: true });
       setSelectedFile(null);
     } finally {
@@ -455,18 +412,12 @@ const EditProfilePage = () => {
     }
   };
 
-  const handleAddSkill = (skillToAdd = null) => {
-    const skill = skillToAdd || newSkill.trim();
-    if (skill && !skills.includes(skill)) {
-      setSkills([...skills, skill]);
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
       setNewSkill("");
-      setShowSkillsDropdown(false);
     }
   };
-  
-  const filteredSkills = predefinedSkills.filter(skill => 
-    skill.toLowerCase().includes(newSkill.toLowerCase()) && !skills.includes(skill)
-  );
 
   const handleRemoveSkill = (skillToRemove) => {
     setSkills(skills.filter(skill => skill !== skillToRemove));
@@ -477,7 +428,7 @@ const EditProfilePage = () => {
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput && fileInput.files[0]) {
       setSelectedFile(fileInput.files[0]);
-      toast.info(t('profile.blurryImageAccepted'));
+      toast.info("Image floue acceptée. Nous recommandons d'utiliser une image plus nette pour de meilleurs résultats.");
     }
   };
 
@@ -513,22 +464,22 @@ const EditProfilePage = () => {
   const handleChangePassword = async () => {
     // Validation
     if (!passwordForm.currentPassword) {
-      setPasswordError(t('profile.currentPasswordRequired'));
+      setPasswordError("Current password is required");
       return;
     }
 
     if (!passwordForm.newPassword) {
-      setPasswordError(t('profile.newPasswordRequired'));
+      setPasswordError("New password is required");
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError(t('profile.passwordsDoNotMatch'));
+      setPasswordError("New passwords do not match");
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setPasswordError(t('profile.passwordTooShort'));
+      setPasswordError("New password must be at least 6 characters long");
       return;
     }
 
@@ -540,16 +491,14 @@ const EditProfilePage = () => {
       await axios.post(`http://localhost:8000/auth/change-password`, {
         email: user.email,
         currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-        sendNotification: true
+        newPassword: passwordForm.newPassword
       });
 
-      toast.success(t('profile.passwordChangedSuccess'));
-      toast.info(t('profile.passwordChangeEmailSent'));
+      toast.success("Password changed successfully!");
       handlePasswordDialogClose();
     } catch (error) {
       console.error("Error changing password:", error);
-      setPasswordError(error.response?.data?.message || t('profile.passwordChangeError'));
+      setPasswordError(error.response?.data?.message || "Failed to change password. Please try again.");
     } finally {
       setChangingPassword(false);
     }
@@ -563,7 +512,8 @@ const EditProfilePage = () => {
     // Vérifier la qualité de l'image avant la soumission
     if (selectedFile && imageQuality && imageQuality.isBlurry) {
       const confirmUpload = window.confirm(
-        t('profile.confirmBlurryUpload', { quality: imageQuality.level })
+        `Vous êtes sur le point de télécharger une image floue (qualité: ${imageQuality.level}). ` +
+        "Cela pourrait affecter la qualité de votre profil. Voulez-vous continuer ?"
       );
 
       if (!confirmUpload) {
@@ -751,11 +701,11 @@ const EditProfilePage = () => {
             }
           } catch (photoErr) {
             console.error("Error uploading profile picture:", photoErr);
-            toast.error(t('profile.profileUpdatePartialError'));
+            toast.error("Profile updated but failed to upload profile picture");
           }
         }
 
-        toast.success(t('profile.profileUpdatedSuccess'));
+        toast.success("Profile updated successfully!");
 
         // Rafraîchir la page principale et naviguer vers la page de profil
         setTimeout(() => {
@@ -803,12 +753,12 @@ const EditProfilePage = () => {
       } catch (updateErr) {
         console.error("Error updating user data:", updateErr);
         setError(`Update failed: ${updateErr.response?.data?.message || updateErr.message}`);
-        toast.error(t('profile.profileUpdateError'));
+        toast.error("Failed to update profile");
       }
     } catch (err) {
       console.error("Update error:", err);
       setError(`Update failed: ${err.message}`);
-      toast.error(t('profile.profileUpdateError'));
+      toast.error("Failed to update profile");
     } finally {
       setSubmitting(false);
     }
@@ -832,17 +782,17 @@ const EditProfilePage = () => {
       <Container maxWidth="sm" sx={{ mt: 8 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 4, textAlign: 'center' }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            {t('profile.profileError')}
+            Profile Error
           </Typography>
           <Alert severity="error" sx={{ mb: 3 }}>
-            {error || t('profile.userNotFound')}
+            {error || "User not found"}
           </Alert>
           <Stack direction="row" spacing={2} justifyContent="center">
             <Button variant="contained" onClick={() => window.location.reload()}>
-              {t('common.tryAgain')}
+              Try Again
             </Button>
             <Button variant="outlined" onClick={() => navigate('/')}>
-              {t('common.goHome')}
+              Go Home
             </Button>
           </Stack>
         </Paper>
@@ -870,7 +820,7 @@ const EditProfilePage = () => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            {t('profile.editProfile')}
+            Edit Profile
           </Typography>
           <Button
             onClick={() => {
@@ -899,7 +849,7 @@ const EditProfilePage = () => {
             variant="outlined"
             sx={{ borderRadius: 20, px: 3 }}
           >
-            {t('profile.backToProfile')}
+            Back to Profile
           </Button>
         </Box>
 
@@ -948,7 +898,7 @@ const EditProfilePage = () => {
             </IconButton>
           </Box>
           <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-            {t('profile.clickCameraToChange')}
+            Click camera icon to change photo
           </Typography>
 
           {/* Indicateur d'analyse de l'image */}
@@ -956,7 +906,7 @@ const EditProfilePage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
               <CircularProgress size={20} sx={{ mr: 1 }} />
               <Typography variant="body2" color="primary">
-                {t('profile.analyzingImageQuality')}
+                Analyse de la qualité de l'image...
               </Typography>
             </Box>
           )}
@@ -975,13 +925,13 @@ const EditProfilePage = () => {
                 {imageQuality.isBlurry ? (
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {t('profile.blurryImageDetected')}
+                      Image floue détectée
                     </Typography>
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                      {t('profile.quality')}: {imageQuality.level} ({t('profile.score')}: {Math.round(imageQuality.score)})
+                      Qualité: {imageQuality.level} (Score: {Math.round(imageQuality.score)})
                     </Typography>
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.5, mb: 1 }}>
-                      {t('profile.recommendSharperImage')}
+                      Nous recommandons de choisir une image plus nette
                     </Typography>
                     <Button
                       size="small"
@@ -990,16 +940,16 @@ const EditProfilePage = () => {
                       onClick={handleForceUseBlurryImage}
                       sx={{ mt: 1, fontSize: '0.75rem' }}
                     >
-                      {t('profile.useAnyway')}
+                      Utiliser quand même
                     </Button>
                   </Box>
                 ) : (
                   <>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {t('profile.goodImageQuality')}
+                      Image de bonne qualité
                     </Typography>
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                      {t('profile.quality')}: {imageQuality.level} ({t('profile.score')}: {Math.round(imageQuality.score)})
+                      Qualité: {imageQuality.level} (Score: {Math.round(imageQuality.score)})
                     </Typography>
                   </>
                 )}
@@ -1020,11 +970,11 @@ const EditProfilePage = () => {
             <Grid item xs={12} md={6}>
               <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                 <Person color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {t('profile.personalInfo')}
+                Personal Information
               </Typography>
 
               <TextField
-                label={t('profile.fullName')}
+                label="Full Name"
                 name="name"
                 fullWidth
                 value={form.name || ""}
@@ -1042,7 +992,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label={t('profile.email')}
+                label="Email"
                 name="email"
                 fullWidth
                 value={form.email || ""}
@@ -1060,7 +1010,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label={t('profile.phone')}
+                label="Phone"
                 name="phone"
                 fullWidth
                 value={form.phone || ""}
@@ -1078,7 +1028,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label={t('profile.location')}
+                label="Location"
                 name="location"
                 fullWidth
                 value={form.location || ""}
@@ -1109,7 +1059,7 @@ const EditProfilePage = () => {
                     fontWeight: 500
                   }}
                 >
-                  {t('profile.changePassword')}
+                  Change Password
                 </Button>
               </Box>
             </Grid>
@@ -1118,17 +1068,17 @@ const EditProfilePage = () => {
             <Grid item xs={12} md={6}>
               <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
                 <Work color="primary" sx={{ verticalAlign: 'middle', mr: 1 }} />
-                {t('profile.professionalDetails')}
+                Professional Details
               </Typography>
 
               <TextField
-                label={t('profile.role')}
+                label="Role"
                 name="role"
                 fullWidth
-                value={translateRole(form.role || "Etudiant")}
+                value={form.role || "Etudiant"}
                 disabled
                 margin="normal"
-                helperText={t('profile.contactAdminRole')}
+                helperText="Contact admin to change role"
                 InputProps={{
                   sx: {
                     textTransform: 'capitalize'
@@ -1137,7 +1087,7 @@ const EditProfilePage = () => {
               />
 
               <TextField
-                label={t('profile.aboutMe')}
+                label="About Me"
                 name="about"
                 fullWidth
                 multiline
@@ -1150,7 +1100,7 @@ const EditProfilePage = () => {
 
               <Box sx={{ mt: 3 }}>
                 <Typography variant="subtitle1" gutterBottom>
-                  {t('profile.skillsExpertise')}
+                  Skills & Expertise
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                   {skills.map((skill, idx) => (
@@ -1165,58 +1115,22 @@ const EditProfilePage = () => {
                     />
                   ))}
                 </Box>
-                <Box sx={{ position: 'relative' }} className="skills-dropdown-container">
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextField
-                      label={t('profile.addSkill')}
-                      value={newSkill}
-                      onChange={(e) => {
-                        setNewSkill(e.target.value);
-                        setShowSkillsDropdown(e.target.value.length > 0);
-                      }}
-                      onFocus={() => setShowSkillsDropdown(newSkill.length > 0)}
-                      size="small"
-                      fullWidth
-                    />
-                    <Button
-                      onClick={() => handleAddSkill()}
-                      variant="contained"
-                      startIcon={<Add />}
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      {t('common.add')}
-                    </Button>
-                  </Box>
-                  {showSkillsDropdown && filteredSkills.length > 0 && (
-                    <Paper
-                      sx={{
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        zIndex: 1000,
-                        maxHeight: 200,
-                        overflowY: 'auto',
-                        mt: 1
-                      }}
-                    >
-                      {filteredSkills.slice(0, 15).map((skill) => (
-                        <Box
-                          key={skill}
-                          onClick={() => handleAddSkill(skill)}
-                          sx={{
-                            p: 1,
-                            cursor: 'pointer',
-                            '&:hover': {
-                              bgcolor: 'action.hover'
-                            }
-                          }}
-                        >
-                          {skill}
-                        </Box>
-                      ))}
-                    </Paper>
-                  )}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <TextField
+                    label="Add Skill"
+                    value={newSkill}
+                    onChange={(e) => setNewSkill(e.target.value)}
+                    size="small"
+                    fullWidth
+                  />
+                  <Button
+                    onClick={handleAddSkill}
+                    variant="contained"
+                    startIcon={<Add />}
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Add
+                  </Button>
                 </Box>
               </Box>
             </Grid>
@@ -1244,10 +1158,10 @@ const EditProfilePage = () => {
                   {submitting ? (
                     <>
                       <CircularProgress size={24} sx={{ mr: 1 }} />
-                      {t('common.saving')}
+                      Saving...
                     </>
                   ) : (
-                    t('common.saveChanges')
+                    "Save Changes"
                   )}
                 </Button>
               </Box>
@@ -1264,7 +1178,7 @@ const EditProfilePage = () => {
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: 600 }}>
-          {t('profile.changePassword')}
+          Change Password
         </DialogTitle>
 
         <DialogContent>
@@ -1275,11 +1189,11 @@ const EditProfilePage = () => {
           )}
 
           <DialogContentText sx={{ mb: 2 }}>
-            {t('profile.changePasswordDescription')}
+            Please enter your current password and a new password to update your account security.
           </DialogContentText>
 
           <TextField
-            label={t('profile.currentPassword')}
+            label="Current Password"
             name="currentPassword"
             type={showCurrentPassword ? "text" : "password"}
             value={passwordForm.currentPassword}
@@ -1301,7 +1215,7 @@ const EditProfilePage = () => {
           />
 
           <TextField
-            label={t('profile.newPassword')}
+            label="New Password"
             name="newPassword"
             type={showNewPassword ? "text" : "password"}
             value={passwordForm.newPassword}
@@ -1326,14 +1240,14 @@ const EditProfilePage = () => {
           {passwordForm.newPassword && (
             <Box sx={{ mt: 1, mb: 2 }}>
               <Typography variant="body2" gutterBottom>
-                {t('profile.passwordStrength')}:
+                Force du mot de passe:
                 <Box component="span"
                   sx={{
                     ml: 1,
                     fontWeight: 'bold',
-                    color: passwordStrength === t('profile.passwordStrengthStrong')
+                    color: passwordStrength === 'forte'
                       ? 'success.main'
-                      : passwordStrength === t('profile.passwordStrengthMedium')
+                      : passwordStrength === 'moyenne'
                         ? 'warning.main'
                         : 'error.main'
                   }}
@@ -1347,14 +1261,14 @@ const EditProfilePage = () => {
                 <Box
                   sx={{
                     height: '100%',
-                    width: passwordStrength === t('profile.passwordStrengthStrong')
+                    width: passwordStrength === 'forte'
                       ? '100%'
-                      : passwordStrength === t('profile.passwordStrengthMedium')
+                      : passwordStrength === 'moyenne'
                         ? '60%'
                         : '30%',
-                    bgcolor: passwordStrength === t('profile.passwordStrengthStrong')
+                    bgcolor: passwordStrength === 'forte'
                       ? 'success.main'
-                      : passwordStrength === t('profile.passwordStrengthMedium')
+                      : passwordStrength === 'moyenne'
                         ? 'warning.main'
                         : 'error.main',
                     transition: 'width 0.3s ease'
@@ -1363,10 +1277,10 @@ const EditProfilePage = () => {
               </Box>
 
               {/* Conseils pour un mot de passe fort */}
-              {passwordStrength !== t('profile.passwordStrengthStrong') && (
+              {passwordStrength !== 'forte' && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
                   <Typography variant="subtitle2" gutterBottom color="primary">
-                    {t('profile.strongPasswordTips')}:
+                    Pour un mot de passe fort, incluez:
                   </Typography>
                   <Grid container spacing={1}>
                     <Grid item xs={12} sm={6}>
@@ -1374,7 +1288,7 @@ const EditProfilePage = () => {
                         color={passwordForm.newPassword.length >= 8 ? 'success.main' : 'text.secondary'}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {passwordForm.newPassword.length >= 8 ? '✓' : '○'} {t('profile.atLeast8Chars')}
+                        {passwordForm.newPassword.length >= 8 ? '✓' : '○'} Au moins 8 caractères
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1382,7 +1296,7 @@ const EditProfilePage = () => {
                         color={/[A-Z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {/[A-Z]/.test(passwordForm.newPassword) ? '✓' : '○'} {t('profile.oneUppercase')}
+                        {/[A-Z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre majuscule
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1390,7 +1304,7 @@ const EditProfilePage = () => {
                         color={/[a-z]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {/[a-z]/.test(passwordForm.newPassword) ? '✓' : '○'} {t('profile.oneLowercase')}
+                        {/[a-z]/.test(passwordForm.newPassword) ? '✓' : '○'} Une lettre minuscule
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -1398,7 +1312,7 @@ const EditProfilePage = () => {
                         color={/\d/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {/\d/.test(passwordForm.newPassword) ? '✓' : '○'} {t('profile.oneDigit')}
+                        {/\d/.test(passwordForm.newPassword) ? '✓' : '○'} Un chiffre
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -1406,7 +1320,7 @@ const EditProfilePage = () => {
                         color={/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? 'success.main' : 'text.secondary'}
                         sx={{ display: 'flex', alignItems: 'center' }}
                       >
-                        {/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? '✓' : '○'} {t('profile.oneSpecialChar')}
+                        {/[!@#$%^&*(),.?":{}|<>]/.test(passwordForm.newPassword) ? '✓' : '○'} Un caractère spécial (!@#$%...)
                       </Typography>
                     </Grid>
                   </Grid>
@@ -1416,7 +1330,7 @@ const EditProfilePage = () => {
           )}
 
           <TextField
-            label={t('profile.confirmNewPassword')}
+            label="Confirm New Password"
             name="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
             value={passwordForm.confirmPassword}
@@ -1444,7 +1358,7 @@ const EditProfilePage = () => {
             variant="outlined"
             disabled={changingPassword}
           >
-            {t('common.cancel')}
+            Cancel
           </Button>
           <Button
             onClick={handleChangePassword}
@@ -1452,7 +1366,7 @@ const EditProfilePage = () => {
             disabled={changingPassword}
             startIcon={changingPassword ? <CircularProgress size={20} /> : <Lock />}
           >
-            {changingPassword ? t('common.updating') : t('profile.updatePassword')}
+            {changingPassword ? "Updating..." : "Update Password"}
           </Button>
         </DialogActions>
       </Dialog>

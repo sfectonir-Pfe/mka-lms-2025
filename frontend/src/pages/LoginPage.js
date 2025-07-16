@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState,useEffect } from "react";
+import { useNavigate ,useLocation,} from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import toastErrorUtils from "../utils/toastError";
@@ -8,24 +8,23 @@ import toastErrorUtils from "../utils/toastError";
 import { toast } from "react-toastify"; 
 
 const LoginPage = () => {
-  const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
-  
+  const location = useLocation();
 const [rememberMe, setRememberMe] = useState(false);
 // const [errors, setErrors] = useState({ email: "", password: "" });
-
+const { t } = useTranslation();
 
 
 
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const emailFromUrl = params.get("email");
+
+    // Extraire l'email de l'URL si présent
+    const emailFromUrl = params.get('email');
     if (emailFromUrl) {
       setEmail(emailFromUrl);
     }
@@ -90,10 +89,14 @@ const [rememberMe, setRememberMe] = useState(false);
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("userEmail", user.email);
 
-      window.location.href = "/";
+      window.location.href = `/`;
     } catch (error) {
       console.error("Login error:", error);
-      const message = t('auth.loginFailed') + " " + (error.response?.data?.message || "");
+
+      const message =
+        "Login failed. Please check your credentials. " +
+        (error.response?.data?.message || "");
+
       setMsgError(message);
       toastErrorUtils.showError(message);
 
@@ -110,11 +113,10 @@ const [rememberMe, setRememberMe] = useState(false);
             className="img-fluid"
             alt="Login Illustration"
           />
-
         </div>
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
-            <h2>{t('auth.login')}</h2>
+            <h2>Connexion</h2>
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
             <div className="mb-3 position-relative">
@@ -152,6 +154,7 @@ const [rememberMe, setRememberMe] = useState(false);
 </div>
 
 
+            {/* Remember me checkbox */}
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">
                 <input
@@ -159,24 +162,27 @@ const [rememberMe, setRememberMe] = useState(false);
                   type="checkbox"
                   id="remember"
                   checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  onChange={(e) => {
+                    const isChecked = e.target.checked;
+                    console.log("Remember Me checkbox changed to:", isChecked ? "CHECKED" : "NOT CHECKED");
+                    setRememberMe(isChecked);
+                  }}
                 />
                 <label className="form-check-label" htmlFor="remember">
-                  {t("common.rememberMe")}
+                  {t('common.rememberMe')}
                 </label>
               </div>
-              <a href="/forgot-password" className="text-decoration-none">
-                {t("common.forgotPassword")}
-              </a>
+              <a href="/forgot-password" className="text-decoration-none">{t('common.forgotPassword')}</a>
             </div>
 
+            {/* Submit */}
             <div className="text-center text-md-start mt-4 pt-2">
               <button
                 type="submit"
                 className="btn btn-primary px-5"
                 disabled={!email || !password}
               >
-                {t("common.login")}
+                {t('common.login')}
               </button>
             </div>
           </form>

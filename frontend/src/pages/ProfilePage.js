@@ -20,12 +20,10 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 
 const ProfilePage = () => {
-  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -75,7 +73,7 @@ const ProfilePage = () => {
           return;
         }
 
-        setError(t('profile.missingUserData'));
+        setError("ID utilisateur manquant et aucune donnée utilisateur disponible");
         setLoading(false);
         return;
       }
@@ -88,7 +86,7 @@ const ProfilePage = () => {
 
       if (isNaN(userId)) {
         console.error("ProfilePage: ID invalide:", id);
-        setError(t('profile.invalidUserId'));
+        setError("ID utilisateur invalide");
         setLoading(false);
         return;
       }
@@ -150,7 +148,7 @@ const ProfilePage = () => {
       }
 
       // Si tout échoue
-      setError(t('profile.loadUserError'));
+      setError("Impossible de charger les informations de l'utilisateur.");
       setLoading(false);
     };
 
@@ -180,10 +178,10 @@ const ProfilePage = () => {
           background: 'linear-gradient(45deg, #f8f9fa 30%, #e9ecef 90%)'
         }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            {t('profile.profileError')}
+            Profile Error
           </Typography>
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-            {error || t('profile.userNotFound')}
+            {error || "User not found"}
           </Alert>
           <Stack direction="row" spacing={2} justifyContent="center">
             <Button
@@ -191,14 +189,14 @@ const ProfilePage = () => {
               onClick={() => window.location.reload()}
               sx={{ px: 4, py: 1 }}
             >
-              {t('common.tryAgain')}
+              Try Again
             </Button>
             <Button
               variant="outlined"
               onClick={() => navigate('/')}
               sx={{ px: 4, py: 1 }}
             >
-              {t('common.goHome')}
+              Go Home
             </Button>
           </Stack>
         </Paper>
@@ -226,7 +224,7 @@ const ProfilePage = () => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            {t('profile.userProfile')}
+            User Profile
           </Typography>
           <Button
             variant="contained"
@@ -248,7 +246,7 @@ const ProfilePage = () => {
               }
             }}
           >
-            {t('profile.editProfile')}
+            Edit Profile
           </Button>
         </Box>
 
@@ -292,14 +290,15 @@ const ProfilePage = () => {
 
             <Chip
               icon={<WorkIcon />}
-              label={user.role ? t(`role.${user.role.toLowerCase()}`) : t('role.etudiant')}
+              label={user.role || "Etudiant"}
               color="primary"
               variant="outlined"
               sx={{
                 borderRadius: 2,
                 px: 1,
                 fontSize: '0.9rem',
-                fontWeight: 500
+                fontWeight: 500,
+                textTransform: 'capitalize'
               }}
             />
 
@@ -308,7 +307,7 @@ const ProfilePage = () => {
               color: 'text.secondary',
               maxWidth: 500
             }}>
-              {user.about || t('profile.noBio')}
+              {user.about || "No bio provided"}
             </Typography>
           </Box>
         </Box>
@@ -330,7 +329,7 @@ const ProfilePage = () => {
               alignItems: 'center',
               gap: 1
             }}>
-              <PersonIcon color="primary" /> {t('profile.personalInfo')}
+              <PersonIcon color="primary" /> Personal Info
             </Typography>
 
             <Stack spacing={2}>
@@ -341,12 +340,12 @@ const ProfilePage = () => {
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <PhoneIcon color="action" />
-                <Typography>{user.phone || t('profile.notProvided')}</Typography>
+                <Typography>{user.phone || "Not provided"}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <LocationOnIcon color="action" />
-                <Typography>{user.location || t('profile.locationNotSpecified')}</Typography>
+                <Typography>{user.location || "Location not specified"}</Typography>
               </Box>
             </Stack>
           </Grid>
@@ -357,7 +356,7 @@ const ProfilePage = () => {
               mb: 3,
               fontWeight: 600
             }}>
-              {t('profile.skillsExpertise')}
+              Skills & Expertise
             </Typography>
 
             {user.skills && Array.isArray(user.skills) && user.skills.length > 0 ? (
@@ -386,7 +385,7 @@ const ProfilePage = () => {
               </Box>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                {t('profile.noSkillsAdded')}
+                No skills added yet.
               </Typography>
             )}
           </Grid>

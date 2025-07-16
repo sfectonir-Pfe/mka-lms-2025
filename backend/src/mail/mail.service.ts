@@ -7,19 +7,18 @@ export class MailService {
 
   private async send(to: string, subject: string, html: string) {
     try {
-      const response = await this.mailerService.sendMail({
-        from: 'LMS Platform <majdlabidi666@gmail.com>',
-        to,
-        subject,
-        html,
-      });
-      console.log("Email sent successfully:", response)
-      return response;
+      const response =await  this.mailerService.sendMail({
+      from: 'LMS Platform <tunirdigital@gmail.com>',
+      to,
+      subject,
+      html,
+    });
+    console.log("Email sent successfully:", response)
+    return response;
     } catch (error) {
-      console.error("Failed to send email:", error);
-      // Ne pas échouer complètement si l'email ne peut pas être envoyé
-      return { success: false, error: error.message };
+      console.log("Failed to send email:", error);
     }
+    
   }
 
   async sendPasswordResetEmail(to: string, token: string) {

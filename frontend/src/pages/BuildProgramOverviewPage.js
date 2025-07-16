@@ -18,11 +18,10 @@ import {
   Button
 } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useTranslation } from 'react-i18next';
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 
-const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
+const Section = ({ title, items, renderItem, expanded, onToggle }) => (
   <Box component={Paper} elevation={2} sx={{ p: 2, mb: 4 }}>
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <Badge badgeContent={items.length} color="primary">
@@ -35,7 +34,7 @@ const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
     <Collapse in={expanded}>
       {items.length === 0 ? (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          {t('common.noItemsFound', 'No items found')}
+          Aucun(e) {title.toLowerCase()} trouvé(e).
         </Typography>
       ) : (
         <List dense>
@@ -51,7 +50,6 @@ const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
 );
 
 export default function BuildProgramOverviewPage() {
-  const { t } = useTranslation();
   const [buildProgram, setbuildProgram] = useState([]);
   const [search, setSearch] = useState("");
   const [showbuildProgram, setShowbuildProgram] = useState(true);
@@ -64,7 +62,7 @@ export default function BuildProgramOverviewPage() {
       const all = res.data;
       setbuildProgram(programId ? all.filter(s => s.programId === Number(programId)) : all);
     } catch (err) {
-      toast.error(t('buildProgram.loadError'));
+      toast.error("Erreur chargement des programmes.");
     }
   }, [programId]);
 
@@ -79,10 +77,10 @@ export default function BuildProgramOverviewPage() {
     <Container sx={{ py: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h4">
-          🎓 {t('buildProgram.overviewTitle')}
+          🎓 Vue d'ensemble des programmes configurés
         </Typography>
         <Button variant="outlined" onClick={() => navigate("/programs")}>
-          ↩️ {t('common.back')}
+          ↩️ Retour
         </Button>
       </Box>
 
@@ -90,7 +88,7 @@ export default function BuildProgramOverviewPage() {
 
       <TextField
         fullWidth
-        label={t('buildProgram.searchProgram')}
+        label="Rechercher un programme par nom"
         variant="outlined"
         size="small"
         value={search}
@@ -99,20 +97,19 @@ export default function BuildProgramOverviewPage() {
       />
 
       <Section
-        title={t('common.programs')}
+        title="Programmes"
         items={buildProgram.filter(filterBySearch)}
         expanded={showbuildProgram}
         onToggle={() => setShowbuildProgram((prev) => !prev)}
-        t={t}
         renderItem={(buildProgram) => (
           <Box component={Paper} elevation={1} sx={{ p: 2, borderRadius: 2, mb: 2 }}>
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-              📘 {t('buildProgram.program')}: {buildProgram.program.name}
+              📘 Programme : {buildProgram.program.name}
             </Typography>
 
             {buildProgram.level && (
               <Typography variant="body2" sx={{ mb: 1 }}>
-                🎯 {t('buildProgram.level')}: <strong>{buildProgram.level}</strong>
+                🎯 Niveau : <strong>{buildProgram.level}</strong>
               </Typography>
             )}
 
@@ -149,12 +146,12 @@ export default function BuildProgramOverviewPage() {
                 color="info"
                 onClick={() => navigate(`/programs/edit/${buildProgram.program.id}`)}
               >
-                🛠️ {t('common.edit')}
+                🛠️ Modifier
               </Button>
 
               {buildProgram.program.published && (
                 <Chip
-                  label={t('buildProgram.published')}
+                  label="Publié"
                   icon={<span style={{ fontSize: 14 }}>✅</span>}
                   sx={{
                     fontWeight: "bold",
@@ -176,12 +173,12 @@ export default function BuildProgramOverviewPage() {
                     await axios.patch(`http://localhost:8000/programs/${buildProgram.program.id}/publish`);
                     toast.success(
                       buildProgram.program.published
-                        ? t('buildProgram.unpublishSuccess')
-                        : t('buildProgram.publishSuccess')
+                        ? "Programme dépublié avec succès !"
+                        : "Programme publié avec succès !"
                     );
                     fetchbuildProgram(); // refresh list
                   } catch (err) {
-                    toast.error(t('buildProgram.publishError'));
+                    toast.error("Erreur lors de la mise à jour du statut de publication.");
                   }
                 }}
                 sx={{
@@ -200,7 +197,7 @@ export default function BuildProgramOverviewPage() {
                   },
                 }}
               >
-                {buildProgram.program.published ? `❌ ${t('buildProgram.unpublish')}` : `📤 ${t('buildProgram.publish')}`}
+                {buildProgram.program.published ? "❌ Dépublier" : "📤 Publier"}
               </Button>
 
             </Box>

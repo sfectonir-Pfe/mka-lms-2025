@@ -12,32 +12,7 @@ export class CoursesService {
   }
 
   findAll() {
-    return this.prisma.course.findMany({
-      include: {
-        modules: {
-          include: {
-            module: {
-              select: {
-                name: true
-              }
-            }
-          }
-        },
-        buildProgramCourses: {
-          include: {
-            buildProgramModule: {
-              include: {
-                module: {
-                  select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
+    return this.prisma.course.findMany();
   }
 
   remove(id: number) {

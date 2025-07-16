@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Container, TextField, Button, Box, Typography } from "@mui/material";
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddCourseView = () => {
-  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const navigate = useNavigate();
 
@@ -15,19 +13,19 @@ const AddCourseView = () => {
       navigate("/courses");
     } catch (err) {
       console.error("Erreur création cours", err);
-      alert(t('courses.createError'));
+      alert("Erreur !");
     }
   };
 
   return (
     <Container maxWidth="sm">
       <Typography variant="h5" mt={3} mb={2}>
-        {t('courses.addCourse')}
+        Ajouter un cours
       </Typography>
 
       <TextField
         fullWidth
-        label={t('common.title')}
+        label="Titre"
         margin="normal"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -35,10 +33,10 @@ const AddCourseView = () => {
 
       <Box display="flex" justifyContent="space-between" mt={3}>
         <Button variant="outlined" color="error" onClick={() => navigate("/courses")}>
-          {t('common.cancel')}
+          Annuler
         </Button>
         <Button variant="contained" onClick={handleSubmit}>
-          {t('common.save')}
+          Enregistrer
         </Button>
       </Box>
     </Container>

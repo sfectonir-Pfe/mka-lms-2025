@@ -20,13 +20,11 @@ import {
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 
 const ConfigureSessionList = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [openDetail, setOpenDetail] = useState(false);
@@ -37,7 +35,7 @@ const ConfigureSessionList = () => {
       .then(res => setSessions(res.data))
       .catch(err => {
         console.error("Erreur chargement sessions", err);
-        alert(t('sessions.loadError'));
+        alert("Erreur chargement sessions.");
       });
   };
 
@@ -46,13 +44,13 @@ const ConfigureSessionList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t('sessions.confirmDelete'))) return;
+    if (!window.confirm("Supprimer cette session ?")) return;
     try {
       await axios.delete(`http://localhost:8000/sessions/${id}`);
       fetchSessions();
     } catch (err) {
       console.error("Erreur suppression session", err);
-      alert(t('sessions.deleteError'));
+      alert("Erreur lors de la suppression");
     }
   };
 
@@ -69,7 +67,7 @@ const ConfigureSessionList = () => {
   return (
     <Box mt={4} p={3} maxWidth="1200px" mx="auto">
       <Typography variant="h4" align="center" gutterBottom>
-        📅 {t('sessions.configuredSessions')}
+        📅 Sessions configurées
       </Typography>
 
       <Grid container spacing={4}>
@@ -144,7 +142,7 @@ const ConfigureSessionList = () => {
         startIcon={<VisibilityIcon />}
         onClick={() => handleViewDetails(s)}
       >
-        {t('sessions.detail')}
+        Détail
       </Button>
       <IconButton color="error" onClick={() => handleDelete(s.id)}>
         <DeleteIcon />
@@ -163,12 +161,12 @@ const ConfigureSessionList = () => {
           size="large"
           onClick={() => navigate("/sessions/add")}
         >
-          ➕ {t('sessions.newSession')}
+          ➕ Nouvelle session
         </Button>
       </Box>
 
       <Dialog open={openDetail} onClose={handleCloseDetail} maxWidth="md" fullWidth>
-        <DialogTitle>{t('sessions.sessionDetails')}</DialogTitle>
+        <DialogTitle>Détails de la session</DialogTitle>
         <DialogContent dividers>
           {selectedSession && (
             <Box>
@@ -208,7 +206,7 @@ const ConfigureSessionList = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDetail}>{t('common.close')}</Button>
+          <Button onClick={handleCloseDetail}>Fermer</Button>
         </DialogActions>
       </Dialog>
     </Box>

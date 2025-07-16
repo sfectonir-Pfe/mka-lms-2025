@@ -7,18 +7,15 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
-const BuildProgramView = () => {
-  const { t } = useTranslation();
-  
-  const steps = [
-    t('buildProgram.modulesCoursesContents'),
-    t('buildProgram.programLevel')
-  ];
+const steps = [
+  "Modules, cours et contenus",
+  "Niveau du programme"
+];
 
+const BuildProgramView = () => {
   const navigate = useNavigate();
   const { programId } = useParams();
 
@@ -71,7 +68,7 @@ const BuildProgramView = () => {
 
   const handleSubmit = async () => {
     if (!programId || !level || selectedModules.length === 0) {
-      alert(t('buildProgram.fillAllFields'));
+      alert("Veuillez remplir tous les champs nécessaires.");
       return;
     }
 
@@ -100,10 +97,10 @@ const BuildProgramView = () => {
       await axios.post("http://localhost:8000/buildProgram", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      alert(t('buildProgram.buildSuccess'));
+      alert("✅ Programme construit avec succès !");
       navigate("/programs");
     } catch {
-      alert(t('buildProgram.buildError'));
+      alert("❌ Erreur lors de la construction du programme.");
     }
   };
 
@@ -111,7 +108,7 @@ const BuildProgramView = () => {
   <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
     <Paper sx={{ p: 4, width: "100%", maxWidth: 1000, borderRadius: 4 }}>
       <Typography variant="h5" align="center" gutterBottom>
-        🎓 {t('buildProgram.buildProgram')}
+        🎓 Construire un Programme
       </Typography>
 
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
@@ -122,7 +119,7 @@ const BuildProgramView = () => {
 
       {activeStep === 0 && (
         <>
-          <Typography variant="h6">📦 {t('buildProgram.selectModules')}</Typography>
+          <Typography variant="h6">📦 Sélectionner les Modules</Typography>
           <FormGroup>
             {modules.map((m) => (
               <FormControlLabel
@@ -149,7 +146,7 @@ const BuildProgramView = () => {
                     />
                     {(selectedCourses[moduleId] || []).includes(course.id) && contenusByCourse[course.id]?.length > 0 && (
                       <Box ml={4} mt={1}>
-                        <Typography variant="body2" fontWeight="bold">📄 {t('buildProgram.contents')} :</Typography>
+                        <Typography variant="body2" fontWeight="bold">📄 Contenus :</Typography>
                         <FormGroup>
                           {contenusByCourse[course.id].map((ct) => (
                             <FormControlLabel
@@ -169,10 +166,10 @@ const BuildProgramView = () => {
 
           <Box mt={3} display="flex" justifyContent="space-between">
             <Button variant="outlined" color="error" onClick={() => navigate("/programs")}>
-              {t('common.cancel')}
+              Annuler
             </Button>
             <Button variant="contained" onClick={() => setActiveStep(1)}>
-              {t('common.next')}
+              Suivant
             </Button>
           </Box>
         </>
@@ -180,9 +177,9 @@ const BuildProgramView = () => {
 
       {activeStep === 1 && (
         <>
-          <Typography variant="h6">🎯 {t('buildProgram.programLevel')}</Typography>
+          <Typography variant="h6">🎯 Niveau du programme</Typography>
           <FormGroup>
-            {[t('buildProgram.basic'), t('buildProgram.intermediate'), t('buildProgram.advanced')].map((lvl) => (
+            {["Basique", "Intermédiaire", "Avancé"].map((lvl) => (
               <FormControlLabel
                 key={lvl}
                 control={<Checkbox checked={level === lvl} onChange={() => setLevel(lvl)} />}
@@ -193,14 +190,14 @@ const BuildProgramView = () => {
 
           <Box mt={3} display="flex" justifyContent="space-between">
             <Button variant="outlined" onClick={() => setActiveStep(0)}>
-              {t('common.back')}
+              Retour
             </Button>
             <Box>
               <Button variant="outlined" color="error" sx={{ mr: 2 }} onClick={() => navigate("/programs")}>
-                {t('common.cancel')}
+                Annuler
               </Button>
               <Button variant="contained" color="primary" onClick={handleSubmit}>
-                {t('common.save')}
+                Enregistrer
               </Button>
             </Box>
           </Box>

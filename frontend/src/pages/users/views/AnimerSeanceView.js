@@ -14,7 +14,6 @@ import {
   IconButton,
   Divider,
 } from "@mui/material";
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import ReactPlayer from "react-player";
 import {
@@ -26,7 +25,6 @@ import {
   Movie as MovieIcon,
   Save as SaveIcon,
   ZoomInMap as ZoomInMapIcon,
-  Feedback as FeedbackIcon,
 } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import io from "socket.io-client";
@@ -34,7 +32,6 @@ import EmojiPicker from "emoji-picker-react";
 import { Avatar } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
-import SeanceFeedbackForm from '../../../components/SeanceFeedbackForm';
 
 
 
@@ -47,12 +44,10 @@ import SeanceFeedbackForm from '../../../components/SeanceFeedbackForm';
 
 
 const AnimerSeanceView = () => {
-  const { t } = useTranslation();
   const { id: seanceId } = useParams();
   const [seance, setSeance] = useState(null);
   const [programDetails, setProgramDetails] = useState(null);
   const [tab, setTab] = useState(0);
-  const [prevTab, setPrevTab] = useState(0); // Ajout pour mémoriser l'onglet précédent
   const [showContenus, setShowContenus] = useState(true);
   const [sessionImages, setSessionImages] = useState([]);
   const [sessionVideos, setSessionVideos] = useState([]);
@@ -60,8 +55,6 @@ const AnimerSeanceView = () => {
   const [expandedCourses, setExpandedCourses] = useState({});
   const [sessionNotes, setSessionNotes] = useState("");
   const [saving, setSaving] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [showFeedbackSidebar, setShowFeedbackSidebar] = useState(false);
 
   // --- CHAT STATE & SOCKET ---
   const [chatMessages, setChatMessages] = useState([]);
@@ -124,7 +117,7 @@ const AnimerSeanceView = () => {
 
         setNewFile(null);
       } catch {
-        alert(t('seances.fileUploadError'));
+        alert("Erreur upload fichier");
       }
     } else if (newMsg.trim()) {
       socket.emit("sendMessage", {
@@ -145,7 +138,7 @@ const AnimerSeanceView = () => {
     });
     setChatMessages((prev) => prev.filter((m) => m.id !== msgId));
   } catch (err) {
-    alert(t('seances.deleteMessageError'));
+    alert("Suppression impossible (vous n'êtes pas l'auteur du message)");
   }
 };
 
@@ -198,10 +191,6 @@ useEffect(() => {
       .then(res => {
         setSessionImages(res.data.filter(m => m.type === "IMAGE"));
         setSessionVideos(res.data.filter(m => m.type === "VIDEO"));
-      })
-      .catch(err => {
-        console.error("Erreur chargement médias:", err);
-        // Continuer sans médias
       });
   }, [seanceId]);
 
@@ -224,11 +213,7 @@ useEffect(() => {
     }));
   };
 
-  // Remplace handleTabChange pour mémoriser l'onglet précédent
-  const handleTabChange = (e, newValue) => {
-    if (newValue !== 4) setPrevTab(tab); // On ne mémorise pas si on va sur feedback
-    setTab(newValue);
-  };
+  const handleTabChange = (e, newValue) => setTab(newValue);
 
   const handleAddImage = async (e) => {
     const file = e.target.files[0];
@@ -236,8 +221,8 @@ useEffect(() => {
     try {
       const media = await uploadMedia(file, "IMAGE");
       setSessionImages((prev) => [...prev, media]);
-    } catch (err) {
-      alert(t('seance.uploadImageError'));
+    } catch {
+      alert("Erreur upload image");
     }
   };
 
@@ -247,15 +232,15 @@ useEffect(() => {
     try {
       const media = await uploadMedia(file, "VIDEO");
       setSessionVideos((prev) => [...prev, media]);
-    } catch (err) {
-      alert(t('seance.uploadVideoError'));
+    } catch {
+      alert("Erreur upload vidéo");
     }
   };
 
   const handleSaveSession = async () => {
     setSaving(true);
-    setTimeout(() => setSaving(false), 1000); // Fake wait
-    alert(t('seance.saveSuccess'));
+    setTimeout(() => setSaving(false), 1000);
+    alert("Contenu spécifique de la séance sauvegardé !");
   };
 
 
@@ -271,12 +256,12 @@ useEffect(() => {
       );
       setProgramDetails(detailRes.data);
     } catch {
-      alert(t('seances.statusChangeError'));
+      alert("Erreur lors du changement de statut.");
     }
   };
 
   const renderProgramHierarchy = () => {
-    if (!programDetails) return <Typography>{t('seances.loadingProgram')}</Typography>;
+    if (!programDetails) return <Typography>Chargement du programme...</Typography>;
 
     return (
       <Box>
@@ -303,7 +288,7 @@ useEffect(() => {
                         variant="outlined"
                         onClick={() => toggleCourseVisibility(course.id)}
                       >
-                        {expandedCourses[course.id] ? t('seances.hide') : t('seances.show')}
+                        {expandedCourses[course.id] ? "Masquer" : "Afficher"}
                       </Button>
                     </Stack>
 
@@ -330,7 +315,7 @@ useEffect(() => {
                             color={ct.contenu?.published ? "success" : "warning"}
                             onClick={() => handlePublishContenu(ct.contenu?.id)}
                           >
-                            {ct.contenu?.published ? t('seances.unpublish') : t('seances.publish')}
+                            {ct.contenu?.published ? "Dépublier" : "Publier"}
                           </Button>
                         </Box>
                       ))}
@@ -345,7 +330,7 @@ useEffect(() => {
     );
   };
 
-  if (!seance) return <Typography>{t('seances.loadingSession')}</Typography>;
+  if (!seance) return <Typography>Chargement de la séance...</Typography>;
 
   return (
     <Box p={2}>
@@ -366,26 +351,14 @@ useEffect(() => {
       {/* Programme */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Chip label={`${t('seances.program')} : ${programDetails?.program?.title || ""}`} color="info" />
+          <Chip label={`Programme : ${programDetails?.program?.title || ""}`} color="info" />
           <Button
             startIcon={<ZoomInMapIcon />}
             onClick={() => setShowContenus(!showContenus)}
             variant="outlined"
             size="small"
           >
-            {showContenus ? t('seances.hideHierarchy') : t('seances.showHierarchy')}
-          </Button>
-          <Button
-            startIcon={<FeedbackIcon />}
-            onClick={() => {
-              if (tab === 4) setTab(prevTab === 4 ? 0 : prevTab);
-              else { setPrevTab(tab === 4 ? 0 : tab); setTab(4); }
-            }}
-            variant={tab === 4 ? "outlined" : "contained"}
-            color="secondary"
-            size="small"
-          >
-            {tab === 4 ? t('seances.hideFeedback') : t('seances.showFeedback')}
+            {showContenus ? "Masquer la hiérarchie" : "Afficher la hiérarchie"}
           </Button>
         </Stack>
         <Collapse in={showContenus}>
@@ -397,13 +370,11 @@ useEffect(() => {
       {/* Tabs */}
       <Box display="flex" mt={2}>
         <Tabs orientation="vertical" value={tab} onChange={handleTabChange} sx={{ borderRight: 1, borderColor: "divider", minWidth: 180 }}>
-          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t('seances.sessionAdditions')} />
-          <Tab icon={<QuizIcon />} iconPosition="start" label={t('seances.quizComing')} />
-          <Tab icon={<ChatIcon />} iconPosition="start" label={t('seances.notesChat')} />
-          <Tab icon={<InsertDriveFileIcon />} iconPosition="start" label={t('seances.whiteboard')} onClick={() => navigate(`/whiteboard/${seanceId}`)} />
-          {tab === 4 && (
-            <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('seances.feedback')} />
-          )}
+          <Tab icon={<DescriptionIcon />} iconPosition="start" label="Ajouts séance" />
+          <Tab icon={<QuizIcon />} iconPosition="start" label="Quiz (à venir)" />
+          <Tab icon={<ChatIcon />} iconPosition="start" label="Notes / Chat" />
+          <Tab icon={<InsertDriveFileIcon />} iconPosition="start" label="Whiteboard" onClick={() => navigate(`/whiteboard/${seanceId}`)} />
+
         </Tabs>
 
         <Box flex={1} pl={3}>
@@ -411,7 +382,7 @@ useEffect(() => {
           {tab === 0 && (
             <Box>
               <Typography variant="h6" mt={1}>
-                {t('seances.sessionImages')}
+                Images propres à la séance
                 <IconButton color="primary" component="label">
                   <AddPhotoAlternateIcon />
                   <input type="file" accept="image/*" hidden onChange={handleAddImage} />
@@ -430,7 +401,7 @@ useEffect(() => {
               </Stack>
 
               <Typography variant="h6" mt={2}>
-                {t('seances.sessionVideos')}
+                Vidéos propres à la séance
                 <IconButton color="primary" component="label">
                   <MovieIcon />
                   <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
@@ -444,29 +415,28 @@ useEffect(() => {
                 ))}
               </Stack>
 
-              <Typography variant="h6" mt={2}>{t('seances.sessionNotes')}</Typography>
+              <Typography variant="h6" mt={2}>Notes propres à la séance</Typography>
               <TextField
                 fullWidth multiline minRows={3}
-                placeholder={t('seances.notesPlaceholder')}
+                placeholder="Prends tes notes ici..."
                 value={sessionNotes}
                 onChange={(e) => setSessionNotes(e.target.value)}
                 sx={{ my: 1 }}
               />
               <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSaveSession} disabled={saving}>
-                {saving ? t('seances.saving') : t('seances.saveSession')}
+                {saving ? "Sauvegarde..." : "Sauvegarder la séance"}
               </Button>
             </Box>
           )}
 
           {/* Onglet 2 */}
           {tab === 1 && (
-            <Typography color="text.secondary">🧪 {t('seances.quizFeature')}</Typography>
+            <Typography color="text.secondary">🧪 La fonctionnalité "Quiz"</Typography>
           )}
 
-          {/* Onglet 3 */}
           {tab === 2 && (
             <Box>
-              <Typography variant="h6" mb={1}>💬 {t('seances.sessionChat')}</Typography>
+              <Typography variant="h6" mb={1}>💬 Chat de séance</Typography>
               <Paper sx={{
                 p: 2, mb: 2, maxHeight: 320, minHeight: 150, overflowY: "auto",
                 border: "1px solid #ccc", borderRadius: 2, background: "#f9f9f9"
@@ -516,7 +486,7 @@ useEffect(() => {
 
                       <Box>
                         <Typography variant="subtitle2" fontWeight="bold" color="primary">
-                          {msg.sender?.name || t('seances.anonymous')}
+                          {msg.sender?.name || "Anonyme"}
                           {msg.sender?.role && (
                             <span style={{ color: "#888", fontWeight: 400, marginLeft: 8, fontSize: 13 }}>
                               · {msg.sender.role}
@@ -562,7 +532,7 @@ useEffect(() => {
                   fullWidth
                   value={newMsg}
                   size="small"
-                  placeholder={t('seances.writeMessage')}
+                  placeholder="Ecris un message…"
                   onChange={(e) => setNewMsg(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleChatSend()}
                   sx={{ background: "#fff", borderRadius: 1 }}
@@ -580,7 +550,7 @@ useEffect(() => {
                   />
                 </IconButton>
                 <Button onClick={handleChatSend} variant="contained" disabled={!newMsg.trim() && !newFile}>
-                  {t('seances.send')}
+                  Envoyer
                 </Button>
               </Stack>
               {showEmoji && (
@@ -590,26 +560,14 @@ useEffect(() => {
               )}
               {newFile && (
                 <Typography color="primary" fontSize={12} ml={1} mt={0.5}>
-                  {t('seances.fileReady')}: {newFile.name}
+                  Fichier prêt à envoyer: {newFile.name}
                 </Typography>
               )}
             </Box>
           )}
 
-          {/* Onglet 4 - Feedback */}
-          {tab === 4 && (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t('seances.sessionFeedback')}</Typography>
-              </Stack>
-              <SeanceFeedbackForm seanceId={seanceId} />
-              {/* Message d'information supprimé */}
-            </Box>
-          )}
-
         </Box>
       </Box>
-      {/* Feedback Sidebar supprimé car le feedback reste dans la sidebar/tab */}
 
       {/* Image zoom */}
       {zoomedImage && (

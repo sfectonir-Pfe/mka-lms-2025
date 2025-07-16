@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 function ForgotPasswordPage() {
-  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -13,7 +11,7 @@ function ForgotPasswordPage() {
     e.preventDefault();
 
     if (!isValidEmail(email)) {
-      alert(t('auth.invalidEmail'));
+      alert('Veuillez entrer une adresse email valide.');
       return;
     }
 
@@ -24,7 +22,7 @@ function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (error) {
       console.error(error);
-      alert(t('auth.errorOccurred'));
+      alert("Une erreur s'est produite. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
@@ -38,12 +36,12 @@ function ForgotPasswordPage() {
           <div className="col-md-6">
             <div className="card border-primary">
               <div className="card-body p-5 text-center">
-                <h2 className="fw-bold mb-4">{t('auth.emailSent')}</h2>
+                <h2 className="fw-bold mb-4">Email envoyé</h2>
                 <div className="border-bottom border-primary mx-auto mb-4" style={{ width: '150px', height: '2px' }}></div>
                 <p className="mb-4">
-                  {t('auth.resetEmailSent')}
+                  Si un compte existe avec l'adresse email fournie, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
                 </p>
-                <a href="/" className="btn btn-outline-primary">{t('auth.backToLogin')}</a>
+                <a href="/" className="btn btn-outline-primary">Retour à la connexion</a>
               </div>
             </div>
           </div>
@@ -59,15 +57,15 @@ function ForgotPasswordPage() {
           <div className="card border-primary">
             <div className="card-body p-5">
               <div className="text-center mb-5">
-                <h2 className="fw-bold">{t('auth.forgotPassword')}</h2>
+                <h2 className="fw-bold">Mot de passe oublié</h2>
                 <div className="border-bottom border-primary mx-auto" style={{ width: '150px', height: '2px' }}></div>
               </div>
 
-              <p className="text-center mb-4">{t('auth.enterEmailForReset')}</p>
+              <p className="text-center mb-4">Entrez votre adresse email pour recevoir un lien de réinitialisation</p>
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-4 text-center">
-                  <label htmlFor="email" className="form-label fw-bold">{t('auth.email')}:</label>
+                  <label htmlFor="email" className="form-label fw-bold">Email :</label>
                   <input
                     type="email"
                     className="form-control mx-auto"
@@ -76,7 +74,7 @@ function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    aria-label={t('auth.email')}
+                    aria-label="Adresse email"
                   />
                 </div>
 
@@ -85,17 +83,17 @@ function ForgotPasswordPage() {
                     {loading ? (
                       <>
                         <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        {t('auth.sending')}
+                        Envoi en cours...
                       </>
                     ) : (
-                      t('auth.sendLink')
+                      'Envoyer le lien'
                     )}
                   </button>
                 </div>
               </form>
 
               <div className="text-center mt-4">
-                <a href="/" className="text-decoration-none">{t('auth.backToLogin')}</a>
+                <a href="/" className="text-decoration-none">Retour à la connexion</a>
               </div>
             </div>
           </div>

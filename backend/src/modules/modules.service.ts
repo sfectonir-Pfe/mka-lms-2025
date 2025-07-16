@@ -11,32 +11,7 @@ export class ModulesService {
   }
 
   findAll() {
-    return this.prisma.module.findMany({
-      include: {
-        programs: {
-          include: {
-            program: {
-              select: {
-                name: true
-              }
-            }
-          }
-        },
-        buildProgramModules: {
-          include: {
-            buildProgram: {
-              include: {
-                program: {
-                  select: {
-                    name: true
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    });
+    return this.prisma.module.findMany();
   }
 
   remove(id: number) {

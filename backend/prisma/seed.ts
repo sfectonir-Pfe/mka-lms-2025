@@ -8,17 +8,14 @@ async function main() {
   const hashedPassword = await bcrypt.hash('123456', salt);
 
   const admin = await prisma.user.upsert({
-  where: { email: 'khalil@gmail.com' },
-  update: {},
-  create: {
-    role: Role.Admin,
-    email: 'khalil@gmail.com',
-    password: hashedPassword,
-    needsVerification: false,  // Ajoutez cette ligne
-    isActive: true            // Assurez-vous que le compte est actif
-  },
-});
-
+    where: { email: 'khalil@gmail.com' },
+    update: {},
+    create: {
+      role: Role.Admin, // ✅ Correct enum usage
+      email: 'khalil@gmail.com',
+      password: hashedPassword,
+    },
+  });
 
   console.log('Admin seedé:', admin);
 }

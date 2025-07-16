@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTranslation } from 'react-i18next'
 import axios from "axios"
 import {
   Box,
@@ -48,7 +47,6 @@ import {
 } from "@mui/icons-material"
 
 export default function UserList() {
-  const { t } = useTranslation()
   const theme = useTheme()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -71,7 +69,7 @@ export default function UserList() {
       setUsers(response.data)
     } catch (error) {
       console.error("❌ Fetch error:", error)
-      showNotification(t('users.loadError'), "error")
+      showNotification("❌ Erreur de chargement des utilisateurs. Veuillez réessayer.", "error")
       setUsers([])
     } finally {
       setLoading(false)
@@ -90,11 +88,11 @@ export default function UserList() {
       console.log("🗑️ Deleting user:", deleteDialog.user.id)
       await axios.delete(`http://localhost:8000/users/${deleteDialog.user.id}`)
       setUsers(users.filter((u) => u.id !== deleteDialog.user.id))
-      showNotification(t('users.deleteSuccess'), "success")
+      showNotification(`✅ L'utilisateur ${deleteDialog.user.name || deleteDialog.user.email} a été supprimé avec succès`, "success")
       console.log("✅ User deleted successfully")
     } catch (error) {
       console.error("❌ Delete error:", error)
-      showNotification(t('users.deleteError'), "error")
+      showNotification(`❌ Erreur lors de la suppression de l'utilisateur ${deleteDialog.user.name || deleteDialog.user.email}`, "error")
     } finally {
       setActionLoading(false)
       setDeleteDialog({ open: false, user: null })
@@ -196,7 +194,8 @@ export default function UserList() {
         // Mettre à jour l'état local
         setUsers((prevUsers) => prevUsers.map((u) => (u.id === user.id ? { ...u, isActive: newStatus } : u)))
 
-        showNotification(t('users.statusUpdateSuccess'), "success")
+        const statusText = newStatus ? "activé" : "désactivé"
+        showNotification(`✅ Le compte de ${user.name || user.email} a été ${statusText} avec succès`, "success")
         console.log("🎉 Status toggle completed successfully")
 
         // Rafraîchir la liste après un délai pour vérifier la synchronisation
@@ -208,7 +207,24 @@ export default function UserList() {
     } catch (error) {
       console.error("💥 Unexpected error:", error)
 
-      showNotification(t('users.statusUpdateError'), "error")
+      // Gestion d'erreur détaillée
+      let errorMessage = "Erreur lors de la modification du statut"
+
+      if (error.code === "ECONNREFUSED") {
+        errorMessage = "❌ Serveur inaccessible - Vérifiez que le backend est démarré"
+      } else if (error.code === "ENOTFOUND") {
+        errorMessage = "❌ Serveur introuvable - Vérifiez l'URL du backend"
+      } else if (error.response?.status === 404) {
+        errorMessage = "❌ Utilisateur introuvable"
+      } else if (error.response?.status === 500) {
+        errorMessage = "❌ Erreur serveur interne"
+      } else if (error.response?.status === 400) {
+        errorMessage = "❌ Données invalides"
+      } else if (error.response?.data?.message) {
+        errorMessage = `❌ ${error.response.data.message}`
+      }
+
+      showNotification(`${errorMessage}`, "error")
 
       // Log détaillé pour le debugging
       console.error("🔍 Error debugging info:", {
@@ -299,19 +315,20 @@ export default function UserList() {
                 mb: 1,
               }}
             >
-              {t('users.userManagement')}
+              Gestion des Utilisateurs
             </Typography>
             <Typography variant="h6" color="text.secondary">
-              {t('users.usersSection')}
+              Tableau de bord administrateur
             </Typography>
           </Box>
+          
         </Box>
 
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title={t('users.totalUsers')}
+              title="Total Utilisateurs"
               value={users.length}
               icon={<People fontSize="large" />}
               color="#1976d2"
@@ -320,7 +337,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title={t('users.activeAccounts')}
+              title="Comptes Actifs"
               value={activeUsers}
               icon={<TrendingUp fontSize="large" />}
               color="#388e3c"
@@ -329,7 +346,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title={t('users.inactiveAccounts')}
+              title="Comptes Inactifs"
               value={users.length - activeUsers}
               icon={<Security fontSize="large" />}
               color="#d32f2f"
@@ -338,7 +355,7 @@ export default function UserList() {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title={t('users.activityRate')}
+              title="Taux d'Activité"
               value={`${users.length > 0 ? Math.round((activeUsers / users.length) * 100) : 0}%`}
               icon={<Analytics fontSize="large" />}
               color="#7b1fa2"
@@ -360,7 +377,7 @@ export default function UserList() {
             <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <TextField
-                  placeholder={t('users.searchPlaceholder')}
+                  placeholder="Rechercher par nom, email ou rôle..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -390,7 +407,7 @@ export default function UserList() {
                   },
                 }}
               >
-                {t('users.addUser')}
+                Ajouter Utilisateur
               </Button>
             </Box>
           </Box>
@@ -401,7 +418,7 @@ export default function UserList() {
               <Box sx={{ textAlign: "center" }}>
                 <CircularProgress size={48} thickness={4} />
                 <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
-                  {t('common.loading')}
+                  Chargement...
                 </Typography>
               </Box>
             </Box>
@@ -409,13 +426,13 @@ export default function UserList() {
             <Box sx={{ textAlign: "center", p: 6 }}>
               <People sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
               <Typography variant="h5" gutterBottom>
-                {t('users.noUsersFound')}
+                Aucun utilisateur trouvé
               </Typography>
               <Typography color="text.secondary" sx={{ mb: 3 }}>
-                {searchTerm ? t('users.noSearchResults') : t('users.startByAddingUser')}
+                {searchTerm ? "Aucun résultat pour votre recherche" : "Commencez par ajouter un utilisateur"}
               </Typography>
               <Button variant="contained" startIcon={<Add />} onClick={() => (window.location.href = "/users/add")}>
-                {t('users.addUser')}
+                Ajouter un utilisateur
               </Button>
             </Box>
           ) : (
@@ -423,11 +440,11 @@ export default function UserList() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: "grey.50" }}>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.user')}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.email')}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.role')}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.status')}</TableCell>
-                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('common.actions')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Utilisateur</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Rôle</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Statut</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -470,7 +487,7 @@ export default function UserList() {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={t(`role.${(user.role || 'user').toLowerCase()}`)}
+                          label={user.role || "user"}
                           color={user.role === "Admin" ? "primary" : user.role === "Instructor" ? "info" : "default"}
                           size="small"
                           sx={{ borderRadius: 2, fontWeight: 600, textTransform: "capitalize" }}
@@ -478,7 +495,7 @@ export default function UserList() {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={user.isActive ? t('users.active') : t('users.inactive')}
+                          label={user.isActive ? "Actif" : "Inactif"}
                           color={user.isActive ? "success" : "error"}
                           size="small"
                           sx={{ borderRadius: 2, fontWeight: 600 }}
@@ -549,16 +566,16 @@ export default function UserList() {
                 <Delete />
               </Avatar>
               <Typography variant="h6" fontWeight={600}>
-                {t('users.confirmDelete')}
+                Confirmer la suppression
               </Typography>
             </Box>
           </DialogTitle>
           <DialogContent>
             <Typography>
-              {t('users.deleteConfirmMessage', { name: deleteDialog.user?.name || '', email: deleteDialog.user?.email })}
+              Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{deleteDialog.user?.name || ''}</strong> (<strong>{deleteDialog.user?.email}</strong>) ?
               <br />
               <br />
-              {t('users.irreversibleAction')}
+              Cette action est <strong>irréversible</strong>.
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -567,7 +584,7 @@ export default function UserList() {
               sx={{ borderRadius: 2 }}
               disabled={actionLoading}
             >
-              {t('common.cancel')}
+              Annuler
             </Button>
             <Button
               onClick={handleDelete}
@@ -576,7 +593,7 @@ export default function UserList() {
               sx={{ borderRadius: 2, minWidth: 120 }}
               disabled={actionLoading}
             >
-              {actionLoading ? <CircularProgress size={20} color="inherit" /> : t('users.deleteButton')}
+              {actionLoading ? <CircularProgress size={20} color="inherit" /> : "Supprimer"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -598,21 +615,20 @@ export default function UserList() {
                 {toggleDialog.user?.isActive ? <Block /> : <LockOpen />}
               </Avatar>
               <Typography variant="h6" fontWeight={600}>
-                {t(toggleDialog.user?.isActive ? 'users.confirmToggleTitleActive' : 'users.confirmToggleTitleInactive')}
+                {toggleDialog.user?.isActive ? "Désactiver" : "Activer"} le compte
               </Typography>
             </Box>
           </DialogTitle>
           <DialogContent>
             <Typography>
-              {t(toggleDialog.user?.isActive ? 'users.confirmToggleMessageActive' : 'users.confirmToggleMessageInactive', {
-                name: toggleDialog.user?.name || '',
-                email: toggleDialog.user?.email || ''
-              })}
+              {toggleDialog.user?.isActive ? "Désactiver" : "Activer"} le compte de{" "}
+              <strong>{toggleDialog.user?.name || ''}</strong> (<strong>{toggleDialog.user?.email}</strong>) ?
               <br />
               <br />
               <strong>ID:</strong> {toggleDialog.user?.id}
               <br />
-              <strong>{t('users.currentStatus')}:</strong> {t(toggleDialog.user?.isActive ? 'users.statusActive' : 'users.statusInactive')}
+              
+              <strong>Statut actuel:</strong> {toggleDialog.user?.isActive ? "Actif" : "Inactif"}
             </Typography>
           </DialogContent>
           <DialogActions sx={{ p: 3 }}>
@@ -621,7 +637,7 @@ export default function UserList() {
               sx={{ borderRadius: 2 }}
               disabled={actionLoading}
             >
-              {t('common.cancel')}
+              Annuler
             </Button>
             <Button
               onClick={handleToggleStatus}
@@ -632,7 +648,11 @@ export default function UserList() {
             >
               {actionLoading ? (
                 <CircularProgress size={20} color="inherit" />
-              ) : t(toggleDialog.user?.isActive ? 'users.deactivateUser' : 'users.activateUser')}
+              ) : toggleDialog.user?.isActive ? (
+                "Désactiver"
+              ) : (
+                "Activer"
+              )}
             </Button>
           </DialogActions>
         </Dialog>

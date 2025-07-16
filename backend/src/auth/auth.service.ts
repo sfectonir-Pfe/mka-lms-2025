@@ -227,7 +227,7 @@ return { ...safeUser, needsVerification: false }; // Always include this
     return { message: 'Password reset successful' };
   }
 
-  async changePassword(email: string, currentPassword: string, newPassword: string, sendNotification?: boolean) {
+  async changePassword(email: string, currentPassword: string, newPassword: string) {
     // Validation des entrées
     if (!email || !currentPassword || !newPassword) {
       throw new HttpException('All fields are required', HttpStatus.BAD_REQUEST);
@@ -267,30 +267,6 @@ return { ...safeUser, needsVerification: false }; // Always include this
         password: hashedPassword,
       },
     });
-
-    // Envoyer email de notification si demandé
-    if (sendNotification) {
-      try {
-        const timestamp = new Date().toLocaleString('fr-FR', {
-          timeZone: 'Europe/Paris',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-
-        await this.mailService.sendPasswordChangeConfirmationEmail(
-          user.email,
-          timestamp
-        );
-        console.log('Password change confirmation email sent to:', user.email);
-      } catch (emailError) {
-        console.error('Failed to send password change confirmation email:', emailError);
-        // Don't throw error here - password change was successful, email is just a notification
-      }
-    }
 
     return { message: 'Password changed successfully' };
   }

@@ -8,12 +8,10 @@ import {
   Paper,
   Grid,
 } from "@mui/material";
-import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AddModuleView = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -34,11 +32,11 @@ const AddModuleView = () => {
     e.preventDefault();
     try {
       await axios.post("http://localhost:8000/modules", formData);
-      alert(t('modules.addSuccess'));
+      alert("✅ Module ajouté avec succès !");
       navigate("/module");
     } catch (err) {
       console.error("❌ Erreur lors de l'ajout du module:", err);
-      alert(t('modules.addError'));
+      alert("Erreur lors de l'ajout du module.");
     }
   };
 
@@ -46,7 +44,7 @@ const AddModuleView = () => {
    <Container maxWidth="sm" sx={{ mt: 4 }}>
   <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
     <Typography variant="h5" gutterBottom>
-      {t('modules.addModule')}
+      Ajouter un module
     </Typography>
     <form onSubmit={handleSubmit}>
       <Grid container spacing={2}>
@@ -54,7 +52,7 @@ const AddModuleView = () => {
           <TextField
             fullWidth
             name="name"
-            label={t('modules.moduleName')}
+            label="Nom du module"
             value={formData.name}
             onChange={handleChange}
             required
@@ -66,13 +64,13 @@ const AddModuleView = () => {
             select
             fullWidth
             name="periodUnit"
-            label={t('modules.periodUnit')}
+            label="Période"
             value={formData.periodUnit}
             onChange={handleChange}
           >
-            <MenuItem value="Day">{t('modules.day')}</MenuItem>
-            <MenuItem value="Week">{t('modules.week')}</MenuItem>
-            <MenuItem value="Month">{t('modules.month')}</MenuItem>
+            <MenuItem value="Day">Jour</MenuItem>
+            <MenuItem value="Week">Semaine</MenuItem>
+            <MenuItem value="Month">Mois</MenuItem>
           </TextField>
         </Grid>
 
@@ -81,7 +79,7 @@ const AddModuleView = () => {
             fullWidth
             type="number"
             name="duration"
-            label={t('modules.duration')}
+            label="Durée"
             value={formData.duration}
             onChange={handleChange}
             inputProps={{ min: 1 }}
@@ -91,10 +89,10 @@ const AddModuleView = () => {
 
         <Grid item xs={12} display="flex" justifyContent="space-between">
           <Button variant="outlined" color="error" onClick={() => navigate("/modules")}>
-            {t('common.cancel')}
+            Annuler
           </Button>
           <Button type="submit" variant="contained" color="primary">
-            {t('common.save')}
+            Enregistrer
           </Button>
         </Grid>
       </Grid>

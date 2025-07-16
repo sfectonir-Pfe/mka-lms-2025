@@ -20,10 +20,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useTranslation } from 'react-i18next';
 
 export default function AdminDashboard() {
-  const { t } = useTranslation();
   const theme = useTheme();
 
   const topFormations = [
@@ -49,10 +47,10 @@ export default function AdminDashboard() {
   ];
 
   const stats = [
-    { label: t('dashboard.participants'), value: 1245 },
-    { label: t('dashboard.participationsThisMonth'), value: 342 },
-    { label: t('dashboard.formations'), value: 38 },
-    { label: t('dashboard.instructors'), value: 14 },
+    { label: "Participants", value: 1245 },
+    { label: "Participations ce mois", value: 342 },
+    { label: "Formations", value: 38 },
+    { label: "Formateurs", value: 14 },
   ];
 
   const monthlyData = [
@@ -70,7 +68,7 @@ export default function AdminDashboard() {
   return (
     <Container sx={{ py: 5 }}>
       <Typography variant="h4" gutterBottom fontWeight="bold">
-        {t('dashboard.adminDashboard')}
+        Dashboard – Admin
       </Typography>
       <Grid container spacing={3}>
         {stats.map((stat, i) => (
@@ -95,7 +93,7 @@ export default function AdminDashboard() {
           <Card elevation={3} sx={{ borderRadius: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom fontWeight="bold">
-                {t('dashboard.topFormations')}
+                Top Formations (Plus suivies)
               </Typography>
               {topFormations.map((f, i) => (
                 <Box key={i} mb={2}>
@@ -111,7 +109,7 @@ export default function AdminDashboard() {
                     }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    {f.participants} {t('dashboard.students')}
+                    {f.participants} Étudiants
                   </Typography>
                 </Box>
               ))}
@@ -123,7 +121,7 @@ export default function AdminDashboard() {
           <Card elevation={3} sx={{ borderRadius: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom fontWeight="bold">
-                {t('dashboard.monthlyParticipation')}
+                Participation mensuelle (12 mois)
               </Typography>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={monthlyData}>
@@ -144,7 +142,7 @@ export default function AdminDashboard() {
               <Card elevation={3} sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom fontWeight="bold">
-                    {t('dashboard.topInstructors')}
+                    Top Formateurs (avis étudiants)
                   </Typography>
                   {topFormateurs.map((f, i) => (
                     <Box
@@ -176,7 +174,7 @@ export default function AdminDashboard() {
               <Card elevation={3} sx={{ borderRadius: 3 }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom fontWeight="bold">
-                    {t('dashboard.topPartnerInstitutions')}
+                    Top Établissements partenaires
                   </Typography>
                   {topEtablissements.map((e, i) => (
                     <Box

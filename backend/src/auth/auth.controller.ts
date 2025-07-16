@@ -21,15 +21,15 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
   ) { }
-
+  
   @Post('verify')
   async verifyAccount(@Body() body: { email: string }) {
     try {
       const user = await this.authService.getUserByEmail(body.email);
-      return {
-        success: true,
-        message: 'Compte vérifié avec succès',
-        data: { user }
+      return { 
+        success: true, 
+        message: 'Compte vérifié avec succès', 
+        data: { user } 
       };
     } catch (error) {
       throw new HttpException(
@@ -80,7 +80,7 @@ export class AuthController {
       return { success: true, message: 'Utilisateur créé', data: user };
     } catch (error) {
       throw new HttpException(
-        error.message || 'Échec de l\'enregistrement',
+        error.message || 'Échec de l’enregistrement',
         error.status || HttpStatus.BAD_REQUEST,
       );
     }
@@ -157,11 +157,11 @@ export class AuthController {
   @Post('reset-password')
 
   async reset(
-
-    @Body() dto: ResetPassword
+  
+    @Body() dto:ResetPassword
   ) {
     try {
-      const result = await this.authService.resetPassword(dto.token, dto.newPass, dto.confirmPass);
+      const result = await this.authService.resetPassword(dto.token,dto. newPass,dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
     } catch (error) {
       throw new HttpException(
@@ -172,13 +172,12 @@ export class AuthController {
   }
 
   @Post('change-password')
-  async changePassword(@Body() changePasswordDto: ChangePasswordDto & { sendNotification?: boolean }) {
+  async changePassword(@Body() changePasswordDto: ChangePasswordDto) {
     try {
       const result = await this.authService.changePassword(
         changePasswordDto.email,
         changePasswordDto.currentPassword,
-        changePasswordDto.newPassword,
-        changePasswordDto.sendNotification
+        changePasswordDto.newPassword
       );
       return { success: true, message: 'Mot de passe changé avec succès', data: result };
     } catch (error) {
@@ -188,7 +187,7 @@ export class AuthController {
       );
     }
   }
-
+  
 
 
   @Post('logout')
@@ -216,15 +215,16 @@ export class AuthController {
     }
   }
   @Post('update-user')
-  async updateUser(@Body() body: { email: string }) {
-    try {
-      const result = await this.authService.verifyUser(body.email);
-      return { success: true, message: 'Utilisateur mis à jour', data: result };
-    } catch (error) {
-      throw new HttpException(
-        error.message || 'Erreur lors de la mise à jour',
-        error.status || HttpStatus.BAD_REQUEST,
-      );
-    }
+async updateUser(@Body() body: { email: string }) {
+  try {
+    const result = await this.authService.verifyUser(body.email);
+    return { success: true, message: 'Utilisateur mis à jour', data: result };
+  } catch (error) {
+    throw new HttpException(
+      error.message || 'Erreur lors de la mise à jour',
+      error.status || HttpStatus.BAD_REQUEST
+    );
   }
+}
+
 }
