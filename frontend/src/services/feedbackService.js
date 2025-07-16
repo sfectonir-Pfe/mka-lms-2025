@@ -89,7 +89,7 @@ export const feedbackService = {
    */
   submitSeanceFeedback: async (feedbackData) => {
     try {
-      const response = await axios.post('/feedback/seance', feedbackData);
+      const response = await axios.post(`${API_URL}/feedback/seance`, feedbackData);
       return response.data;
     } catch (error) {
       console.error('Error submitting seance feedback:', error);

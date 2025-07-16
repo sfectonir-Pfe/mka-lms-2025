@@ -1,8 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import axios from "axios"
-import feedbackService from "../services/feedbackService";
+import { useState } from "react"
 import {
   Button,
   Card,
@@ -91,38 +89,27 @@ export default function SeanceFeedbackForm({ seanceId }) {
     improvementAreas: [],
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [user, setUser] = useState(null)
-
-  useEffect(() => {
-    // Exemple: récupération de l'utilisateur depuis le localStorage (adapter selon votre auth)
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
-  }, [])
+  const [showStepError, setShowStepError] = useState(false)
 
   const steps = ["Déroulement de la Séance", "Évaluation du Formateur", "Évaluation de l'Équipe", "Recommandations"]
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    if (!user) {
-      alert("Utilisateur non connecté. Veuillez vous connecter pour soumettre un feedback.")
+    if (!isStepValid()) {
+      setShowStepError(true)
       return
     }
-    try {
-      await feedbackService.submitSeanceFeedback({
-        ...feedback,
-        improvementAreas: feedback.improvementAreas.join(', '),
-        seanceId,
-        userId: user.id,
-      })
-      setIsSubmitted(true)
-    } catch (err) {
-      alert("Erreur lors de l'envoi du feedback.")
-    }
+    setShowStepError(false)
+    console.log("Feedback soumis:", feedback)
+    setIsSubmitted(true)
   }
 
   const handleNext = () => {
+    if (!isStepValid()) {
+      setShowStepError(true)
+      return
+    }
+    setShowStepError(false)
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
   }
 
@@ -135,6 +122,33 @@ export default function SeanceFeedbackForm({ seanceId }) {
       ...prev,
       improvementAreas: checked ? [...prev.improvementAreas, area] : prev.improvementAreas.filter((a) => a !== area),
     }))
+  }
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 0:
+        return (
+          feedback.sessionRating > 0 &&
+          feedback.contentQuality > 0 &&
+          feedback.sessionOrganization > 0 &&
+          feedback.objectivesAchieved > 0 &&
+          feedback.sessionDuration !== ""
+        )
+      case 1:
+        return (
+          feedback.trainerRating > 0 &&
+          feedback.trainerClarity > 0 &&
+          feedback.trainerPedagogy > 0 &&
+          feedback.trainerAvailability > 0 &&
+          feedback.trainerInteraction > 0
+        )
+      case 2:
+        return true // Étape optionnelle
+      case 3:
+        return feedback.wouldRecommend !== "" // Seule la recommandation est obligatoire
+      default:
+        return true
+    }
   }
 
   const renderStepContent = (step) => {
@@ -202,7 +216,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
                 fullWidth
                 multiline
                 rows={3}
-                label="💬 Commentaires sur la séance"
+                label="💬 Commentaires sur la séance (optionnel)"
                 value={feedback.sessionComments}
                 onChange={(e) => setFeedback((prev) => ({ ...prev, sessionComments: e.target.value }))}
                 placeholder="Partagez vos impressions sur le déroulement de la séance..."
@@ -266,7 +280,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
                 fullWidth
                 multiline
                 rows={3}
-                label="💬 Commentaires sur le formateur"
+                label="💬 Commentaires sur le formateur (optionnel)"
                 value={feedback.trainerComments}
                 onChange={(e) => setFeedback((prev) => ({ ...prev, trainerComments: e.target.value }))}
                 placeholder="Partagez vos impressions sur le formateur..."
@@ -286,7 +300,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
                 Évaluation de l'Équipe d'Étudiants
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Comment évaluez-vous la collaboration et la participation de votre équipe ?
+                Comment évaluez-vous la collaboration et la participation de votre équipe ? (optionnel)
               </Typography>
             </CardHeader>
             <CardContent>
@@ -325,7 +339,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
                 fullWidth
                 multiline
                 rows={3}
-                label="💬 Commentaires sur l'équipe"
+                label="💬 Commentaires sur l'équipe (optionnel)"
                 value={feedback.teamComments}
                 onChange={(e) => setFeedback((prev) => ({ ...prev, teamComments: e.target.value }))}
                 placeholder="Partagez vos impressions sur le travail d'équipe..."
@@ -351,7 +365,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
             <CardContent>
               <FormControl component="fieldset" sx={{ mb: 3 }}>
                 <FormLabel component="legend" sx={{ fontWeight: "bold" }}>
-                  🤔 Recommanderiez-vous cette formation ?
+                  🤔 Recommanderiez-vous cette formation ? *
                 </FormLabel>
                 <RadioGroup
                   value={feedback.wouldRecommend}
@@ -399,7 +413,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
                 fullWidth
                 multiline
                 rows={4}
-                label="💡 Suggestions d'amélioration"
+                label="💡 Suggestions d'amélioration (optionnel)"
                 value={feedback.suggestions}
                 onChange={(e) => setFeedback((prev) => ({ ...prev, suggestions: e.target.value }))}
                 placeholder="Quelles améliorations suggérez-vous pour les prochaines formations ?"
@@ -416,39 +430,6 @@ export default function SeanceFeedbackForm({ seanceId }) {
 
   const progress = ((currentStep + 1) / steps.length) * 100
 
-  // Fonction de validation par étape
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          feedback.sessionRating > 0 &&
-          feedback.contentQuality > 0 &&
-          feedback.sessionOrganization > 0 &&
-          feedback.objectivesAchieved > 0 &&
-          feedback.sessionDuration !== ""
-        )
-      case 1:
-        return (
-          feedback.trainerRating > 0 &&
-          feedback.trainerClarity > 0 &&
-          feedback.trainerAvailability > 0 &&
-          feedback.trainerPedagogy > 0 &&
-          feedback.trainerInteraction > 0
-        )
-      case 2:
-        return (
-          feedback.teamRating > 0 &&
-          feedback.teamCollaboration > 0 &&
-          feedback.teamParticipation > 0 &&
-          feedback.teamCommunication > 0
-        )
-      case 3:
-        return feedback.wouldRecommend !== ""
-      default:
-        return true
-    }
-  }
-
   if (isSubmitted) {
     return (
       <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
@@ -456,14 +437,14 @@ export default function SeanceFeedbackForm({ seanceId }) {
           <div className="col-lg-8">
             <Card className="shadow-lg" sx={{ mt: 8, textAlign: "center" }}>
               <CardContent>
-                <Typography variant="h3" sx={{ color: "#1976d2", mb: 2 }}>
+                <Typography variant="h3" sx={{ color: "#1976d2", fontWeight: "bold", mb: 2 }}>
                   🎉 Merci pour votre feedback !
                 </Typography>
                 <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
                   Votre avis a bien été enregistré.
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Nous apprécions votre contribution à l’amélioration de nos formations.
+                  Nous apprécions le temps que vous avez pris pour nous aider à améliorer nos formations.
                 </Typography>
               </CardContent>
             </Card>
@@ -472,6 +453,7 @@ export default function SeanceFeedbackForm({ seanceId }) {
       </div>
     )
   }
+
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
       <div className="row justify-content-center">
@@ -539,8 +521,12 @@ export default function SeanceFeedbackForm({ seanceId }) {
                   </Typography>
 
                   {currentStep === steps.length - 1 ? (
-                    <Button type="submit" variant="contained" startIcon={<Send />} size="large" sx={{ minWidth: 150 }}
-                      disabled={!isStepValid()} // Désactive si non valide
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      startIcon={<Send />}
+                      size="large"
+                      sx={{ minWidth: 150 }}
                     >
                       Envoyer le Feedback
                     </Button>
@@ -551,12 +537,16 @@ export default function SeanceFeedbackForm({ seanceId }) {
                       endIcon={<NavigateNext />}
                       size="large"
                       sx={{ minWidth: 150 }}
-                      disabled={!isStepValid()} // Désactive si non valide
                     >
                       Suivant
                     </Button>
                   )}
                 </Box>
+                {showStepError && (
+                  <Typography color="error" sx={{ mt: 2, textAlign: "center" }}>
+                    Veuillez remplir tous les champs obligatoires avant de continuer.
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           </form>

@@ -46,7 +46,13 @@ export default function FeedbackResponse({ open, onClose, feedback }) {
       // Get current user from localStorage
       const userStr = localStorage.getItem("user");
       const currentUser = userStr ? JSON.parse(userStr) : { id: 0 };
-      
+
+      // Vérification de l'ID du feedback
+      if (!feedback || !feedback.id || isNaN(Number(feedback.id))) {
+        setError(t("feedback.response.invalidIdError", "ID du feedback invalide. Impossible d'envoyer la réponse."));
+        setLoading(false);
+        return;
+      }
       // Try to use the backend service
       await feedbackService.respondToFeedback(feedback.id, {
         response,

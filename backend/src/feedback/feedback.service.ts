@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
@@ -49,8 +49,11 @@ export class FeedbackService {
   }
 
   async findOne(id: number) {
+    if (!id || isNaN(Number(id))) {
+      throw new BadRequestException('Feedback ID is required and must be a number');
+    }
     const feedback = await this.prisma.feedback.findUnique({
-      where: { id },
+      where: { id: Number(id) },
       include: { responses: true },
     });
     if (!feedback) throw new NotFoundException(`Feedback with ID ${id} not found`);
