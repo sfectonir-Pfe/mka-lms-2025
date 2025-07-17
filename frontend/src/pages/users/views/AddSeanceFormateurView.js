@@ -11,13 +11,16 @@ import {
   Collapse,
 } from "@mui/material";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
+
+
 import { useParams } from "react-router-dom";
 import { Eye, EyeOff, PlusCircle } from "lucide-react"; // Or any icons you prefer
 
 const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   const { sessionId } = useParams();
   const [sessionData, setSessionData] = useState(null);
-
+  const { t } = useTranslation();
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -40,7 +43,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
   const handleSubmit = async () => {
     if (!sessionData || !user?.id || !date || !time || !title) {
-      alert("Remplissez tous les champs.");
+      alert(t("addSeance.fillAllFieldsAlert"));
       return;
     }
 
@@ -60,7 +63,11 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
       setShowAddBlock(false); // Optionally close form after submit
     } catch (err) {
       console.error("❌ Erreur création séance :", err);
-      alert("Erreur lors de la création.");
+      console.error("❌ Response data:", err.response?.data);
+      console.error("❌ Response status:", err.response?.status);
+      
+      const errorMessage = err.response?.data?.message || err.message || t("addSeance.creationErrorAlert");
+      alert(`${t("addSeance.creationErrorAlert")}: ${errorMessage}`);
     }
   };
 
@@ -76,18 +83,18 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
         onClick={() => setShowAddBlock((prev) => !prev)}
         sx={{ mb: 2 }}
       >
-        {showAddBlock ? "Masquer le formulaire" : "Créer une nouvelle séance"}
+        {showAddBlock ? t("addSeance.hideForm") : t("addSeance.createNewSession")}
       </Button>
 
       <Collapse in={showAddBlock}>
         <Box>
           <Typography variant="h5" gutterBottom>
-            ➕ Créer une nouvelle séance
+            ➕ {t("addSeance.createNewSessionTitle")}
           </Typography>
 
           <TextField
             fullWidth
-            label="Titre"
+            label={t("addSeance.title")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             margin="normal"
@@ -95,7 +102,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
           <TextField
             fullWidth
-            label="Date"
+            label={t("addSeance.date")}
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -105,7 +112,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
           <TextField
             fullWidth
-            label="Heure"
+            label={t("addSeance.time")}
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
@@ -116,7 +123,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
           {sessionData && (
             <Box component={Paper} variant="outlined" sx={{ mt: 3, p: 2 }}>
               <Typography variant="h6" gutterBottom>
-                🧩 Aperçu de la session sélectionnée
+                🧩 {t("addSeance.sessionPreview")}
               </Typography>
               {sessionData.session2Modules.map((m) => (
                 <Box key={m.id} mb={2}>
@@ -158,7 +165,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
               fullWidth
               onClick={handleSubmit}
             >
-              CRÉER LA SÉANCE
+              {t("addSeance.createSessionButton")}
             </Button>
           </Box>
         </Box>

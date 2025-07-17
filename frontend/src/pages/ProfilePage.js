@@ -20,10 +20,12 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 
 const ProfilePage = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -84,7 +86,7 @@ useEffect(() => {
           return;
         }
 
-        setError("ID utilisateur manquant et aucune donnée utilisateur disponible");
+        setError(t('profile.missingUserData'));
         setLoading(false);
         return;
       }
@@ -97,7 +99,7 @@ useEffect(() => {
 
       if (isNaN(userId)) {
         console.error("ProfilePage: ID invalide:", id);
-        setError("ID utilisateur invalide");
+        setError(t('profile.invalidUserId'));
         setLoading(false);
         return;
       }
@@ -160,7 +162,7 @@ useEffect(() => {
       }
 
       // Si tout échoue
-      setError("Impossible de charger les informations de l'utilisateur.");
+      setError(t('profile.loadUserError'));
       setLoading(false);
     };
 
@@ -190,10 +192,10 @@ useEffect(() => {
           background: 'linear-gradient(45deg, #f8f9fa 30%, #e9ecef 90%)'
         }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Profile Error
+            {t('profile.profileError')}
           </Typography>
           <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-            {error || "User not found"}
+            {error || t('profile.userNotFound')}
           </Alert>
           <Stack direction="row" spacing={2} justifyContent="center">
             <Button
@@ -201,14 +203,14 @@ useEffect(() => {
               onClick={() => window.location.reload()}
               sx={{ px: 4, py: 1 }}
             >
-              Try Again
+              {t('common.tryAgain')}
             </Button>
             <Button
               variant="outlined"
               onClick={() => navigate('/')}
               sx={{ px: 4, py: 1 }}
             >
-              Go Home
+              {t('common.goHome')}
             </Button>
           </Stack>
         </Paper>
@@ -236,7 +238,7 @@ useEffect(() => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent'
           }}>
-            User Profile
+            {t('profile.userProfile')}
           </Typography>
           <Button
             variant="contained"
@@ -258,7 +260,7 @@ useEffect(() => {
               }
             }}
           >
-            Edit Profile
+            {t('profile.editProfile')}
           </Button>
         </Box>
 
@@ -302,15 +304,14 @@ useEffect(() => {
 
             <Chip
               icon={<WorkIcon />}
-              label={user.role || "Etudiant"}
+              label={user.role ? t(`role.${user.role.toLowerCase()}`) : t('role.etudiant')}
               color="primary"
               variant="outlined"
               sx={{
                 borderRadius: 2,
                 px: 1,
                 fontSize: '0.9rem',
-                fontWeight: 500,
-                textTransform: 'capitalize'
+                fontWeight: 500
               }}
             />
 
@@ -319,7 +320,7 @@ useEffect(() => {
               color: 'text.secondary',
               maxWidth: 500
             }}>
-              {user.about || "No bio provided"}
+              {user.about || t('profile.noBio')}
             </Typography>
           </Box>
         </Box>
@@ -341,7 +342,7 @@ useEffect(() => {
               alignItems: 'center',
               gap: 1
             }}>
-              <PersonIcon color="primary" /> Personal Info
+              <PersonIcon color="primary" /> {t('profile.personalInfo')}
             </Typography>
 
             <Stack spacing={2}>
@@ -352,12 +353,12 @@ useEffect(() => {
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <PhoneIcon color="action" />
-                <Typography>{user.phone || "Not provided"}</Typography>
+                <Typography>{user.phone || t('profile.notProvided')}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <LocationOnIcon color="action" />
-                <Typography>{user.location || "Location not specified"}</Typography>
+                <Typography>{user.location || t('profile.locationNotSpecified')}</Typography>
               </Box>
             </Stack>
           </Grid>
@@ -368,7 +369,7 @@ useEffect(() => {
               mb: 3,
               fontWeight: 600
             }}>
-              Skills & Expertise
+              {t('profile.skillsExpertise')}
             </Typography>
 
             {user.skills && Array.isArray(user.skills) && user.skills.length > 0 ? (
@@ -397,7 +398,7 @@ useEffect(() => {
               </Box>
             ) : (
               <Typography variant="body2" color="text.secondary">
-                No skills added yet.
+                {t('profile.noSkillsAdded')}
               </Typography>
             )}
           </Grid>

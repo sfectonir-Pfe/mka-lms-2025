@@ -50,6 +50,9 @@ model User {
   session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
 
   GeneralChatMessage GeneralChatMessage[]
+  feedbacks          Feedback[]           @relation("UserFeedback")
+  chatMemories       ChatMemory[]         @relation("UserChatMemory")
+  sessionFeedbacks   SessionFeedback[]
 }
 
 model Formateur {
@@ -131,6 +134,7 @@ model Contenu {
   fileType             FileType?
   type                 ContenuType
   published            Boolean               @default(false)
+  coursAssocie         String?
   courseContenus       CourseContenu[]
   quiz                 Quiz?
   session2Contenus     Session2Contenu[]
@@ -409,6 +413,79 @@ model GeneralChatMessage {
   type      String // "text" | "image" | "video" | "audio" | "file" (you can restrict by enum if needed)
   content   String // text content or file URL
   createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        Int                @id @default(autoincrement())
+  rating    Int
+  message   String?
+  category  String? // ← ajouté
+  type      String? // ← ajouté
+  likes     Int                @default(0) // ← ajouté
+  dislikes  Int                @default(0) // ← ajouté
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt // ← ajouté
+  userId    Int?
+  user      User?              @relation("UserFeedback", fields: [userId], references: [id])
+  responses FeedbackResponse[]
+}
+
+model FeedbackResponse {
+  id         Int      @id @default(autoincrement())
+  feedbackId Int
+  response   String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model SeanceFeedback {
+  id                  Int      @id @default(autoincrement())
+  seanceId            Int
+  userId              Int?
+  sessionRating       Int
+  contentQuality      Int
+  sessionDuration     String
+  sessionOrganization Int
+  objectivesAchieved  Int
+  trainerRating       Int
+  trainerClarity      Int
+  trainerAvailability Int
+  trainerPedagogy     Int
+  trainerInteraction  Int
+  teamRating          Int
+  teamCollaboration   Int
+  teamParticipation   Int
+  teamCommunication   Int
+  sessionComments     String?
+  trainerComments     String?
+  teamComments        String?
+  suggestions         String?
+  wouldRecommend      String?
+  improvementAreas    String?
+  createdAt           DateTime @default(now())
+}
+
+model SessionFeedback {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  userId    Int?
+  rating    Int
+  comments  String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model ChatMemory {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  sessionId   String?
+  userMessage String
+  botResponse String? // ✅ champ ajouté
+  role        String // "user" | "assistant"
+  content     String
+  createdAt   DateTime @default(now())
+  user        User?    @relation("UserChatMemory", fields: [userId], references: [id])
 }
 
 enum Role {

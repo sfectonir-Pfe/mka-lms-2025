@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Paper,
@@ -18,7 +19,6 @@ import RedoIcon from "@mui/icons-material/Redo";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 
 const SOCKET_URL = "http://localhost:8000/whiteboard";
- // adapte ton URL
 
 const TOOLS = {
   PEN: "pen",
@@ -27,6 +27,7 @@ const TOOLS = {
 };
 
 export default function Whiteboard({ seanceId, userId }) {
+  const { t } = useTranslation();
   const canvasRef = useRef(null);
   const [socket, setSocket] = useState(null);
   const [tool, setTool] = useState(TOOLS.PEN);
@@ -37,31 +38,17 @@ export default function Whiteboard({ seanceId, userId }) {
   const [showTextInput, setShowTextInput] = useState(false);
   const [textPos, setTextPos] = useState({ x: 0, y: 0 });
   const [undoStack, setUndoStack] = useState([]);
- 
-useEffect(() => {
 
-  const s = io(SOCKET_URL, { transports: ["websocket"] });
-  setSocket(s);
-
-  s.on("connect", () => {
-    console.log("✅ Socket.io connected to", SOCKET_URL);
-  });
-  s.on("connect_error", (err) => {
-    console.error("❌ Erreur de connexion socket.io :", err);
-  });
-
-  s.emit("join-seance", seanceId);
-
-  s.on("whiteboard-sync", (actions) => setActions(actions));
-  s.on("whiteboard-action", (action) => setActions((prev) => [...prev, action]));
-
-  return () => s.disconnect();
-}, [seanceId]);
-
-  // Connect socket + join room
   useEffect(() => {
     const s = io(SOCKET_URL, { transports: ["websocket"] });
     setSocket(s);
+
+    s.on("connect", () => {
+      console.log("✅ Socket.io connecté à", SOCKET_URL);
+    });
+    s.on("connect_error", (err) => {
+      console.error("❌ Erreur de connexion socket.io :", err);
+    });
 
     s.emit("join-seance", seanceId);
 
@@ -71,7 +58,6 @@ useEffect(() => {
     return () => s.disconnect();
   }, [seanceId]);
 
-  // Dessin pen
   const handlePointerDown = (e) => {
     if (tool === TOOLS.PEN) {
       setDrawing(true);
@@ -119,7 +105,6 @@ useEffect(() => {
     setDrawing(false);
   };
 
-  // Ajout texte après input
   const handleTextSubmit = (e) => {
     e.preventDefault();
     if (!currentText.trim()) return;
@@ -135,26 +120,24 @@ useEffect(() => {
     setShowTextInput(false);
   };
 
-  // Undo/Redo logic
   const handleUndo = () => {
     if (actions.length === 0) return;
     setUndoStack((prev) => [...prev, actions[actions.length - 1]]);
     setActions((prev) => prev.slice(0, -1));
   };
+
   const handleRedo = () => {
     if (undoStack.length === 0) return;
     setActions((prev) => [...prev, undoStack[undoStack.length - 1]]);
     setUndoStack((prev) => prev.slice(0, -1));
   };
 
-  // Redessiner tout le canvas à chaque update d’actions
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Grid (style Canva)
     const gridSize = 24;
     ctx.save();
     ctx.strokeStyle = "#e9e9f1";
@@ -215,7 +198,6 @@ useEffect(() => {
     });
   }, [actions]);
 
-  // --- Toolbar Stylée (verticale à gauche) ---
   return (
     <Box
       sx={{
@@ -238,10 +220,10 @@ useEffect(() => {
           style={{ width: 38, marginRight: 7 }}
         />
         <span style={{ fontSize: 32, fontWeight: 700, fontFamily: "Poppins, Arial" }}>
-          Tableau blanc collaboratif
+          {t('whiteboard.collaborativeWhiteboard')}
         </span>
       </Stack>
-      {/* TOOLBAR FLOTTANTE */}
+      
       <Paper
         elevation={5}
         sx={{
@@ -259,23 +241,23 @@ useEffect(() => {
           boxShadow: "0 4px 18px #dde2f3bb",
         }}
       >
-        <Tooltip title="Stylo (Pen)" placement="right" TransitionComponent={Fade}>
+        <Tooltip title={t('whiteboard.tools.pen')} placement="right" TransitionComponent={Fade}>
           <IconButton color={tool === TOOLS.PEN ? "primary" : "default"} onClick={() => setTool(TOOLS.PEN)}>
             <EditIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Texte" placement="right" TransitionComponent={Fade}>
+        <Tooltip title={t('whiteboard.tools.text')} placement="right" TransitionComponent={Fade}>
           <IconButton color={tool === TOOLS.TEXT ? "primary" : "default"} onClick={() => setTool(TOOLS.TEXT)}>
             <TextFieldsIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Tableau" placement="right" TransitionComponent={Fade}>
+        <Tooltip title={t('whiteboard.tools.table')} placement="right" TransitionComponent={Fade}>
           <IconButton color={tool === TOOLS.TABLE ? "primary" : "default"} onClick={() => setTool(TOOLS.TABLE)}>
             <TableChartIcon />
           </IconButton>
         </Tooltip>
         <Divider sx={{ my: 1, width: 26 }} />
-        <Tooltip title="Changer la couleur" placement="right" TransitionComponent={Fade}>
+        <Tooltip title={t('whiteboard.tools.color')} placement="right" TransitionComponent={Fade}>
           <Box>
             <input
               type="color"
@@ -294,94 +276,61 @@ useEffect(() => {
           </Box>
         </Tooltip>
         <Divider sx={{ my: 1, width: 26 }} />
-        <Tooltip title="Annuler (Undo)" placement="right" TransitionComponent={Fade}>
-          <span>
-            <IconButton onClick={handleUndo} disabled={actions.length === 0}>
-              <UndoIcon />
-            </IconButton>
-          </span>
+        <Tooltip title={t('whiteboard.tools.undo')} placement="right" TransitionComponent={Fade}>
+          <IconButton onClick={handleUndo} disabled={actions.length === 0}>
+            <UndoIcon />
+          </IconButton>
         </Tooltip>
-        <Tooltip title="Rétablir (Redo)" placement="right" TransitionComponent={Fade}>
-          <span>
-            <IconButton onClick={handleRedo} disabled={undoStack.length === 0}>
-              <RedoIcon />
-            </IconButton>
-          </span>
+        <Tooltip title={t('whiteboard.tools.redo')} placement="right" TransitionComponent={Fade}>
+          <IconButton onClick={handleRedo} disabled={undoStack.length === 0}>
+            <RedoIcon />
+          </IconButton>
         </Tooltip>
       </Paper>
 
-      {/* CANVAS */}
-      <Paper
-        sx={{
-          ml: 13,
-          mt: 0,
-          borderRadius: 4,
-          boxShadow: 2,
-          background: "#fafdff",
-          border: "2.5px solid #e5e8f3",
-          width: 1050,
-          height: 600,
-          position: "relative",
-          overflow: "visible",
+      <canvas
+        ref={canvasRef}
+        width={900}
+        height={500}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        style={{
+          border: "2px solid #e1e8f5",
+          borderRadius: 12,
+          cursor: tool === TOOLS.PEN ? "crosshair" : "default",
+          marginLeft: 80,
+          background: "#fff",
         }}
-      >
-        <canvas
-          ref={canvasRef}
-          width={1050}
-          height={600}
-          style={{
-            borderRadius: 16,
-            background: "transparent",
-            cursor: tool === TOOLS.PEN ? "crosshair" : "pointer",
+      />
+
+      {showTextInput && (
+        <Box
+          component="form"
+          onSubmit={handleTextSubmit}
+          sx={{
+            position: "absolute",
+            left: textPos.x + 80,
+            top: textPos.y + 140,
+            zIndex: 20,
           }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        />
-        {/* TEXT INPUT flottant */}
-        {showTextInput && (
-          <form
+        >
+          <input
+            type="text"
+            value={currentText}
+            onChange={(e) => setCurrentText(e.target.value)}
+            onBlur={() => setShowTextInput(false)}
+            autoFocus
             style={{
-              position: "absolute",
-              left: textPos.x + 25,
-              top: textPos.y + 60,
-              background: "#fff",
-              padding: 7,
-              borderRadius: 7,
-              border: "1.5px solid #92b7ec",
-              boxShadow: "0 2px 10px #adc7ee22",
-              zIndex: 111,
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
+              border: "2px solid #1976d2",
+              borderRadius: 6,
+              padding: "8px 12px",
+              fontSize: 16,
+              fontFamily: "Poppins, Arial",
             }}
-            onSubmit={handleTextSubmit}
-          >
-            <input
-              value={currentText}
-              onChange={(e) => setCurrentText(e.target.value)}
-              autoFocus
-              style={{
-                fontSize: 18,
-                fontWeight: 500,
-                fontFamily: "Poppins, Arial",
-                border: "none",
-                outline: "none",
-                background: "none",
-                padding: "2px 7px",
-                borderBottom: `2px solid ${color}`,
-                width: 180,
-              }}
-              placeholder="Tape ton texte..."
-            />
-            <Button variant="contained" size="small" color="primary" type="submit">
-              OK
-            </Button>
-          </form>
-        )}
-      </Paper>
-      
+          />
+        </Box>
+      )}
     </Box>
   );
 }

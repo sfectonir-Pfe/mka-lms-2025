@@ -37,6 +37,7 @@ export default function UnifiedSessionChatPopup({ user }) {
   const [newMsg, setNewMsg] = useState("");
   const [newFile, setNewFile] = useState(null);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const chatBottomRef = useRef();
   const fileInputRef = useRef();
@@ -291,7 +292,7 @@ useEffect(() => {
     <>
       {/* Floating Button */}
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(!open)}
         style={{
           position: "fixed",
           bottom: 32,
@@ -317,6 +318,23 @@ useEffect(() => {
       >
         {open ? "✕" : "💬"}
       </button>
+      {/* Tooltip au survol */}
+      {showTooltip && (
+        <div style={{
+          position: "fixed",
+          bottom: 166,
+          right: 24,
+          fontSize: "12px",
+          color: "white",
+          background: "rgba(0,0,0,0.8)",
+          padding: "6px 12px",
+          borderRadius: "6px",
+          whiteSpace: "nowrap",
+          zIndex: 2001
+        }}>
+          Chat de session
+        </div>
+      )}
 
       {/* Popup */}
       {open && (

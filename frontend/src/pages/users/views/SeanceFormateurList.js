@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -9,7 +10,8 @@ import {
   Divider,
 } from "@mui/material";
 
-const SeanceFormateurList = ({ seances, onAnimer, onDelete }) => {
+const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSelectedSeance, setFeedbackOpen }) => {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState({});
 
@@ -29,10 +31,10 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete }) => {
   return (
     <Box mt={4}>
       <Typography variant="h6" gutterBottom>
-        📅 Séances de cette session
+        📅 {t('seances.sessionsList')}
       </Typography>
       {(!seances || seances.length === 0) ? (
-        <Typography color="text.secondary">Aucune séance pour le moment.</Typography>
+        <Typography color="text.secondary">{t('seances.noSessions')}</Typography>
       ) : (
         seances.map((s) => (
           <Paper key={s.id} elevation={3} sx={{ p: 2, mb: 2 }}>
@@ -41,48 +43,73 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete }) => {
               🕒 {new Date(s.startTime).toLocaleString()}
             </Typography>
             <Box mt={2} display="flex" gap={1}>
+              
+              
               <Button
                 variant="outlined"
                 onClick={() =>
                   (window.location.href = `/formateur/seance/${s.id}`)
                 }
               >
-                Animer la séance
+                {t('seances.animateSession')}
               </Button>
               <Button
                 variant="contained"
                 color="primary"
                 onClick={() => toggleDetails(s)}
               >
-                {expandedId === s.id ? "Masquer" : "Détails"}
+                {expandedId === s.id ? t('common.hide') : t('common.details')}
               </Button>
+
+              {fetchSeances && (
+                <Button
+                  variant="outlined"
+                  color="info"
+                  onClick={fetchSeances}
+                >
+                  🔄 {t('seances.refresh')}
+                </Button>
+              )}
+
+              {setSelectedSeance && setFeedbackOpen && (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={() => {
+                    setSelectedSeance(s);
+                    setFeedbackOpen(true);
+                  }}
+                >
+                  💬 {t('seances.feedback')}
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 color="error"
                 onClick={() => onDelete && onDelete(s.id)}
               >
-                Supprimer
+                {t('common.delete')}
               </Button>
             </Box>
             <Collapse in={expandedId === s.id}>
               <Box mt={2} pl={2}>
                 <Typography variant="subtitle1" gutterBottom>
-                  📘 Détails du programme
+                  📘 {t('seances.programDetails')}
                 </Typography>
                 {details[s.id] ? (
                   <>
                     <Typography variant="body1" fontWeight="bold">
-                      Programme : {details[s.id].program?.name}
+                      {t('seances.program')} : {details[s.id].program?.name}
                     </Typography>
                     {details[s.id].session2Modules.map((mod) => (
                       <Box key={mod.id} pl={2} mt={2}>
-                        <Typography>📗 Module : {mod.module.name}</Typography>
+                        <Typography>📗 {t('seances.module')} : {mod.module.name}</Typography>
                         {mod.courses.map((course) => (
                           <Box key={course.id} pl={2} mt={1}>
-                            <Typography>📘 Cours : {course.course.title}</Typography>
+                            <Typography>📘 {t('seances.course')} : {course.course.title}</Typography>
                             {course.contenus.map((ct) => (
                               <Typography key={ct.id} pl={4}>
-                                📄 Contenu : {ct.contenu.title}
+                                📄 {t('seances.content')} : {ct.contenu.title}
                               </Typography>
                             ))}
                           </Box>
@@ -92,13 +119,15 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete }) => {
                     ))}
                   </>
                 ) : (
-                  <Typography color="text.secondary">Chargement...</Typography>
+                  <Typography color="text.secondary">{t('seances.loading')}</Typography>
                 )}
               </Box>
             </Collapse>
           </Paper>
         ))
       )}
+      
+
     </Box>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
@@ -8,6 +9,8 @@ import SeanceFormateurList from "./users/views/SeanceFormateurList";
 import AnimerSeanceView from "./users/views/AnimerSeanceView";
 
 const SeanceFormateurPage = () => {
+  const { t } = useTranslation();
+  const [refreshSeancesList, setRefreshSeancesList] = useState(null);
   const { sessionId } = useParams();
   const [selectedSeance, setSelectedSeance] = useState(null);
   const [seances, setSeances] = useState([]);
@@ -35,18 +38,30 @@ const SeanceFormateurPage = () => {
     }
   };
 
+  const handleSeanceCreated = (newSeance) => {
+    console.log('New seance created:', newSeance);
+    // Refresh the list
+    if (refreshSeancesList) {
+      refreshSeancesList();
+    }
+  };
+
+  const handleRefreshCallback = (refreshFn) => {
+    setRefreshSeancesList(() => refreshFn);
+  };
+
   return (
     <Container>
       <Box mt={4}>
         <Typography variant="h4" gutterBottom>
-          🎓 Gérer mes Séances de la session {sessionId}
+          {t('seanceFormateur.manageSessionsOfSession2', { sessionId })}
         </Typography>
 
         {selectedSeance ? (
           <>
             <Box display="flex" justifyContent="flex-end" mb={2}>
               <Button onClick={handleRetour} variant="outlined">
-                ⬅️ Retour
+                ⬅️ {t('common.back')}
               </Button>
             </Box>
             <AnimerSeanceView seance={selectedSeance} />

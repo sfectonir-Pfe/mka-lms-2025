@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import axios from "axios";
 
 const dummyModules = [
@@ -33,6 +34,7 @@ const dummyModules = [
 ];
 
 const StudentProgramPage = () => {
+  const { t } = useTranslation();
   const { programId } = useParams();
   const navigate = useNavigate();
   const [modules, setModules] = useState([]);
@@ -69,15 +71,15 @@ const StudentProgramPage = () => {
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        📘 Program Overview
+        📘 {t('studentProgram.title')}
       </Typography>
 
       <Button variant="text" onClick={() => navigate("/student")} sx={{ mb: 2}}>
-        🎓 All Programs
+        🎓 {t('studentProgram.allPrograms')}
       </Button>
 
       {modules.length === 0 ? (
-        <Typography>No modules available.</Typography>
+        <Typography>{t('studentProgram.noModules')}</Typography>
       ) : (
         modules.map((module) => (
           <Accordion key={module.id}>
@@ -86,7 +88,7 @@ const StudentProgramPage = () => {
             </AccordionSummary>
             <AccordionDetails>
               {!Array.isArray(module.courses) || module.courses.length === 0 ? (
-                <Typography>No courses in this module.</Typography>
+                <Typography>{t('studentProgram.noCourses')}</Typography>
               ) : (
                 module.courses.map((course) => (
                   <Card key={course.id} sx={{ mb: 2 }}>
@@ -97,14 +99,14 @@ const StudentProgramPage = () => {
                           <span style={{ color: "green" }}>✅</span>
                         )}
                       </Typography>
-                      <Typography variant="body2">Type: {course.type}</Typography>
+                      <Typography variant="body2">{t('studentProgram.type')}: {course.type}</Typography>
                       <Button
                         variant="outlined"
                         href={course.fileUrl}
                         target="_blank"
                         sx={{ mt: 1, mr: 1 }}
                       >
-                        View Course
+                        {t('studentProgram.viewCourse')}
                       </Button>
                       <Button
                         variant="contained"
@@ -112,7 +114,7 @@ const StudentProgramPage = () => {
                         onClick={() => toggleComplete(course.id)}
                         sx={{ mt: 1 }}
                       >
-                        {completedCourses.includes(course.id) ? "Completed" : "Mark as Done"}
+                        {completedCourses.includes(course.id) ? t('studentProgram.completed') : t('studentProgram.markAsDone')}
                       </Button>
                     </CardContent>
                   </Card>

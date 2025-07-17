@@ -34,7 +34,30 @@ export class ContenusService {
 
   findAll() {
     return this.prisma.contenu.findMany({
-      include: { courseContenus: true },
+      include: {
+        courseContenus: {
+          include: {
+            course: {
+              select: {
+                title: true
+              }
+            }
+          }
+        },
+        buildProgramContenus: {
+          include: {
+            buildProgramCourse: {
+              include: {
+                course: {
+                  select: {
+                    title: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     });
   }
 
