@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -19,7 +19,6 @@ import ReactPlayer from "react-player";
 import {
   Description as DescriptionIcon,
   Quiz as QuizIcon,
-  Chat as ChatIcon,
   InsertDriveFile as InsertDriveFileIcon,
   AddPhotoAlternate as AddPhotoAlternateIcon,
   Movie as MovieIcon,
@@ -27,21 +26,6 @@ import {
   ZoomInMap as ZoomInMapIcon,
 } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
-import io from "socket.io-client";
-import EmojiPicker from "emoji-picker-react";
-import { Avatar } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from "react-router-dom";
-
-
-
-
-
-
-
-
-
-
 
 const AnimerSeanceView = () => {
   const { id: seanceId } = useParams();
@@ -53,117 +37,9 @@ const AnimerSeanceView = () => {
   const [sessionVideos, setSessionVideos] = useState([]);
   const [zoomedImage, setZoomedImage] = useState(null);
   const [expandedCourses, setExpandedCourses] = useState({});
-  const [sessionNotes, setSessionNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // --- CHAT STATE & SOCKET ---
-  const [chatMessages, setChatMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState("");
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [newFile, setNewFile] = useState(null);
-  const chatBottomRef = useRef();
-  const [socket, setSocket] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user")); // Or wherever your user is stored
   const navigate = useNavigate();
-
-
-
-  // Init socket.io
- ;
-
-  // Load old messages (optional)
-  useEffect(() => {
-    if (!seanceId) return;
-    axios.get(`http://localhost:8000/chat-messages/${seanceId}`)
-      .then((res) => setChatMessages(res.data))
-      .catch(() => setChatMessages([]));
-  }, [seanceId]);
-
-  // Always scroll to bottom
-  useEffect(() => {
-    if (chatBottomRef.current) {
-      chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages]);
-
-  const handleEmoji = (e) => {
-    setNewMsg((prev) => prev + e.emoji);
-    setShowEmoji(false);
-  };
-
-  const handleChatSend = async () => {
-    if (!socket) return;
-    if (newFile) {
-      const formData = new FormData();
-      formData.append("file", newFile);
-      formData.append("seanceId", seanceId);
-      try {
-        const res = await axios.post("http://localhost:8000/chat-messages/upload-chat", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        console.log("Sending chat message:", {
-          content: newMsg,
-          senderId: user.id,
-          // ...
-        });
-
-
-        socket.emit("sendMessage", {
-          content: res.data.fileUrl,
-          type: res.data.fileType || "file",
-          seanceId: Number(seanceId),
-          senderId: user.id,
-        });
-
-        setNewFile(null);
-      } catch {
-        alert("Erreur upload fichier");
-      }
-    } else if (newMsg.trim()) {
-      socket.emit("sendMessage", {
-        content: newMsg,
-        type: "text",
-        seanceId: Number(seanceId),
-        senderId: user.id,
-      });
-
-      setNewMsg("");
-    }
-  };
-  // Delete a single message
-  const handleDeleteMsg = async (msgId) => {
-  try {
-    await axios.delete(`http://localhost:8000/chat-messages/${msgId}`, {
-      data: { userId: user.id }, // user.id must be available in your component
-    });
-    setChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-  } catch (err) {
-    alert("Suppression impossible (vous n'êtes pas l'auteur du message)");
-  }
-};
-
-
-  // Delete all messages in this séance
-  
-useEffect(() => {
-  const s = io("http://localhost:8000");
-  setSocket(s);
-  s.emit("joinRoom", { seanceId: Number(seanceId) });
-
-  s.on("newMessage", (msg) => {
-    setChatMessages((prev) => [...prev, msg]);
-  });
-
-  // 👇 Listen for delete event from backend
-  s.on("deleteMessage", (payload) => {
-    setChatMessages((prev) => prev.filter((m) => m.id !== payload.id));
-  });
-
-  return () => {
-    s.disconnect();
-  };
-}, [seanceId]);
-
 
   useEffect(() => {
     const fetchSeance = async () => {
@@ -243,8 +119,6 @@ useEffect(() => {
     alert("Contenu spécifique de la séance sauvegardé !");
   };
 
-
-
   const handlePublishContenu = async (contenuId) => {
     if (!contenuId) return;
     try {
@@ -262,20 +136,17 @@ useEffect(() => {
 
   const renderProgramHierarchy = () => {
     if (!programDetails) return <Typography>Chargement du programme...</Typography>;
-
     return (
       <Box>
         <Typography variant="h6" mb={1}>
           📘 <strong>Programme : {programDetails.program.title}</strong>
         </Typography>
-
         <Box ml={2} mt={2}>
           {programDetails.session2Modules.map((mod) => (
             <Box key={mod.id} mt={2}>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ color: "#1976d2" }}>
                 📦 {mod.module.title}
               </Typography>
-
               <Box ml={3}>
                 {mod.courses.map((course) => (
                   <Box key={course.id} mt={1}>
@@ -291,7 +162,6 @@ useEffect(() => {
                         {expandedCourses[course.id] ? "Masquer" : "Afficher"}
                       </Button>
                     </Stack>
-
                     <Collapse in={expandedCourses[course.id]}>
                       {course.contenus.map((ct) => (
                         <Box key={ct.contenu?.id ?? uuidv4()} display="flex" alignItems="center" gap={1} flexWrap="wrap" mt={1}>
@@ -341,7 +211,7 @@ useEffect(() => {
         border: "2px solid #bcbcbc", overflow: "hidden",
       }}>
         <iframe
-          src={`https://meet.jitsi.local:8443/${seance.title || "default-room"}`}
+          src={`https://localhost:8443/${seance.title || "default-room"}`}
           allow="camera; microphone; fullscreen; display-capture"
           style={{ width: "100%", height: "70vh", border: "none" }}
           title="Jitsi Meeting"
@@ -372,11 +242,8 @@ useEffect(() => {
         <Tabs orientation="vertical" value={tab} onChange={handleTabChange} sx={{ borderRight: 1, borderColor: "divider", minWidth: 180 }}>
           <Tab icon={<DescriptionIcon />} iconPosition="start" label="Ajouts séance" />
           <Tab icon={<QuizIcon />} iconPosition="start" label="Quiz (à venir)" />
-          <Tab icon={<ChatIcon />} iconPosition="start" label="Notes / Chat" />
           <Tab icon={<InsertDriveFileIcon />} iconPosition="start" label="Whiteboard" onClick={() => navigate(`/whiteboard/${seanceId}`)} />
-
         </Tabs>
-
         <Box flex={1} pl={3}>
           {/* Onglet 1 */}
           {tab === 0 && (
@@ -399,7 +266,6 @@ useEffect(() => {
                   />
                 ))}
               </Stack>
-
               <Typography variant="h6" mt={2}>
                 Vidéos propres à la séance
                 <IconButton color="primary" component="label">
@@ -414,18 +280,6 @@ useEffect(() => {
                   </Box>
                 ))}
               </Stack>
-
-              <Typography variant="h6" mt={2}>Notes propres à la séance</Typography>
-              <TextField
-                fullWidth multiline minRows={3}
-                placeholder="Prends tes notes ici..."
-                value={sessionNotes}
-                onChange={(e) => setSessionNotes(e.target.value)}
-                sx={{ my: 1 }}
-              />
-              <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSaveSession} disabled={saving}>
-                {saving ? "Sauvegarde..." : "Sauvegarder la séance"}
-              </Button>
             </Box>
           )}
 
@@ -433,142 +287,8 @@ useEffect(() => {
           {tab === 1 && (
             <Typography color="text.secondary">🧪 La fonctionnalité "Quiz"</Typography>
           )}
-
-          {tab === 2 && (
-            <Box>
-              <Typography variant="h6" mb={1}>💬 Chat de séance</Typography>
-              <Paper sx={{
-                p: 2, mb: 2, maxHeight: 320, minHeight: 150, overflowY: "auto",
-                border: "1px solid #ccc", borderRadius: 2, background: "#f9f9f9"
-              }}>
-                {/* <Button
-                  color="error"
-                  variant="outlined"
-                  size="small"
-                  onClick={handleClearAll}
-                >
-                  Supprimer tous les messages
-                </Button> */}
-
-                <Stack spacing={1}>
-                  {chatMessages.map((msg, i) => (
-
-                    <Paper
-                      key={i}
-                      sx={{
-                        p: 1,
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        mb: 1,
-                        gap: 1,
-                      }}
-                    >
-                      {/* Avatar (optional) */}
-                      {msg.sender?.profilePic
-                        ? (
-                          <img
-                            src={
-                              msg.sender?.profilePic?.startsWith('http')
-                                ? msg.sender.profilePic
-                                : `http://localhost:8000${msg.sender?.profilePic || '/profile-pics/default.png'}`
-                            }
-                            alt={msg.sender?.name}
-                            style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 8 }}
-                          />
-
-                        ) : (
-                          <Avatar sx={{ width: 32, height: 32, marginRight: 1 }}>
-                            {msg.sender?.name?.[0]?.toUpperCase() || "?"}
-                          </Avatar>
-                        )
-                      }
-
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight="bold" color="primary">
-                          {msg.sender?.name || "Anonyme"}
-                          {msg.sender?.role && (
-                            <span style={{ color: "#888", fontWeight: 400, marginLeft: 8, fontSize: 13 }}>
-                              · {msg.sender.role}
-                            </span>
-                          )}
-                          {msg.createdAt && (
-                            <span style={{ color: "#888", fontSize: 11, marginLeft: 8 }}>
-                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </span>
-                          )}{msg.sender?.id === user.id && (
-  <IconButton size="small" onClick={() => handleDeleteMsg(msg.id)} color="error">
-    <DeleteIcon fontSize="small" />
-  </IconButton>
-)}
-
-
-                        </Typography>
-
-                        {/* Message Content */}
-                        {msg.type === "text" && <span>{msg.content}</span>}
-                        {msg.type === "image" && (
-                          <img src={msg.content} alt="img" style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                        )}
-                        {msg.type === "audio" && (
-                          <audio controls src={msg.content} style={{ maxWidth: 180, marginTop: 4 }} />
-                        )}
-                        {msg.type === "video" && (
-                          <video controls src={msg.content} style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                        )}
-                        {msg.type === "file" && (
-                          <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4 }}>
-                            📎 {msg.content.split("/").pop()}
-                          </a>
-                        )}
-                      </Box>
-                    </Paper>
-                  ))}
-                  <div ref={chatBottomRef} />
-                </Stack>
-              </Paper>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <TextField
-                  fullWidth
-                  value={newMsg}
-                  size="small"
-                  placeholder="Ecris un message…"
-                  onChange={(e) => setNewMsg(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleChatSend()}
-                  sx={{ background: "#fff", borderRadius: 1 }}
-                />
-                <IconButton onClick={() => setShowEmoji((v) => !v)}>
-                  <span role="img" aria-label="emoji">😀</span>
-                </IconButton>
-                <IconButton component="label" color={newFile ? "success" : "primary"}>
-                  <AddPhotoAlternateIcon />
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*,video/*,audio/*,application/pdf"
-                    onChange={(e) => setNewFile(e.target.files[0])}
-                  />
-                </IconButton>
-                <Button onClick={handleChatSend} variant="contained" disabled={!newMsg.trim() && !newFile}>
-                  Envoyer
-                </Button>
-              </Stack>
-              {showEmoji && (
-                <Box sx={{ position: "absolute", zIndex: 11 }}>
-                  <EmojiPicker onEmojiClick={handleEmoji} autoFocusSearch={false} />
-                </Box>
-              )}
-              {newFile && (
-                <Typography color="primary" fontSize={12} ml={1} mt={0.5}>
-                  Fichier prêt à envoyer: {newFile.name}
-                </Typography>
-              )}
-            </Box>
-          )}
-
         </Box>
       </Box>
-
       {/* Image zoom */}
       {zoomedImage && (
         <Box

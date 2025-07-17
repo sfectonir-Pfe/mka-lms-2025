@@ -2,41 +2,33 @@
   "recording_directory": "/config/recordings",
   "finalize_recording_script_path": "/config/finalize.sh",
   "log_directory": "/config/logs",
-  "chrome_flags": [
-    "--use-fake-ui-for-media-stream",
-    "--start-maximized",
-    "--kiosk",
-    "--disable-features=BlockThirdPartyCookies",
-    "--autoplay-policy=no-user-gesture-required",
-    "--ignore-certificate-errors",
-    "--disable-web-security",
-    "--disable-site-isolation-trials"
-    
-  ],
+
+
   "xmpp_environments": [
     {
-      "name": "prod environment",
-      "xmpp_server_hosts": ["meet.jitsi.local"],
-      "xmpp_domain": "meet.jitsi.local",
+      "name": "dev-local",
+      "xmpp_server_hosts": ["localhost"],
+      "xmpp_domain": "localhost",
       "control_login": {
-        "domain": "auth.meet.jitsi.local",
+        "domain": "auth.localhost",
         "username": "jibri",
         "password": "record1230123recrod"
       },
       "control_muc": {
-        "domain": "internal-muc.meet.jitsi.local",
+        "domain": "internal-muc.localhost",
         "room_name": "jibribrewery",
         "nickname": "jibri-nickname"
       },
       "call_login": {
-        "domain": "recorder.meet.jitsi.local",
+        "domain": "recorder.localhost",
         "username": "recorder",
         "password": "record123123recrod"
       },
-      "room_jid_domain_string_to_strip_from_start": "muc.meet.jitsi.local",
-      "usage_timeout": "0",
-      "base_url": "https://meet.jitsi.local:8443",
-      "url": "https://meet.jitsi.local:8443"
+      "room_jid_domain_string_to_strip_from_start": "muc.localhost",
+      "usage_timeout": "600",
+      
+      "base_url":  "http://localhost:8081",
+      "url": "http://localhost:8081"
 
     }
   ]
