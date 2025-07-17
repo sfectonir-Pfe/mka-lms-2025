@@ -6,14 +6,14 @@ services:
         ports:
             - '${HTTP_PORT}:80'
             - '${HTTPS_PORT}:443'
-        extra_hosts:
-            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "meet.jitsi.local:172.28.160.141"
         # extra_hosts:
         #     - "localhost:172.17.0.1"
 
      
         volumes:
-            - ./config/web/config.js:/config/config.js:ro
+            # - ./config/web/config.js:/config/config.js:ro
             - ${CONFIG}/web:/config:Z
             - ${CONFIG}/web/crontabs:/var/spool/cron/crontabs:Z
             - ${CONFIG}/transcripts:/usr/share/jitsi-meet/transcripts:Z
@@ -206,14 +206,17 @@ services:
             - '${PROSODY_HTTP_PORT:-5280}'
         labels:
             service: "jitsi-prosody"
-        extra_hosts:
-            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "meet.jitsi.local:172.28.160.141"
         # extra_hosts:
         #     - "localhost:172.17.0.1"   
         volumes:
             - ${CONFIG}/prosody/config:/config:Z
             - ${CONFIG}/prosody/prosody-plugins-custom:/prosody-plugins-custom:Z
             - ${CONFIG}/prosody/conf.d:/config/conf.d:Z
+            - ./config/prosody.cfg.lua:/etc/prosody/prosody.cfg.lua:ro
+            - ./config/prosody:/etc/prosody/conf.d:ro
+            - ./config/certs:/etc/prosody/certs:ro
 
         environment:
             - AUTH_TYPE
@@ -357,8 +360,8 @@ services:
         restart: ${RESTART_POLICY:-unless-stopped}
         ports:
             - '127.0.0.1:${JICOFO_REST_PORT:-8888}:8888'
-        extra_hosts:
-            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "meet.jitsi.local:172.28.160.141"
         # extra_hosts:
         #     - "localhost:172.17.0.1"    
         volumes:
@@ -458,8 +461,8 @@ services:
         ports:
             - '${JVB_PORT:-10000}:${JVB_PORT:-10000}/udp'
             - '127.0.0.1:${JVB_COLIBRI_PORT:-8080}:8080'
-        extra_hosts:
-            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "meet.jitsi.local:172.28.160.141"
         # extra_hosts:
         #     - "localhost:172.17.0.1"    
         volumes:

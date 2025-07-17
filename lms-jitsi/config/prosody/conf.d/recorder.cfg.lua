@@ -1,4 +1,4 @@
-VirtualHost "recorder.meet.jitsi.local"
+VirtualHost "recorder.localhost"
     modules_enabled = {
         "ping";
     }

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+
+import { $Enums } from '@prisma/client';
+
 @Injectable()
 export class Session2Service {
   constructor(private readonly prisma: PrismaService) {}
@@ -139,4 +142,44 @@ export class Session2Service {
 
     return { message: "Utilisateur ajouté à la session !" };
   }
+  // session2.service.ts
+async getUsersForSession(session2Id: number) {
+  // Assumes you have a join table: userSession2 (with userId, session2Id)
+  // Adjust field names as needed!
+  const assigned = await this.prisma.userSession2.findMany({
+    where: { session2Id },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          profilePic: true,
+          role: true,
+        },
+      },
+    },
+  });
+  // Return just the users:
+  return assigned.map(item => item.user);
+}
+// session2.service.ts
+
+async removeUserFromSession(session2Id: number, userId: number) {
+  return this.prisma.userSession2.deleteMany({
+    where: {
+      session2Id,
+      userId,
+    },
+  });
+}
+async updateStatus(id: number, status: string) {
+  if (!['ACTIVE', 'INACTIVE', 'COMPLETED', 'ARCHIVED'].includes(status)) {
+    throw new BadRequestException('Invalid status');
+  }
+  return this.prisma.session2.update({
+    where: { id },
+    data: { status: { set: status as $Enums.Session2Status } }, // ✅ CORRECT!
+  });
+}
 }

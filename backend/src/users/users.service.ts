@@ -536,4 +536,22 @@ export class UsersService {
       include: { session2: true }
     });
   }
+// user.service.ts
+// user.service.ts
+async getUserSessions(userId: number) {
+  const sessions = await this.prisma.userSession2.findMany({
+    where: { userId },
+    include: {
+      session2: {
+        include: {
+          program: true, // include program info if you want
+        },
+      },
+    },
+  });
+  console.log("getUserSessions result for userId:", userId, "\n", JSON.stringify(sessions, null, 2));
+  return sessions;
+}
+
+
 }

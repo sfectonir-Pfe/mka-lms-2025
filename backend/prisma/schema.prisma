@@ -48,9 +48,11 @@ model User {
   whiteboardActions       WhiteboardAction[]
   userSessions2           UserSession2[]
   session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
-  feedbacks               Feedback[]              @relation("UserFeedback")
-  chatMemories            ChatMemory[]            @relation("UserChatMemory")
-  sessionFeedbacks        SessionFeedback[]
+
+  GeneralChatMessage GeneralChatMessage[]
+  feedbacks          Feedback[]           @relation("UserFeedback")
+  chatMemories       ChatMemory[]         @relation("UserChatMemory")
+  sessionFeedbacks   SessionFeedback[]
 }
 
 model Formateur {
@@ -102,6 +104,7 @@ model Program {
   modules      ProgramModule[]
   sessions2    Session2[]
   buildProgram buildProgram[]
+  createdAt    DateTime        @default(now())
 }
 
 model Module {
@@ -277,6 +280,7 @@ model Session2 {
   endDate         DateTime?
   imageUrl        String?
   createdAt       DateTime              @default(now())
+  status          Session2Status        @default(ACTIVE)
   SeanceFormateur SeanceFormateur[]
   program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
   session2Modules Session2Module[]
@@ -402,6 +406,15 @@ model Session2ChatMessage {
   createdAt  DateTime @default(now())
 }
 
+model GeneralChatMessage {
+  id        Int      @id @default(autoincrement())
+  senderId  Int? // Nullable for "Anonyme", otherwise required
+  sender    User?    @relation(fields: [senderId], references: [id])
+  type      String // "text" | "image" | "video" | "audio" | "file" (you can restrict by enum if needed)
+  content   String // text content or file URL
+  createdAt DateTime @default(now())
+}
+
 model Feedback {
   id        Int                @id @default(autoincrement())
   rating    Int
@@ -460,7 +473,7 @@ model SessionFeedback {
   comments  String?
   createdAt DateTime @default(now())
 
-  user      User?    @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model ChatMemory {
@@ -509,4 +522,11 @@ enum QuestionType {
   TRUE_FALSE
   FILL_BLANK
   IMAGE_CHOICE
+}
+
+enum Session2Status {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+  ARCHIVED
 }

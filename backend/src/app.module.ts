@@ -19,7 +19,17 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { ChatMessagesModule } from './chat-messages/chat-messages.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
 import { Session2ChatModule } from './session2-chat/session2-chat.module';
+import { GeneralChatMessageModule } from './general-chat-message/general-chat-message.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { CreatorDashboardModule } from './creator-dashboard/creator-dashboard.module';
+import { FormateurDashboardModule } from './formateur-dashboard/formateur-dashboard.module';
+import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard.module';
 import { S3Module } from './s3/s3.module';
+
+
+
+
+
 
 @Module({
 imports: [
@@ -42,6 +52,7 @@ imports: [
   FeedbackModule, 
   ChatbotModule,
   S3Module,
+  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule,
 ],
 
   controllers: [AppController],

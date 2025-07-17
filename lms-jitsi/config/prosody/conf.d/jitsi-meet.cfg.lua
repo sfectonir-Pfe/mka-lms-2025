@@ -2,26 +2,26 @@ admins = {
     
 
     
-    "jibri@auth.meet.jitsi.local",
+    "jibri@auth.localhost",
     
 
-    "focus@auth.meet.jitsi.local",
-    "jvb@auth.meet.jitsi.local"
+    "focus@auth.localhost",
+    "jvb@auth.localhost"
 }
 
 unlimited_jids = {
-    "focus@auth.meet.jitsi.local",
-    "jvb@auth.meet.jitsi.local"
+    "focus@auth.localhost",
+    "jvb@auth.localhost"
 }
 
 plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom", "/prosody-plugins-contrib" }
 
-muc_mapper_domain_base = "meet.jitsi.local";
+muc_mapper_domain_base = "localhost";
 muc_mapper_domain_prefix = "muc";
 
 recorder_prefixes = { "recorder@hidden.meet.jitsi" };
 
-http_default_host = "meet.jitsi.local"
+http_default_host = "localhost"
 
 
 
@@ -34,13 +34,13 @@ consider_websocket_secure = true;
 
 
 
-VirtualHost "meet.jitsi.local"
+VirtualHost "localhost"
 
     authentication = "jitsi-anonymous"
 
     ssl = {
-        key = "/config/certs/meet.jitsi.local.key";
-        certificate = "/config/certs/meet.jitsi.local.crt";
+        key = "/config/certs/localhost.key";
+        certificate = "/config/certs/localhost.crt";
     }
     modules_enabled = {
         "bosh";
@@ -65,25 +65,25 @@ VirtualHost "meet.jitsi.local"
 
     }
 
-    main_muc = "muc.meet.jitsi.local"
-    room_metadata_component = "metadata.meet.jitsi.local"
+    main_muc = "muc.localhost"
+    room_metadata_component = "metadata.localhost"
     
 
     
 
     
-    breakout_rooms_muc = "breakout.meet.jitsi.local"
+    breakout_rooms_muc = "breakout.localhost"
     
 
-    speakerstats_component = "speakerstats.meet.jitsi.local"
-    conference_duration_component = "conferenceduration.meet.jitsi.local"
+    speakerstats_component = "speakerstats.localhost"
+    conference_duration_component = "conferenceduration.localhost"
 
     
-    end_conference_component = "endconference.meet.jitsi.local"
+    end_conference_component = "endconference.localhost"
     
 
     
-    av_moderation_component = "avmoderation.meet.jitsi.local"
+    av_moderation_component = "avmoderation.localhost"
     
 
     c2s_require_encryption = true
@@ -92,10 +92,10 @@ VirtualHost "meet.jitsi.local"
 
     
 
-VirtualHost "auth.meet.jitsi.local"
+VirtualHost "auth.localhost"
     ssl = {
-        key = "/config/certs/auth.meet.jitsi.local.key";
-        certificate = "/config/certs/auth.meet.jitsi.local.crt";
+        key = "/config/certs/auth.localhost.key";
+        certificate = "/config/certs/auth.localhost.crt";
     }
     modules_enabled = {
         "limits_exception";
@@ -112,21 +112,21 @@ VirtualHost "hidden.meet.jitsi"
     authentication = "internal_hashed"
 
 
-Component "internal-muc.meet.jitsi.local" "muc"
+Component "internal-muc.localhost" "muc"
     storage = "memory"
     modules_enabled = {
         "muc_hide_all";
         "muc_filter_access";
         }
     restrict_room_creation = true
-    muc_filter_whitelist="auth.meet.jitsi.local"
+    muc_filter_whitelist="auth.localhost"
     muc_room_locking = false
     muc_room_default_public_jids = true
     muc_room_cache_size = 1000
     muc_tombstones = false
     muc_room_allow_persistent = false
 
-Component "muc.meet.jitsi.local" "muc"
+Component "muc.localhost" "muc"
     restrict_room_creation = true
     storage = "memory"
     modules_enabled = {
@@ -148,35 +148,35 @@ Component "muc.meet.jitsi.local" "muc"
     muc_room_default_public_jids = true
     
     muc_password_whitelist = {
-        "focus@auth.meet.jitsi.local";
+        "focus@auth.localhost";
         "recorder@hidden.meet.jitsi";
     }
     muc_tombstones = false
     muc_room_allow_persistent = false
 
-Component "focus.meet.jitsi.local" "client_proxy"
-    target_address = "focus@auth.meet.jitsi.local"
+Component "focus.localhost" "client_proxy"
+    target_address = "focus@auth.localhost"
 
-Component "speakerstats.meet.jitsi.local" "speakerstats_component"
-    muc_component = "muc.meet.jitsi.local"
+Component "speakerstats.localhost" "speakerstats_component"
+    muc_component = "muc.localhost"
 
-Component "conferenceduration.meet.jitsi.local" "conference_duration_component"
-    muc_component = "muc.meet.jitsi.local"
-
-
-Component "endconference.meet.jitsi.local" "end_conference"
-    muc_component = "muc.meet.jitsi.local"
+Component "conferenceduration.localhost" "conference_duration_component"
+    muc_component = "muc.localhost"
 
 
-
-Component "avmoderation.meet.jitsi.local" "av_moderation_component"
-    muc_component = "muc.meet.jitsi.local"
+Component "endconference.localhost" "end_conference"
+    muc_component = "muc.localhost"
 
 
 
+Component "avmoderation.localhost" "av_moderation_component"
+    muc_component = "muc.localhost"
 
 
-Component "breakout.meet.jitsi.local" "muc"
+
+
+
+Component "breakout.localhost" "muc"
     storage = "memory"
     restrict_room_creation = true
     muc_room_cache_size = 10000
@@ -191,9 +191,9 @@ Component "breakout.meet.jitsi.local" "muc"
         }
 
 
-Component "metadata.meet.jitsi.local" "room_metadata_component"
-    muc_component = "muc.meet.jitsi.local"
-    breakout_rooms_component = "breakout.meet.jitsi.local"
+Component "metadata.localhost" "room_metadata_component"
+    muc_component = "muc.localhost"
+    breakout_rooms_component = "breakout.localhost"
 
 
 

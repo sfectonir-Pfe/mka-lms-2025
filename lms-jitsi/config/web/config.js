@@ -3,7 +3,7 @@
 var config = {};
 
 config.hosts = {};
-config.hosts.domain = 'meet.jitsi.local';
+config.hosts.domain = 'localhost';
 
 var subdir = '<!--# echo var="subdir" default="" -->';
 var subdomain = '<!--# echo var="subdomain" default="" -->';
@@ -13,12 +13,8 @@ if (subdir.startsWith('<!--')) {
 if (subdomain) {
     subdomain = subdomain.substring(0,subdomain.length-1).split('.').join('_').toLowerCase() + '.';
 }
-config.hosts.muc = 'muc.' + subdomain + 'meet.jitsi.local';
-// config.bosh = 'https://meet.jitsi.local:8443/' + subdir + 'http-bind';
-config.bosh = 'https://meet.jitsi.local:8443/http-bind';
-// config.bosh = 'http://meet.jitsi.local:8081/http-bind';
-// config.websocket = 'ws://meet.jitsi.local:8081/xmpp-websocket'; 
-
+config.hosts.muc = 'muc.' + subdomain + 'localhost';
+config.bosh = 'https://localhost:8443/' + subdir + 'http-bind';
 config.bridgeChannel = {
     preferSctp: true
 };
@@ -89,7 +85,7 @@ config.hideAddRoomButton = false;
 // Recording.
 //
 
-config.hiddenDomain = 'recorder.meet.jitsi.local';
+config.hiddenDomain = 'recorder.localhost';
 config.recordingService = {
     // Whether to enable file recording or not using the "service" defined by the finalizer in Jibri
     enabled: true,
@@ -239,4 +235,3 @@ config.whiteboard = {
 config.testing = {
     enableCodecSelectionAPI: true
 };
-config.disableBrowserChecks = true;

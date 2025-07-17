@@ -6,82 +6,58 @@ import {
   Divider,
   Stack,
   Button,
+  Avatar,
+  IconButton,
+  TextField,
   Chip,
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton,
-  TextField,
-  Collapse,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
-import html2canvas from "html2canvas";
-
-
 import { useNavigate } from "react-router-dom";
 import SessionFeedbackForm from '../../../components/session-feedback-form';
 
-
-
-
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
-const [userEmail, setUserEmail] = useState("");
-const [addLoading, setAddLoading] = useState(false);
-const { t } = useTranslation();
-const handleAddUser = async (sessionId) => {
-  if (!userEmail) {
-    toast.error(t("sessions.enterEmail"));
-    return;
-  }
-  setAddLoading(true);
-  try {
-    await axios.post(`http://localhost:8000/session2/${sessionId}/add-user`, {
-      email: userEmail,
-    });
-    toast.success(t("sessions.userAdded"));
-    setShowAddUserId(null);
-    setUserEmail("");
-  } catch (e) {
-    toast.error(
-      e.response?.data?.message ||
-      t("sessions.addUserError")
-    );
-  } finally {
-    setAddLoading(false);
-  }
-};
-
+  const [userEmail, setUserEmail] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
   const [sessions, setSessions] = useState([]);
+  const [assignedUsersMap, setAssignedUsersMap] = useState({});
+  const [sidebarOpen, setSidebarOpen] = useState({});
   const [shareModal, setShareModal] = useState({ open: false, session: null });
   const [shareText, setShareText] = useState('');
-  const [showFeedback, setShowFeedback] = useState({});
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
-
-const navigate = useNavigate();
-
-  const toggleFeedback = (sessionId) => {
-    setShowFeedback(prev => ({
-      ...prev,
-      [sessionId]: !prev[sessionId]
-    }));
-  };
-
-  const openFeedbackForm = (session) => {
-    console.log("openFeedbackForm called with session:", session);
-    setSelectedSession(session);
-    setOpenFeedbackDialog(true);
-    console.log("openFeedbackDialog set to true");
-  };
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const fetchSessions = async () => {
     try {
       const res = await axios.get("http://localhost:8000/session2");
       setSessions(res.data);
+      const usersMap = {};
+      await Promise.all(
+        res.data.map(async (session) => {
+          try {
+            const resp = await axios.get(`http://localhost:8000/session2/${session.id}/users`);
+            usersMap[session.id] = resp.data || [];
+          } catch {
+            usersMap[session.id] = [];
+          }
+        })
+      );
+      setAssignedUsersMap(usersMap);
     } catch {
       toast.error(t("sessions.loadError"));
     }
@@ -101,8 +77,62 @@ const navigate = useNavigate();
     }
   };
 
+  const handleStatusChange = async (sessionId, newStatus) => {
+    try {
+      await axios.patch(`http://localhost:8000/session2/${sessionId}/status`, {
+        status: newStatus,
+      });
+      toast.success(t("sessions.statusUpdated"));
+      fetchSessions();
+    } catch {
+      toast.error(t("sessions.statusUpdateError"));
+    }
+  };
+
+  const handleRemoveUser = async (sessionId, userId) => {
+    try {
+      await axios.delete(`http://localhost:8000/session2/${sessionId}/remove-user/${userId}`);
+      toast.success(t("sessions.userRemoved"));
+      await fetchSessions();
+    } catch (e) {
+      toast.error(
+        e.response?.data?.message || t("sessions.removeUserError")
+      );
+    }
+  };
+
+  const handleAddUser = async (sessionId) => {
+    if (!userEmail) {
+      toast.error(t("sessions.enterEmail"));
+      return;
+    }
+    setAddLoading(true);
+    try {
+      await axios.post(`http://localhost:8000/session2/${sessionId}/add-user`, {
+        email: userEmail,
+      });
+      toast.success(t("sessions.userAdded"));
+      setShowAddUserId(null);
+      setUserEmail("");
+      await fetchSessions();
+    } catch (e) {
+      toast.error(
+        e.response?.data?.message || t("sessions.addUserError")
+      );
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
+  const handleToggleSidebar = (sessionId) => {
+    setSidebarOpen(prev => ({
+      ...prev,
+      [sessionId]: !prev[sessionId]
+    }));
+  };
+
   const handleShare = (session) => {
-    const text = `🌟 NOUVELLE SESSION DE FORMATION DISPONIBLE! 🌟\n\n🎯 ${session.name}\n\n📚 PROGRAMME: ${session.program?.name || 'Programme'}\n📅 PÉRIODE: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? '🎓 MODULES INCLUS:\n' + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 Une opportunité unique de développer vos compétences!\n\n💡 Inscrivez-vous dès maintenant et transformez votre avenir professionnel!\n\n#Formation #Éducation #DéveloppementProfessionnel #Apprentissage #Compétences #LMS #Success`;
+    const text = `🌟 ${t("sessions.newSessionAvailable")} 🌟\n\n🎯 ${session.name}\n\n📚 ${t("sessions.program")}: ${session.program?.name || t("sessions.program")}\n📅 ${t("sessions.period")}: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? `🎓 ${t("sessions.includedModules")}:\n` + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 ${t("sessions.uniqueOpportunity")}\n\n💡 ${t("sessions.registerNow")}\n\n#Formation #Éducation #DéveloppementProfessionnel #Apprentissage #Compétences #LMS #Success`;
     setShareText(text);
     setShareModal({ open: true, session });
   };
@@ -127,16 +157,29 @@ const navigate = useNavigate();
   };
 
   const handleDownloadPreview = async () => {
-    const element = document.getElementById("session-preview");
-    if (!element) return;
+    try {
+      // Dynamically import html2canvas
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const element = document.getElementById("session-preview");
+      if (!element) return;
 
-    const canvas = await html2canvas(element);
-    const dataURL = canvas.toDataURL("image/png");
+      const canvas = await html2canvas(element);
+      const dataURL = canvas.toDataURL("image/png");
 
-    const link = document.createElement("a");
-    link.href = dataURL;
-    link.download = `session-${shareModal.session?.name || "preview"}.png`;
-    link.click();
+      const link = document.createElement("a");
+      link.href = dataURL;
+      link.download = `session-${shareModal.session?.name || "preview"}.png`;
+      link.click();
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast.error(t('sessions.imageGenerationError'));
+    }
+  };
+
+  const openFeedbackForm = (session) => {
+    setSelectedSession(session);
+    setOpenFeedbackDialog(true);
   };
 
   return (
@@ -160,154 +203,316 @@ const navigate = useNavigate();
               borderRadius: 3,
               backgroundColor: "#ffffff",
               border: "1px solid #e0e0e0",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 3
             }}
           >
-            {session.imageUrl && (
-              <Box mb={2} display="flex" justifyContent="center">
-                <img
-                  src={session.imageUrl}
-                  alt="Session"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: 180,
-                    borderRadius: 16,
-                    objectFit: "cover",
-                  }}
-                />
-              </Box>
-            )}
+            {/* Main Content */}
+            <Box flex={1}>
+              {session.imageUrl && (
+                <Box mb={2} display="flex" justifyContent="center">
+                  <img
+                    src={session.imageUrl}
+                    alt="Session"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: 180,
+                      borderRadius: 16,
+                      objectFit: "cover",
+                    }}
+                  />
+                </Box>
+              )}
 
-            <Stack
-  direction="row"
-  justifyContent="space-between"
-  alignItems="center"
-  mb={1}
->
-  <Typography variant="h6" fontWeight="bold" color="primary">
-    🧾 {session.name}
-  </Typography>
-  <Box>
-    <Button
-      variant="outlined"
-      color="error"
-      size="small"
-      onClick={() => handleDelete(session.id)}
-    >
-      🗑️ {t("sessions.delete")}
-    </Button>
-    <Button
-      variant="contained"
-      color="primary"
-      size="small"
-      onClick={() => navigate(`/sessions/${session.id}/seances`)}
-      sx={{ ml: 2 }}
-    >
-      🚀 {t("sessions.join")}
-    </Button>
-    <Button
-  variant="outlined"
-  color="secondary"
-  size="small"
-  sx={{ ml: 2 }}
-  onClick={() => setShowAddUserId(session.id === showAddUserId ? null : session.id)}
->
-  ➕ {t("sessions.addUser")}
-</Button>
-<Button
-  variant="contained"
-  color="info"
-  size="small"
-  sx={{ ml: 2 }}
-  startIcon={<Feedback />}
-  onClick={() => {
-    console.log("Button clicked for session:", session.name);
-    openFeedbackForm(session);
-  }}
->
-  📝 {t("sessions.feedback")}
-</Button>
-{showAddUserId === session.id && (
-  <Box mt={2} display="flex" gap={1} alignItems="center">
-    <input
-      type="email"
-      placeholder={t("sessions.userEmailPlaceholder")}
-      value={userEmail}
-      onChange={e => setUserEmail(e.target.value)}
-      style={{ padding: 8, borderRadius: 6, border: '1px solid #ddd', minWidth: 220 }}
-    />
-    <Button
-      variant="contained"
-      size="small"
-      color="secondary"
-      onClick={() => handleAddUser(session.id)}
-      disabled={addLoading}
-    >
-      {addLoading ? t("sessions.adding") : t("sessions.add")}
-    </Button>
-    <Button
-      variant="text"
-      size="small"
-      onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
-    >
-      {t("sessions.cancel")}
-    </Button>
-  </Box>
-)}
-
-  </Box>
-</Stack>
-
-
-            <Typography variant="body2" mb={0.5}>
-              📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>
-            </Typography>
-            <Typography variant="body2">
-              📅 {t("sessions.period")} <strong>{session.startDate?.slice(0, 10)}</strong> {t("sessions.to")}{" "}
-              <strong>{session.endDate?.slice(0, 10)}</strong>
-            </Typography>
-
-            {session.session2Modules?.length > 0 && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1" fontWeight="bold">
-                  🧱 {t("sessions.modulesContent")}
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={1}
+              >
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  🧾 {session.name}
                 </Typography>
-                {session.session2Modules.map((mod) => (
-                  <Box key={mod.id} mt={1}>
-                    <Typography fontWeight="bold" color="secondary.main">
-                      📦 {mod.module?.name}
-                    </Typography>
-                    {mod.courses.map((c) => (
-                      <Box key={c.id} ml={2} mt={1}>
-                        <Typography variant="body2" fontWeight="bold" color="text.primary">
-                          📘 {c.course?.title}
-                        </Typography>
-                        <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
-                          {c.contenus.map((ct) => (
-                            <Chip
-                              key={ct.id}
-                              label={`📄 ${ct.contenu?.title}`}
-                              size="small"
-                              variant="outlined"
-                              color="info"
-                              onClick={() =>
-                                ct.contenu?.fileUrl &&
-                                window.open(ct.contenu.fileUrl, "_blank")
-                              }
-                              sx={{
-                                cursor: ct.contenu?.fileUrl ? "pointer" : "default",
-                              }}
-                            />
-                          ))}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Box>
-                ))}
-              </>
-            )}
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Chip
+                    label={session.status}
+                    color={
+                      session.status === "ACTIVE"
+                        ? "success"
+                        : session.status === "INACTIVE"
+                        ? "default"
+                        : session.status === "COMPLETED"
+                        ? "primary"
+                        : "secondary"
+                    }
+                    sx={{ fontWeight: 700, textTransform: "capitalize" }}
+                  />
+                  <FormControl size="small" sx={{ minWidth: 120 }}>
+                    <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
+                    <Select
+                      labelId={`status-label-${session.id}`}
+                      value={session.status}
+                      label={t("sessions.status")}
+                      onChange={e => handleStatusChange(session.id, e.target.value)}
+                    >
+                      <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
+                      <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
+                      <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
+                      <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              </Stack>
 
-            {/* Section Feedback - Supprimée car maintenant en dialog */}
+              {!sidebarOpen[session.id] && (
+                <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => handleDelete(session.id)}
+                  >
+                    {t("sessions.delete")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<RocketLaunchIcon />}
+                    onClick={() => navigate(`/sessions/${session.id}/seances`)}
+                  >
+                    {t("sessions.join")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    startIcon={<PersonAddAlt1Icon />}
+                    onClick={() => handleToggleSidebar(session.id)}
+                  >
+                    {t("sessions.addUser")}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    size="small"
+                    onClick={() => handleShare(session)}
+                  >
+                    📤 {t("sessions.share")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    size="small"
+                    startIcon={<Feedback />}
+                    onClick={() => openFeedbackForm(session)}
+                  >
+                    📝 {t("sessions.feedback")}
+                  </Button>
+                </Stack>
+              )}
+
+              {/* Add User Section */}
+              {showAddUserId === session.id && (
+                <Box mt={2} mb={2} display="flex" gap={1} alignItems="center">
+                  <TextField
+                    type="email"
+                    placeholder={t("sessions.userEmailPlaceholder")}
+                    value={userEmail}
+                    onChange={e => setUserEmail(e.target.value)}
+                    size="small"
+                    sx={{ minWidth: 220 }}
+                  />
+                  <Button
+                    variant="contained"
+                    size="small"
+                    color="secondary"
+                    onClick={() => handleAddUser(session.id)}
+                    disabled={addLoading}
+                  >
+                    {addLoading ? t("sessions.adding") : t("sessions.add")}
+                  </Button>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
+                  >
+                    {t("sessions.cancel")}
+                  </Button>
+                </Box>
+              )}
+
+              <Typography variant="body2" mb={0.5}>
+                📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>
+              </Typography>
+              <Typography variant="body2">
+                📅 {t("sessions.period")} <strong>{session.startDate?.slice(0, 10)}</strong> {t("sessions.to")}{" "}
+                <strong>{session.endDate?.slice(0, 10)}</strong>
+              </Typography>
+
+              {/* Modules and Contents */}
+              {session.session2Modules?.length > 0 && (
+                <>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    🧱 {t("sessions.modulesContent")}
+                  </Typography>
+                  {session.session2Modules.map((mod) => (
+                    <Box key={mod.id} mt={1}>
+                      <Typography fontWeight="bold" color="secondary.main">
+                        📦 {mod.module?.name}
+                      </Typography>
+                      {mod.courses?.map((c) => (
+                        <Box key={c.id} ml={2} mt={1}>
+                          <Typography variant="body2" fontWeight="bold" color="text.primary">
+                            📘 {c.course?.title}
+                          </Typography>
+                          <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                            {c.contenus?.map((ct) => (
+                              <Button
+                                key={ct.id}
+                                variant="outlined"
+                                color="info"
+                                size="small"
+                                sx={{ mr: 1, mb: 1, borderRadius: 2 }}
+                                onClick={() =>
+                                  ct.contenu?.fileUrl &&
+                                  window.open(ct.contenu.fileUrl, "_blank")
+                                }
+                              >
+                                📄 {ct.contenu?.title}
+                              </Button>
+                            ))}
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Box>
+                  ))}
+                </>
+              )}
+            </Box>
+
+            {/* Sidebar for Users */}
+            {sidebarOpen[session.id] && (
+              <Paper
+                elevation={4}
+                sx={{
+                  minWidth: 350,
+                  maxWidth: 400,
+                  bgcolor: "#f8fbff",
+                  borderRadius: 4,
+                  p: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "stretch",
+                  boxShadow: "0 12px 36px 0 rgba(25, 118, 210, 0.09)",
+                }}
+              >
+                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                  <Typography fontWeight={700} color="primary" fontSize={18}>
+                    {t("sessions.members")}
+                  </Typography>
+                  <Button
+                    variant="text"
+                    color="primary"
+                    onClick={() => handleToggleSidebar(session.id)}
+                    sx={{ fontWeight: 600, fontSize: 14, textTransform: "none" }}
+                  >
+                    {t("sessions.hide")}
+                  </Button>
+                </Box>
+
+                {/* Add User Input */}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  mb={3}
+                  bgcolor="#eaf0f9"
+                  borderRadius={2}
+                  p={1.5}
+                >
+                  <TextField
+                    size="small"
+                    type="email"
+                    placeholder={t("sessions.addByEmail")}
+                    value={showAddUserId === session.id ? userEmail : ""}
+                    onFocus={() => setShowAddUserId(session.id)}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    variant="outlined"
+                    sx={{ flex: 1, bgcolor: "#fff", borderRadius: 2 }}
+                  />
+                  <IconButton
+                    color="primary"
+                    disabled={addLoading}
+                    onClick={() => handleAddUser(session.id)}
+                    sx={{ bgcolor: "#1976d2", color: "#fff", "&:hover": { bgcolor: "#1565c0" } }}
+                  >
+                    <PersonAddAlt1Icon />
+                  </IconButton>
+                </Box>
+
+                {/* Users List */}
+                <Stack spacing={2}>
+                  {(assignedUsersMap[session.id] || []).length === 0 ? (
+                    <Typography color="text.secondary" fontSize={14}>
+                      {t("sessions.noUsers")}
+                    </Typography>
+                  ) : (
+                    assignedUsersMap[session.id].map((user) => (
+                      <Box
+                        key={user.id}
+                        display="flex"
+                        alignItems="center"
+                        gap={2}
+                        p={2}
+                        bgcolor="#fff"
+                        borderRadius={2}
+                        sx={{
+                          boxShadow: "0 2px 8px rgba(25,118,210,.04)",
+                          cursor: "pointer",
+                          transition: "background .15s",
+                          "&:hover": { background: "#f0f6ff" }
+                        }}
+                        onClick={() => navigate(`/ProfilePage/${user.id}`)}
+                      >
+                        <Avatar
+                          src={user.profilePic || undefined}
+                          sx={{
+                            width: 38, height: 38, fontWeight: 700, fontSize: 16,
+                            bgcolor: user.profilePic ? "transparent" : "#B5C7D3",
+                          }}
+                        >
+                          {!user.profilePic && user.name ? user.name[0].toUpperCase() : null}
+                        </Avatar>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography fontWeight={600} fontSize={14} color="#222">
+                            {user.name}
+                          </Typography>
+                          <Typography fontSize={12} color="#999">
+                            {user.role}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleRemoveUser(session.id, user.id);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    ))
+                  )}
+                </Stack>
+              </Paper>
+            )}
           </Paper>
         ))
       )}
@@ -321,8 +526,7 @@ const navigate = useNavigate();
           </IconButton>
         </DialogTitle>
         <DialogContent>
-
-          {/* 💎 Widget stylé */}
+          {/* Session Preview Widget */}
           <Box
             id="session-preview"
             sx={{
@@ -405,7 +609,7 @@ const navigate = useNavigate();
             </Box>
           </Box>
 
-          {/* Champs texte + boutons */}
+          {/* Share Text and Buttons */}
           <TextField
             multiline
             rows={8}
@@ -422,7 +626,6 @@ const navigate = useNavigate();
             <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
             <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
             <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
-            <Button variant="outlined" onClick={handleDownloadPreview}>🖼️ {t("sessions.downloadImage")}</Button>
           </Stack>
         </DialogContent>
       </Dialog>
