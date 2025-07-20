@@ -3,6 +3,7 @@
 # ===========================
 FRONT_COMPOSE=./frontend/docker-compose.yml
 BACK_COMPOSE=./backend/docker-compose.yml
+SERVICE=backend
 
 GREEN=\033[0;32m
 NC=\033[0m # No Color
@@ -78,3 +79,16 @@ back-build:
 back-logs:
 	@echo "$(GREEN)Showing backend logs...$(NC)"
 	docker compose -f $(BACK_COMPOSE) logs -f
+
+
+migrate:
+	@echo "$(GREEN)Applying Prisma migrations (deploy)...$(NC)"
+	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate deploy
+
+migrate-dev:
+	@echo "$(GREEN)Running Prisma migrate dev (development mode)...$(NC)"
+	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate dev
+
+studio:
+	@echo "$(GREEN)Launching Prisma Studio...$(NC)"
+	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma studio
