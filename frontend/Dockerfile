@@ -16,6 +16,6 @@ RUN yarn global add serve
 
 COPY --from=builder /app/build ./build
 
-EXPOSE 3000
+EXPOSE 4000
 
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "4000"]
