@@ -1,0 +1,679 @@
+Jibri 2025-07-12 10:38:49.230 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#349: Logs for call null
+Jibri 2025-07-12 10:38:49.248 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#354: ========= TYPE=browser ===========
+Jibri 2025-07-12 10:38:49.265 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#354: ========= TYPE=driver ===========
+Jibri 2025-07-12 10:38:49.265 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Browser search. Trying... /usr/bin/chrome
+
+Jibri 2025-07-12 10:38:49.266 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Browser search. Trying... /usr/bin/chrome
+
+Jibri 2025-07-12 10:38:49.266 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Browser search. Trying... /usr/bin/google-chrome
+
+Jibri 2025-07-12 10:38:49.266 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Browser search. Found at  /usr/bin/google-chrome
+
+Jibri 2025-07-12 10:38:49.266 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Populating Preferences file: {
+   "alternate_error_pages": {
+      "enabled": false
+   },
+   "autofill": {
+      "enabled": false
+   },
+   "browser": {
+      "check_default_browser": false
+   },
+   "distribution": {
+      "import_bookmarks": false,
+      "import_history": false,
+      "import_search_engine": false,
+      "make_chrome_default_for_user": false,
+      "skip_first_run_ui": true
+   },
+   "dns_prefetching": {
+      "enabled": false
+   },
+   "profile": {
+      "content_settings": {
+         "pattern_pairs": {
+            "https://*,*": {
+               "media-stream": {
+                  "audio": "Default",
+                  "video": "Default"
+               }
+            }
+         }
+      },
+      "default_content_setting_values": {
+         "geolocation": 1
+      },
+      "default_content_settings": {
+         "geolocation": 1,
+         "mouselock": 1,
+         "notifications": 1,
+         "popups": 1,
+         "ppapi-broker": 1
+      },
+      "password_manager_enabled": false
+   },
+   "safebrowsing": {
+      "enabled": false
+   },
+   "search": {
+      "suggest_enabled": false
+   },
+   "translate": {
+      "enabled": false
+   }
+}
+
+Jibri 2025-07-12 10:38:49.267 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Populating Local State file: {
+   "background_mode": {
+      "enabled": false
+   },
+   "ssl": {
+      "rev_checking": {
+         "enabled": false
+      }
+   }
+}
+
+Jibri 2025-07-12 10:38:49.267 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] ChromeDriver supports communication with Chrome via pipes. This is more reliable and more secure.
+
+Jibri 2025-07-12 10:38:49.267 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Use the --remote-debugging-pipe Chrome switch instead of the default --remote-debugging-port to enable this communication mode.
+
+Jibri 2025-07-12 10:38:49.268 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] Launching chrome: /usr/bin/google-chrome --allow-pre-commit-input --autoplay-policy=no-user-gesture-required --disable-background-networking --disable-client-side-phishing-detection --disable-default-apps --disable-hang-monitor --disable-popup-blocking --disable-prompt-on-repost --disable-sync --enable-automation --enable-logging --enabled --kiosk --log-level=0 --no-first-run --no-service-autorun --password-store=basic --remote-debugging-port=0 --start-maximized --test-type=webdriver --use-fake-ui-for-media-stream --use-mock-keychain --user-data-dir=/tmp/.org.chromium.Chromium.kC7raV data:,
+
+Jibri 2025-07-12 10:38:49.268 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools HTTP Request: http://localhost:37693/json/version
+
+Jibri 2025-07-12 10:38:49.268 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools HTTP Response: {
+   "Browser": "Chrome/130.0.6723.116",
+   "Protocol-Version": "1.3",
+   "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+   "V8-Version": "13.0.245.18",
+   "WebKit-Version": "537.36 (@6ac35f94ae3d01152cf1946c896b0678e48f8ec4)",
+   "webSocketDebuggerUrl": "ws://localhost:37693/devtools/browser/1d8d5f39-6759-4f48-a3b1-6148418ceafb"
+}
+
+
+Jibri 2025-07-12 10:38:49.269 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools HTTP Request: http://localhost:37693/json/list
+
+Jibri 2025-07-12 10:38:49.270 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools HTTP Response: [ {
+   "description": "",
+   "devtoolsFrontendUrl": "/devtools/inspector.html?ws=localhost:37693/devtools/page/033CE01459E9FFAE477DA274694CE28C",
+   "id": "033CE01459E9FFAE477DA274694CE28C",
+   "title": "",
+   "type": "page",
+   "url": "data:,",
+   "webSocketDebuggerUrl": "ws://localhost:37693/devtools/page/033CE01459E9FFAE477DA274694CE28C"
+} ]
+
+
+Jibri 2025-07-12 10:38:49.271 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Target.getTargets (id=1) (session_id=) browser {
+}
+
+Jibri 2025-07-12 10:38:49.271 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Target.getTargets (id=1) (session_id=) browser {
+   "targetInfos": [ {
+      "attached": false,
+      "browserContextId": "0D7D07ECE5D14A96E34A6838102DE068",
+      "canAccessOpener": false,
+      "targetId": "033CE01459E9FFAE477DA274694CE28C",
+      "title": "",
+      "type": "page",
+      "url": "data:,"
+   } ]
+}
+
+Jibri 2025-07-12 10:38:49.271 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Target.attachToTarget (id=2) (session_id=) browser {
+   "flatten": true,
+   "targetId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.271 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Target.attachedToTarget (session_id=) browser {
+   "sessionId": "CB7F18EBB301FACA8568FC80F0E54647",
+   "targetInfo": {
+      "attached": true,
+      "browserContextId": "0D7D07ECE5D14A96E34A6838102DE068",
+      "canAccessOpener": false,
+      "targetId": "033CE01459E9FFAE477DA274694CE28C",
+      "title": "",
+      "type": "page",
+      "url": "data:,"
+   },
+   "waitingForDebugger": false
+}
+
+Jibri 2025-07-12 10:38:49.272 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Target.attachToTarget (id=2) (session_id=) browser {
+   "sessionId": "CB7F18EBB301FACA8568FC80F0E54647"
+}
+
+Jibri 2025-07-12 10:38:49.272 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Page.enable (id=3) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.272 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Page.addScriptToEvaluateOnNewDocument (id=4) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "source": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+
+Jibri 2025-07-12 10:38:49.272 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=5) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "(function () {window.cdc_adoQpoasnfa76pfcZLmcfl_Array = window.Array;window.cdc_adoQpoasnfa76pfcZLmcfl_Object = window.Object;window.cdc_adoQpoasnfa76pfcZLmcfl_Promise = window.Promise;window.cdc_a..."
+}
+
+Jibri 2025-07-12 10:38:49.273 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Log.enable (id=6) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.273 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Target.setAutoAttach (id=7) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "autoAttach": true,
+   "flatten": true,
+   "waitForDebuggerOnStart": false
+}
+
+Jibri 2025-07-12 10:38:49.273 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Page.enable (id=3) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.273 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Page.addScriptToEvaluateOnNewDocument (id=4) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "identifier": "1"
+}
+
+Jibri 2025-07-12 10:38:49.274 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=5) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "type": "undefined"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.274 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Log.enable (id=6) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.274 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Target.setAutoAttach (id=7) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.274 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Runtime.enable (id=8) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.274 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Page.domContentEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.07554
+}
+
+Jibri 2025-07-12 10:38:49.275 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Page.loadEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.076022
+}
+
+Jibri 2025-07-12 10:38:49.275 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Page.frameStoppedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.275 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Page.frameResized (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.275 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextCreated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "context": {
+      "auxData": {
+         "frameId": "033CE01459E9FFAE477DA274694CE28C",
+         "isDefault": true,
+         "type": "default"
+      },
+      "id": 1,
+      "name": "",
+      "origin": "://",
+      "uniqueId": "6709582470648206795.-4551416692468465329"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.276 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Runtime.enable (id=8) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.276 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Command: Runtime.enable (id=9) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.276 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [FINE] DevTools WebSocket Response: Runtime.enable (id=9) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.277 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:48+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] RESPONSE InitSession {
+   "acceptInsecureCerts": false,
+   "acceptSslCerts": false,
+   "browserConnectionEnabled": false,
+   "browserName": "chrome",
+   "chrome": {
+      "chromedriverVersion": "130.0.6723.116 (6ac35f94ae3d01152cf1946c896b0678e48f8ec4-refs/branch-heads/6723@{#1764})",
+      "userDataDir": "/tmp/.org.chromium.Chromium.kC7raV"
+   },
+   "cssSelectorsEnabled": true,
+   "databaseEnabled": false,
+   "fedcm:accounts": true,
+   "goog:chromeOptions": {
+      "debuggerAddress": "localhost:37693"
+   },
+   "handlesAlerts": true,
+   "hasTouchScreen": false,
+   "javascriptEnabled": true,
+   "locationContextEnabled": true,
+   "mobileEmulationEnabled": false,
+   "nativeEvents": true,
+   "networkConnectionEnabled": false,
+   "pageLoadStrategy": "normal",
+   "platform": "Linux",
+   "proxy": {
+   },
+   "~~~": "..."
+}
+
+Jibri 2025-07-12 10:38:49.277 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] COMMAND SetTimeouts {
+   "ms": 60000,
+   "type": "page load"
+}
+
+Jibri 2025-07-12 10:38:49.278 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] RESPONSE SetTimeouts
+
+Jibri 2025-07-12 10:38:49.278 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] COMMAND Navigate {
+   "url": "https://localhost:8443"
+}
+
+Jibri 2025-07-12 10:38:49.278 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Waiting for pending navigations...
+
+Jibri 2025-07-12 10:38:49.279 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=10) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.279 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=10) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.280 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Done waiting for pending navigations. Status: ok
+
+Jibri 2025-07-12 10:38:49.280 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Page.navigate (id=11) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "url": "https://localhost:8443"
+}
+
+Jibri 2025-07-12 10:38:49.280 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStartedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.280 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Page.navigate (id=11) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "errorText": "net::ERR_CONNECTION_REFUSED",
+   "frameId": "033CE01459E9FFAE477DA274694CE28C",
+   "loaderId": "8D5B960BC278410908B88816696B5178"
+}
+
+Jibri 2025-07-12 10:38:49.281 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=12) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.281 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextsCleared (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.281 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextsCleared (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.282 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameNavigated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frame": {
+      "adFrameStatus": {
+         "adFrameType": "none"
+      },
+      "crossOriginIsolatedContextType": "NotIsolated",
+      "domainAndRegistry": "",
+      "gatedAPIFeatures": [  ],
+      "id": "033CE01459E9FFAE477DA274694CE28C",
+      "loaderId": "645E1B9AFDCA9AFAF8EC78A4156E99CE",
+      "mimeType": "text/html",
+      "secureContextType": "InsecureScheme",
+      "securityOrigin": "://",
+      "unreachableUrl": "https://localhost:8443/",
+      "url": "chrome-error://chromewebdata/"
+   },
+   "type": "Navigation"
+}
+
+Jibri 2025-07-12 10:38:49.282 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextCreated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "context": {
+      "auxData": {
+         "frameId": "033CE01459E9FFAE477DA274694CE28C",
+         "isDefault": true,
+         "type": "default"
+      },
+      "id": 1,
+      "name": "",
+      "origin": "://",
+      "uniqueId": "-1179582653171886081.-4634359948733984975"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.282 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=12) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.282 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Waiting for pending navigations...
+
+Jibri 2025-07-12 10:38:49.282 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=13) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.283 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.domContentEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.197297
+}
+
+Jibri 2025-07-12 10:38:49.283 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=13) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.284 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.loadEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.224851
+}
+
+Jibri 2025-07-12 10:38:49.284 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=14) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "awaitPromise": false,
+   "expression": "document.readyState",
+   "returnByValue": true,
+   "uniqueContextId": "-1179582653171886081.-4634359948733984975"
+}
+
+Jibri 2025-07-12 10:38:49.284 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStoppedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.285 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=14) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "type": "string",
+      "value": "complete"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.285 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=15) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.285 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=15) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.286 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Done waiting for pending navigations. Status: ok
+
+Jibri 2025-07-12 10:38:49.286 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Page.navigate (id=16) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "url": "https://localhost:8443"
+}
+
+Jibri 2025-07-12 10:38:49.287 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStartedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.287 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Page.navigate (id=16) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "errorText": "net::ERR_CONNECTION_REFUSED",
+   "frameId": "033CE01459E9FFAE477DA274694CE28C",
+   "loaderId": "BF6D688AA9BBD5365C77098080850A92"
+}
+
+Jibri 2025-07-12 10:38:49.287 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=17) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.288 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextsCleared (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.288 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameNavigated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frame": {
+      "adFrameStatus": {
+         "adFrameType": "none"
+      },
+      "crossOriginIsolatedContextType": "NotIsolated",
+      "domainAndRegistry": "",
+      "gatedAPIFeatures": [  ],
+      "id": "033CE01459E9FFAE477DA274694CE28C",
+      "loaderId": "F49A16055F8E13572BA4EDB4DC3753C8",
+      "mimeType": "text/html",
+      "secureContextType": "InsecureScheme",
+      "securityOrigin": "://",
+      "unreachableUrl": "https://localhost:8443/",
+      "url": "chrome-error://chromewebdata/"
+   },
+   "type": "Navigation"
+}
+
+Jibri 2025-07-12 10:38:49.288 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextCreated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "context": {
+      "auxData": {
+         "frameId": "033CE01459E9FFAE477DA274694CE28C",
+         "isDefault": true,
+         "type": "default"
+      },
+      "id": 2,
+      "name": "",
+      "origin": "://",
+      "uniqueId": "-8212144081386512150.-2711084056135794121"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.289 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=17) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.289 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Waiting for pending navigations...
+
+Jibri 2025-07-12 10:38:49.289 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=18) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.289 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.domContentEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.265305
+}
+
+Jibri 2025-07-12 10:38:49.290 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=18) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.290 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.loadEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.267496
+}
+
+Jibri 2025-07-12 10:38:49.290 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=19) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "awaitPromise": false,
+   "expression": "document.readyState",
+   "returnByValue": true,
+   "uniqueContextId": "-8212144081386512150.-2711084056135794121"
+}
+
+Jibri 2025-07-12 10:38:49.290 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStoppedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.290 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=19) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "type": "string",
+      "value": "complete"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.291 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=20) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.291 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=20) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.291 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Done waiting for pending navigations. Status: ok
+
+Jibri 2025-07-12 10:38:49.292 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Page.navigate (id=21) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "url": "https://localhost:8443"
+}
+
+Jibri 2025-07-12 10:38:49.292 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStartedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.292 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Page.navigate (id=21) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "errorText": "net::ERR_CONNECTION_REFUSED",
+   "frameId": "033CE01459E9FFAE477DA274694CE28C",
+   "loaderId": "4F7D8FD25FE2B321400656175602F8E4"
+}
+
+Jibri 2025-07-12 10:38:49.292 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=22) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.293 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextsCleared (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+}
+
+Jibri 2025-07-12 10:38:49.293 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameNavigated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frame": {
+      "adFrameStatus": {
+         "adFrameType": "none"
+      },
+      "crossOriginIsolatedContextType": "NotIsolated",
+      "domainAndRegistry": "",
+      "gatedAPIFeatures": [  ],
+      "id": "033CE01459E9FFAE477DA274694CE28C",
+      "loaderId": "9CEEEEA975E325309B3DD1B98A3E243F",
+      "mimeType": "text/html",
+      "secureContextType": "InsecureScheme",
+      "securityOrigin": "://",
+      "unreachableUrl": "https://localhost:8443/",
+      "url": "chrome-error://chromewebdata/"
+   },
+   "type": "Navigation"
+}
+
+Jibri 2025-07-12 10:38:49.293 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Runtime.executionContextCreated (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "context": {
+      "auxData": {
+         "frameId": "033CE01459E9FFAE477DA274694CE28C",
+         "isDefault": true,
+         "type": "default"
+      },
+      "id": 3,
+      "name": "",
+      "origin": "://",
+      "uniqueId": "2749915948406509723.7245047573664601286"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.293 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=22) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.294 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Waiting for pending navigations...
+
+Jibri 2025-07-12 10:38:49.294 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=23) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.294 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.domContentEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.299761
+}
+
+Jibri 2025-07-12 10:38:49.295 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=23) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.296 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.loadEventFired (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "timestamp": 4901.301804
+}
+
+Jibri 2025-07-12 10:38:49.296 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=24) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "awaitPromise": false,
+   "expression": "document.readyState",
+   "returnByValue": true,
+   "uniqueContextId": "2749915948406509723.7245047573664601286"
+}
+
+Jibri 2025-07-12 10:38:49.297 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Event: Page.frameStoppedLoading (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "frameId": "033CE01459E9FFAE477DA274694CE28C"
+}
+
+Jibri 2025-07-12 10:38:49.297 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=24) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "type": "string",
+      "value": "complete"
+   }
+}
+
+Jibri 2025-07-12 10:38:49.297 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=25) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "expression": "1"
+}
+
+Jibri 2025-07-12 10:38:49.298 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=25) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.298 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] Done waiting for pending navigations. Status: ok
+
+Jibri 2025-07-12 10:38:49.298 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] RESPONSE Navigate ERROR unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=130.0.6723.116)
+
+Jibri 2025-07-12 10:38:49.298 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] COMMAND GetLogTypes {
+}
+
+Jibri 2025-07-12 10:38:49.299 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] RESPONSE GetLogTypes [ "browser", "driver" ]
+
+Jibri 2025-07-12 10:38:49.299 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] COMMAND GetLog {
+   "type": "browser"
+}
+
+Jibri 2025-07-12 10:38:49.299 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=26) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "awaitPromise": false,
+   "expression": "1",
+   "returnByValue": true
+}
+
+Jibri 2025-07-12 10:38:49.299 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=26) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.300 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] RESPONSE GetLog [  ]
+
+Jibri 2025-07-12 10:38:49.300 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [INFO] [65b6df9b4b8eed75937c825b573d100f] COMMAND GetLog {
+   "type": "driver"
+}
+
+Jibri 2025-07-12 10:38:49.300 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Command: Runtime.evaluate (id=27) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "awaitPromise": false,
+   "expression": "1",
+   "returnByValue": true
+}
+
+Jibri 2025-07-12 10:38:49.300 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#356: [2025-07-12T10:38:49+0000] [FINE] DevTools WebSocket Response: Runtime.evaluate (id=27) (session_id=CB7F18EBB301FACA8568FC80F0E54647) 033CE01459E9FFAE477DA274694CE28C {
+   "result": {
+      "description": "1",
+      "type": "number",
+      "value": 1
+   }
+}
+
+Jibri 2025-07-12 10:38:49.301 INFO: [62] JibriSelenium.leaveCallAndQuitBrowser#354: ========= TYPE=client ===========
