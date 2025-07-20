@@ -15,13 +15,13 @@ NC=\033[0m # No Color
 
 up:
 	@echo "$(GREEN)Starting frontend and backend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) up -d
-	docker compose -f $(BACK_COMPOSE) up -d
+	docker-compose -f $(FRONT_COMPOSE) up -d
+	docker-compose -f $(BACK_COMPOSE) up -d
 
 down:
 	@echo "$(GREEN)Stopping frontend and backend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) down
-	docker compose -f $(BACK_COMPOSE) down
+	docker-compose -f $(FRONT_COMPOSE) down
+	docker-compose -f $(BACK_COMPOSE) down
 
 restart:
 	@echo "$(GREEN)Restarting frontend and backend...$(NC)"
@@ -30,13 +30,13 @@ restart:
 
 logs:
 	@echo "$(GREEN)Showing logs for frontend and backend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) logs -f &
-	docker compose -f $(BACK_COMPOSE) logs -f
+	docker-compose -f $(FRONT_COMPOSE) logs -f &
+	docker-compose -f $(BACK_COMPOSE) logs -f
 
 build-all:
 	@echo "$(GREEN)Building Docker images for frontend and backend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) build
-	docker compose -f $(BACK_COMPOSE) build
+	docker-compose -f $(FRONT_COMPOSE) build
+	docker-compose -f $(BACK_COMPOSE) build
 
 # ===========================
 # Frontend Commands
@@ -45,19 +45,19 @@ build-all:
 
 front-up:
 	@echo "$(GREEN)Starting frontend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) up -d
+	docker-compose -f $(FRONT_COMPOSE) up -d
 
 front-down:
 	@echo "$(GREEN)Stopping frontend...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) down
+	docker-compose -f $(FRONT_COMPOSE) down
 
 front-build:
 	@echo "$(GREEN)Building frontend Docker image...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) build
+	docker-compose -f $(FRONT_COMPOSE) build
 
 front-logs:
 	@echo "$(GREEN)Showing frontend logs...$(NC)"
-	docker compose -f $(FRONT_COMPOSE) logs -f
+	docker-compose -f $(FRONT_COMPOSE) logs -f
 
 # ===========================
 # Backend Commands
@@ -66,29 +66,29 @@ front-logs:
 
 back-up:
 	@echo "$(GREEN)Starting backend...$(NC)"
-	docker compose -f $(BACK_COMPOSE) up -d
+	docker-compose -f $(BACK_COMPOSE) up -d
 
 back-down:
 	@echo "$(GREEN)Stopping backend...$(NC)"
-	docker compose -f $(BACK_COMPOSE) down
+	docker-compose -f $(BACK_COMPOSE) down
 
 back-build:
 	@echo "$(GREEN)Building backend Docker image...$(NC)"
-	docker compose -f $(BACK_COMPOSE) build
+	docker-compose -f $(BACK_COMPOSE) build
 
 back-logs:
 	@echo "$(GREEN)Showing backend logs...$(NC)"
-	docker compose -f $(BACK_COMPOSE) logs -f
+	docker-compose -f $(BACK_COMPOSE) logs -f
 
 
 migrate:
 	@echo "$(GREEN)Applying Prisma migrations (deploy)...$(NC)"
-	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate deploy
+	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate deploy
 
 migrate-dev:
 	@echo "$(GREEN)Running Prisma migrate dev (development mode)...$(NC)"
-	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate dev
+	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate dev
 
 studio:
 	@echo "$(GREEN)Launching Prisma Studio...$(NC)"
-	docker compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma studio
+	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma studio
