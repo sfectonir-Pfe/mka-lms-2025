@@ -1,7 +1,22 @@
 version: '3.8'
 
 services:
-
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mka-lms-backend
+    restart: always
+    ports:
+      - "4001:8000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/mka-lms-2025-db"
+    depends_on:
+      - postgres
+    networks:
+      - lms-net
+    command: yarn start:prod   # أو start:dev أثناء التطوير
+  
   postgres:
     image: postgres:15
     container_name: mka_lms_postgres
