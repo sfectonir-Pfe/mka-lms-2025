@@ -52,3 +52,5 @@ services:
 
 volumes:
   pgdata-mka-lms-2025:
+networks:
+  lms-net:
