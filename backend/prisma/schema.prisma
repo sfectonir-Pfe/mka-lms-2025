@@ -1,17 +1,491 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Mail {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  resetToken       String?
+  resetTokenExpiry DateTime?
+}
+
+model User {
+  id                      Int                     @id @default(autoincrement())
+  role                    Role                    @default(Etudiant)
+  email                   String                  @unique
+  password                String
+  name                    String?
+  phone                   String?
+  profilePic              String?
+  location                String?
+  skills                  String[]
+  about                   String?
+  isActive                Boolean                 @default(true)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  isVerified              Boolean                 @default(false)
+  needsVerification       Boolean                 @default(true)
+  emailVerified           DateTime?
+  emailVerificationCode   String?
+  codeExpiryDate          DateTime?
+  resetToken              String?
+  resetTokenExpiry        DateTime?
+  Admins                  Admin[]
+  Createurs_De_Formations Createur_De_Formation[]
+  Etablissements          Etablissement[]
+  Etudiants               Etudiant[]
+  formateurs              Formateur[]
+  ResetToken              ResetToken[]
+  SeanceFormateur         SeanceFormateur[]
+  UserAnswer              UserAnswer[]
+  chatMessages            ChatMessage[]
+  whiteboardActions       WhiteboardAction[]
+  userSessions2           UserSession2[]
+  session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
+
+  GeneralChatMessage GeneralChatMessage[]
+  feedbacks          Feedback[]           @relation("UserFeedback")
+  chatMemories       ChatMemory[]         @relation("UserChatMemory")
+  sessionFeedbacks   SessionFeedback[]
+}
+
+model Formateur {
+  id         Int    @id @default(autoincrement())
+  speciality String
+  userId     Int
+  User       User   @relation(fields: [userId], references: [id])
+}
+
+model Etudiant {
+  id                Int    @id @default(autoincrement())
+  NameEtablissement String
+  userId            Int
+  User              User   @relation(fields: [userId], references: [id])
+}
+
+model Createur_De_Formation {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  User   User @relation(fields: [userId], references: [id])
+}
+
+model Admin {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  User   User @relation(fields: [userId], references: [id])
+}
+
+model Etablissement {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  User   User @relation(fields: [userId], references: [id])
+}
+
+model ResetToken {
+  id         Int      @id @default(autoincrement())
+  token      String
+  userId     Int
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  User       User     @relation(fields: [userId], references: [id])
+}
+
+model Program {
+  id           Int             @id @default(autoincrement())
+  name         String
+  published    Boolean         @default(false)
+  modules      ProgramModule[]
+  sessions2    Session2[]
+  buildProgram buildProgram[]
+  createdAt    DateTime        @default(now())
+}
+
+model Module {
+  id                  Int                  @id @default(autoincrement())
+  name                String
+  periodUnit          PeriodUnit
+  duration            Int
+  courses             ModuleCourse[]
+  programs            ProgramModule[]
+  session2Modules     Session2Module[]
+  buildProgramModules buildProgramModule[]
+}
+
+model Course {
+  id                  Int                  @id @default(autoincrement())
+  title               String
+  courseContenus      CourseContenu[]
+  modules             ModuleCourse[]
+  session2Courses     Session2Course[]
+  buildProgramCourses buildProgramCourse[]
+}
+
+model Contenu {
+  id                   Int                   @id @default(autoincrement())
+  title                String
+  fileUrl              String?
+  fileType             FileType?
+  type                 ContenuType
+  published            Boolean               @default(false)
+  coursAssocie         String?
+  courseContenus       CourseContenu[]
+  quiz                 Quiz?
+  session2Contenus     Session2Contenu[]
+  buildProgramContenus buildProgramContenu[]
+}
+
+model ProgramModule {
+  id        Int     @id @default(autoincrement())
+  programId Int
+  moduleId  Int
+  module    Module  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, moduleId])
+}
+
+model ModuleCourse {
+  id       Int    @id @default(autoincrement())
+  moduleId Int
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, courseId])
+}
+
+model CourseContenu {
+  id        Int     @id @default(autoincrement())
+  courseId  Int
+  contenuId Int
+  contenu   Contenu @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, contenuId])
+}
+
+model buildProgram {
+  id        Int                  @id @default(autoincrement())
+  programId Int
+  startDate DateTime?
+  endDate   DateTime?
+  imageUrl  String?
+  level     String               @default("Basique")
+  createdAt DateTime?            @default(now())
+  program   Program              @relation(fields: [programId], references: [id], onDelete: Cascade)
+  modules   buildProgramModule[]
+}
+
+model buildProgramModule {
+  id             Int                  @id @default(autoincrement())
+  buildProgramId Int
+  moduleId       Int
+  courses        buildProgramCourse[]
+  buildProgram   buildProgram         @relation(fields: [buildProgramId], references: [id], onDelete: Cascade)
+  module         Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([buildProgramId, moduleId])
+}
+
+model buildProgramCourse {
+  id                   Int                   @id @default(autoincrement())
+  buildProgramModuleId Int
+  courseId             Int
+  contenus             buildProgramContenu[]
+  buildProgramModule   buildProgramModule    @relation(fields: [buildProgramModuleId], references: [id], onDelete: Cascade)
+  course               Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([buildProgramModuleId, courseId])
+}
+
+model buildProgramContenu {
+  id                   Int                @id @default(autoincrement())
+  buildProgramCourseId Int
+  contenuId            Int
+  buildProgramCourse   buildProgramCourse @relation(fields: [buildProgramCourseId], references: [id], onDelete: Cascade)
+  contenu              Contenu            @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+
+  @@unique([buildProgramCourseId, contenuId])
+}
+
+model Quiz {
+  id          Int          @id @default(autoincrement())
+  contenuId   Int          @unique
+  title       String?
+  description String?
+  timeLimit   Int?
+  questions   Question[]
+  contenu     Contenu      @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  userAnswers UserAnswer[]
+}
+
+model Question {
+  id           Int          @id @default(autoincrement())
+  text         String
+  imageUrl     String?
+  type         QuestionType @default(MCQ)
+  score        Int          @default(1)
+  negativeMark Int          @default(0)
+  quizId       Int
+  correctText  String?
+  answers      Answer[]
+  choices      Choice[]
+  quiz         Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+}
+
+model Choice {
+  id         Int      @id @default(autoincrement())
+  text       String?
+  imageUrl   String?
+  isCorrect  Boolean  @default(false)
+  questionId Int
+  answers    Answer[]
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model UserAnswer {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  quizId      Int
+  score       Int
+  submittedAt DateTime @default(now())
+  answers     Answer[]
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Answer {
+  id           Int        @id @default(autoincrement())
+  userAnswerId Int
+  questionId   Int
+  selectedId   Int?
+  textAnswer   String?
+  question     Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selected     Choice?    @relation(fields: [selectedId], references: [id])
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+}
+
+model Session2 {
+  id              Int                   @id @default(autoincrement())
+  name            String
+  programId       Int
+  startDate       DateTime?
+  endDate         DateTime?
+  imageUrl        String?
+  createdAt       DateTime              @default(now())
+  status          Session2Status        @default(ACTIVE)
+  SeanceFormateur SeanceFormateur[]
+  program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
+  session2Modules Session2Module[]
+  userSessions2   UserSession2[]
+  chatMessages    Session2ChatMessage[]
+}
+
+model Session2Module {
+  id         Int              @id @default(autoincrement())
+  session2Id Int
+  moduleId   Int
+  courses    Session2Course[]
+  module     Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  session2   Session2         @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+}
+
+model Session2Course {
+  id               Int               @id @default(autoincrement())
+  session2ModuleId Int
+  courseId         Int
+  contenus         Session2Contenu[]
+  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  session2Module   Session2Module    @relation(fields: [session2ModuleId], references: [id], onDelete: Cascade)
+
+  @@unique([session2ModuleId, courseId])
+}
+
+model Session2Contenu {
+  id               Int            @id @default(autoincrement())
+  session2CourseId Int
+  contenuId        Int
+  contenu          Contenu        @relation(fields: [contenuId], references: [id], onDelete: Cascade)
+  session2Course   Session2Course @relation(fields: [session2CourseId], references: [id], onDelete: Cascade)
+
+  @@unique([session2CourseId, contenuId])
+}
+
+model SeanceFormateur {
+  id               Int                @id @default(autoincrement())
+  title            String
+  startTime        DateTime
+  formateurId      Int
+  session2Id       Int
+  createdAt        DateTime           @default(now())
+  buildProgramId   Int?
+  formateur        User               @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  session2         Session2           @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+  medias           SeanceMedia[]
+  chatMessages     ChatMessage[]
+  WhiteboardAction WhiteboardAction[]
+}
+
+model SeanceMedia {
+  id                Int                @id @default(autoincrement())
+  seanceId          Int
+  type              FileType
+  fileUrl           String
+  createdAt         DateTime           @default(now())
+  seance            SeanceFormateur    @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  whiteboardActions WhiteboardAction[]
+}
+
+model ChatMessage {
+  id       Int             @id @default(autoincrement())
+  seanceId Int
+  seance   SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+
+  senderId  Int?
+  sender    User?    @relation(fields: [senderId], references: [id])
+  messageId Int?
+  type      String // "text" | "image" | "video" | "audio"
+  content   String // text or file URL
+  createdAt DateTime @default(now())
+}
+
+// model ChatSeen {
+//   id        Int      @id @default(autoincrement())
+//   userId    Int
+//   seanceId  Int
+//   messageId Int      // The latest ChatMessage.id the user has seen
+//   seenAt    DateTime @default(now())
+//   user      User     @relation(fields: [userId], references: [id])
+//   seance    SeanceFormateur @relation(fields: [seanceId], references: [id])
+//   message   ChatMessage @relation(fields: [messageId], references: [id])
+
+//   @@unique([userId, seanceId]) // Each user can only have one "last seen" per chat
+// }
+
+model WhiteboardAction {
+  id          Int      @id @default(autoincrement())
+  seanceId    Int
+  type        String
+  data        Json
+  createdAt   DateTime @default(now())
+  createdById Int?
+
+  seance        SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  createdBy     User?           @relation(fields: [createdById], references: [id])
+  SeanceMedia   SeanceMedia?    @relation(fields: [seanceMediaId], references: [id])
+  seanceMediaId Int?
+}
+
+model UserSession2 {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  session2Id Int
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session2 Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+
+  @@unique([userId, session2Id])
+}
+
+model Session2ChatMessage {
+  id         Int      @id @default(autoincrement())
+  session2Id Int
+  session2   Session2 @relation(fields: [session2Id], references: [id], onDelete: Cascade)
+  senderId   Int?
+  sender     User?    @relation("UserSession2ChatMessages", fields: [senderId], references: [id])
+  type       String // "text" | "image" | "video" | "audio"
+  content    String // text or file URL
+  createdAt  DateTime @default(now())
+}
+
+model GeneralChatMessage {
+  id        Int      @id @default(autoincrement())
+  senderId  Int? // Nullable for "Anonyme", otherwise required
+  sender    User?    @relation(fields: [senderId], references: [id])
+  type      String // "text" | "image" | "video" | "audio" | "file" (you can restrict by enum if needed)
+  content   String // text content or file URL
+  createdAt DateTime @default(now())
+}
+
+model Feedback {
+  id        Int                @id @default(autoincrement())
+  rating    Int
+  message   String?
+  category  String? // ← ajouté
+  type      String? // ← ajouté
+  likes     Int                @default(0) // ← ajouté
+  dislikes  Int                @default(0) // ← ajouté
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt // ← ajouté
+  userId    Int?
+  user      User?              @relation("UserFeedback", fields: [userId], references: [id])
+  responses FeedbackResponse[]
+}
+
+model FeedbackResponse {
+  id         Int      @id @default(autoincrement())
+  feedbackId Int
+  response   String
+  createdAt  DateTime @default(now())
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+}
+
+model SeanceFeedback {
+  id                  Int      @id @default(autoincrement())
+  seanceId            Int
+  userId              Int?
+  sessionRating       Int
+  contentQuality      Int
+  sessionDuration     String
+  sessionOrganization Int
+  objectivesAchieved  Int
+  trainerRating       Int
+  trainerClarity      Int
+  trainerAvailability Int
+  trainerPedagogy     Int
+  trainerInteraction  Int
+  teamRating          Int
+  teamCollaboration   Int
+  teamParticipation   Int
+  teamCommunication   Int
+  sessionComments     String?
+  trainerComments     String?
+  teamComments        String?
+  suggestions         String?
+  wouldRecommend      String?
+  improvementAreas    String?
+  createdAt           DateTime @default(now())
+}
+
+model SessionFeedback {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  userId    Int?
+  rating    Int
+  comments  String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model ChatMemory {
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  sessionId   String?
+  userMessage String
+  botResponse String? // ✅ champ ajouté
+  role        String // "user" | "assistant"
+  content     String
+  createdAt   DateTime @default(now())
+  user        User?    @relation("UserChatMemory", fields: [userId], references: [id])
 }
 
 enum Role {
@@ -22,50 +496,37 @@ enum Role {
   Etablissement
 }
 
-model User {
-  id                    Int                   @id @default(autoincrement())
-  role                  Role                  @default(Etudiant)
-  email                 String                @unique
-  password              String
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
-  resetToken            String?
-  resetTokenExpiry      DateTime?
-  formateurs            Formateur[]
-  Etudiants             Etudiant[]
-  CreateursDeFormations CreateurDeFormation[]
-  Admins                Admin[]
-  Etablissements        Etablissement[]
+enum FileType {
+  PDF
+  IMAGE
+  VIDEO
+  WORD
+  EXCEL
+  PPT
 }
 
-model Formateur {
-  id         Int    @id @default(autoincrement())
-  speciality String
-  User       User   @relation(fields: [userId], references: [id])
-  userId     Int
+enum ContenuType {
+  Cours
+  Exercice
+  Quiz
 }
 
-model Etudiant {
-  id                Int    @id @default(autoincrement())
-  NameEtablissement String
-  User              User   @relation(fields: [userId], references: [id])
-  userId            Int
+enum PeriodUnit {
+  Day
+  Week
+  Month
 }
 
-model CreateurDeFormation {
-  id     Int  @id @default(autoincrement())
-  User   User @relation(fields: [userId], references: [id])
-  userId Int
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  FILL_BLANK
+  IMAGE_CHOICE
 }
 
-model Admin {
-  id     Int   @id @default(autoincrement())
-  User   User @relation(fields: [userId], references: [id])
-  userId Int
-}
-
-model Etablissement {
-  id     Int  @id @default(autoincrement())
-  User   User @relation(fields: [userId], references: [id])
-  userId Int
+enum Session2Status {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+  ARCHIVED
 }

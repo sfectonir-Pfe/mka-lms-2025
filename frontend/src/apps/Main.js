@@ -1,28 +1,44 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import { styled, useTheme, alpha } from "@mui/material/styles";
+import {
+  Box,
+  CssBaseline,
+  Typography,
+  Toolbar,
+  IconButton,
+  List,
+  Divider,
+  Menu,
+  MenuItem,
+  Avatar,
+  Badge,
+} from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import Button from "@mui/material/Button"; // Corrected to use MUI's Button
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Added for user icon
-import LogoutIcon from "@mui/icons-material/Logout"; // Added for logout icon
-import { sideBarData } from "../constants/sideBarData";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
-const drawerWidth = 240;
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { sideBarData } from "../constants/sideBarData";
+import ScrollToTopButton from "../components/ScrollToTopButton";
+import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
+import { Tooltip } from "@mui/material";
+import axios from "axios";
+import { useTranslation } from "react-i18next";
+import { secureLogout } from "../utils/authUtils";
+import Session2ChatPopup from "../components/Session2ChatPopup";
+
+
+
+const drawerWidth = 260;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -31,6 +47,8 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: "hidden",
+  boxShadow: theme.shadows[3],
+  backgroundColor: theme.palette.background.default,
 });
 
 const closedMixin = (theme) => ({
@@ -39,30 +57,38 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
+  width: `calc(${theme.spacing(9)} + 1px)`,
+  boxShadow: theme.shadows[3],
+  backgroundColor: theme.palette.background.default,
   [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
+    width: `calc(${theme.spacing(9)} + 1px)`,
   },
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
+  justifyContent: "space-between",
+  padding: theme.spacing(0, 2),
+  height: "80px",
   ...theme.mixins.toolbar,
 }));
 
 const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
+  shouldForwardProp: (prop) => prop !== "open" && prop !== "isRTL",
+})(({ theme, open, isRTL }) => ({
   zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: alpha(theme.palette.background.paper, 0.8),
+  backdropFilter: "blur(8px)",
+  color: theme.palette.text.primary,
+  boxShadow: "none",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    marginLeft: drawerWidth,
+    ...(isRTL ? { marginRight: drawerWidth, marginLeft: 0 } : { marginLeft: drawerWidth, marginRight: 0 }),
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
@@ -80,38 +106,226 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open
     ? {
-        ...openedMixin(theme),
-        "& .MuiDrawer-paper": openedMixin(theme),
-      }
+      ...openedMixin(theme),
+      "& .MuiDrawer-paper": openedMixin(theme),
+    }
     : {
-        ...closedMixin(theme),
-        "& .MuiDrawer-paper": closedMixin(theme),
-      }),
+      ...closedMixin(theme),
+      "& .MuiDrawer-paper": closedMixin(theme),
+    }),
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    right: -3,
+    top: 13,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: "0 4px",
+  },
 }));
 
 export default function Main({ setUser, user }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  // Log user object for debugging and ensure role is set correctly
+  React.useEffect(() => {
+  console.log("User object in Main.js:", user);
+  if (user) {
+    console.log("User ID:", user.id);
+    console.log("User email:", user.email);
+    console.log("User role:", user.role);
+    console.log("User keys:", Object.keys(user));
+
+    // Ensure role is set correctly
+    if (!user.role || user.role === "user") {
+      const updatedUser = { ...user, role: "Etudiant" };
+      setUser(updatedUser);
+
+      // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      } else {
+        sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+      console.log("Updated user role to Etudiant");
+    }
+
+    // Récupérer les données utilisateur à jour, y compris la photo de profil
+    const fetchUserData = async () => {
+      try {
+        if (user.email) {
+          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          if (response.data) {
+            // Mettre à jour l'objet utilisateur avec les données à jour
+            const updatedUser = {
+              ...user,
+              profilePic: response.data.profilePic || user.profilePic,
+              name: response.data.name || user.name,
+              role: response.data.role || user.role
+            };
+            
+            // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
+            if (localStorage.getItem("user")) {
+              localStorage.setItem("user", JSON.stringify(updatedUser));
+            } else {
+              sessionStorage.setItem("user", JSON.stringify(updatedUser));
+            }
+            console.log("Updated user data with profile pic:", updatedUser);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }
+}, [user, setUser]); // Ajout des dépendances manquantes
+
+  const handleDrawerOpen = () => setOpen(true);
+  const handleDrawerClose = () => setOpen(false);
+
+  const handleLogout = async () => {
+    console.log("=== LOGOUT INITIATED FROM MAIN COMPONENT ===");
+    console.log("Current user before logout:", user);
+
+    try {
+      // Utiliser la fonction de déconnexion sécurisée
+      await secureLogout(setUser, navigate);
+    } catch (error) {
+      console.error("Error during logout from Main component:", error);
+    }
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
+
+
+  // Menu déroulant pour le profil
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate('/');
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
+
+  const handleVoirProfil = async () => {
+    handleMenuClose();
+
+    // Afficher l'objet utilisateur complet pour le débogage
+    console.log("Current user object:", user);
+
+    // Récupérer les données utilisateur depuis le localStorage pour le débogage
+    const storedUserStr = localStorage.getItem("user");
+    let storedUser = null;
+
+    if (storedUserStr) {
+      try {
+        storedUser = JSON.parse(storedUserStr);
+        console.log("User from localStorage:", storedUser);
+      } catch (err) {
+        console.error("Error parsing localStorage user:", err);
+      }
+    }
+
+    try {
+      // Si l'utilisateur a un email, essayer de récupérer son ID depuis le backend
+      if (user && user.email) {
+        console.log("Trying to fetch user data from backend for email:", user.email);
+        try {
+          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          if (response.data && response.data.id) {
+            console.log("User data from backend:", response.data);
+
+            // Mettre à jour l'objet utilisateur dans le localStorage et l'état
+            const updatedUser = { ...user, id: response.data.id };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            setUser(updatedUser);
+
+            console.log("Navigating to profile page with ID from backend:", response.data.id);
+            navigate(`/ProfilePage/${response.data.id}`);
+            return;
+          }
+        } catch (error) {
+          console.error("Error fetching user data from backend:", error);
+        }
+      }
+
+      // Si l'utilisateur a un ID dans l'état, l'utiliser
+      if (user && user.id) {
+        console.log("Navigating to profile page with ID from state:", user.id);
+        navigate(`/ProfilePage/${user.id}`);
+        return;
+      }
+
+      // Si l'utilisateur a un ID dans le localStorage, l'utiliser
+      if (storedUser && storedUser.id) {
+        console.log("Navigating to profile page with ID from localStorage:", storedUser.id);
+        navigate(`/ProfilePage/${storedUser.id}`);
+        return;
+      }
+
+      // Si tout échoue, naviguer vers la page de profil sans ID
+      console.log("No valid user ID found, navigating to profile page without ID");
+      navigate("/ProfilePage");
+    } catch (err) {
+      console.error("Error in handleVoirProfil:", err);
+      navigate("/ProfilePage");
+    }
+  };
+
+  const handleEditProfil = () => {
+    handleMenuClose();
+    if (user && user.email) {
+      console.log("Navigating to edit profile with email:", user.email);
+      // Assurez-vous que la route correspond exactement à celle définie dans App.js
+      navigate(`/EditProfile/${user.email}`);
+    } else {
+      console.error("User email not available for edit profile navigation");
+      // Récupérer l'email depuis le localStorage comme solution de secours
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const userData = JSON.parse(storedUser);
+          if (userData && userData.email) {
+            console.log("Using email from localStorage:", userData.email);
+            navigate(`/EditProfile/${userData.email}`);
+            return;
+          }
+        } catch (err) {
+          console.error("Error parsing user data from localStorage:", err);
+        }
+      }
+      // Si tout échoue, naviguer vers la page d'accueil
+      navigate("/");
+    }
+  };
+  function stringToColor(string) {
+  let hash = 0;
+  for (let i = 0; i < string.length; i++) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += (`00${value.toString(16)}`).slice(-2);
+  }
+
+  return color;
+};
+
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} isRTL={isRTL}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -126,105 +340,224 @@ export default function Main({ setUser, user }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div">
-              Master Knowledge Academy
+            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
+              {t('common.appTitle', 'Master Knowledge Academy')}
             </Typography>
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-              <AccountCircleIcon sx={{ mr: 1 }} />
-              <Typography variant="body1" noWrap>
-                {user.email} | {user.role}
-              </Typography>
-            </Box>
+            <LanguageSelectorWithFlags />
 
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<LogoutIcon />}
-              onClick={handleLogout}
-              size="small"
-            >
-              Logout
-            </Button>
+
+            <IconButton color="inherit">
+              <StyledBadge badgeContent={4} color="error">
+                <NotificationsIcon />
+              </StyledBadge>
+            </IconButton>
+
+            <Typography variant="body1" noWrap>
+              {user?.name || "Utilisateur"} |{" "}
+              <span style={{ textTransform: "capitalize" }}>
+                {t('role.' + ((user?.role || 'user').toLowerCase()))}
+              </span>
+            </Typography>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <IconButton
+                onClick={handleMenuClick}
+                size="small"
+                sx={{ p: 0 }}
+              >
+                <Avatar
+                  alt={user?.name || user?.email || "User"}
+                  src={
+                    user?.profilePic
+                      ? user.profilePic.startsWith('/profile-pics/')
+                        ? `http://localhost:8000/uploads${user.profilePic}`
+                        : user.profilePic.startsWith('http')
+                          ? user.profilePic
+                          : `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                      : null
+                  }
+                  sx={{
+                    width: 36,
+                    height: 36,
+                    bgcolor: user?.profilePic ? undefined : stringToColor(user?.email || user?.name || "User")
+                  }}
+                >
+                  {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || "U"}
+                </Avatar>
+
+
+              </IconButton>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{
+                  paper: {
+                    elevation: 0,
+                    sx: {
+                      overflow: "visible",
+                      filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                      mt: 1.5,
+                      "& .MuiAvatar-root": {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      "&:before": {
+                        content: '""',
+                        display: "block",
+                        position: "absolute",
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: "background.paper",
+                        transform: "translateY(-50%) rotate(45deg)",
+                        zIndex: 0,
+                      },
+                    }
+                  }
+                }}
+              >
+                <Box sx={{ px: 4, py: 4, textAlign: "center" }}>
+                  <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
+                    {user?.name || "Utilisateur"}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
+                    {user?.email}
+                  </Typography>
+                </Box>
+
+
+
+                <Divider />
+
+                <MenuItem onClick={handleVoirProfil}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  {t('profile.viewProfile')}
+                </MenuItem>
+
+                <MenuItem onClick={handleEditProfil}>
+                  <ListItemIcon>
+                    <AccountCircleIcon fontSize="small" />
+                  </ListItemIcon>
+                  {t('profile.editProfile')}
+                </MenuItem>
+
+                <Divider />
+
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  {t('common.logout')}
+                </MenuItem>
+
+              </Menu>
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Drawer variant="permanent" open={open}>
+      <Drawer variant="permanent" open={open} anchor={isRTL ? "right" : "left"}>
         <DrawerHeader>
-          
+          <Typography variant="h6" sx={{ fontWeight: 700, opacity: open ? 1 : 0 }}>
+            {t('sidebar.menu')}
+          </Typography>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
+            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </DrawerHeader>
         <Divider />
-        
-        
-        <List>
-          
-          {sideBarData.map((elem, index) => (
-            <Link to={elem.path} style={{all:"unset"}}>
-              <ListItem key={index} disablePadding sx={{ display: "block" }}>
-                <ListItemButton
-                  sx={[
-                    {
+
+        <List sx={{ px: 1 }}>
+          {sideBarData.map((elem, index) => {
+            const item = (
+              <Link to={elem.path} key={index} style={{ all: "unset" }}>
+                <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
+                  <ListItemButton
+                    sx={{
                       minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
                       px: 2.5,
-                    },
-                    open
-                      ? {
-                          justifyContent: "initial",
-                        }
-                      : {
-                          justifyContent: "center",
-                        },
-                  ]}
-                >
-                  <ListItemIcon
-                    sx={[
-                      {
-                        minWidth: 0,
-                        justifyContent: "center",
+                      borderRadius: 2,
+                      "&:hover": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
                       },
-                      open
-                        ? {
-                            mr: 3,
-                          }
-                        : {
-                            mr: "auto",
-                          },
-                    ]}
+                      "&.Mui-selected": {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                        "&:hover": {
+                          backgroundColor: alpha(theme.palette.primary.main, 0.25),
+                        },
+                      },
+                    }}
                   >
-                     {elem.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={elem.text}
-                    sx={[
-                      open
-                        ? {
-                            opacity: 1,
-                          }
-                        : {
-                            opacity: 0,
-                          },
-                    ]}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </Link>
-          ))}
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                        color: theme.palette.primary.main,
+                      }}
+                    >
+                      {elem.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={t(elem.text)}
+                      sx={{
+                        opacity: open ? 1 : 0,
+                        '& .MuiTypography-root': {
+                          fontWeight: 500
+                        }
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </Link>
+            );
+
+            return open ? item : (
+              <Tooltip title={t(elem.text)} placement="right" key={index}>
+                {item}
+              </Tooltip>
+            );
+          })}
         </List>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          backgroundColor: theme.palette.grey[50],
+          minHeight: "100vh",
+        }}
+      >
         <DrawerHeader />
-        <Outlet />
+        <Box
+          sx={{
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: 2,
+            boxShadow: theme.shadows[1],
+            p: 3,
+          }}
+        >
+          <Outlet />
+        </Box>
+        <ScrollToTopButton />
+        {user && <Session2ChatPopup user={user} />}
+
       </Box>
-    </Box>
+    </Box >
   );
 }

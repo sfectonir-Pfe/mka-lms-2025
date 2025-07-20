@@ -1,0 +1,35 @@
+{
+  "recording_directory": "/config/recordings",
+  "finalize_recording_script_path": "/config/finalize.sh",
+  "log_directory": "/config/logs",
+
+
+  "xmpp_environments": [
+    {
+      "name": "dev-local",
+      "xmpp_server_hosts": ["localhost"],
+      "xmpp_domain": "localhost",
+      "control_login": {
+        "domain": "auth.localhost",
+        "username": "jibri",
+        "password": "record1230123recrod"
+      },
+      "control_muc": {
+        "domain": "internal-muc.localhost",
+        "room_name": "jibribrewery",
+        "nickname": "jibri-nickname"
+      },
+      "call_login": {
+        "domain": "recorder.localhost",
+        "username": "recorder",
+        "password": "record123123recrod"
+      },
+      "room_jid_domain_string_to_strip_from_start": "muc.localhost",
+      "usage_timeout": "600",
+      
+      "base_url":  "http://localhost:8081",
+      "url": "http://localhost:8081"
+
+    }
+  ]
+}
