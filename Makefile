@@ -62,7 +62,7 @@ front-logs:
 # ===========================
 # Backend Commands
 # ===========================
-.PHONY: back-up back-down back-build back-logs
+.PHONY: back-up back-down back-build back-logs migrate migrate-dev studio
 
 back-up:
 	@echo "$(GREEN)Starting backend...$(NC)"
