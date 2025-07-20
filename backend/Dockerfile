@@ -1,13 +1,24 @@
-# Étape 1 : Build
-FROM node:18 AS builder
+# Stage 1: Build
+FROM node:20 AS builder
 WORKDIR /app
-COPY . .
-RUN npm install
-RUN npm run build
 
-# Étape 2 : Runtime
-FROM node:18
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+
+COPY . .
+RUN yarn build
+
+# Stage 2: Production
+FROM node:20
 WORKDIR /app
-COPY --from=builder /app .
-RUN npm install --omit=dev
+
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --production
+
+
+COPY --from=builder /app/dist ./dist
+
 CMD ["node", "dist/main"]
