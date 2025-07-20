@@ -4,6 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import Box from '@mui/material/Box';
 import axios from "axios";
 import { useLocation } from "react-router-dom";
+import { api } from "../../../constants/api";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
@@ -24,7 +25,7 @@ export default function UserList() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8000/auth");
+      const response = await api.get("auth");
       console.log("Full API Response:", response); // Debug log
       
       // Ensure proper data structure
@@ -44,7 +45,7 @@ export default function UserList() {
 
   const handleDelete = async (row) => {
     try {
-      await axios.delete(`http://localhost:8000/auth/users/${row.id}`);
+      await api.delete(`auth/users/${row.id}`);
       setUsers(users.filter(user => user.id !== row.id));
     } catch (error) {
       console.error("Error deleting user:", error);

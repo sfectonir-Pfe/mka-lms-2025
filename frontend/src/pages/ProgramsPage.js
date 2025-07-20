@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, Button, Container, Row, Col, Spinner } from "react-bootstrap";
+import { api } from "../constants/api";
 
 const ProgramsPage = () => {
   const [programs, setPrograms] = useState([]);
@@ -8,7 +9,7 @@ const ProgramsPage = () => {
 
   useEffect(() => {
     // Replace with your actual NestJS API endpoint
-    axios.get("http://localhost:3000/programs")
+    api.get("programs")
       .then((response) => {
         setPrograms(response.data);
         setLoading(false);

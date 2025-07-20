@@ -1,7 +1,7 @@
 
 
 services:
-  
+  # app backend : runing dev code of backend image that buided from dockerfile 
 
   postgres:
     image: postgres:15

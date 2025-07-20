@@ -18,4 +18,4 @@ async function main() {
 
 main()
   .then((res) => console.log('done'))
-  .catch((err) => console.log('err'));
+  .catch((err) => console.log('err',err));

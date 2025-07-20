@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import showErrorToast from "../utils/toastError";
+import { api } from "../constants/api";
 
 function LoginPage({ setUser }) {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ function LoginPage({ setUser }) {
     if (!validate()) return;
 
     try {
-      const response = await axios.post("http://localhost:8000/auth/login", {
+      const response = await api.post("auth/login", {
         email,
         password,
       });
@@ -47,11 +48,9 @@ function LoginPage({ setUser }) {
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
-      setMgsError(
-        "Login failed. Please check your credentials." +
-          error.response.data.message
-      );
-      showErrorToast(msgError);
+  
+      showErrorToast("Login failed. Please check your credentials." +
+          error.response.data.message);
     }
   };
 
