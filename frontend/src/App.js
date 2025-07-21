@@ -58,6 +58,12 @@ import Chatbot from './components/Chatbot';
 import WhiteboardPage from "./pages/WhiteboardPage";
 import FeedbackListPage from "./pages/FeedbackListPage";
 
+//Dashboards
+import AdminDashboard from "./pages/users/views/AdminDashboard";
+import EtablissementDashboard from "./pages/users/views/EtablissementDashboard";
+import CreateurDashboard from "./pages/users/views/CreateurDashboard";
+import FormateurDashboard from "./pages/users/views/FormateurDashboard";
+import EtudiantDashboard from "./pages/users/views/EtudiantDashboard";
 
 
 
@@ -234,7 +240,7 @@ function App() {
                 <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
-
+                <Route path="/seances-formateur" element={<SeanceFormateurList />} />
 
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
@@ -247,8 +253,12 @@ function App() {
                 {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
                 <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
 
-
-
+                {/* //dashboard */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/etablissement/dashboard" element={<EtablissementDashboard />} />
+                <Route path="/createur/dashboard" element={<CreateurDashboard />} />
+                <Route path="/formateur/dashboard" element={<FormateurDashboard />} />
+                <Route path="/etudiant/dashboard" element={<EtudiantDashboard />} />
 
 
 

@@ -9,7 +9,7 @@ services:
             # - ${CONFIG}/jibri/recordings:/config/recordings
             - ./config/jibri:/config:Z
             - ./config/jibri/recordings:/config/recordings
-        shm_size: '2gb'
+        shm_size: '3gb'
         cap_add:
             - SYS_ADMIN
         environment:
@@ -69,8 +69,8 @@ services:
             - XMPP_TRUST_ALL_CERTS
         depends_on:
             - jicofo
-        extra_hosts:
-            - "meet.jitsi.local:172.28.160.141"
+        # extra_hosts:
+        #     - "meet.jitsi.local:172.28.160.141"
         # extra_hosts:
         #     - "localhost:172.17.0.1"
 

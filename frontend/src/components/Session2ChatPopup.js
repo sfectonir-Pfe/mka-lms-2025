@@ -8,9 +8,17 @@ import EmojiPicker from "emoji-picker-react";
 import io from "socket.io-client";
 import { Tabs, Tab } from "@mui/material";
 
+
 const SOCKET_URL = "http://localhost:8000";
 
 export default function UnifiedSessionChatPopup({ user }) {
+
+  // const globalSocketRef = useRef(null);
+
+
+  const [generalChatMessages, setGeneralChatMessages] = useState([]);
+  const generalSocketRef = useRef(null);
+
   // Which chat is active: "session" or "seance"
   const [selectedTab, setSelectedTab] = useState("session");
 
@@ -38,6 +46,30 @@ export default function UnifiedSessionChatPopup({ user }) {
 
   // UI popup
   const [open, setOpen] = useState(false);
+useEffect(() => {
+  if (chatBottomRef.current) chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
+}, [sessionChatMessages, seanceChatMessages, generalChatMessages, selectedTab, open]);
+
+  //genralechat 
+useEffect(() => {
+  // Only connect once
+  if (generalSocketRef.current) {
+    generalSocketRef.current.disconnect();
+  }
+  const s = io(`${SOCKET_URL}/general-chat`, { transports: ["websocket"] });
+  generalSocketRef.current = s;
+
+  // Fetch messages
+  s.emit("fetchGeneralMessages");
+  s.on("generalMessages", msgs => setGeneralChatMessages(msgs));
+  s.on("newGeneralMessage", msg =>
+    setGeneralChatMessages(prev => [...prev, msg])
+  );
+  s.on("deleteGeneralMessage", ({ id }) =>
+    setGeneralChatMessages(prev => prev.filter(m => m.id !== id))
+  );
+  return () => s.disconnect();
+}, []); // []: only once
 
   // Fetch session2s for the user
   useEffect(() => {
@@ -50,8 +82,8 @@ export default function UnifiedSessionChatPopup({ user }) {
           s.session2
             ? { id: s.session2.id, name: s.session2.name }
             : s.session2Id
-            ? { id: s.session2Id, name: s.session2?.name || "" }
-            : s
+              ? { id: s.session2Id, name: s.session2?.name || "" }
+              : s
         );
         setSession2s(sessions);
         setSession2Id(sessions[0]?.id ?? null);
@@ -145,119 +177,144 @@ export default function UnifiedSessionChatPopup({ user }) {
 
   // Send message (text/file) for current tab
   const handleChatSend = async () => {
-    let socket = selectedTab === "session" ? sessionSocketRef.current : seanceSocketRef.current;
-    if (!socket) return;
-    if (selectedTab === "session" && !session2Id) return;
-    if (selectedTab === "seance" && !seanceId) return;
+  let socket;
+  if (selectedTab === "session") socket = sessionSocketRef.current;
+  else if (selectedTab === "seance") socket = seanceSocketRef.current;
+  else if (selectedTab === "general") socket = generalSocketRef.current;
+  if (!socket) return;
 
-    // File message
-    if (newFile) {
-      const formData = new FormData();
-      if (selectedTab === "session") {
-        formData.append("file", newFile);
-        formData.append("session2Id", session2Id);
-        try {
-          const res = await fetch("http://localhost:8000/session2-chat-messages/upload-chat", {
-            method: "POST",
-            body: formData,
-          });
-          const fileData = await res.json();
-          socket.emit("sendSession2Message", {
-            content: fileData.fileUrl,
-            type: fileData.fileType || "file",
-            session2Id: Number(session2Id),
-            senderId: user.id,
-          });
-        } catch {
-          alert("Erreur upload fichier");
-        }
-      } else {
-        formData.append("file", newFile);
-        formData.append("seanceId", seanceId);
-        try {
-          const res = await fetch("http://localhost:8000/chat-messages/upload-chat", {
-            method: "POST",
-            body: formData,
-          });
-          const fileData = await res.json();
-          socket.emit("sendSeanceMessage", {
-            content: fileData.fileUrl,
-            type: fileData.fileType || "file",
-            seanceId: Number(seanceId),
-            senderId: user.id,
-          });
-        } catch {
-          alert("Erreur upload fichier");
-        }
-      }
-      setNewFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
+  // File message
+  if (newFile) {
+    const formData = new FormData();
+    formData.append("file", newFile);
+
+    let uploadUrl = "";
+    if (selectedTab === "general") {
+      uploadUrl = "http://localhost:8000/general-chat-messages/upload-chat";
+    } else if (selectedTab === "session") {
+      formData.append("session2Id", session2Id);
+      uploadUrl = "http://localhost:8000/session2-chat-messages/upload-chat";
+    } else if (selectedTab === "seance") {
+      formData.append("seanceId", seanceId);
+      uploadUrl = "http://localhost:8000/chat-messages/upload-chat";
     }
-    // Text message
-    if (newMsg.trim()) {
-      if (selectedTab === "session") {
+    try {
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        body: formData,
+      });
+      const fileData = await res.json();
+      if (selectedTab === "general") {
+        socket.emit("sendGeneralMessage", {
+          content: fileData.fileUrl,
+          type: fileData.fileType || "file",
+          senderId: user.id,
+        });
+      } else if (selectedTab === "session") {
         socket.emit("sendSession2Message", {
-          content: newMsg,
-          type: "text",
+          content: fileData.fileUrl,
+          type: fileData.fileType || "file",
           session2Id: Number(session2Id),
           senderId: user.id,
         });
       } else {
         socket.emit("sendSeanceMessage", {
-          content: newMsg,
-          type: "text",
+          content: fileData.fileUrl,
+          type: fileData.fileType || "file",
           seanceId: Number(seanceId),
           senderId: user.id,
         });
       }
-      setNewMsg("");
+    } catch {
+      alert("Erreur upload fichier");
     }
-  };
+    setNewFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    return;
+  }
+  // Text message
+  if (newMsg.trim()) {
+    if (selectedTab === "general") {
+      socket.emit("sendGeneralMessage", {
+        content: newMsg,
+        type: "text",
+        senderId: user.id,
+      });
+    } else if (selectedTab === "session") {
+      socket.emit("sendSession2Message", {
+        content: newMsg,
+        type: "text",
+        session2Id: Number(session2Id),
+        senderId: user.id,
+      });
+    } else {
+      socket.emit("sendSeanceMessage", {
+        content: newMsg,
+        type: "text",
+        seanceId: Number(seanceId),
+        senderId: user.id,
+      });
+    }
+    setNewMsg("");
+  }
+};
+
 
   // Delete message
-  const handleDeleteMsg = async (msgId) => {
-    if (selectedTab === "session") {
-      await fetch(`http://localhost:8000/session2-chat-messages/${msgId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
-      });
-      setSessionChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-    } else {
-      await fetch(`http://localhost:8000/chat-messages/${msgId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
-      });
-      setSeanceChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-    }
-  };
+ const handleDeleteMsg = async (msgId) => {
+  if (selectedTab === "session") {
+    await fetch(`http://localhost:8000/session2-chat-messages/${msgId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    setSessionChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+  } else if (selectedTab === "seance") {
+    await fetch(`http://localhost:8000/chat-messages/${msgId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    setSeanceChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+  } else if (selectedTab === "general") {
+    await fetch(`http://localhost:8000/general-chat-messages/${msgId}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: user.id }),
+    });
+    setGeneralChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+  }
+};
+
 
   // --- UI ---
   return (
     <>
-      {/* Floating Red Button */}
+      {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
         style={{
           position: "fixed",
-          bottom: 100,
-          right: 24,
-          width: 60,
-          height: 60,
+          bottom: 32,
+          right: 32,
+          width: 64,
+          height: 64,
           borderRadius: "50%",
-          backgroundColor: "#dc3545",
-          color: "#fff",
+          background: open ? "#fff" : "#d32f2f",
+          color: open ? "#d32f2f" : "#fff",
           fontSize: 28,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.18)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.22)",
           border: "none",
           zIndex: 2000,
           cursor: "pointer",
+          transition: "all 0.18s",
+          borderWidth: open ? 3 : 0,
+          borderStyle: open ? "solid" : "none",
+          borderColor: open ? "#d32f2f" : "transparent"
         }}
         aria-label="Chat session"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseOver={e => { e.currentTarget.style.background = open ? "#fbeaec" : "#e53935"; }}
+        onMouseOut={e => { e.currentTarget.style.background = open ? "#fff" : "#d32f2f"; }}
       >
         {open ? "✕" : "💬"}
       </button>
@@ -284,84 +341,164 @@ export default function UnifiedSessionChatPopup({ user }) {
         <Paper
           sx={{
             position: "fixed",
-            bottom: 100,
+            bottom: 96,
             right: 32,
-            width: 400,
-            maxHeight: "72vh",
-            borderRadius: 3,
-            boxShadow: 8,
+            width: 410,
+            maxHeight: "74vh",
+            borderRadius: 4,
+            boxShadow: 10,
             zIndex: 2100,
             display: "flex",
             flexDirection: "column",
-            p: 2,
+            p: 0,
+            overflow: "hidden",
+            background: "#f9f9fa",
           }}
         >
-          {/* Tabs always visible */}
-          <Box display="flex" gap={2} mb={1} justifyContent="center">
+          {/* Tabs */}
+          <Box
+            display="flex"
+            alignItems="center"
+            bgcolor="#fff"
+            px={2}
+            pt={1.5}
+            pb={0.5}
+            borderBottom="1px solid #e8e8e8"
+          >
             <Button
-              variant={selectedTab === "session" ? "contained" : "outlined"}
+              variant={selectedTab === "session" ? "contained" : "text"}
               onClick={() => setSelectedTab("session")}
               color="error"
               size="small"
-              sx={{ flex: 1, fontWeight: 600 }}
+              sx={{
+                borderRadius: 3,
+                fontWeight: 600,
+                boxShadow: selectedTab === "session" ? 3 : 0,
+                mx: 1,
+                px: 2
+              }}
             >
-              💬 Session Chat
+              Session Chat
             </Button>
             <Button
-              variant={selectedTab === "seance" ? "contained" : "outlined"}
+              variant={selectedTab === "seance" ? "contained" : "text"}
               onClick={() => setSelectedTab("seance")}
               color="primary"
               size="small"
               disabled={!seanceId}
-              sx={{ flex: 1, fontWeight: 600 }}
+              sx={{
+                borderRadius: 3,
+                fontWeight: 600,
+                boxShadow: selectedTab === "seance" ? 3 : 0,
+                mx: 1,
+                px: 2
+              }}
             >
-              💬 Séance Chat
+              Séance Chat
             </Button>
+            <Button
+  variant={selectedTab === "general" ? "contained" : "text"}
+  onClick={() => setSelectedTab("general")}
+  color="secondary"
+  size="small"
+  sx={{
+    borderRadius: 3,
+    fontWeight: 600,
+    boxShadow: selectedTab === "general" ? 3 : 0,
+    mx: 1,
+    px: 2
+  }}
+>
+  Chat Général
+</Button>
+
           </Box>
-          {/* Session selector (if needed) */}
+          {/* Session selector */}
           {session2s.length > 1 && (
-            <select
-              value={session2Id}
-              onChange={e => setSession2Id(Number(e.target.value))}
-              style={{ marginBottom: 8, padding: 6, borderRadius: 8, border: "1px solid #aaa" }}
-            >
-              {session2s.map(s => (
-                <option value={s.id} key={s.id}>{s.name}</option>
-              ))}
-            </select>
+            <Box bgcolor="#f6f6fc" px={2} py={1.5}>
+              <select
+                value={session2Id}
+                onChange={e => setSession2Id(Number(e.target.value))}
+                style={{
+                  width: "100%",
+                  padding: "6px 10px",
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  fontWeight: 500
+                }}
+              >
+                {session2s.map(s => (
+                  <option value={s.id} key={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </Box>
           )}
-          {/* Seance selector (if needed) */}
+          {/* Seance selector */}
           {selectedTab === "seance" && seances.length > 1 && (
-            <select
-              value={seanceId}
-              onChange={e => setSeanceId(Number(e.target.value))}
-              style={{ marginBottom: 8, padding: 6, borderRadius: 8, border: "1px solid #aaa" }}
-            >
-              {seances.map(s => (
-                <option value={s.id} key={s.id}>{s.title || `Séance ${s.id}`}</option>
-              ))}
-            </select>
+            <Box bgcolor="#f6f6fc" px={2} py={1.5}>
+              <select
+                value={seanceId}
+                onChange={e => setSeanceId(Number(e.target.value))}
+                style={{
+                  width: "100%",
+                  padding: "6px 10px",
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  fontWeight: 500
+                }}
+              >
+                {seances.map(s => (
+                  <option value={s.id} key={s.id}>{s.title || `Séance ${s.id}`}</option>
+                ))}
+              </select>
+            </Box>
           )}
+
           {/* Chat Messages */}
-          <Paper sx={{
-            p: 1,
-            mb: 1,
-            maxHeight: 290,
-            minHeight: 120,
-            overflowY: "auto",
-            background: "#f8f8f8"
-          }}>
+          <Box
+            sx={{
+              p: 2,
+              pt: 1.5,
+              flex: 1,
+              overflowY: "auto",
+              background: "#f7f7fa",
+              borderBottom: "1px solid #eee",
+              minHeight: 200,
+              scrollbarWidth: "thin",
+              "&::-webkit-scrollbar": {
+                width: "7px",
+                background: "#eaeaea",
+                borderRadius: 5
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "#e1e1e1",
+                borderRadius: 5
+              }
+            }}
+          >
             <Stack spacing={1}>
-              {(selectedTab === "session" ? sessionChatMessages : seanceChatMessages).map((msg, i) => (
-                <Paper
+  {(
+    selectedTab === "session"
+      ? sessionChatMessages
+      : selectedTab === "seance"
+        ? seanceChatMessages
+        : generalChatMessages
+  ).map((msg, i) => (
+                <Box
                   key={msg.id || i}
                   sx={{
-                    p: 1,
-                    background: "#fff",
                     display: "flex",
                     alignItems: "flex-start",
-                    mb: 1,
-                    gap: 1,
+                    gap: 1.5,
+                    bgcolor: msg.sender?.id === user.id ? "#fff8f8" : "#fff",
+                    borderRadius: 3,
+                    boxShadow: msg.sender?.id === user.id ? "0 1px 8px #ffe0e0" : "0 1px 8px #e2e2ef0c",
+                    border: "1px solid #f2f2f3",
+                    px: 1.5,
+                    py: 1,
+                    mr: msg.sender?.id === user.id ? 0 : "auto",
+                    ml: msg.sender?.id === user.id ? "auto" : 0,
+                    maxWidth: "85%",
                   }}
                 >
                   {/* Avatar */}
@@ -374,57 +511,84 @@ export default function UnifiedSessionChatPopup({ user }) {
                             : `http://localhost:8000${msg.sender?.profilePic || '/profile-pics/default.png'}`
                         }
                         alt={msg.sender?.name}
-                        style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 8 }}
+                        style={{ width: 32, height: 32, borderRadius: "50%", marginTop: 2 }}
                       />
                     ) : (
-                      <Avatar sx={{ width: 32, height: 32, marginRight: 1 }}>
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: "#d5dde9", mt: 0.25 }}>
                         {msg.sender?.name?.[0]?.toUpperCase() || "?"}
                       </Avatar>
                     )
                   }
-                  <Box>
-                    <Typography variant="subtitle2" fontWeight="bold" color="primary">
-                      {msg.sender?.name || "Anonyme"}
-                      {msg.sender?.role && (
-                        <span style={{ color: "#888", fontWeight: 400, marginLeft: 8, fontSize: 13 }}>
-                          · {msg.sender.role}
-                        </span>
-                      )}
-                      {msg.createdAt && (
-                        <span style={{ color: "#888", fontSize: 11, marginLeft: 8 }}>
-                          {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                        </span>
-                      )}
+                  <Box sx={{ flex: 1 }}>
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="subtitle2" fontWeight="bold" color="primary" sx={{ fontSize: 15 }}>
+                        {msg.sender?.name || "Anonyme"}
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: "#aaa",
+                          fontSize: 11.5,
+                          fontWeight: 500,
+                          ml: 1,
+                          mt: 0.3
+                        }}
+                      >
+                        {msg.sender?.role ? "· " + msg.sender.role : ""}
+                        {msg.createdAt && (
+                          <span style={{ marginLeft: 8 }}>
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        )}
+                      </Typography>
                       {msg.sender?.id === user.id && (
-                        <IconButton size="small" onClick={() => handleDeleteMsg(msg.id)} color="error">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteMsg(msg.id)}
+                          color="error"
+                          sx={{ ml: "auto" }}
+                        >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       )}
-                    </Typography>
+                    </Box>
                     {/* Message Content */}
-                    {msg.type === "text" && <span>{msg.content}</span>}
-                    {msg.type === "image" && (
-                      <img src={msg.content} alt="img" style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                    )}
-                    {msg.type === "audio" && (
-                      <audio controls src={msg.content} style={{ maxWidth: 180, marginTop: 4 }} />
-                    )}
-                    {msg.type === "video" && (
-                      <video controls src={msg.content} style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                    )}
-                    {msg.type === "file" && (
-                      <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4 }}>
-                        📎 {msg.content.split("/").pop()}
-                      </a>
-                    )}
+                    <Box mt={0.5}>
+                      {msg.type === "text" && (
+                        <Typography sx={{ fontSize: 15, color: "#222" }}>
+                          {msg.content}
+                        </Typography>
+                      )}
+                      {msg.type === "image" && (
+                        <img src={msg.content} alt="img" style={{ maxWidth: 170, borderRadius: 7, marginTop: 4 }} />
+                      )}
+                      {msg.type === "audio" && (
+                        <audio controls src={msg.content} style={{ maxWidth: 150, marginTop: 4 }} />
+                      )}
+                      {msg.type === "video" && (
+                        <video controls src={msg.content} style={{ maxWidth: 160, borderRadius: 7, marginTop: 4 }} />
+                      )}
+                      {msg.type === "file" && (
+                        <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4, color: "#0072ff" }}>
+                          📎 {msg.content.split("/").pop()}
+                        </a>
+                      )}
+                    </Box>
                   </Box>
-                </Paper>
+                </Box>
               ))}
               <div ref={chatBottomRef} />
             </Stack>
-          </Paper>
+          </Box>
+
           {/* Input */}
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Box sx={{
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            background: "#fff",
+            borderTop: "1px solid #e8e8e8"
+          }}>
             <TextField
               fullWidth
               value={newMsg}
@@ -432,7 +596,8 @@ export default function UnifiedSessionChatPopup({ user }) {
               placeholder="Écris un message…"
               onChange={e => setNewMsg(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleChatSend()}
-              sx={{ background: "#fff", borderRadius: 1 }}
+              sx={{ background: "#f8f8f8", borderRadius: 2 }}
+              inputProps={{ style: { fontSize: 15 } }}
             />
             <IconButton onClick={() => setShowEmoji(v => !v)}>
               <span role="img" aria-label="emoji">😀</span>
@@ -447,22 +612,23 @@ export default function UnifiedSessionChatPopup({ user }) {
                 onChange={e => setNewFile(e.target.files[0])}
               />
             </IconButton>
-            <Button onClick={handleChatSend} variant="contained" color={selectedTab === "session" ? "error" : "primary"} disabled={!newMsg.trim() && !newFile}>
+            <Button onClick={handleChatSend} variant="contained" color={selectedTab === "session" ? "error" : "primary"} disabled={!newMsg.trim() && !newFile} sx={{ px: 2, fontWeight: 600 }}>
               Envoyer
             </Button>
-          </Stack>
+          </Box>
           {showEmoji && (
-            <Box sx={{ position: "absolute", zIndex: 11 }}>
+            <Box sx={{ position: "absolute", bottom: 90, right: 30, zIndex: 11 }}>
               <EmojiPicker onEmojiClick={handleEmoji} autoFocusSearch={false} />
             </Box>
           )}
           {newFile && (
-            <Typography color="primary" fontSize={12} ml={1} mt={0.5}>
-              Fichier prêt à envoyer: {newFile.name}
+            <Typography color="primary" fontSize={13} ml={2} mt={0.5}>
+              Fichier prêt à envoyer : <strong>{newFile.name}</strong>
             </Typography>
           )}
         </Paper>
       )}
     </>
   );
+
 }

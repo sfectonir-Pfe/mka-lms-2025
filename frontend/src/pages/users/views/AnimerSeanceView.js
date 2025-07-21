@@ -30,6 +30,7 @@ import {
   Save as SaveIcon,
   ZoomInMap as ZoomInMapIcon,
   Feedback as FeedbackIcon,
+  List as ListIcon,
 } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import io from "socket.io-client";
@@ -40,6 +41,7 @@ import { useNavigate } from "react-router-dom";
 import SeanceFeedbackForm from '../../../components/SeanceFeedbackForm';
 import FeedbackFormateur from '../../../components/FeedbackFormateur';
 import SeanceFeedbackList from './seancefeedbacklist';
+import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 
 const AnimerSeanceView = () => {
   const { t } = useTranslation('seances');
@@ -58,12 +60,10 @@ const AnimerSeanceView = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [showFeedbackSidebar, setShowFeedbackSidebar] = useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [showFeedbackTab, setShowFeedbackTab] = useState(false);
-
-  // --- CHAT STATE & SOCKET ---
-  const [chatMessages, setChatMessages] = useState([]);
   const [newMsg, setNewMsg] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [newFile, setNewFile] = useState(null);
@@ -186,7 +186,7 @@ const AnimerSeanceView = () => {
       });
       setChatMessages((prev) => prev.filter((m) => m.id !== msgId));
     } catch (err) {
-      alert(t('deleteMessageError'));
+      alert(t('seances.deleteMessageError'));
     }
   };
 
@@ -271,7 +271,7 @@ const AnimerSeanceView = () => {
   const handleSaveSession = async () => {
     setSaving(true);
     setTimeout(() => setSaving(false), 1000);
-    alert(t('saveSuccess'));
+    alert(t('seance.saveSuccess'));
   };
 
   const handlePublishContenu = async (contenuId) => {
@@ -288,6 +288,34 @@ const AnimerSeanceView = () => {
       alert(t('statusChangeError'));
     }
   };
+
+  const feedbackColumns = [
+    { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'studentName', headerName: t('seances.studentName'), width: 200 },
+    { field: 'studentEmail', headerName: t('seances.studentEmail'), width: 250 },
+    {
+      field: 'createdAt',
+      headerName: t('seances.date'),
+      width: 180,
+      valueGetter: (params) => new Date(params.row.createdAt).toLocaleString()
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: t('seances.actions'),
+      width: 120,
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<DescriptionIcon />}
+          label={t('seances.viewFeedback')}
+          onClick={() => {
+            setSelectedFeedback(params.row);
+            setFeedbackDialogOpen(true);
+          }}
+        />
+      ],
+    },
+  ];
 
   const renderProgramHierarchy = () => {
     if (!programDetails) return <Typography>{t('loadingProgram')}</Typography>;
@@ -368,7 +396,7 @@ const AnimerSeanceView = () => {
         border: "2px solid #bcbcbc", overflow: "hidden",
       }}>
         <iframe
-          src={`https://meet.jitsi.local:8443/${seance.title || t('defaultRoom')}`}
+          src={`https://localhost:8443/${seance.title || "default-room"}`}
           allow="camera; microphone; fullscreen; display-capture"
           style={{ width: "100%", height: "70vh", border: "none" }}
           title={t('jitsiMeeting')}
