@@ -7,32 +7,34 @@ export class FeedbackFormateurService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateFeedbackFormateurDto) {
-    // Récupérer le nom de l’étudiant
+    console.log('Payload reçu pour création feedback:', data);
     const etudiant = await this.prisma.user.findUnique({
       where: { id: data.etudiantId },
-      select: { name: true }
+      select: { name: true },
     });
 
-    // Déduire le label de l’emoji (à adapter selon ta logique)
     const emojiLabels: Record<string, string> = {
       '😊': 'Satisfait',
       '👍': 'Excellent',
       '💡': 'Idées claires',
       '🚀': 'Progrès rapide',
       '🧠': 'Bonne compréhension',
-      '⚠️': 'Attention nécessaire'
+      '⚠️': 'Attention nécessaire',
     };
 
-    return this.prisma.feedbackFormateur.create({
+    const created = await this.prisma.feedbackFormateur.create({
       data: {
         studentId: data.etudiantId,
         studentName: etudiant?.name || '',
         emoji: data.emoji,
         emojiLabel: emojiLabels[data.emoji] || '',
         commentaire: data.commentaire || '',
-        userId: data.formateurId,
+        formateurId: data.formateurId, // <-- bien utiliser formateurId
+        seanceId: data.seanceId,       // <-- bien utiliser seanceId
       },
     });
+    console.log('FeedbackFormateur créé:', created);
+    return created;
   }
 
   async findAll() {
@@ -45,15 +47,21 @@ export class FeedbackFormateurService {
 
   async findAllByFormateur(userId: number) {
     const feedbacks = await this.prisma.feedbackFormateur.findMany({
-      where: { userId }
+      where: { userId },
     });
-    return await Promise.all(feedbacks.map(async f => {
-      const student = await this.prisma.user.findUnique({ where: { id: f.studentId }, select: { email: true } });
-      return {
-        ...f,
-        studentEmail: student?.email || ''
-      };
-    }));
+
+    return await Promise.all(
+      feedbacks.map(async (f) => {
+        const student = await this.prisma.user.findUnique({
+          where: { id: f.studentId },
+          select: { email: true },
+        });
+        return {
+          ...f,
+          studentEmail: student?.email || '',
+        };
+      }),
+    );
   }
 
   async findAllBySeance(seanceId: number) {
@@ -63,10 +71,39 @@ export class FeedbackFormateurService {
     return await Promise.all(feedbacks.map(async f => {
       const student = await this.prisma.user.findUnique({ where: { id: f.studentId }, select: { email: true } });
       return {
-        ...f,
-        studentEmail: student?.email || ''
+        id: f.id,
+        studentName: f.studentName,
+        studentEmail: student?.email || '',
+        emoji: f.emoji,
+        emojiLabel: f.emojiLabel,
+        commentaire: f.commentaire,
+        seanceId: f.seanceId,
+        studentId: f.studentId,
+        createdAt: f.createdAt,
       };
     }));
+  }
+
+  async findAllByFormateurAndSeance(formateurId: number, seanceId: number) {
+    const feedbacks = await this.prisma.feedbackFormateur.findMany({
+      where: {
+        userId: formateurId,
+        seanceId,
+      },
+    });
+
+    return await Promise.all(
+      feedbacks.map(async (f) => {
+        const student = await this.prisma.user.findUnique({
+          where: { id: f.studentId },
+          select: { email: true },
+        });
+        return {
+          ...f,
+          studentEmail: student?.email || '',
+        };
+      }),
+    );
   }
 
   async remove(id: number) {

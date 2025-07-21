@@ -644,7 +644,7 @@ const AnimerSeanceView = () => {
           {tab === 4 && (
             <Box>
               <Typography variant="h6" mb={2}>{t('feedbackFormateur') || 'Feedback Formateur'}</Typography>
-              <FeedbackFormateur />
+              <FeedbackFormateur seanceId={seanceId} />
             </Box>
           )}
           {/* Onglet Feedback (dynamique) */}

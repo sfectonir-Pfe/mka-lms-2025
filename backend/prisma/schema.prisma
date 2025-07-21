@@ -16,44 +16,46 @@ model Mail {
 }
 
 model User {
-  id                      Int                     @id @default(autoincrement())
-  role                    Role                    @default(Etudiant)
-  email                   String                  @unique
-  password                String
-  name                    String?
-  phone                   String?
-  profilePic              String?
-  location                String?
-  skills                  String[]
-  about                   String?
-  isActive                Boolean                 @default(true)
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
-  isVerified              Boolean                 @default(false)
-  needsVerification       Boolean                 @default(true)
-  emailVerified           DateTime?
-  emailVerificationCode   String?
-  codeExpiryDate          DateTime?
-  resetToken              String?
-  resetTokenExpiry        DateTime?
-  Admins                  Admin[]
-  Createurs_De_Formations Createur_De_Formation[]
-  Etablissements          Etablissement[]
-  Etudiants               Etudiant[]
-  formateurs              Formateur[]
-  ResetToken              ResetToken[]
-  SeanceFormateur         SeanceFormateur[]
-  UserAnswer              UserAnswer[]
-  chatMessages            ChatMessage[]
-  whiteboardActions       WhiteboardAction[]
-  userSessions2           UserSession2[]
-  session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
-  feedbacks               Feedback[]              @relation("UserFeedback")
-  chatMemories            ChatMemory[]            @relation("UserChatMemory")
-  sessionFeedbacks        SessionFeedback[]
-  FeedbackList            FeedbackList[]
-  seanceFeedbacks         SeanceFeedback[]
-  feedbackFormateurs      FeedbackFormateur[]
+  id                         Int                     @id @default(autoincrement())
+  role                       Role                    @default(Etudiant)
+  email                      String                  @unique
+  password                   String
+  name                       String?
+  phone                      String?
+  profilePic                 String?
+  location                   String?
+  skills                     String[]
+  about                      String?
+  isActive                   Boolean                 @default(true)
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+  isVerified                 Boolean                 @default(false)
+  needsVerification          Boolean                 @default(true)
+  emailVerified              DateTime?
+  emailVerificationCode      String?
+  codeExpiryDate             DateTime?
+  resetToken                 String?
+  resetTokenExpiry           DateTime?
+  Admins                     Admin[]
+  Createurs_De_Formations    Createur_De_Formation[]
+  Etablissements             Etablissement[]
+  Etudiants                  Etudiant[]
+  formateurs                 Formateur[]
+  ResetToken                 ResetToken[]
+  SeanceFormateur            SeanceFormateur[]
+  UserAnswer                 UserAnswer[]
+  chatMessages               ChatMessage[]
+  whiteboardActions          WhiteboardAction[]
+  userSessions2              UserSession2[]
+  session2ChatMessages       Session2ChatMessage[]   @relation("UserSession2ChatMessages")
+  feedbacks                  Feedback[]              @relation("UserFeedback")
+  chatMemories               ChatMemory[]            @relation("UserChatMemory")
+  sessionFeedbacks           SessionFeedback[]
+  FeedbackList               FeedbackList[]
+  seanceFeedbacks            SeanceFeedback[]
+  FeedbackFormateur          FeedbackFormateur[]
+  feedbacksFormateurSent     FeedbackFormateur[]     @relation("FormateurFeedbacks")
+  feedbacksFormateurReceived FeedbackFormateur[]     @relation("EtudiantFeedbacks")
 }
 
 model Formateur {
@@ -503,9 +505,14 @@ model FeedbackFormateur {
   emojiLabel  String
   commentaire String
   createdAt   DateTime @default(now())
-  User        User?    @relation(fields: [userId], references: [id])
-  userId      Int?
-  seanceId    Int? // Ajouté pour lier à une séance
+  seanceId    Int?
+
+  formateurId Int?
+  formateur   User? @relation("FormateurFeedbacks", fields: [formateurId], references: [id])
+
+  student User  @relation("EtudiantFeedbacks", fields: [studentId], references: [id])
+  User    User? @relation(fields: [userId], references: [id])
+  userId  Int?
 }
 
 enum Role {

@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FeedbackformateurController } from './feedbackformateur.controller';
-import { FeedbackformateurService } from './feedbackformateur.service';
+import { FeedbackFormateurController } from './feedbackformateur.controller';
+import { FeedbackFormateurService } from './feedbackformateur.service';
 
-describe('FeedbackformateurController', () => {
-  let controller: FeedbackformateurController;
+describe('FeedbackFormateurController', () => {
+  let controller: FeedbackFormateurController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [FeedbackformateurController],
-      providers: [FeedbackformateurService],
+      controllers: [FeedbackFormateurController],
+      providers: [FeedbackFormateurService],
     }).compile();
 
-    controller = module.get<FeedbackformateurController>(FeedbackformateurController);
+    controller = module.get<FeedbackFormateurController>(FeedbackFormateurController);
   });
 
   it('should be defined', () => {

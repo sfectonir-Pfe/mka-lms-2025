@@ -536,4 +536,42 @@ export class UsersService {
       include: { session2: true }
     });
   }
+
+  async getStudents() {
+    return this.prisma.user.findMany({
+      where: { role: 'Etudiant' },
+      select: { id: true, name: true, email: true, role: true },
+    });
+  }
+
+  async getSeanceFormateur(seanceId: number) {
+    return this.prisma.seanceFormateur.findUnique({
+      where: { id: seanceId },
+      select: { session2Id: true }
+    });
+  }
+
+  async getUserSessions2(session2Id: number) {
+    return this.prisma.userSession2.findMany({
+      where: { session2Id },
+      select: { userId: true }
+    });
+  }
+
+  async getStudentsByIds(studentIds: number[]) {
+    return this.prisma.user.findMany({
+      where: {
+        id: { in: studentIds },
+        role: 'Etudiant'
+      },
+      select: { id: true, name: true, email: true, role: true }
+    });
+  }
+
+  async getFeedbacks(formateurId: number, seanceId: number) {
+    return this.prisma.feedbackFormateur.findMany({
+      where: { userId: formateurId, seanceId },
+      select: { studentId: true }
+    });
+  }
 }

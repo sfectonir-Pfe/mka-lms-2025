@@ -7,6 +7,9 @@ export class CreateFeedbackFormateurDto {
   @IsInt()
   etudiantId: number;
 
+  @IsInt()
+  seanceId: number;
+
   @IsString()
   emoji: string;
 

@@ -78,7 +78,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaRegMoon } from "react-icons/fa";
 import { GoSun } from "react-icons/go";
-import { UserContext } from './context/UserContext';
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -186,108 +186,106 @@ function App() {
 
 
   return (
-    <UserContext.Provider value={{ user }}>
-      <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
-        <ToastContainer />
-        <div className="d-flex justify-content-end">
-          <button className="btn btn-light d-flex align-items-center" onClick={() => setDarkMode(!darkMode)}>
-            {darkMode ? <GoSun /> : <FaRegMoon />}
-          </button>
-        </div>
-        {user && <Chatbot />}
-
-        {loading ? (
-          <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
-            <Spinner animation="border" variant="primary" />
-          </div>
-        ) : (
-          <BrowserRouter>
-            <Routes>
-              {/* Route de connexion toujours disponible */}
-              <Route path="/login" element={<LoginPage setUser={setUser} />} />
-
-              {user ? (
-                <Route path="/" element={<Main setUser={setUser} user={user} />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="users" element={<UsersPages />}>
-                    <Route index element={<UserList />} />
-                    <Route path="add" element={<AddUserView />} />
-                  </Route>
-
-
-                  <Route path="programs" element={<ProgramsPage />} />
-                  <Route path="programs/add" element={<AddProgramList />} />
-                  <Route path="module" element={<ModulePage />} />
-                  <Route path="module/add" element={<AddModuleView />} />
-                  <Route path="courses/*" element={<CoursesPage />} />
-                  <Route path="contenus/*" element={<ContenusPage />} />
-
-                  <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
-
-                  <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
-                  <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
-
-                  <Route path="/programs/build/:programId" element={<BuildProgramView />} />
-                  <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
-                  <Route path="/modules" element={<ModuleList />} />
-                  <Route path="/programs/edit/:programId" element={<EditProgramView />} />
-                  <Route path="/sessions" element={<SessionPage />} />
-                  <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
-                  <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-                  <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
-
-
-                  <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
-                  <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
-
-
-
-                  <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
-
-                  <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
-                  {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
-                  <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                  {/* Student */}
-                  <Route path="student" element={<StudentLandingPage />} />
-                  <Route path="student/program/:programId" element={<StudentProgramPage />} />
-                  <Route path="feedback" element={<FeedbackPage />} />
-                  <Route path="feedback-list" element={<FeedbackListPage />} />
-                  <Route path="/EditProfile/:id" element={<EditProfilePage />} />
-                  <Route path="/ProfilePage/:id" element={<ProfilePage />} />
-                </Route>
-              ) : (
-                <Route path="/" element={<Auth />}>
-                  <Route index element={<LoginPage setUser={setUser} />} />
-                  <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
-                  <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
-                  <Route path="/reset-success" element={<ResetSuccessPage />} />
-                  <Route path="/verify-sms" element={<VerifyAccountPage />} />
-
-
-
-                </Route>
-              )}
-
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        )}
+    <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
+      <ToastContainer />
+      <div className="d-flex justify-content-end">
+        <button className="btn btn-light d-flex align-items-center" onClick={() => setDarkMode(!darkMode)}>
+          {darkMode ? <GoSun /> : <FaRegMoon />}
+        </button>
       </div>
-    </UserContext.Provider>
+      {user && <Chatbot />}
+
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : (
+        <BrowserRouter>
+          <Routes>
+            {/* Route de connexion toujours disponible */}
+            <Route path="/login" element={<LoginPage setUser={setUser} />} />
+
+            {user ? (
+              <Route path="/" element={<Main setUser={setUser} user={user} />}>
+                <Route index element={<HomePage />} />
+                <Route path="users" element={<UsersPages />}>
+                  <Route index element={<UserList />} />
+                  <Route path="add" element={<AddUserView />} />
+                </Route>
+
+
+                <Route path="programs" element={<ProgramsPage />} />
+                <Route path="programs/add" element={<AddProgramList />} />
+                <Route path="module" element={<ModulePage />} />
+                <Route path="module/add" element={<AddModuleView />} />
+                <Route path="courses/*" element={<CoursesPage />} />
+                <Route path="contenus/*" element={<ContenusPage />} />
+
+                <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
+
+                <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
+                <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+
+                <Route path="/programs/build/:programId" element={<BuildProgramView />} />
+                <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
+                <Route path="/modules" element={<ModuleList />} />
+                <Route path="/programs/edit/:programId" element={<EditProgramView />} />
+                <Route path="/sessions" element={<SessionPage />} />
+                <Route path="/quizzes/edit/:contenuId" element={<EditQuizForm />} />
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
+
+
+                <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
+                <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
+
+
+
+                <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
+
+                <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
+                {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
+                <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                {/* Student */}
+                <Route path="student" element={<StudentLandingPage />} />
+                <Route path="student/program/:programId" element={<StudentProgramPage />} />
+                <Route path="feedback" element={<FeedbackPage />} />
+                <Route path="feedback-list" element={<FeedbackListPage />} />
+                <Route path="/EditProfile/:id" element={<EditProfilePage />} />
+                <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+              </Route>
+            ) : (
+              <Route path="/" element={<Auth />}>
+                <Route index element={<LoginPage setUser={setUser} />} />
+                <Route path="/forgot-password/" element={<ForgetPasswordPage />} />
+                <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
+                <Route path="/reset-success" element={<ResetSuccessPage />} />
+                <Route path="/verify-sms" element={<VerifyAccountPage />} />
+
+
+
+              </Route>
+            )}
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      )}
+    </div>
   );
 }
 

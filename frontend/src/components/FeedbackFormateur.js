@@ -23,11 +23,10 @@ import {
   Person,
   Group,
 } from '@mui/icons-material';
-import { useUser } from '../context/UserContext';
 import { DataGrid } from '@mui/x-data-grid';
 
-const FeedbackFormateur = () => {
-  const { user } = useUser();
+const FeedbackFormateur = ({ seanceId }) => {
+  const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null');
   const formateurId = user?.id;
 
   const [selectedEmoji, setSelectedEmoji] = useState(null);
@@ -39,10 +38,13 @@ const FeedbackFormateur = () => {
 
   // Chargement des étudiants sans feedback
   const loadStudents = () => {
-    if (!formateurId) return;
-    fetch(`/users/students/without-feedback?formateurId=${formateurId}`)
+    if (!formateurId || !seanceId) return;
+    fetch(`/users/students/without-feedback?formateurId=${formateurId}&seanceId=${seanceId}`)
       .then((res) => res.json())
-      .then((data) => setStudents(Array.isArray(data) ? data : []))
+      .then((data) => {
+        console.log('Réponse étudiants sans feedback:', data);
+        setStudents(Array.isArray(data) ? data : []);
+      })
       .catch((err) => {
         console.error('Erreur lors du chargement des étudiants:', err);
         setStudents([]);
@@ -50,13 +52,18 @@ const FeedbackFormateur = () => {
   };
 
   useEffect(() => {
+    if (!formateurId || !seanceId) return;
+
     loadStudents();
-    if (!formateurId) return;
-    fetch(`/feedback-formateur?formateurId=${formateurId}`)
-      .then(res => res.json())
-      .then(data => setFeedbacksEnvoyes(Array.isArray(data) ? data : []))
+
+    fetch(`/feedback-formateur/seance/${seanceId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('Réponse feedbacks envoyés:', data);
+        setFeedbacksEnvoyes(Array.isArray(data) ? data : []);
+      })
       .catch(() => setFeedbacksEnvoyes([]));
-  }, [formateurId, feedbackEnvoye]);
+  }, [formateurId, seanceId, feedbackEnvoye]);
 
   const studentsFiltered = Array.isArray(students)
     ? students.filter((s) => s.role === 'Etudiant' || !s.role)
@@ -76,11 +83,13 @@ const FeedbackFormateur = () => {
     if (!selectedStudent || !selectedEmoji) return;
 
     const payload = {
-      formateurId,
-      etudiantId: selectedStudent.id,
+      formateurId: Number(formateurId),
+      etudiantId: Number(selectedStudent.id),
       emoji: emojis.find((e) => e.id === selectedEmoji)?.emoji,
       commentaire,
+      seanceId: Number(seanceId),
     };
+    console.log('Payload envoyé:', payload);
 
     try {
       await fetch('/feedback-formateur', {
@@ -88,8 +97,40 @@ const FeedbackFormateur = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+
+      // Retirer l'étudiant de la liste immédiatement
+      setStudents((prev) => prev.filter((s) => s.id !== selectedStudent.id));
+
+      // Ajouter le feedback dans le DataGrid immédiatement (optimiste)
+      setFeedbacksEnvoyes((prev) => [
+        ...prev,
+        {
+          id: `temp-${Date.now()}`, // id unique temporaire pour le DataGrid
+          studentName: selectedStudent?.name,
+          studentEmail: selectedStudent?.email,
+          emoji: payload.emoji,
+          emojiLabel: emojis.find((e) => e.id === selectedEmoji)?.label,
+        },
+      ]);
+
+      // Puis recharge la liste des feedbacks envoyés depuis le backend pour garantir la synchro
+      fetch(`/feedback-formateur/seance/${seanceId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setFeedbacksEnvoyes(data);
+          } else {
+            // Si la réponse backend est vide, on garde l'ajout optimiste
+            console.warn('Aucun feedback renvoyé par le backend, on garde l\'ajout local.');
+          }
+        })
+        .catch((err) => {
+          // En cas d'erreur, on garde l'ajout optimiste
+          console.error('Erreur lors du rechargement des feedbacks:', err);
+        });
+
       setFeedbackEnvoye(true);
-      loadStudents(); // Recharge la liste pour exclure l'étudiant noté
+      setSelectedStudent(null); // Pour revenir à la liste
     } catch (err) {
       console.error('Erreur lors de l\'envoi du feedback:', err);
     }
@@ -110,7 +151,7 @@ const FeedbackFormateur = () => {
           Feedback envoyé avec succès! 🎉
         </Typography>
         <Typography variant="body1" className="mb-2">
-          Feedback pour: <strong>{selectedStudent.name}</strong>
+          Feedback pour: <strong>{selectedStudent?.name}</strong>
         </Typography>
         <Typography variant="body1" className="mb-4">
           {emojis.find((e) => e.id === selectedEmoji)?.emoji} -{' '}
@@ -151,7 +192,6 @@ const FeedbackFormateur = () => {
             Pour lui donner un feedback personnalisé
           </Typography>
         </Box>
-        {/* Liste des étudiants sans feedback */}
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {studentsFiltered.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ mt: 2 }}>
@@ -181,24 +221,23 @@ const FeedbackFormateur = () => {
             ))
           )}
         </List>
-        {/* DataGrid des feedbacks envoyés (sous la liste) */}
         <Box sx={{ height: 350, width: '100%', my: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Étudiants ayant déjà reçu un feedback
           </Typography>
           <DataGrid
             rows={feedbacksEnvoyes.map((f, idx) => ({
-              id: idx,
+              id: f.id || idx, // Utilise l'id unique si présent, sinon idx
               name: f.studentName,
-              email: f.studentEmail || f.email,
+              email: f.studentEmail,
               emoji: f.emoji,
-              emojiLabel: f.emojiLabel
+              emojiLabel: f.emojiLabel,
             }))}
             columns={[
               { field: 'name', headerName: 'Nom', flex: 1 },
               { field: 'email', headerName: 'Email', flex: 1 },
               { field: 'emoji', headerName: 'Emoji', width: 80 },
-              { field: 'emojiLabel', headerName: 'Label', flex: 1 }
+              { field: 'emojiLabel', headerName: 'Label', flex: 1 },
             ]}
             pageSize={5}
             rowsPerPageOptions={[5]}
@@ -215,14 +254,14 @@ const FeedbackFormateur = () => {
       <Box className="text-center mb-4">
         <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
           <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-            {selectedStudent.name
+            {selectedStudent?.name
               ? selectedStudent.name.split(' ').map((n) => n[0]).join('').toUpperCase()
               : '?'}
           </Avatar>
           <Box textAlign="left">
-            <Typography variant="h6">{selectedStudent.name}</Typography>
+            <Typography variant="h6">{selectedStudent?.name || ''}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {selectedStudent.groupe}
+              {selectedStudent?.groupe || ''}
             </Typography>
           </Box>
         </Box>
@@ -243,7 +282,7 @@ const FeedbackFormateur = () => {
         <Grid container spacing={2} className="mb-4">
           <Grid item xs={12}>
             <Typography variant="h6" className="mb-3">
-              Comment évaluez-vous le travail de {(selectedStudent.name || '').split(' ')[0]}? 😊
+              Comment évaluez-vous le travail de {(selectedStudent?.name || '').split(' ')[0]}? 😊
             </Typography>
           </Grid>
 
@@ -267,14 +306,14 @@ const FeedbackFormateur = () => {
 
         <TextField
           fullWidth
-          label={`Commentaire pour ${(selectedStudent.name || '').split(' ')[0]} ✍️`}
+          label={`Commentaire pour ${(selectedStudent?.name || '').split(' ')[0]} ✍️`}
           multiline
           rows={4}
           variant="outlined"
           value={commentaire}
           onChange={(e) => setCommentaire(e.target.value)}
           className="mb-4"
-          placeholder={`Ex: ${(selectedStudent.name || '').split(' ')[0]} a fait des progrès remarquables en...`}
+          placeholder={`Ex: ${(selectedStudent?.name || '').split(' ')[0]} a fait des progrès remarquables en...`}
         />
 
         <Box className="d-flex justify-content-between">

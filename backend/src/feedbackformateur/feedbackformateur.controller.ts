@@ -5,9 +5,9 @@ import {
   Param,
   Body,
   Delete,
+  Query,
   UsePipes,
   ValidationPipe,
-  Query,
 } from '@nestjs/common';
 import { FeedbackFormateurService } from './feedbackformateur.service';
 import { CreateFeedbackFormateurDto } from './dto/create-feedbackformateur.dto';
@@ -23,7 +23,16 @@ export class FeedbackFormateurController {
   }
 
   @Get()
-  async findAll(@Query('formateurId') formateurId?: string) {
+  async findAll(
+    @Query('formateurId') formateurId?: string,
+    @Query('seanceId') seanceId?: string,
+  ) {
+    if (formateurId && seanceId) {
+      return this.service.findAllByFormateurAndSeance(
+        Number(formateurId),
+        Number(seanceId),
+      );
+    }
     if (formateurId) {
       return this.service.findAllByFormateur(Number(formateurId));
     }
