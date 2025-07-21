@@ -4,24 +4,24 @@ WORKDIR /app
 
 
 COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
-
+# RUN yarn install --frozen-lockfile
+Run yarn 
 
 COPY . .
 RUN npx prisma generate
 RUN yarn build
 
 # Stage 2: Production
-FROM node:20
-WORKDIR /app
+# FROM node:20
+# WORKDIR /app
 
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production
+# COPY package.json yarn.lock ./
+# RUN yarn install --frozen-lockfile --production
 
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# COPY --from=builder /app/dist ./dist
+# COPY --from=builder /app/prisma ./prisma
+# COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main.js"]
