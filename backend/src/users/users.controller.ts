@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from "@nestjs/common"
 import { FileInterceptor } from "@nestjs/platform-express"
 import { diskStorage } from "multer"
@@ -19,6 +20,9 @@ import type { CreateUserDto } from "./dto/create-user.dto"
 import type { UpdateUserDto } from "./dto/update-user.dto"
 import type { Express } from "express"
 import { S3Service } from "../s3/s3.service"
+import { PrismaClient, Role } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
@@ -260,6 +264,32 @@ async joinSession2(@Param('id') userId: string, @Param('session2Id') session2Id:
 @Get(':id/sessions2')
 async getUserSessions2(@Param('id') userId: string) {
   return this.usersService.getSessionsForUser(Number(userId));
+}
+
+@Get('students')
+async getStudents() {
+  return prisma.user.findMany({
+    where: { role: Role.Etudiant },
+    select: { id: true, name: true, email: true, role: true },
+  });
+}
+
+@Get('students/without-feedback')
+async getStudentsWithoutFeedback(@Query('formateurId') formateurId: number) {
+  // Récupère les feedbacks déjà donnés par ce formateur
+  const feedbacks = await prisma.feedbackFormateur.findMany({
+    where: { userId: Number(formateurId) },
+    select: { studentId: true }
+  });
+  const alreadyFeedbackStudentIds = feedbacks.map(f => f.studentId);
+
+  return prisma.user.findMany({
+    where: {
+      role: Role.Etudiant,
+      id: { notIn: alreadyFeedbackStudentIds }
+    },
+    select: { id: true, name: true, email: true, role: true }
+  });
 }
 
 }

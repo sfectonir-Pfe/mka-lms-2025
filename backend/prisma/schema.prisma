@@ -51,6 +51,9 @@ model User {
   feedbacks               Feedback[]              @relation("UserFeedback")
   chatMemories            ChatMemory[]            @relation("UserChatMemory")
   sessionFeedbacks        SessionFeedback[]
+  FeedbackList            FeedbackList[]
+  seanceFeedbacks         SeanceFeedback[]
+  feedbackFormateurs      FeedbackFormateur[]
 }
 
 model Formateur {
@@ -429,6 +432,7 @@ model SeanceFeedback {
   id                  Int      @id @default(autoincrement())
   seanceId            Int
   userId              Int?
+  user                User?    @relation(fields: [userId], references: [id]) // Ajout relation user
   sessionRating       Int
   contentQuality      Int
   sessionDuration     String
@@ -452,6 +456,22 @@ model SeanceFeedback {
   createdAt           DateTime @default(now())
 }
 
+model FeedbackList {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  seanceId        Int
+  feedback        String
+  nom             String?
+  email           String?
+  sessionComments String?
+  trainerComments String?
+  teamComments    String?
+  suggestions     String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model SessionFeedback {
   id        Int      @id @default(autoincrement())
   sessionId Int
@@ -460,7 +480,7 @@ model SessionFeedback {
   comments  String?
   createdAt DateTime @default(now())
 
-  user      User?    @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 }
 
 model ChatMemory {
@@ -473,6 +493,19 @@ model ChatMemory {
   content     String
   createdAt   DateTime @default(now())
   user        User?    @relation("UserChatMemory", fields: [userId], references: [id])
+}
+
+model FeedbackFormateur {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  studentName String
+  emoji       String
+  emojiLabel  String
+  commentaire String
+  createdAt   DateTime @default(now())
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+  seanceId    Int? // Ajouté pour lier à une séance
 }
 
 enum Role {
