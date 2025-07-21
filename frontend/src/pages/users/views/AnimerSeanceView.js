@@ -387,7 +387,7 @@ const AnimerSeanceView = () => {
         border: "2px solid #bcbcbc", overflow: "hidden",
       }}>
         <iframe
-          src={`https://meet.jitsi.local:8443/${seance.title || "default-room"}`}
+          src={`https://localhost:8443/${seance.title || "default-room"}`}
           allow="camera; microphone; fullscreen; display-capture"
           style={{ width: "100%", height: "70vh", border: "none" }}
           title="Jitsi Meeting"
