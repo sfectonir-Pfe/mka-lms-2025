@@ -15,7 +15,7 @@ services:
       - postgres
     networks:
       - lms-net
-    command: yarn start:prod   # أو start:dev أثناء التطوير
+    command: yarn start:prod   
   
   postgres:
     image: postgres:15
