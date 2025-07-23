@@ -23,6 +23,7 @@ import {
 } from "@mui/material"
 import { Send, Person, Group, MenuBook, NavigateNext, NavigateBefore, Recommend } from "@mui/icons-material"
 import "bootstrap/dist/css/bootstrap.min.css"
+import axios from "axios";
 
 const EmojiRating = ({ rating, onRatingChange, label }) => {
   const emojis = ["😞", "😐", "🙂", "😊", "🤩"]
@@ -93,15 +94,31 @@ export default function SeanceFeedbackForm({ seanceId }) {
 
   const steps = ["Déroulement de la Séance", "Évaluation du Formateur", "Évaluation de l'Équipe", "Recommandations"]
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isStepValid()) {
       setShowStepError(true)
       return
     }
     setShowStepError(false)
-    console.log("Feedback soumis:", feedback)
-    setIsSubmitted(true)
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      // Exclure tout champ 'id' du feedback
+      const { id, ...feedbackData } = feedback;
+      await axios.post("http://localhost:8000/feedback/seance", {
+        ...feedbackData,
+        seanceId: Number(seanceId),
+        userId: user?.id,
+        improvementAreas: feedback.improvementAreas.join(", ") // backend attend string
+      });
+      setIsSubmitted(true)
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        alert("Erreur: " + (Array.isArray(err.response.data.message) ? err.response.data.message.join(' | ') : err.response.data.message));
+      } else {
+        alert("Erreur lors de l'envoi du feedback. Veuillez réessayer.");
+      }
+    }
   }
 
   const handleNext = () => {

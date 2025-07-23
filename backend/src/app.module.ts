@@ -25,6 +25,7 @@ import { CreatorDashboardModule } from './creator-dashboard/creator-dashboard.mo
 import { FormateurDashboardModule } from './formateur-dashboard/formateur-dashboard.module';
 import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard.module';
 import { S3Module } from './s3/s3.module';
+import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 
 
 
@@ -52,6 +53,7 @@ imports: [
   FeedbackModule, 
   ChatbotModule,
   S3Module,
+  FeedbackFormateurModule,
   GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule,
 ],
 
