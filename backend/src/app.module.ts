@@ -26,6 +26,7 @@ import { FormateurDashboardModule } from './formateur-dashboard/formateur-dashbo
 import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard.module';
 import { S3Module } from './s3/s3.module';
 import { FeedbackSessionSeanceModule } from './feedback-session-seance/feedback-session-seance.module';
+import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 
 
 

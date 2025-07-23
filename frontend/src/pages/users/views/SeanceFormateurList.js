@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -14,6 +14,32 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
   const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState(null);
   const [details, setDetails] = useState({});
+  const [feedbackAverages, setFeedbackAverages] = useState({});
+
+  useEffect(() => {
+    if (!seances || seances.length === 0) return;
+    // Pour chaque séance, fetch feedbacklist et calcule la moyenne
+    const fetchAverages = async () => {
+      const results = await Promise.all(
+        seances.map(async (s) => {
+          try {
+            const res = await fetch(`http://localhost:8000/feedback/feedbacklist/${s.id}`);
+            const data = await res.json();
+            // Récupère toutes les réponses numériques (1-5)
+            const allRatings = data.flatMap(fb => (fb.answers || []).map(qa => Number(qa.answer)).filter(val => !isNaN(val) && val >= 1 && val <= 5));
+            const avg = allRatings.length > 0 ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length) : null;
+            return { id: s.id, avg };
+          } catch {
+            return { id: s.id, avg: null };
+          }
+        })
+      );
+      const avgObj = {};
+      results.forEach(({ id, avg }) => { avgObj[id] = avg; });
+      setFeedbackAverages(avgObj);
+    };
+    fetchAverages();
+  }, [seances]);
 
   const toggleDetails = (seance) => {
     const id = seance.id;
@@ -39,6 +65,12 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
         seances.map((s) => (
           <Paper key={s.id} elevation={3} sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6">{s.title}</Typography>
+            {/* Affichage de la moyenne des feedbacks */}
+            {feedbackAverages[s.id] !== undefined && feedbackAverages[s.id] !== null && (
+              <Typography variant="body2" color="secondary">
+                ⭐ {t('averageRating')}: {feedbackAverages[s.id].toFixed(2)} / 5
+              </Typography>
+            )}
             <Typography variant="body2">
               🕒 {new Date(s.startTime).toLocaleString()}
             </Typography>

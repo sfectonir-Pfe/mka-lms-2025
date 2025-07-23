@@ -10,6 +10,30 @@ import { CreateGeneralFeedbackDto } from './dto/create-general-feedback.dto';
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
+  @Post('seance')
+  createSeanceFeedback(@Body() dto: any) {
+    return this.feedbackService.createSeanceFeedback(dto);
+  }
+
+  /**
+   * Retourne la liste des feedbacks d'une séance, avec les infos utilisateur (nom, email)
+   * GET /feedback/seance/:seanceId
+   */
+  @Get('seance/:seanceId')
+  getSeanceFeedbacks(@Param('seanceId') seanceId: string) {
+    return this.feedbackService.getSeanceFeedbacks(Number(seanceId));
+  }
+
+  @Post('session')
+  createSessionFeedback(@Body() dto: any) {
+    return this.feedbackService.createSessionFeedback(dto);
+  }
+
+  @Get('session/:sessionId')
+  getSessionFeedbacks(@Param('sessionId') sessionId: string) {
+    return this.feedbackService.getSessionFeedbacks(Number(sessionId));
+  }
+
   @Post()
   create(@Body() dto: CreateFeedbackDto) {
     return this.feedbackService.create(dto);
@@ -33,6 +57,11 @@ export class FeedbackController {
   @Get('analytics')
   getAnalytics(@Query('timeRange') timeRange: string) {
     return this.feedbackService.getAnalytics(timeRange);
+  }
+
+  @Get('feedbacklist/:seanceId')
+  getFeedbackList(@Param('seanceId') seanceId: string) {
+    return this.feedbackService.getFeedbackList(Number(seanceId));
   }
 
   @Get(':id')
@@ -63,25 +92,5 @@ export class FeedbackController {
   @Post(':id/delete')
   remove(@Param('id') id: string) {
     return this.feedbackService.remove(+id);
-  }
-
-  @Post('seance')
-  createSeanceFeedback(@Body() dto: any) {
-    return this.feedbackService.createSeanceFeedback(dto);
-  }
-
-  @Get('seance/:seanceId')
-  getSeanceFeedbacks(@Param('seanceId') seanceId: string) {
-    return this.feedbackService.getSeanceFeedbacks(Number(seanceId));
-  }
-
-  @Post('session')
-  createSessionFeedback(@Body() dto: any) {
-    return this.feedbackService.createSessionFeedback(dto);
-  }
-
-  @Get('session/:sessionId')
-  getSessionFeedbacks(@Param('sessionId') sessionId: string) {
-    return this.feedbackService.getSessionFeedbacks(Number(sessionId));
   }
 }
