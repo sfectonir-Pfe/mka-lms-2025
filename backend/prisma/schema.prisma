@@ -53,6 +53,7 @@ model User {
   feedbacks          Feedback[]           @relation("UserFeedback")
   chatMemories       ChatMemory[]         @relation("UserChatMemory")
   sessionFeedbacks   SessionFeedback[]
+  SeanceFeedback     SeanceFeedback[]
 }
 
 model Formateur {
@@ -273,19 +274,20 @@ model Answer {
 }
 
 model Session2 {
-  id              Int                   @id @default(autoincrement())
-  name            String
-  programId       Int
-  startDate       DateTime?
-  endDate         DateTime?
-  imageUrl        String?
-  createdAt       DateTime              @default(now())
-  status          Session2Status        @default(ACTIVE)
-  SeanceFormateur SeanceFormateur[]
-  program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
-  session2Modules Session2Module[]
-  userSessions2   UserSession2[]
-  chatMessages    Session2ChatMessage[]
+  id               Int                   @id @default(autoincrement())
+  name             String
+  programId        Int
+  startDate        DateTime?
+  endDate          DateTime?
+  imageUrl         String?
+  createdAt        DateTime              @default(now())
+  status           Session2Status        @default(ACTIVE)
+  SeanceFormateur  SeanceFormateur[]
+  program          Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
+  session2Modules  Session2Module[]
+  userSessions2    UserSession2[]
+  chatMessages     Session2ChatMessage[]
+  sessionFeedbacks SessionFeedback[]     @relation("Session2Feedbacks")
 }
 
 model Session2Module {
@@ -331,6 +333,7 @@ model SeanceFormateur {
   medias           SeanceMedia[]
   chatMessages     ChatMessage[]
   WhiteboardAction WhiteboardAction[]
+  seanceFeedbacks  SeanceFeedback[]   @relation("SeanceFeedbacksOnSeance")
 }
 
 model SeanceMedia {
@@ -441,28 +444,32 @@ model FeedbackResponse {
 model SeanceFeedback {
   id                  Int      @id @default(autoincrement())
   seanceId            Int
-  userId              Int?
-  sessionRating       Int
-  contentQuality      Int
-  sessionDuration     String
-  sessionOrganization Int
-  objectivesAchieved  Int
-  trainerRating       Int
-  trainerClarity      Int
-  trainerAvailability Int
-  trainerPedagogy     Int
-  trainerInteraction  Int
-  teamRating          Int
-  teamCollaboration   Int
-  teamParticipation   Int
-  teamCommunication   Int
+  userId              Int
+  sessionRating       Int // Emoji 1-5
+  contentQuality      Int // Emoji 1-5
+  sessionOrganization Int // Emoji 1-5
+  objectivesAchieved  Int // Emoji 1-5
+  trainerRating       Int // Emoji 1-5
+  trainerClarity      Int // Emoji 1-5
+  trainerAvailability Int // Emoji 1-5
+  trainerPedagogy     Int // Emoji 1-5
+  trainerInteraction  Int // Emoji 1-5
+  teamRating          Int // Emoji 1-5
+  teamCollaboration   Int // Emoji 1-5
+  teamParticipation   Int // Emoji 1-5
+  teamCommunication   Int // Emoji 1-5
   sessionComments     String?
   trainerComments     String?
   teamComments        String?
   suggestions         String?
-  wouldRecommend      String?
+  wouldRecommend      Boolean?
   improvementAreas    String?
   createdAt           DateTime @default(now())
+
+  seance SeanceFormateur @relation("SeanceFeedbacksOnSeance", fields: [seanceId], references: [id])
+  user   User            @relation(fields: [userId], references: [id])
+
+  @@unique([userId, seanceId])
 }
 
 model SessionFeedback {
@@ -473,7 +480,8 @@ model SessionFeedback {
   comments  String?
   createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+  session Session2 @relation("Session2Feedbacks", fields: [sessionId], references: [id])
 }
 
 model ChatMemory {

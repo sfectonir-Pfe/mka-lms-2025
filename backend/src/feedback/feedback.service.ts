@@ -4,6 +4,8 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { CreateFeedbackResponseDto } from './dto/create-feedback-response.dto';
 import { CreateGeneralFeedbackDto } from './dto/create-general-feedback.dto';
+import { Role } from '@prisma/client';
+
 
 @Injectable()
 export class FeedbackService {
@@ -220,4 +222,35 @@ export class FeedbackService {
 
     return Object.entries(monthly).map(([month, count]) => ({ month, count }));
   }
+  async getSessionSeanceRatings(sessionId: number) {
+  const seances = await this.prisma.seanceFormateur.findMany({
+    where: { session2Id: sessionId },
+    include: { seanceFeedbacks: true }
+  });
+
+  return seances.map(s => ({
+    seanceId: s.id,
+    title: s.title,
+    avgRating: s.seanceFeedbacks.length > 0
+      ? s.seanceFeedbacks.reduce((a, b) => a + b.sessionRating, 0) / s.seanceFeedbacks.length
+      : null,
+    ratings: s.seanceFeedbacks.map(fb => fb.sessionRating),
+  }));
+}
+async getFeedbacksByRoleAndName(role?: string, name?: string) {
+  return this.prisma.feedback.findMany({
+    where: {
+      user: {
+        is: {
+          ...(role ? { role: role as Role } : {}),
+          ...(name ? { name: { contains: name, mode: 'insensitive' } } : {})
+        }
+      }
+    },
+    include: { user: true },
+    orderBy: { createdAt: 'desc' }
+  });
+}
+
+
 }
