@@ -16,43 +16,47 @@ model Mail {
 }
 
 model User {
-  id                      Int                     @id @default(autoincrement())
-  role                    Role                    @default(Etudiant)
-  email                   String                  @unique
-  password                String
-  name                    String?
-  phone                   String?
-  profilePic              String?
-  location                String?
-  skills                  String[]
-  about                   String?
-  isActive                Boolean                 @default(true)
-  createdAt               DateTime                @default(now())
-  updatedAt               DateTime                @updatedAt
-  isVerified              Boolean                 @default(false)
-  needsVerification       Boolean                 @default(true)
-  emailVerified           DateTime?
-  emailVerificationCode   String?
-  codeExpiryDate          DateTime?
-  resetToken              String?
-  resetTokenExpiry        DateTime?
-  Admins                  Admin[]
-  Createurs_De_Formations Createur_De_Formation[]
-  Etablissements          Etablissement[]
-  Etudiants               Etudiant[]
-  formateurs              Formateur[]
-  ResetToken              ResetToken[]
-  SeanceFormateur         SeanceFormateur[]
-  UserAnswer              UserAnswer[]
-  chatMessages            ChatMessage[]
-  whiteboardActions       WhiteboardAction[]
-  userSessions2           UserSession2[]
-  session2ChatMessages    Session2ChatMessage[]   @relation("UserSession2ChatMessages")
-
+  id                         Int                     @id @default(autoincrement())
+  role                       Role                    @default(Etudiant)
+  email                      String                  @unique
+  password                   String
+  name                       String?
+  phone                      String?
+  profilePic                 String?
+  location                   String?
+  skills                     String[]
+  about                      String?
+  isActive                   Boolean                 @default(true)
+  createdAt                  DateTime                @default(now())
+  updatedAt                  DateTime                @updatedAt
+  isVerified                 Boolean                 @default(false)
+  needsVerification          Boolean                 @default(true)
+  emailVerified              DateTime?
+  emailVerificationCode      String?
+  codeExpiryDate             DateTime?
+  resetToken                 String?
+  resetTokenExpiry           DateTime?
+  Admins                     Admin[]
+  Createurs_De_Formations    Createur_De_Formation[]
+  Etablissements             Etablissement[]
+  Etudiants                  Etudiant[]
+  formateurs                 Formateur[]
+  ResetToken                 ResetToken[]
+  SeanceFormateur            SeanceFormateur[]
+  UserAnswer                 UserAnswer[]
+  chatMessages               ChatMessage[]
+  whiteboardActions          WhiteboardAction[]
+  userSessions2              UserSession2[]
+  session2ChatMessages       Session2ChatMessage[]   @relation("UserSession2ChatMessages")
+  feedbacks                  Feedback[]              @relation("UserFeedback")
+  chatMemories               ChatMemory[]            @relation("UserChatMemory")
+  sessionFeedbacks           SessionFeedback[]
+  FeedbackList               FeedbackList[]
+  seanceFeedbacks            SeanceFeedback[]
+  FeedbackFormateur          FeedbackFormateur[]
+  feedbacksFormateurSent     FeedbackFormateur[]     @relation("FormateurFeedbacks")
+  feedbacksFormateurReceived FeedbackFormateur[]     @relation("EtudiantFeedbacks")
   GeneralChatMessage GeneralChatMessage[]
-  feedbacks          Feedback[]           @relation("UserFeedback")
-  chatMemories       ChatMemory[]         @relation("UserChatMemory")
-  sessionFeedbacks   SessionFeedback[]
 }
 
 model Formateur {
@@ -442,6 +446,7 @@ model SeanceFeedback {
   id                  Int      @id @default(autoincrement())
   seanceId            Int
   userId              Int?
+  user                User?    @relation(fields: [userId], references: [id]) // Ajout relation user
   sessionRating       Int
   contentQuality      Int
   sessionDuration     String
@@ -465,6 +470,22 @@ model SeanceFeedback {
   createdAt           DateTime @default(now())
 }
 
+model FeedbackList {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  seanceId        Int
+  feedback        String
+  nom             String?
+  email           String?
+  sessionComments String?
+  trainerComments String?
+  teamComments    String?
+  suggestions     String?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model SessionFeedback {
   id        Int      @id @default(autoincrement())
   sessionId Int
@@ -486,6 +507,24 @@ model ChatMemory {
   content     String
   createdAt   DateTime @default(now())
   user        User?    @relation("UserChatMemory", fields: [userId], references: [id])
+}
+
+model FeedbackFormateur {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  studentName String
+  emoji       String
+  emojiLabel  String
+  commentaire String
+  createdAt   DateTime @default(now())
+  seanceId    Int?
+
+  formateurId Int?
+  formateur   User? @relation("FormateurFeedbacks", fields: [formateurId], references: [id])
+
+  student User  @relation("EtudiantFeedbacks", fields: [studentId], references: [id])
+  User    User? @relation(fields: [userId], references: [id])
+  userId  Int?
 }
 
 enum Role {

@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from "@nestjs/common"
 import { FileInterceptor } from "@nestjs/platform-express"
 import { diskStorage } from "multer"
@@ -19,6 +20,8 @@ import type { CreateUserDto } from "./dto/create-user.dto"
 import type { UpdateUserDto } from "./dto/update-user.dto"
 import type { Express } from "express"
 import { S3Service } from "../s3/s3.service"
+import { Role } from '@prisma/client';
+import { PrismaService } from 'nestjs-prisma';
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
@@ -47,7 +50,8 @@ const multerOptions = {
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly s3Service: S3Service
+    private readonly s3Service: S3Service,
+    private readonly prisma: PrismaService
   ) {}
 
   @Post()
@@ -266,5 +270,46 @@ async getUserSessions2(@Param('id') userId: string) {
   return this.usersService.getUserSessions(Number(userId));
 }
 
+@Get('students')
+async getStudents() {
+  return this.usersService.getStudents();
+}
+
+@Get('students/without-feedback')
+async getStudentsWithoutFeedback(
+  @Query('formateurId') formateurId: string,
+  @Query('seanceId') seanceId: string,
+) {
+  if (!formateurId || !seanceId) return [];
+
+  // 1. Trouver la séance pour obtenir session2Id
+  const seance = await this.prisma.seanceFormateur.findUnique({
+    where: { id: Number(seanceId) },
+    select: { session2Id: true }
+  });
+  if (!seance) return [];
+
+  // 2. Trouver tous les étudiants de cette session
+  const userSessions = await this.prisma.userSession2.findMany({
+    where: { session2Id: seance.session2Id },
+    select: { userId: true }
+  });
+  const studentIds = userSessions.map(us => us.userId);
+  const students = await this.prisma.user.findMany({
+    where: {
+      id: { in: studentIds },
+      role: 'Etudiant'
+    },
+    select: { id: true, name: true, email: true, role: true }
+  });
+
+  // 3. Exclure ceux qui ont déjà reçu un feedback de ce formateur pour cette séance
+  const feedbacks = await this.prisma.feedbackFormateur.findMany({
+    where: { userId: Number(formateurId), seanceId: Number(seanceId) },
+    select: { studentId: true }
+  });
+  const alreadyFeedbackStudentIds = feedbacks.map(f => f.studentId);
+  return students.filter(s => !alreadyFeedbackStudentIds.includes(s.id));
+}
 
 }

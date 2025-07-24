@@ -97,13 +97,108 @@ export class FeedbackService {
   }
 
   async createSeanceFeedback(dto: any) {
-    return this.prisma.seanceFeedback.create({ data: dto });
+    const { seanceId, userId } = dto;
+  
+    if (!userId) {
+      throw new BadRequestException('userId requis pour enregistrer dans FeedbackList');
+    }
+  
+    if (!seanceId) {
+      throw new BadRequestException('seanceId requis pour enregistrer le feedback');
+    }
+  
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+  
+    if (!user) {
+      throw new NotFoundException(`Utilisateur avec l'ID ${userId} introuvable`);
+    }
+  
+    // Créer un message de feedback basé sur les données du formulaire si aucun feedback n'est fourni
+    const feedbackMessage = dto.feedback || this.generateFeedbackMessage(dto);
+  
+    return this.prisma.$transaction([
+      this.prisma.seanceFeedback.create({
+        data: {
+          ...dto,
+          userId,
+        },
+      }),
+      this.prisma.feedbackList.create({
+        data: {
+          seanceId,
+          userId,
+          feedback: feedbackMessage,
+          nom: user.name ?? '',
+          email: user.email,
+          sessionComments: dto.sessionComments,
+          trainerComments: dto.trainerComments,
+          teamComments: dto.teamComments,
+          suggestions: dto.suggestions,
+        },
+      }),
+    ]);
   }
+
+  // Méthode privée pour générer un message de feedback basé sur les données du formulaire
+  private generateFeedbackMessage(dto: any): string {
+    const parts: string[] = [];
+    
+    if (dto.sessionComments) {
+      parts.push(`Commentaires sur la session: ${dto.sessionComments}`);
+    }
+    
+    if (dto.trainerComments) {
+      parts.push(`Commentaires sur le formateur: ${dto.trainerComments}`);
+    }
+    
+    if (dto.teamComments) {
+      parts.push(`Commentaires sur l'équipe: ${dto.teamComments}`);
+    }
+    
+    if (dto.suggestions) {
+      parts.push(`Suggestions: ${dto.suggestions}`);
+    }
+    
+    if (dto.improvementAreas) {
+      parts.push(`Zones d'amélioration: ${dto.improvementAreas}`);
+    }
+    
+    if (dto.wouldRecommend) {
+      parts.push(`Recommanderait: ${dto.wouldRecommend}`);
+    }
+    
+    // Ajouter les notes moyennes
+    const ratings = [
+      { name: 'Session', value: dto.sessionRating },
+      { name: 'Qualité du contenu', value: dto.contentQuality },
+      { name: 'Organisation', value: dto.sessionOrganization },
+      { name: 'Objectifs atteints', value: dto.objectivesAchieved },
+      { name: 'Formateur', value: dto.trainerRating },
+      { name: 'Clarté du formateur', value: dto.trainerClarity },
+      { name: 'Disponibilité du formateur', value: dto.trainerAvailability },
+      { name: 'Pédagogie du formateur', value: dto.trainerPedagogy },
+      { name: 'Interaction du formateur', value: dto.trainerInteraction },
+      { name: 'Équipe', value: dto.teamRating },
+      { name: 'Collaboration d\'équipe', value: dto.teamCollaboration },
+      { name: 'Participation d\'équipe', value: dto.teamParticipation },
+      { name: 'Communication d\'équipe', value: dto.teamCommunication },
+    ];
+    
+    const validRatings = ratings.filter(r => r.value !== undefined && r.value !== null);
+    if (validRatings.length > 0) {
+      const averageRating = validRatings.reduce((sum, r) => sum + r.value, 0) / validRatings.length;
+      parts.unshift(`Note moyenne: ${averageRating.toFixed(1)}/5`);
+    }
+    
+    return parts.length > 0 ? parts.join('\n\n') : 'Feedback de séance soumis';
+  }
+  
 
   async getSeanceFeedbacks(seanceId: number) {
     return this.prisma.seanceFeedback.findMany({
       where: { seanceId },
       orderBy: { createdAt: 'desc' },
+      include: { user: true }, // Relation user désormais valide
     });
   }
 
@@ -219,5 +314,47 @@ export class FeedbackService {
     });
 
     return Object.entries(monthly).map(([month, count]) => ({ month, count }));
+  }
+
+  async getFeedbackList(seanceId: number) {
+    // Récupérer tous les feedbacks de FeedbackList pour la séance
+    const feedbacks = await this.prisma.feedbackList.findMany({
+      where: { seanceId },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Pour chaque feedback, retrouver le SeanceFeedback correspondant et construire answers
+    const results = await Promise.all(feedbacks.map(async (fb) => {
+      const seanceFeedback = await this.prisma.seanceFeedback.findFirst({
+        where: { seanceId: fb.seanceId, userId: fb.userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      // Construction de la liste des questions/réponses
+      const answers = seanceFeedback
+        ? [
+            { question: "Note de la session", answer: seanceFeedback.sessionRating?.toString() },
+            { question: "Qualité du contenu", answer: seanceFeedback.contentQuality?.toString() },
+            { question: "Organisation de la session", answer: seanceFeedback.sessionOrganization?.toString() },
+            { question: "Objectifs atteints", answer: seanceFeedback.objectivesAchieved?.toString() },
+            { question: "Note du formateur", answer: seanceFeedback.trainerRating?.toString() },
+            { question: "Clarté du formateur", answer: seanceFeedback.trainerClarity?.toString() },
+            { question: "Disponibilité du formateur", answer: seanceFeedback.trainerAvailability?.toString() },
+            { question: "Pédagogie du formateur", answer: seanceFeedback.trainerPedagogy?.toString() },
+            { question: "Interaction du formateur", answer: seanceFeedback.trainerInteraction?.toString() },
+            { question: "Note de l'équipe", answer: seanceFeedback.teamRating?.toString() },
+            { question: "Collaboration d'équipe", answer: seanceFeedback.teamCollaboration?.toString() },
+            { question: "Participation d'équipe", answer: seanceFeedback.teamParticipation?.toString() },
+            { question: "Communication d'équipe", answer: seanceFeedback.teamCommunication?.toString() },
+            { question: "Commentaires sur la session", answer: seanceFeedback.sessionComments },
+            { question: "Commentaires sur le formateur", answer: seanceFeedback.trainerComments },
+            { question: "Commentaires sur l'équipe", answer: seanceFeedback.teamComments },
+            { question: "Suggestions", answer: seanceFeedback.suggestions },
+            { question: "Zones d'amélioration", answer: seanceFeedback.improvementAreas },
+            { question: "Recommanderait", answer: seanceFeedback.wouldRecommend },
+          ].filter(q => q.answer !== undefined && q.answer !== null && q.answer !== '')
+        : [];
+      return { ...fb, answers };
+    }));
+    return results;
   }
 }

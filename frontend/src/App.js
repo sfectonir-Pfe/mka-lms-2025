@@ -85,6 +85,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { FaRegMoon } from "react-icons/fa";
 import { GoSun } from "react-icons/go";
 
+
 function App() {
   const [user, setUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
@@ -191,7 +192,6 @@ function App() {
 
 
   return (
-
     <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
       <div className="d-flex justify-content-end">
@@ -294,8 +294,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      )};
-
+      )}
     </div>
   );
 }
