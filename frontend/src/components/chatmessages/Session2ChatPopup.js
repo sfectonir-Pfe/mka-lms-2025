@@ -46,30 +46,30 @@ export default function UnifiedSessionChatPopup({ user }) {
 
   // UI popup
   const [open, setOpen] = useState(false);
-useEffect(() => {
-  if (chatBottomRef.current) chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-}, [sessionChatMessages, seanceChatMessages, generalChatMessages, selectedTab, open]);
+  useEffect(() => {
+    if (chatBottomRef.current) chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [sessionChatMessages, seanceChatMessages, generalChatMessages, selectedTab, open]);
 
   //genralechat 
-useEffect(() => {
-  // Only connect once
-  if (generalSocketRef.current) {
-    generalSocketRef.current.disconnect();
-  }
-  const s = io(`${SOCKET_URL}/general-chat`, { transports: ["websocket"] });
-  generalSocketRef.current = s;
+  useEffect(() => {
+    // Only connect once
+    if (generalSocketRef.current) {
+      generalSocketRef.current.disconnect();
+    }
+    const s = io(`${SOCKET_URL}/general-chat`, { transports: ["websocket"] });
+    generalSocketRef.current = s;
 
-  // Fetch messages
-  s.emit("fetchGeneralMessages");
-  s.on("generalMessages", msgs => setGeneralChatMessages(msgs));
-  s.on("newGeneralMessage", msg =>
-    setGeneralChatMessages(prev => [...prev, msg])
-  );
-  s.on("deleteGeneralMessage", ({ id }) =>
-    setGeneralChatMessages(prev => prev.filter(m => m.id !== id))
-  );
-  return () => s.disconnect();
-}, []); // []: only once
+    // Fetch messages
+    s.emit("fetchGeneralMessages");
+    s.on("generalMessages", msgs => setGeneralChatMessages(msgs));
+    s.on("newGeneralMessage", msg =>
+      setGeneralChatMessages(prev => [...prev, msg])
+    );
+    s.on("deleteGeneralMessage", ({ id }) =>
+      setGeneralChatMessages(prev => prev.filter(m => m.id !== id))
+    );
+    return () => s.disconnect();
+  }, []); // []: only once
 
   // Fetch session2s for the user
   useEffect(() => {
@@ -177,114 +177,114 @@ useEffect(() => {
 
   // Send message (text/file) for current tab
   const handleChatSend = async () => {
-  let socket;
-  if (selectedTab === "session") socket = sessionSocketRef.current;
-  else if (selectedTab === "seance") socket = seanceSocketRef.current;
-  else if (selectedTab === "general") socket = generalSocketRef.current;
-  if (!socket) return;
+    let socket;
+    if (selectedTab === "session") socket = sessionSocketRef.current;
+    else if (selectedTab === "seance") socket = seanceSocketRef.current;
+    else if (selectedTab === "general") socket = generalSocketRef.current;
+    if (!socket) return;
 
-  // File message
-  if (newFile) {
-    const formData = new FormData();
-    formData.append("file", newFile);
+    // File message
+    if (newFile) {
+      const formData = new FormData();
+      formData.append("file", newFile);
 
-    let uploadUrl = "";
-    if (selectedTab === "general") {
-      uploadUrl = "http://localhost:8000/general-chat-messages/upload-chat";
-    } else if (selectedTab === "session") {
-      formData.append("session2Id", session2Id);
-      uploadUrl = "http://localhost:8000/session2-chat-messages/upload-chat";
-    } else if (selectedTab === "seance") {
-      formData.append("seanceId", seanceId);
-      uploadUrl = "http://localhost:8000/chat-messages/upload-chat";
+      let uploadUrl = "";
+      if (selectedTab === "general") {
+        uploadUrl = "http://localhost:8000/general-chat-messages/upload-chat";
+      } else if (selectedTab === "session") {
+        formData.append("session2Id", session2Id);
+        uploadUrl = "http://localhost:8000/session2-chat-messages/upload-chat";
+      } else if (selectedTab === "seance") {
+        formData.append("seanceId", seanceId);
+        uploadUrl = "http://localhost:8000/chat-messages/upload-chat";
+      }
+      try {
+        const res = await fetch(uploadUrl, {
+          method: "POST",
+          body: formData,
+        });
+        const fileData = await res.json();
+        if (selectedTab === "general") {
+          socket.emit("sendGeneralMessage", {
+            content: fileData.fileUrl,
+            type: fileData.fileType || "file",
+            senderId: user.id,
+          });
+        } else if (selectedTab === "session") {
+          socket.emit("sendSession2Message", {
+            content: fileData.fileUrl,
+            type: fileData.fileType || "file",
+            session2Id: Number(session2Id),
+            senderId: user.id,
+          });
+        } else {
+          socket.emit("sendSeanceMessage", {
+            content: fileData.fileUrl,
+            type: fileData.fileType || "file",
+            seanceId: Number(seanceId),
+            senderId: user.id,
+          });
+        }
+      } catch {
+        alert("Erreur upload fichier");
+      }
+      setNewFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
-    try {
-      const res = await fetch(uploadUrl, {
-        method: "POST",
-        body: formData,
-      });
-      const fileData = await res.json();
+    // Text message
+    if (newMsg.trim()) {
       if (selectedTab === "general") {
         socket.emit("sendGeneralMessage", {
-          content: fileData.fileUrl,
-          type: fileData.fileType || "file",
+          content: newMsg,
+          type: "text",
           senderId: user.id,
         });
       } else if (selectedTab === "session") {
         socket.emit("sendSession2Message", {
-          content: fileData.fileUrl,
-          type: fileData.fileType || "file",
+          content: newMsg,
+          type: "text",
           session2Id: Number(session2Id),
           senderId: user.id,
         });
       } else {
         socket.emit("sendSeanceMessage", {
-          content: fileData.fileUrl,
-          type: fileData.fileType || "file",
+          content: newMsg,
+          type: "text",
           seanceId: Number(seanceId),
           senderId: user.id,
         });
       }
-    } catch {
-      alert("Erreur upload fichier");
+      setNewMsg("");
     }
-    setNewFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    return;
-  }
-  // Text message
-  if (newMsg.trim()) {
-    if (selectedTab === "general") {
-      socket.emit("sendGeneralMessage", {
-        content: newMsg,
-        type: "text",
-        senderId: user.id,
-      });
-    } else if (selectedTab === "session") {
-      socket.emit("sendSession2Message", {
-        content: newMsg,
-        type: "text",
-        session2Id: Number(session2Id),
-        senderId: user.id,
-      });
-    } else {
-      socket.emit("sendSeanceMessage", {
-        content: newMsg,
-        type: "text",
-        seanceId: Number(seanceId),
-        senderId: user.id,
-      });
-    }
-    setNewMsg("");
-  }
-};
+  };
 
 
   // Delete message
- const handleDeleteMsg = async (msgId) => {
-  if (selectedTab === "session") {
-    await fetch(`http://localhost:8000/session2-chat-messages/${msgId}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id }),
-    });
-    setSessionChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-  } else if (selectedTab === "seance") {
-    await fetch(`http://localhost:8000/chat-messages/${msgId}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id }),
-    });
-    setSeanceChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-  } else if (selectedTab === "general") {
-    await fetch(`http://localhost:8000/general-chat-messages/${msgId}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: user.id }),
-    });
-    setGeneralChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-  }
-};
+  const handleDeleteMsg = async (msgId) => {
+    if (selectedTab === "session") {
+      await fetch(`http://localhost:8000/session2-chat-messages/${msgId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      setSessionChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+    } else if (selectedTab === "seance") {
+      await fetch(`http://localhost:8000/chat-messages/${msgId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      setSeanceChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+    } else if (selectedTab === "general") {
+      await fetch(`http://localhost:8000/general-chat-messages/${msgId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      setGeneralChatMessages((prev) => prev.filter((m) => m.id !== msgId));
+    }
+  };
 
 
   // --- UI ---
@@ -295,26 +295,37 @@ useEffect(() => {
         onClick={() => setOpen(!open)}
         style={{
           position: "fixed",
-          bottom: 32,
-          right: 32,
-          width: 64,
-          height: 64,
+          bottom: "104px",
+          right: "24px",
+          width: "64px",
+          height: "64px",
           borderRadius: "50%",
           background: open ? "#fff" : "#d32f2f",
           color: open ? "#d32f2f" : "#fff",
-          fontSize: 28,
-          boxShadow: "0 4px 24px rgba(0,0,0,0.22)",
-          border: "none",
+          fontSize: "28px",
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.22)",
+          border: open ? "3px solid #d32f2f" : "none",
           zIndex: 2000,
           cursor: "pointer",
-          transition: "all 0.18s",
-          borderWidth: open ? 3 : 0,
-          borderStyle: open ? "solid" : "none",
-          borderColor: open ? "#d32f2f" : "transparent"
+          transition: "all 0.18s ease-in-out",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          outline: "none"
         }}
-        aria-label="Chat session"
-        onMouseOver={e => { e.currentTarget.style.background = open ? "#fbeaec" : "#e53935"; }}
-        onMouseOut={e => { e.currentTarget.style.background = open ? "#fff" : "#d32f2f"; }}
+        aria-label={open ? "Close chat" : "Open chat"}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = open ? "#fbeaec" : "#e53935";
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = open ? "#fff" : "#d32f2f";
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.boxShadow = "0 0 0 3px rgba(211, 47, 47, 0.4)";
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = "0 4px 24px rgba(0, 0, 0, 0.22)";
+        }}
       >
         {open ? "✕" : "💬"}
       </button>
@@ -341,7 +352,7 @@ useEffect(() => {
         <Paper
           sx={{
             position: "fixed",
-            bottom: 96,
+            bottom: 180,
             right: 32,
             width: 410,
             maxHeight: "74vh",
@@ -397,20 +408,20 @@ useEffect(() => {
               Séance Chat
             </Button>
             <Button
-  variant={selectedTab === "general" ? "contained" : "text"}
-  onClick={() => setSelectedTab("general")}
-  color="secondary"
-  size="small"
-  sx={{
-    borderRadius: 3,
-    fontWeight: 600,
-    boxShadow: selectedTab === "general" ? 3 : 0,
-    mx: 1,
-    px: 2
-  }}
->
-  Chat Général
-</Button>
+              variant={selectedTab === "general" ? "contained" : "text"}
+              onClick={() => setSelectedTab("general")}
+              color="secondary"
+              size="small"
+              sx={{
+                borderRadius: 3,
+                fontWeight: 600,
+                boxShadow: selectedTab === "general" ? 3 : 0,
+                mx: 1,
+                px: 2
+              }}
+            >
+              Chat Général
+            </Button>
 
           </Box>
           {/* Session selector */}
@@ -477,13 +488,13 @@ useEffect(() => {
             }}
           >
             <Stack spacing={1}>
-  {(
-    selectedTab === "session"
-      ? sessionChatMessages
-      : selectedTab === "seance"
-        ? seanceChatMessages
-        : generalChatMessages
-  ).map((msg, i) => (
+              {(
+                selectedTab === "session"
+                  ? sessionChatMessages
+                  : selectedTab === "seance"
+                    ? seanceChatMessages
+                    : generalChatMessages
+              ).map((msg, i) => (
                 <Box
                   key={msg.id || i}
                   sx={{
