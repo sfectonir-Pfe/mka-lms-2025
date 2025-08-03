@@ -857,5 +857,30 @@
     "socialcontent": "محتوى وسائل التواصل الاجتماعي",
     "videoediting": "تحرير الفيديو",
     "podcasting": "البودكاست"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "noNotifications": "لا توجد إشعارات",
+    "noMatchingNotifications": "لا توجد إشعارات مطابقة",
+    "markAllRead": "تحديد الكل كمقروء",
+    "markAsRead": "تحديد كمقروء",
+    "delete": "حذف",
+    "viewAll": "عرض الكل",
+    "loadError": "خطأ في تحميل الإشعارات",
+    "searchPlaceholder": "البحث في الإشعارات...",
+    "filterByType": "تصفية حسب النوع",
+    "allTypes": "جميع الأنواع",
+    "info": "معلومات",
+    "warning": "تحذير",
+    "success": "نجح",
+    "error": "خطأ",
+    "message": "رسالة",
+    "showRead": "إظهار المقروءة",
+    "all": "الكل",
+    "unread": "غير مقروءة",
+    "read": "مقروءة",
+    "clearFilters": "مسح المرشحات",
+    "settings": "الإعدادات",
+    "autoMarkRead": "تحديد تلقائي كمقروء"
   }
 }

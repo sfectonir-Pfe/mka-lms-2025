@@ -4,18 +4,18 @@ import './i18n';
 import { useTranslation } from 'react-i18next';
 
 // Pages
-import LoginPage from "./pages/LoginPage";
-import ForgetPasswordPage from "./pages/ForgetPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import ResetSuccessPage from "./pages/ResetSuccessPage";
+import LoginPage from "./pages/auth/LoginPage";
+import ForgetPasswordPage from "./pages//auth/ForgetPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import ResetSuccessPage from "./pages/auth/ResetSuccessPage";
 
-import NotFound from "./pages/NotFoundPage";
-import HomePage from "./pages/HomePage";
-import FeedbackPage from "./pages/FeedbackPage";
-import StudentLandingPage from "./pages/StudentLandingPage";
-import StudentProgramPage from "./pages/StudentProgramPage";
-import ProfilePage from "./pages/ProfilePage";
-import EditProfilePage from "./pages/EditProfilePage";
+import NotFound from "./pages/error/NotFoundPage";
+import HomePage from "./pages/home/HomePage";
+import FeedbackPage from "./pages/feedback/FeedbackPage";
+import StudentLandingPage from "./pages/session/StudentLandingPage";
+import StudentProgramPage from "./pages/session/StudentProgramPage";
+import ProfilePage from "./pages/profile/ProfilePage";
+import EditProfilePage from "./pages/profile/EditProfilePage";
 
 // Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
@@ -24,46 +24,49 @@ import Main from "./apps/Main";
 
 // User-related pages
 import UsersPages from "./pages/users/UsersPages";
-import AddUserView from "./pages/users/views/AddUserView";
-import UserList from "./pages/users/views/UserList";
+import AddUserView from "./features/views/users/AddUserView";
+import UserList from "./features/views/users/UserList";
 
 
 // Program / Module / Course/ quiz / session
-import ProgramsPage from "./pages/ProgramsPage";
-import AddProgramList from "./pages/users/views/AddProgramList";
-import ModulePage from "./pages/ModulePage";
-import AddModuleView from "./pages/users/views/AddModuleView";
-import CoursesPage from "./pages/CoursesPage";
-import ContenusPage from "./pages/ContenusPage";
-import AddQuizForm from "./pages/users/views/AddQuizForm";
-import PlayQuizPage from "./pages/users/views/PlayQuizPage";
+import ProgramsPage from "./pages/program/ProgramsPage";
+import AddProgramList from "./features/views/program/AddProgramList";
+import ModulePage from "./pages/module/ModulePage";
+import AddModuleView from "./features/views/module/AddModuleView";
+import CoursesPage from "./pages/course/CoursesPage";
+import ContenusPage from "./pages/contenu/ContenusPage";
+import AddQuizForm from "./features/views/quiz/AddQuizForm";
+import PlayQuizPage from "./features/views/quiz/PlayQuizPage";
 
-import BuildProgramView from "./pages/users/views/BuildProgramView";
-import BuildProgramOverviewPage from "./pages/BuildProgramOverviewPage";
-import ModuleList from './pages/users/views/ModuleList';
-import EditProgramView from "./pages/users/views/EditProgramView";
-import SessionPage from "./pages/SessionPage";
-import EditQuizForm from "./pages/users/views/EditQuizForm";
-import VerifyAccountPage from './pages/VerifyAccountPage';
-import SeanceFormateurPage from "./pages/SeanceFormateurPage";
-import AddSeanceFormateurView from "./pages/users/views/AddSeanceFormateurView";
-import SeanceFormateurList from "./pages/users/views/SeanceFormateurList";
-import AnimerSeanceView from "./pages/users/views/AnimerSeanceView";
-import SessionDetail from "./pages/SessionDetail";
+import BuildProgramView from "./features/views/program/BuildProgramView";
+import BuildProgramOverviewPage from "./pages/program/BuildProgramOverviewPage";
+import ModuleList from './features/views/module/ModuleList';
+import EditProgramView from "./features/views/edit/EditProgramView";
+import SessionPage from "./pages/cohort/SessionPage";
+import EditQuizForm from "./features/views/quiz/EditQuizForm";
+import VerifyAccountPage from './pages/auth/VerifyAccountPage';
+import SeanceFormateurPage from "./pages/session/SeanceFormateurPage";
+import AddSeanceFormateurView from "./features/views/session/AddSeanceFormateurView";
+import SeanceFormateurList from "./features/views/session/SeanceFormateurList";
+import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
+// import SessionDetail from "./pages/cohort/SessionDetail";
 
-
-import JitsiRoom from './components/JitsiRoom';
+//chatbot
 import Chatbot from './components/Chatbot';
 // import TestChatPage from "./pages/TestChatPage";
-import WhiteboardPage from "./pages/WhiteboardPage";
-import FeedbackListPage from "./pages/FeedbackListPage";
+import WhiteboardPage from "./pages/session/WhiteboardPage";
 
 //Dashboards
-import AdminDashboard from "./pages/users/views/AdminDashboard";
-import EtablissementDashboard from "./pages/users/views/EtablissementDashboard";
-import CreateurDashboard from "./pages/users/views/CreateurDashboard";
-import FormateurDashboard from "./pages/users/views/FormateurDashboard";
-import EtudiantDashboard from "./pages/users/views/EtudiantDashboard";
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import EtablissementDashboard from "./pages/dashboard/EtablissementDashboard";
+import CreateurDashboard from "./pages/dashboard/CreateurDashboard";
+import FormateurDashboard from "./pages/dashboard/FormateurDashboard";
+import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
+// --------------------------------------------------------------------------------------
+// feedbacks
+import FeedbackListPage from "./features/views/feedback/FeedbackList/FeedbackListPage";
+import JitsiRoom from "./features/views/session/JitsiRoom";
+import NotificationsPage from "./pages/notifications/NotificationsPage";
 
 
 
@@ -72,10 +75,7 @@ import EtudiantDashboard from "./pages/users/views/EtudiantDashboard";
 
 
 
-
-
-
-
+  
 // UI
 import Spinner from "react-bootstrap/Spinner";
 import { ToastContainer } from "react-toastify";
@@ -277,6 +277,7 @@ function App() {
                 <Route path="feedback-list" element={<FeedbackListPage />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+                <Route path="/notifications" element={<NotificationsPage user={user} />} />
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
