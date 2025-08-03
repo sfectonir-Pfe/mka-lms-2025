@@ -4,6 +4,8 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { CreateFeedbackResponseDto } from './dto/create-feedback-response.dto';
 import { CreateGeneralFeedbackDto } from './dto/create-general-feedback.dto';
+import { Role } from '@prisma/client';
+
 
 @Injectable()
 export class FeedbackService {
