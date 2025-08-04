@@ -27,14 +27,15 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { sideBarData } from "../constants/sideBarData";
-import ScrollToTopButton from "../components/ScrollToTopButton";
-import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
+import { sideBarData } from "../components/constants/sideBarData";
+import ScrollToTopButton from "../components/constants/ScrollToTopButton";
+import LanguageSelectorWithFlags from "../i18n/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
 import axios from "axios";
 import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
-import Session2ChatPopup from "../components/Session2ChatPopup";
+import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
+import NotificationCenter from "../components/notification/NotificationCenter";
 
 
 
@@ -349,11 +350,7 @@ export default function Main({ setUser, user }) {
             <LanguageSelectorWithFlags />
 
 
-            <IconButton color="inherit">
-              <StyledBadge badgeContent={4} color="error">
-                <NotificationsIcon />
-              </StyledBadge>
-            </IconButton>
+            <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>
               {user?.name || "Utilisateur"} |{" "}
