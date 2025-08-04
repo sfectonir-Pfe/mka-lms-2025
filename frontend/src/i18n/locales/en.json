@@ -769,5 +769,30 @@
       "undo": "Undo",
       "redo": "Redo"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications",
+    "noMatchingNotifications": "No matching notifications",
+    "markAllRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "delete": "Delete",
+    "viewAll": "View all",
+    "loadError": "Error loading notifications",
+    "searchPlaceholder": "Search notifications...",
+    "filterByType": "Filter by type",
+    "allTypes": "All types",
+    "info": "Information",
+    "warning": "Warning",
+    "success": "Success",
+    "error": "Error",
+    "message": "Message",
+    "showRead": "Show read",
+    "all": "All",
+    "unread": "Unread",
+    "read": "Read",
+    "clearFilters": "Clear filters",
+    "settings": "Settings",
+    "autoMarkRead": "Auto mark as read"
   }
 }

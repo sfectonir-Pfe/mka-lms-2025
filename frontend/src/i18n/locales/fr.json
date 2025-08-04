@@ -804,5 +804,30 @@
       "undo": "Annuler",
       "redo": "Refaire"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "Aucune notification",
+    "noMatchingNotifications": "Aucune notification correspondante",
+    "markAllRead": "Tout marquer comme lu",
+    "markAsRead": "Marquer comme lu",
+    "delete": "Supprimer",
+    "viewAll": "Voir toutes",
+    "loadError": "Erreur lors du chargement des notifications",
+    "searchPlaceholder": "Rechercher dans les notifications...",
+    "filterByType": "Filtrer par type",
+    "allTypes": "Tous les types",
+    "info": "Information",
+    "warning": "Avertissement",
+    "success": "Succès",
+    "error": "Erreur",
+    "message": "Message",
+    "showRead": "Afficher les lues",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "read": "Lues",
+    "clearFilters": "Effacer les filtres",
+    "settings": "Paramètres",
+    "autoMarkRead": "Marquer automatiquement comme lu"
   }
 }
