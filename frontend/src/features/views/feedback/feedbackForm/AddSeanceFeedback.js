@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import {
   Button,
@@ -65,7 +63,7 @@ const EmojiRating = ({ rating, onRatingChange, label }) => {
   )
 }
 
-export default function SeanceFeedbackForm({ seanceId }) {
+export default function AddSeanceFeedback({ seanceId }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [feedback, setFeedback] = useState({
     sessionRating: 0,

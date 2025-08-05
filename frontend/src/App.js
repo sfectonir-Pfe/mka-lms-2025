@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './i18n';
-import { useTranslation } from 'react-i18next';
 
 // Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -26,6 +25,10 @@ import Main from "./apps/Main";
 import UsersPages from "./pages/users/UsersPages";
 import AddUserView from "./features/views/users/AddUserView";
 import UserList from "./features/views/users/UserList";
+
+// Test components (commented out - files don't exist)
+// import TestFeedback from "./TestFeedback";
+// import TestAverageRating from "./TestAverageRating";
 
 
 // Program / Module / Course/ quiz / session
@@ -67,6 +70,7 @@ import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 import FeedbackListPage from "./features/views/feedback/FeedbackList/FeedbackListPage";
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
+import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
 
 
 
@@ -244,7 +248,7 @@ function App() {
 
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
-
+                <Route path="/sessions/:sessionId/feedbacklist" element={<SessionFeedbackList />} />
 
 
                 <Route path="/formateur/seance/:id" element={<AnimerSeanceView />} />
@@ -274,7 +278,6 @@ function App() {
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="feedback" element={<FeedbackPage />} />
-                <Route path="feedback-list" element={<FeedbackListPage />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
                 <Route path="/notifications" element={<NotificationsPage user={user} />} />
@@ -287,11 +290,14 @@ function App() {
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
 
-
-
               </Route>
             )}
 
+
+
+            {/* Test routes commented out - components don't exist */}
+            {/* <Route path="/test-feedback" element={<TestFeedback />} /> */}
+            {/* <Route path="/test-average-rating" element={<TestAverageRating />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

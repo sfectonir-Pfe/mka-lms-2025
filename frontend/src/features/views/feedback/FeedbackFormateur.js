@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,6 +12,7 @@ import {
   Avatar,
   ListItemText,
   Divider,
+  CircularProgress,
 } from '@mui/material';
 import ListItemButton from '@mui/material/ListItemButton';
 import {
@@ -35,9 +36,10 @@ const FeedbackFormateur = ({ seanceId }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [students, setStudents] = useState([]);
   const [feedbacksEnvoyes, setFeedbacksEnvoyes] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Chargement des étudiants sans feedback
-  const loadStudents = () => {
+  const loadStudents = useCallback(() => {
     if (!formateurId || !seanceId) return;
     fetch(`/users/students/without-feedback?formateurId=${formateurId}&seanceId=${seanceId}`)
       .then((res) => res.json())
@@ -49,10 +51,18 @@ const FeedbackFormateur = ({ seanceId }) => {
         console.error('Erreur lors du chargement des étudiants:', err);
         setStudents([]);
       });
-  };
+  }, [formateurId, seanceId]);
 
   useEffect(() => {
     if (!formateurId || !seanceId) return;
+
+    // Reset state when seanceId changes to avoid sharing state across sessions
+    setStudents([]);
+    setFeedbacksEnvoyes([]);
+    setSelectedStudent(null);
+    setSelectedEmoji(null);
+    setCommentaire('');
+    setFeedbackEnvoye(false);
 
     loadStudents();
 
@@ -63,7 +73,7 @@ const FeedbackFormateur = ({ seanceId }) => {
         setFeedbacksEnvoyes(Array.isArray(data) ? data : []);
       })
       .catch(() => setFeedbacksEnvoyes([]));
-  }, [formateurId, seanceId, feedbackEnvoye]);
+  }, [formateurId, seanceId, loadStudents]);
 
   const studentsFiltered = Array.isArray(students)
     ? students.filter((s) => s.role === 'Etudiant' || !s.role)
@@ -82,57 +92,65 @@ const FeedbackFormateur = ({ seanceId }) => {
     e.preventDefault();
     if (!selectedStudent || !selectedEmoji) return;
 
+    const selectedEmojiData = emojis.find((e) => e.id === selectedEmoji);
     const payload = {
       formateurId: Number(formateurId),
       etudiantId: Number(selectedStudent.id),
-      emoji: emojis.find((e) => e.id === selectedEmoji)?.emoji,
+      emoji: selectedEmojiData?.emoji,
       commentaire,
       seanceId: Number(seanceId),
     };
     console.log('Payload envoyé:', payload);
 
     try {
-      await fetch('/feedback-formateur', {
+      setIsSubmitting(true);
+      
+      // Mise à jour optimiste
+      // 1. Retirer l'étudiant de la liste
+      setStudents(prev => prev.filter(s => s.id !== selectedStudent.id));
+      
+      // 2. Ajouter le feedback dans le DataGrid
+      setFeedbacksEnvoyes(prev => [
+        ...prev,
+        {
+          id: `temp-${Date.now()}`,
+          studentName: selectedStudent.name,
+          studentEmail: selectedStudent.email,
+          emoji: selectedEmojiData.emoji,
+          emojiLabel: selectedEmojiData.label,
+          commentaire: commentaire
+        }
+      ]);
+      
+      // 3. Envoyer la requête au serveur
+      const response = await fetch('/feedback-formateur', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      // Retirer l'étudiant de la liste immédiatement
-      setStudents((prev) => prev.filter((s) => s.id !== selectedStudent.id));
+      if (!response.ok) {
+        throw new Error('Erreur serveur');
+      }
 
-      // Ajouter le feedback dans le DataGrid immédiatement (optimiste)
-      setFeedbacksEnvoyes((prev) => [
-        ...prev,
-        {
-          id: `temp-${Date.now()}`, // id unique temporaire pour le DataGrid
-          studentName: selectedStudent?.name,
-          studentEmail: selectedStudent?.email,
-          emoji: payload.emoji,
-          emojiLabel: emojis.find((e) => e.id === selectedEmoji)?.label,
-        },
-      ]);
-
-      // Puis recharge la liste des feedbacks envoyés depuis le backend pour garantir la synchro
-      fetch(`/feedback-formateur/seance/${seanceId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setFeedbacksEnvoyes(data);
-          } else {
-            // Si la réponse backend est vide, on garde l'ajout optimiste
-            console.warn('Aucun feedback renvoyé par le backend, on garde l\'ajout local.');
-          }
-        })
-        .catch((err) => {
-          // En cas d'erreur, on garde l'ajout optimiste
-          console.error('Erreur lors du rechargement des feedbacks:', err);
-        });
+      // 4. Synchroniser avec le serveur
+      const updatedFeedbacks = await fetch(`/feedback-formateur/seance/${seanceId}`).then(res => res.json());
+      setFeedbacksEnvoyes(Array.isArray(updatedFeedbacks) ? updatedFeedbacks : []);
 
       setFeedbackEnvoye(true);
-      setSelectedStudent(null); // Pour revenir à la liste
+      setSelectedStudent(null);
     } catch (err) {
       console.error('Erreur lors de l\'envoi du feedback:', err);
+      
+      // Annuler les modifications optimistes en cas d'erreur
+      loadStudents();
+      fetch(`/feedback-formateur/seance/${seanceId}`)
+        .then(res => res.json())
+        .then(data => setFeedbacksEnvoyes(Array.isArray(data) ? data : []));
+      
+      alert('Une erreur est survenue. Veuillez réessayer.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -195,7 +213,7 @@ const FeedbackFormateur = ({ seanceId }) => {
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {studentsFiltered.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ mt: 2 }}>
-              Aucun étudiant à afficher.
+              Tous les étudiants ont reçu un feedback pour cette séance.
             </Typography>
           ) : (
             studentsFiltered.map((student) => (
@@ -226,13 +244,14 @@ const FeedbackFormateur = ({ seanceId }) => {
             Étudiants ayant déjà reçu un feedback
           </Typography>
           <DataGrid
-            rows={feedbacksEnvoyes.map((f, idx) => ({
-              id: f.id || idx, // Utilise l'id unique si présent, sinon idx
-              name: f.studentName,
-              email: f.studentEmail,
-              emoji: f.emoji,
-              emojiLabel: f.emojiLabel,
-            }))}
+            rows={Array.isArray(feedbacksEnvoyes) ? feedbacksEnvoyes.map((f, idx) => ({
+              id: f && typeof f === 'object' && 'id' in f ? f.id || idx : idx,
+              name: f && typeof f === 'object' && 'studentName' in f ? f.studentName : '',
+              email: f && typeof f === 'object' && 'studentEmail' in f ? f.studentEmail : '',
+              emoji: f && typeof f === 'object' && 'emoji' in f ? f.emoji : '',
+              emojiLabel: f && typeof f === 'object' && 'emojiLabel' in f ? f.emojiLabel : '',
+              commentaire: f && typeof f === 'object' && 'commentaire' in f ? f.commentaire : '',
+            })) : []}
             columns={[
               { field: 'name', headerName: 'Nom', flex: 1 },
               { field: 'email', headerName: 'Email', flex: 1 },
@@ -294,6 +313,7 @@ const FeedbackFormateur = ({ seanceId }) => {
                 color={item.color}
                 onClick={() => setSelectedEmoji(item.id)}
                 sx={{ fontSize: '2rem', height: '80px' }}
+                disabled={isSubmitting}
               >
                 {item.emoji}
               </Button>
@@ -314,6 +334,7 @@ const FeedbackFormateur = ({ seanceId }) => {
           onChange={(e) => setCommentaire(e.target.value)}
           className="mb-4"
           placeholder={`Ex: ${(selectedStudent?.name || '').split(' ')[0]} a fait des progrès remarquables en...`}
+          disabled={isSubmitting}
         />
 
         <Box className="d-flex justify-content-between">
@@ -322,6 +343,7 @@ const FeedbackFormateur = ({ seanceId }) => {
             color="error"
             startIcon={<ThumbDown />}
             onClick={resetForm}
+            disabled={isSubmitting}
           >
             Annuler
           </Button>
@@ -329,10 +351,10 @@ const FeedbackFormateur = ({ seanceId }) => {
             type="submit"
             variant="contained"
             color="success"
-            disabled={!selectedEmoji}
-            startIcon={<ThumbUp />}
+            disabled={!selectedEmoji || isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={20} /> : <ThumbUp />}
           >
-            Envoyer Feedback
+            {isSubmitting ? 'Envoi en cours...' : 'Envoyer Feedback'}
           </Button>
         </Box>
       </form>

@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import SessionFeedbackForm from '../../../features/views/feedback/feedbackForm/session-feedback-form';
+import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
 
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
@@ -631,7 +631,7 @@ const SessionList = () => {
       </Dialog>
 
       {/* Feedback Dialog */}
-      <SessionFeedbackForm 
+      <AddSessionFeedback
         open={openFeedbackDialog} 
         onClose={() => setOpenFeedbackDialog(false)}
         session={selectedSession}

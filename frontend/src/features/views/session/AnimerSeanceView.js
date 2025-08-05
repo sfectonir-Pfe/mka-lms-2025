@@ -38,7 +38,7 @@ import EmojiPicker from "emoji-picker-react";
 import { Avatar } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
-import SeanceFeedbackForm from '../../../features/views/feedback/feedbackForm/SeanceFeedbackForm';
+import AddSeanceFeedback from '../../../features/views/feedback/feedbackForm/AddSeanceFeedback';
 import FeedbackFormateur from '../../../features/views/feedback/FeedbackFormateur';
 import SeanceFeedbackList from '../../../features/views/feedback/FeedbackList/seancefeedbacklist';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
@@ -681,7 +681,7 @@ const AnimerSeanceView = () => {
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
                 <Typography variant="h6">📝 {t('sessionFeedback')}</Typography>
               </Stack>
-              <SeanceFeedbackForm seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
+              <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
             </Box>
           )}
           {/* Onglet FeedbackList */}
