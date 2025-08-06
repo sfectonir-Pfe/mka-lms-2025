@@ -14,18 +14,59 @@ const SeanceFormateurPage = () => {
   const { sessionId } = useParams();
   const [selectedSeance, setSelectedSeance] = useState(null);
   const [seances, setSeances] = useState([]);
+  const [sessionName, setSessionName] = useState('');
+  const [averageRating, setAverageRating] = useState(null);
+  const [loadingRating, setLoadingRating] = useState(true);
 
   const fetchSeances = async () => {
     try {
       const res = await axios.get(`http://localhost:8000/seance-formateur/session/${sessionId}`);
       setSeances(res.data);
     } catch (err) {
+      console.error('Error fetching seances:', err);
+      alert('Erreur lors du chargement des séances. Veuillez réessayer.');
+    }
+  };
+
+  const fetchSessionName = async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/session2/${sessionId}`);
+      setSessionName(res.data.name);
+    } catch (err) {
       // handle error
+    }
+  };
+
+  const fetchAverageRating = async () => {
+    try {
+      setLoadingRating(true);
+      const res = await axios.get(`http://localhost:8000/session2/session/${sessionId}/with-feedback`);
+      const seancesWithFeedback = res.data;
+      
+      // Calculate overall average rating across all seances
+      const allRatings = seancesWithFeedback
+        .map(seance => seance.averageFeedbackScore)
+        .filter(rating => rating !== null && rating !== undefined);
+      
+      if (allRatings.length > 0) {
+        const sum = allRatings.reduce((a, b) => a + b, 0);
+        const avg = sum / allRatings.length;
+        setAverageRating(avg.toFixed(1));
+      } else {
+        setAverageRating(null);
+      }
+    } catch (err) {
+      console.error('Error fetching average rating:', err);
+      setAverageRating(null);
+    } finally {
+      setLoadingRating(false);
     }
   };
 
   useEffect(() => {
     fetchSeances();
+    fetchSessionName();
+    fetchAverageRating();
   }, [sessionId]);
 
   const handleAnimer = (seance) => setSelectedSeance(seance);
@@ -53,9 +94,51 @@ const SeanceFormateurPage = () => {
   return (
     <Container>
       <Box mt={4}>
-        <Typography variant="h4" gutterBottom>
-          {t('seanceFormateur.manageSessionsOfSession2', { sessionId })}
-        </Typography>
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap">
+          <Typography variant="h4" gutterBottom>
+            {`🎓 ${sessionName} 🎓`}
+          </Typography>
+          
+          {averageRating !== null && (
+            <Box 
+              sx={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 2, 
+                p: 2, 
+                mb: 2,
+                minWidth: 200,
+                textAlign: 'center'
+              }}
+            >
+              <Typography variant="h6" color="primary" gutterBottom>
+                Note Moyenne Globale
+              </Typography>
+              <Typography variant="h4" color="secondary" fontWeight="bold">
+                {averageRating} / 5
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Basée sur toutes les séances
+              </Typography>
+            </Box>
+          )}
+          
+          {averageRating === null && !loadingRating && (
+            <Box 
+              sx={{ 
+                backgroundColor: '#f5f5f5', 
+                borderRadius: 2, 
+                p: 2, 
+                mb: 2,
+                minWidth: 200,
+                textAlign: 'center'
+              }}
+            >
+              <Typography variant="h6" color="textSecondary">
+                Pas encore de notes
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         {selectedSeance ? (
           <>

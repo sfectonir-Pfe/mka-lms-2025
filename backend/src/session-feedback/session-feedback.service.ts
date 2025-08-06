@@ -12,13 +12,26 @@ export class SessionFeedbackService {
     // Validation des champs obligatoires
     if (!userId) throw new BadRequestException('userId requis');
     if (!sessionId) throw new BadRequestException('sessionId requis');
+    
+    // Validation des types
+    if (isNaN(Number(userId))) throw new BadRequestException('userId doit être un nombre valide');
+    if (isNaN(Number(sessionId))) throw new BadRequestException('sessionId doit être un nombre valide');
 
     // Vérification de l'existence de l'utilisateur
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException(`Utilisateur ${userId} introuvable`);
+    let user;
+    try {
+      user = await this.prisma.user.findUnique({ where: { id: Number(userId) } });
+      if (!user) throw new NotFoundException(`Utilisateur ${userId} introuvable`);
+    } catch (error) {
+      console.error('Erreur lors de la recherche utilisateur:', error);
+      throw new BadRequestException('Erreur lors de la validation de l\'utilisateur');
+    }
 
+    // Handle emoji ratings from frontend
+    const processedRatings = this.processFrontendRatings(ratings);
+    
     // Calcul de la note moyenne avec le système pondéré
-    const averageRating = this.calculateWeightedScore(ratings);
+    const averageRating = this.calculateWeightedScore(processedRatings);
 
     // Vérification si un feedback existe déjà pour cette session et cet utilisateur
     const existingFeedback = await this.prisma.sessionFeedback.findFirst({ 
@@ -32,53 +45,40 @@ export class SessionFeedbackService {
         where: { id: existingFeedback.id },
         data: {
           rating: averageRating,
-          comments: rest.comments,
-          ratings: ratings ? JSON.stringify(ratings) : null,
-          formData: JSON.stringify(rest),
-          user: { connect: { id: userId } }
+          comments: rest.comments || JSON.stringify({ ratings, formData: rest }),
+          userId: Number(userId)
         },
       });
 
-      await this.prisma.sessionFeedbackList.updateMany({
-        where: { sessionId, userId },
-        data: {
-          feedback: feedback || this.generateFeedbackMessage({ ratings, ...rest }),
-          nom: user.name ?? '',
-          email: user.email,
-          sessionComments,
-          trainerComments,
-          teamComments,
-          suggestions,
-        },
-      });
+      // Note: sessionFeedbackList n'existe pas, on stocke tout dans sessionFeedback
+      // Les données détaillées sont dans le champ comments comme JSON
     } else {
       // Création d'un nouveau feedback
-      await this.prisma.$transaction([
-        this.prisma.sessionFeedback.create({
+      try {
+        await this.prisma.sessionFeedback.create({
           data: {
-            sessionId,
-            userId,
+            sessionId: Number(sessionId),
+            userId: Number(userId),
             rating: averageRating,
-            comments: rest.comments,
-            ratings: ratings ? JSON.stringify(ratings) : null,
-            formData: JSON.stringify(rest),
-            user: { connect: { id: userId } }
+            comments: JSON.stringify({
+              feedback: feedback || this.generateFeedbackMessage({ ratings, ...rest }),
+              sessionComments,
+              trainerComments,
+              teamComments,
+              suggestions,
+              ratings,
+              formData: rest,
+              userInfo: {
+                nom: user.name ?? '',
+                email: user.email
+              }
+            })
           }
-        }),
-        this.prisma.sessionFeedbackList.create({
-          data: {
-            sessionId,
-            userId,
-            feedback: feedback || this.generateFeedbackMessage({ ratings, ...rest }),
-            nom: user.name ?? '',
-            email: user.email,
-            sessionComments,
-            trainerComments,
-            teamComments,
-            suggestions,
-          },
-        }),
-      ]);
+        });
+      } catch (error) {
+        console.error('Erreur lors de la création du feedback:', error);
+        throw new BadRequestException('Erreur lors de la sauvegarde du feedback');
+      }
     }
 
     // Nettoyage des anciens feedbacks
@@ -113,22 +113,22 @@ export class SessionFeedbackService {
   }
 
   async cleanupOldFeedbacks(sessionId: number) {
-    const allFeedbacks = await this.prisma.sessionFeedbackList.findMany({
+    const allFeedbacks = await this.prisma.sessionFeedback.findMany({
       where: { sessionId },
       orderBy: { createdAt: 'desc' },
     });
 
     const latestMap = new Map<number, number>();
     allFeedbacks.forEach(fb => {
-      if (!latestMap.has(fb.userId)) latestMap.set(fb.userId, fb.id);
+      if (fb.userId && !latestMap.has(fb.userId)) latestMap.set(fb.userId, fb.id);
     });
 
     const idsToDelete = allFeedbacks
-      .filter(fb => latestMap.get(fb.userId) !== fb.id)
+      .filter(fb => fb.userId && latestMap.get(fb.userId) !== fb.id)
       .map(fb => fb.id);
 
     if (idsToDelete.length > 0) {
-      await this.prisma.sessionFeedbackList.deleteMany({ 
+      await this.prisma.sessionFeedback.deleteMany({ 
         where: { id: { in: idsToDelete } } 
       });
     }
@@ -162,63 +162,64 @@ export class SessionFeedbackService {
   }
 
   async getStudentFeedbacks(sessionId: number, userId: number) {
-    // Récupérer les feedbacks détaillés depuis SessionFeedbackList
-    const feedbackList = await this.prisma.sessionFeedbackList.findMany({
-      where: { sessionId, userId },
-      orderBy: { createdAt: 'desc' },
-      include: { user: true },
-    });
-
-    // Récupérer aussi les ratings depuis SessionFeedback si disponibles
+    // Récupérer les feedbacks depuis SessionFeedback uniquement
     const sessionFeedbacks = await this.prisma.sessionFeedback.findMany({
       where: { sessionId, userId },
       orderBy: { createdAt: 'desc' },
       include: { user: true },
     });
 
-    // Combiner les données des deux tables
-    const combinedFeedbacks = feedbackList.map(fb => {
-      // Trouver le rating correspondant dans SessionFeedback
-      const matchingRating = sessionFeedbacks.find(sf =>
-        Math.abs(new Date(sf.createdAt).getTime() - new Date(fb.createdAt).getTime()) < 60000 // 1 minute de différence
-      );
-
-      // Parser les données JSON si disponibles
+    // Parser et structurer les données
+    const structuredFeedbacks = sessionFeedbacks.map(fb => {
+      let parsedComments = null;
       let parsedRatings = null;
       let parsedFormData = null;
+      let feedback = '';
+      let sessionComments = '';
+      let trainerComments = '';
+      let teamComments = '';
+      let suggestions = '';
 
       try {
-        if (matchingRating?.ratings) {
-          parsedRatings = JSON.parse(matchingRating.ratings);
-        }
-        if (matchingRating?.formData) {
-          parsedFormData = JSON.parse(matchingRating.formData);
+        if (fb.comments) {
+          parsedComments = JSON.parse(fb.comments);
+          if (parsedComments) {
+            const data = parsedComments as any;
+            feedback = data.feedback || '';
+            sessionComments = data.sessionComments || '';
+            trainerComments = data.trainerComments || '';
+            teamComments = data.teamComments || '';
+            suggestions = data.suggestions || '';
+            parsedRatings = data.ratings || null;
+            parsedFormData = data.formData || null;
+          }
         }
       } catch (error) {
         console.error('Error parsing JSON data:', error);
+        feedback = fb.comments || '';
       }
 
       return {
         id: fb.id,
         sessionId: fb.sessionId,
         userId: fb.userId,
-        rating: matchingRating?.rating || null,
-        comments: fb.feedback,
-        feedback: fb.feedback,
-        sessionComments: fb.sessionComments,
-        trainerComments: fb.trainerComments,
-        teamComments: fb.teamComments,
-        suggestions: fb.suggestions,
-        ratings: parsedRatings, // Ratings détaillés du formulaire
-        formData: parsedFormData, // Données complètes du formulaire
+        rating: fb.rating,
+        comments: feedback,
+        feedback: feedback,
+        sessionComments,
+        trainerComments,
+        teamComments,
+        suggestions,
+        ratings: parsedRatings,
+        formData: parsedFormData,
         createdAt: fb.createdAt,
-        studentName: fb.nom || fb.user?.name || '',
-        studentEmail: fb.email || fb.user?.email || '',
+        studentName: (parsedComments as any)?.userInfo?.nom || fb.user?.name || '',
+        studentEmail: (parsedComments as any)?.userInfo?.email || fb.user?.email || '',
         user: fb.user,
       };
     });
 
-    return combinedFeedbacks;
+    return structuredFeedbacks;
   }
 
   async getSessionFeedbackList(sessionId: number) {
@@ -244,72 +245,46 @@ export class SessionFeedbackService {
       }
     });
 
-    // Nouvelle logique de calcul des scores
+    // Calcul des scores avec la méthode centralisée
     const results = [...uniqueFeedbacks.values()].map((fb: any) => {
-      let finalScore = 0;
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      // Utiliser la méthode centralisée pour calculer le score
+      const finalScore = this.calculateWeightedScore(ratingsData);
+      
       let scoreLabel = 'Non évalué';
       let emoji = '❓';
-
-      // Nouvelle méthode de calcul basée sur un système de points pondérés
-      if (fb.ratings) {
-        try {
-          const ratingsData = typeof fb.ratings === 'string' ? JSON.parse(fb.ratings) : fb.ratings;
-
-          if (ratingsData && typeof ratingsData === 'object') {
-            // Définir les poids pour chaque critère (total = 1.0)
-            const criteriaWeights = {
-              overallRating: 0.25,        // 25% - Note globale
-              contentRelevance: 0.20,     // 20% - Pertinence du contenu
-              learningObjectives: 0.15,   // 15% - Atteinte des objectifs
-              skillImprovement: 0.15,     // 15% - Amélioration des compétences
-              satisfactionLevel: 0.10,    // 10% - Satisfaction
-              sessionStructure: 0.10,     // 10% - Structure
-              knowledgeGain: 0.05         // 5% - Acquisition de connaissances
-            };
-
-            let totalWeightedScore = 0;
-            let totalWeight = 0;
-
-            // Calculer le score pondéré
-            Object.entries(criteriaWeights).forEach(([criterion, weight]) => {
-              const rating = ratingsData[criterion];
-              if (typeof rating === 'number' && rating >= 1 && rating <= 5) {
-                totalWeightedScore += rating * weight;
-                totalWeight += weight;
-              }
-            });
-
-            // Si on a au moins 50% des critères pondérés évalués
-            if (totalWeight >= 0.5) {
-              finalScore = Math.round((totalWeightedScore / totalWeight) * 10) / 10;
-
-              // Déterminer le label et l'emoji basés sur le score
-              if (finalScore >= 4.5) {
-                scoreLabel = 'Exceptionnel';
-                emoji = '🌟';
-              } else if (finalScore >= 4.0) {
-                scoreLabel = 'Excellent';
-                emoji = '🤩';
-              } else if (finalScore >= 3.5) {
-                scoreLabel = 'Très bien';
-                emoji = '😊';
-              } else if (finalScore >= 3.0) {
-                scoreLabel = 'Bien';
-                emoji = '🙂';
-              } else if (finalScore >= 2.5) {
-                scoreLabel = 'Moyen';
-                emoji = '😐';
-              } else if (finalScore >= 2.0) {
-                scoreLabel = 'Insuffisant';
-                emoji = '😕';
-              } else {
-                scoreLabel = 'Très insuffisant';
-                emoji = '😞';
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Erreur lors du parsing des ratings:', error);
+      
+      if (finalScore > 0) {
+        if (finalScore >= 4.5) {
+          scoreLabel = 'Exceptionnel';
+          emoji = '🌟';
+        } else if (finalScore >= 4.0) {
+          scoreLabel = 'Excellent';
+          emoji = '🤩';
+        } else if (finalScore >= 3.5) {
+          scoreLabel = 'Très bien';
+          emoji = '😊';
+        } else if (finalScore >= 3.0) {
+          scoreLabel = 'Bien';
+          emoji = '🙂';
+        } else if (finalScore >= 2.5) {
+          scoreLabel = 'Moyen';
+          emoji = '😐';
+        } else if (finalScore >= 2.0) {
+          scoreLabel = 'Insuffisant';
+          emoji = '😕';
+        } else {
+          scoreLabel = 'Très insuffisant';
+          emoji = '😞';
         }
       }
 
@@ -340,7 +315,17 @@ export class SessionFeedbackService {
     let validScores = 0;
 
     feedbacks.forEach(fb => {
-      const score = this.calculateWeightedScore(fb.ratings);
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const score = this.calculateWeightedScore(ratingsData);
       if (score > 0) {
         totalScore += score;
         validScores++;
@@ -358,6 +343,29 @@ export class SessionFeedbackService {
     };
   }
 
+  private processFrontendRatings(ratings: any): any {
+    if (!ratings || typeof ratings !== 'object') return {};
+
+    const emojiMap: Record<string, number> = {
+      '😞': 1,
+      '😐': 2,
+      '🙂': 3,
+      '😊': 4,
+      '🤩': 5
+    };
+
+    const processed: any = {};
+    Object.entries(ratings).forEach(([key, value]) => {
+      if (typeof value === 'string' && emojiMap[value]) {
+        processed[key] = emojiMap[value];
+      } else if (typeof value === 'number') {
+        processed[key] = value;
+      }
+    });
+
+    return processed;
+  }
+
   private calculateWeightedScore(ratings: any): number {
     if (!ratings) return 0;
 
@@ -366,31 +374,21 @@ export class SessionFeedbackService {
 
       if (!ratingsData || typeof ratingsData !== 'object') return 0;
 
-      // Définir les poids pour chaque critère
-      const criteriaWeights = {
-        overallRating: 0.25,
-        contentRelevance: 0.20,
-        learningObjectives: 0.15,
-        skillImprovement: 0.15,
-        satisfactionLevel: 0.10,
-        sessionStructure: 0.10,
-        knowledgeGain: 0.05
-      };
+      // Handle emoji ratings by converting them to numeric
+      const processedRatings = this.processFrontendRatings(ratingsData);
 
-      let totalWeightedScore = 0;
-      let totalWeight = 0;
+      // Calculer la moyenne simple de toutes les réponses emoji
+      const validRatings = Object.values(processedRatings)
+        .filter(rating => typeof rating === 'number' && rating >= 1 && rating <= 5) as number[];
 
-      Object.entries(criteriaWeights).forEach(([criterion, weight]) => {
-        const rating = ratingsData[criterion];
-        if (typeof rating === 'number' && rating >= 1 && rating <= 5) {
-          totalWeightedScore += rating * weight;
-          totalWeight += weight;
-        }
-      });
+      if (validRatings.length === 0) return 0;
 
-      return totalWeight >= 0.5 ? Math.round((totalWeightedScore / totalWeight) * 10) / 10 : 0;
+      const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
+      const average = sum / validRatings.length;
+      
+      return Math.round(average * 10) / 10;
     } catch (error) {
-      console.error('Erreur lors du calcul du score pondéré:', error);
+      console.error('Erreur lors du calcul du score moyen:', error);
       return 0;
     }
   }
@@ -407,7 +405,17 @@ export class SessionFeedbackService {
     };
 
     feedbacks.forEach(fb => {
-      const score = this.calculateWeightedScore(fb.ratings);
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const score = this.calculateWeightedScore(ratingsData);
       if (score >= 4.5) distribution['Exceptionnel']++;
       else if (score >= 4.0) distribution['Excellent']++;
       else if (score >= 3.5) distribution['Très bien']++;
@@ -432,7 +440,17 @@ export class SessionFeedbackService {
     let validScores = 0;
 
     filteredFeedbacks.forEach(fb => {
-      const score = this.calculateWeightedScore(fb.ratings);
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const score = this.calculateWeightedScore(ratingsData);
       if (score > 0) {
         totalScore += score;
         validScores++;

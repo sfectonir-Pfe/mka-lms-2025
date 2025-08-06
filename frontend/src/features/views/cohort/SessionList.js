@@ -313,6 +313,14 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/sessions/${session.id}/feedbacklist`)}
+                  >
+                    📊 {t("sessions.feedbackList")}
+                  </Button>
                 </Stack>
               )}
 
@@ -353,6 +361,27 @@ const SessionList = () => {
                 📅 {t("sessions.period")} <strong>{session.startDate?.slice(0, 10)}</strong> {t("sessions.to")}{" "}
                 <strong>{session.endDate?.slice(0, 10)}</strong>
               </Typography>
+              
+              {/* Average Feedback Rating */}
+              <Box mt={1} display="flex" alignItems="center" gap={1}>
+                <Typography variant="body2" fontWeight="bold">
+                  ⭐ Average Rating:
+                </Typography>
+                {session.averageRating ? (
+                  <>
+                    <Typography variant="body2" color="primary" fontWeight="bold">
+                      {session.averageRating.toFixed(1)}/5
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ({session.feedbackCount} {session.feedbackCount === 1 ? 'feedback' : 'feedbacks'})
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No feedback yet
+                  </Typography>
+                )}
+              </Box>
 
               {/* Modules and Contents */}
               {session.session2Modules?.length > 0 && (

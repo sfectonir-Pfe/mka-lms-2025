@@ -32,16 +32,23 @@ const SessionFeedbackList = () => {
 
   const reloadFeedbacks = React.useCallback(() => {
     if (sessionId) {
+      console.log("🔄 Rechargement des feedbacks pour la session:", sessionId);
       axios.get(`http://localhost:8000/feedback/session/list/${sessionId}`)
         .then(res => {
+          console.log("✅ Feedbacks reçus:", res.data);
           setFeedbacks(res.data);
         })
-        .catch(err => console.error("Error loading session feedback list:", err));
+        .catch(err => console.error("❌ Error loading session feedback list:", err));
     }
   }, [sessionId]);
 
   React.useEffect(() => {
     reloadFeedbacks();
+    
+    // Rafraîchissement automatique toutes les 30 secondes
+    const interval = setInterval(reloadFeedbacks, 30000);
+    
+    return () => clearInterval(interval);
   }, [reloadFeedbacks]);
 
   const handleShowMore = (userId) => {

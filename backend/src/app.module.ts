@@ -53,7 +53,7 @@ imports: [
   Session2ChatModule, 
   ChatbotModule,
   S3Module,
-  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule,
+  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule,
 ],
 
   controllers: [AppController],

@@ -41,8 +41,17 @@ const FeedbackFormateur = ({ seanceId }) => {
   // Chargement des étudiants sans feedback
   const loadStudents = useCallback(() => {
     if (!formateurId || !seanceId) return;
-    fetch(`/users/students/without-feedback?formateurId=${formateurId}&seanceId=${seanceId}`)
-      .then((res) => res.json())
+    
+    const url = `/users/students/without-feedback?formateurId=${formateurId}&seanceId=${seanceId}`;
+    console.log('Chargement des étudiants depuis:', url);
+    
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
         console.log('Réponse étudiants sans feedback:', data);
         setStudents(Array.isArray(data) ? data : []);
@@ -50,6 +59,8 @@ const FeedbackFormateur = ({ seanceId }) => {
       .catch((err) => {
         console.error('Erreur lors du chargement des étudiants:', err);
         setStudents([]);
+        // Afficher une erreur plus détaillée
+        console.error('Détails de l\'erreur:', err.message);
       });
   }, [formateurId, seanceId]);
 
@@ -148,7 +159,15 @@ const FeedbackFormateur = ({ seanceId }) => {
         .then(res => res.json())
         .then(data => setFeedbacksEnvoyes(Array.isArray(data) ? data : []));
       
-      alert('Une erreur est survenue. Veuillez réessayer.');
+      // Message d'erreur plus spécifique
+      let errorMessage = 'Une erreur est survenue lors de l\'envoi du feedback.';
+      if (err.response) {
+        errorMessage = `Erreur serveur: ${err.response.status}`;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
