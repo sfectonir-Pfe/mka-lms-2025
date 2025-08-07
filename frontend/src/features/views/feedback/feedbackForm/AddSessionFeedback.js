@@ -32,6 +32,58 @@ import { Close, Send, NavigateNext, NavigateBefore } from "@mui/icons-material"
 const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) => {
   console.log("FeedbackForm rendered with props:", { open, session })
 
+  // Catégories de commentaires détaillés
+  const commentCategories = [
+    {
+      value: "content",
+      label: "📚 Qualité du contenu",
+      description: "Pertinence, clarté et utilité du contenu présenté",
+      icon: "📚",
+      color: "#2196f3",
+    },
+    {
+      value: "trainer",
+      label: "👨‍🏫 Performance du formateur",
+      description: "Pédagogie, expertise et capacité d'animation",
+      icon: "👨‍🏫",
+      color: "#4caf50",
+    },
+    {
+      value: "organization",
+      label: "📅 Organisation de la session",
+      description: "Structure, timing et déroulement de la formation",
+      icon: "📅",
+      color: "#ff9800",
+    },
+    {
+      value: "materials",
+      label: "📝 Matériel pédagogique",
+      description: "Supports, documents et ressources fournis",
+      icon: "📝",
+      color: "#9c27b0",
+    },
+    {
+      value: "interaction",
+      label: "💬 Niveau d'interaction",
+      description: "Participation, échanges et dynamique de groupe",
+      icon: "💬",
+      color: "#00bcd4",
+    },
+    {
+      value: "technical",
+      label: "💻 Aspects techniques",
+      description: "Outils, plateforme et support technique",
+      icon: "💻",
+      color: "#607d8b",
+    },
+  ]
+
+  const commentPriorities = [
+    { value: "low", label: "🟢 Suggestion", description: "Amélioration mineure", color: "#4caf50" },
+    { value: "medium", label: "🟡 Important", description: "Point à améliorer", color: "#ff9800" },
+    { value: "high", label: "🔴 Prioritaire", description: "Problème significatif", color: "#f44336" },
+  ]
+
   const [currentStep, setCurrentStep] = useState(0)
   const [ratings, setRatings] = useState({})
   const [formData, setFormData] = useState({
@@ -44,12 +96,22 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
     bestAspects: "",
     suggestions: "",
     additionalTopics: "",
+    // Commentaires détaillés
+    contentQuality: "",
+    trainerPerformance: "",
+    sessionOrganization: "",
+    learningMaterials: "",
+    interactionLevel: "",
+    technicalAspects: "",
+    commentCategories: [],
+    commentPriority: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [validationError, setValidationError] = useState("")
 
   const steps = [
+    "Guide des Évaluations",
     "Évaluation Globale",
     "Progression & Apprentissage",
     "Organisation & Logistique",
@@ -157,7 +219,9 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
 
   const validateCurrentStep = () => {
     switch (currentStep) {
-      case 0: // Évaluation Globale
+      case 0: // Guide des Évaluations - pas de validation nécessaire
+        return true
+      case 1: // Évaluation Globale
         const globalRatings = ["overallRating", "contentRelevance", "learningObjectives", "sessionStructure"]
         const missingGlobal = globalRatings.filter((rating) => !ratings[rating])
         if (missingGlobal.length > 0) {
@@ -165,7 +229,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           return false
         }
         break
-      case 1: // Progression & Apprentissage
+      case 2: // Progression & Apprentissage
         const progressRatings = ["skillImprovement"]
         const missingProgress = progressRatings.filter((rating) => !ratings[rating])
         if (missingProgress.length > 0) {
@@ -173,17 +237,19 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           return false
         }
         break
-      case 2: // Organisation & Logistique
+      case 3: // Organisation & Logistique
         if (!formData.sessionDuration) {
           setValidationError("Veuillez indiquer votre avis sur la durée de la session.")
           return false
         }
         break
-      case 4: // Satisfaction & Recommandations
+      case 5: // Satisfaction & Recommandations
         if (!ratings.satisfactionLevel || !formData.wouldRecommend) {
           setValidationError("Veuillez compléter le niveau de satisfaction et la recommandation.")
           return false
         }
+        break
+      case 7: // Commentaires Détaillés - optionnel
         break
     }
     return true
@@ -258,6 +324,16 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
         sessionComments: formData.overallComments,
         trainerComments: formData.bestAspects,
         teamComments: formData.suggestions,
+        detailedComments: {
+          contentQuality: formData.contentQuality,
+          trainerPerformance: formData.trainerPerformance,
+          sessionOrganization: formData.sessionOrganization,
+          learningMaterials: formData.learningMaterials,
+          interactionLevel: formData.interactionLevel,
+          technicalAspects: formData.technicalAspects,
+        },
+        commentCategories: formData.commentCategories,
+        commentPriority: formData.commentPriority,
         feedback: formData.overallComments || "Feedback submitted via form",
         timestamp: new Date().toISOString(),
       }
@@ -304,6 +380,12 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
         bestAspects: "",
         suggestions: "",
         additionalTopics: "",
+        contentQuality: "",
+        trainerPerformance: "",
+        sessionOrganization: "",
+        learningMaterials: "",
+        interactionLevel: "",
+        technicalAspects: "",
       })
 
       // Hide success message after 5 seconds
@@ -359,7 +441,102 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 0: // Évaluation Globale
+      case 0: // Guide des Évaluations
+        return (
+          <SectionCard
+            headerStyle={{
+              background: "linear-gradient(135deg, #667eea, #764ba2)",
+            }}
+            title="Guide des Évaluations"
+            subtitle="Comprendre le système de notation avec les emojis"
+            icon="📖"
+          >
+            <Typography variant="h6" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
+              Comment utiliser les emojis pour évaluer ?
+            </Typography>
+            
+            <Grid container spacing={3}>
+              {[
+                {
+                  emoji: "😞",
+                  label: "Très mauvais",
+                  color: "#f44336",
+                  description: "Expérience très décevante, bien en dessous des attentes"
+                },
+                {
+                  emoji: "😐",
+                  label: "Mauvais",
+                  color: "#ff9800",
+                  description: "Expérience insatisfaisante, plusieurs aspects à améliorer"
+                },
+                {
+                  emoji: "🙂",
+                  label: "Moyen",
+                  color: "#ffc107",
+                  description: "Expérience correcte mais sans plus, quelques améliorations possibles"
+                },
+                {
+                  emoji: "😊",
+                  label: "Bon",
+                  color: "#4caf50",
+                  description: "Bonne expérience, répond aux attentes avec quelques points forts"
+                },
+                {
+                  emoji: "🤩",
+                  label: "Excellent",
+                  color: "#2196f3",
+                  description: "Expérience exceptionnelle, dépasse largement les attentes"
+                }
+              ].map((item, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Box
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      border: `2px solid ${item.color}40`,
+                      bgcolor: `${item.color}10`,
+                      textAlign: "center",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1
+                    }}
+                  >
+                    <Typography sx={{ fontSize: "3rem" }}>{item.emoji}</Typography>
+                    <Typography variant="h6" fontWeight="600" sx={{ color: item.color }}>
+                      {item.label}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {item.description}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+            
+            <Box sx={{ mt: 4, p: 3, bgcolor: "info.light", borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                💡 <span>Conseils pour une évaluation efficace</span>
+              </Typography>
+              <Box component="ul" sx={{ pl: 2, mt: 2 }}>
+                <Typography component="li" variant="body2" sx={{ mb: 1 }}>
+                  <strong>Soyez honnête :</strong> Votre feedback nous aide à améliorer nos formations
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1 }}>
+                  <strong>Soyez précis :</strong> Plus vos commentaires sont détaillés, plus ils sont utiles
+                </Typography>
+                <Typography component="li" variant="body2" sx={{ mb: 1 }}>
+                  <strong>Pensez constructif :</strong> Proposez des améliorations concrètes
+                </Typography>
+                <Typography component="li" variant="body2">
+                  <strong>Prenez votre temps :</strong> Réfléchissez à chaque aspect avant de noter
+                </Typography>
+              </Box>
+            </Box>
+          </SectionCard>
+        )
+
+      case 1: // Évaluation Globale
         return (
           <SectionCard
             headerStyle={{
@@ -410,7 +587,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 1: // Progression et Apprentissage
+      case 2: // Progression et Apprentissage
         return (
           <SectionCard
             headerStyle={{
@@ -461,7 +638,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 2: // Organisation et Logistique
+      case 3: // Organisation et Logistique
         return (
           <SectionCard
             headerStyle={{
@@ -509,7 +686,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 3: // Impact et Valeur
+      case 4: // Impact et Valeur
         return (
           <SectionCard
             headerStyle={{
@@ -560,7 +737,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 4: // Satisfaction et Recommandations
+      case 5: // Satisfaction et Recommandations
         return (
           <SectionCard
             headerStyle={{
@@ -616,7 +793,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 5: // Points Forts et Améliorations
+      case 6: // Points Forts et Améliorations
         return (
           <SectionCard
             headerStyle={{
@@ -693,63 +870,22 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </SectionCard>
         )
 
-      case 6: // Commentaires Détaillés
+      case 7: // Commentaires Détaillés
         return (
-          <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #1976d2, #1565c0)",
-            }}
-            title="Commentaires Détaillés"
-            subtitle="Partagez vos impressions et suggestions en détail"
-            icon="💬"
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="💭 Commentaire général sur la session"
-                  placeholder="Partagez votre expérience globale de cette session de formation..."
-                  value={formData.overallComments}
-                  onChange={(e) => handleInputChange("overallComments", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="⭐ Ce que vous avez le plus apprécié"
-                  placeholder="Décrivez les aspects qui vous ont le plus marqué positivement..."
-                  value={formData.bestAspects}
-                  onChange={(e) => handleInputChange("bestAspects", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="💡 Suggestions d'amélioration"
-                  placeholder="Comment pourrions-nous améliorer cette formation ?"
-                  value={formData.suggestions}
-                  onChange={(e) => handleInputChange("suggestions", e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="📚 Sujets supplémentaires souhaités"
-                  placeholder="Quels sujets aimeriez-vous voir abordés dans de futures sessions ?"
-                  value={formData.additionalTopics}
-                  onChange={(e) => handleInputChange("additionalTopics", e.target.value)}
-                />
-              </Grid>
-            </Grid>
-          </SectionCard>
+          <Box sx={{ py: 2 }}>
+            <TextField
+              name="comment"
+              label="Commentaire (optionnel)"
+              multiline
+              fullWidth
+              rows={4}
+              value={formData.overallComments}
+              onChange={(e) => setFormData({ ...formData, overallComments: e.target.value })}
+              required
+              sx={{ mb: 3 }}
+            />
+           
+          </Box>
         )
 
       default:
@@ -757,7 +893,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
     }
   }
 
-  const progress = ((currentStep + 1) / steps.length) * 100
+  const progress = (currentStep / steps.length) * 100
 
   return (
     <Dialog

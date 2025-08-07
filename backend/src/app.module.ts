@@ -28,6 +28,7 @@ import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.m
 import { NotificationModule } from './notification/notification.module';
 import {SeanceFeedbackModule} from './seance-feedback/seance-feedback.module';
 import {SessionFeedbackModule} from './session-feedback/session-feedback.module';
+import { RéclamationModule } from './réclamation/réclamation.module';
 
 
 
@@ -53,7 +54,7 @@ imports: [
   Session2ChatModule, 
   ChatbotModule,
   S3Module,
-  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule,
+  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule,
 ],
 
   controllers: [AppController],

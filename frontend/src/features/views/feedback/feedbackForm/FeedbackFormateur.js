@@ -203,16 +203,7 @@ const FeedbackFormateur = ({ seanceId }) => {
         >
           Nouveau Feedback
         </Button>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            setFeedbackEnvoye(false);
-            loadStudents();
-          }}
-          startIcon={<Group />}
-        >
-          Voir liste étudiants
-        </Button>
+        
       </Box>
     );
   }
@@ -317,31 +308,31 @@ const FeedbackFormateur = ({ seanceId }) => {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2} className="mb-4">
-          <Grid item xs={12}>
-            <Typography variant="h6" className="mb-3">
-              Comment évaluez-vous le travail de {(selectedStudent?.name || '').split(' ')[0]}? 😊
-            </Typography>
+        <Box className="mb-4" sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" className="mb-3">
+            Comment évaluez-vous le travail de {(selectedStudent?.name || '').split(' ')[0]}? 😊
+          </Typography>
+          
+          <Grid container spacing={2} justifyContent="center" sx={{ maxWidth: 600, margin: '0 auto' }}>
+            {emojis.map((item) => (
+              <Grid item xs={4} sm={2} key={item.id}>
+                <Button
+                  fullWidth
+                  variant={selectedEmoji === item.id ? 'contained' : 'outlined'}
+                  color={item.color}
+                  onClick={() => setSelectedEmoji(item.id)}
+                  sx={{ fontSize: '2rem', height: '80px', mb: 1 }}
+                  disabled={isSubmitting}
+                >
+                  {item.emoji}
+                </Button>
+                <Typography variant="caption" display="block" sx={{ textAlign: 'center' }}>
+                  {item.label}
+                </Typography>
+              </Grid>
+            ))}
           </Grid>
-
-          {emojis.map((item) => (
-            <Grid item xs={4} sm={2} key={item.id}>
-              <Button
-                fullWidth
-                variant={selectedEmoji === item.id ? 'contained' : 'outlined'}
-                color={item.color}
-                onClick={() => setSelectedEmoji(item.id)}
-                sx={{ fontSize: '2rem', height: '80px' }}
-                disabled={isSubmitting}
-              >
-                {item.emoji}
-              </Button>
-              <Typography variant="caption" display="block">
-                {item.label}
-              </Typography>
-            </Grid>
-          ))}
-        </Grid>
+        </Box>
 
         <TextField
           fullWidth

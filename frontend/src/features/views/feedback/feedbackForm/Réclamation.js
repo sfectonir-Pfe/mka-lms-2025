@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 // import { feedbackService } from "./services/feedbackService"
-import feedbackService from '../../services/feedbackService';
+import feedbackService from '../../../../services/feedbackService';
 
 import {
   Container,
@@ -108,7 +108,7 @@ const FeedbackPage = () => {
     },
     {
       value: "complaint",
-      label: `⚠️ ${t("feedback.feedbackTypes.complaint")}`,
+      label: `⚠️ Problème de service`,
       description: "Problème de service ou d'expérience utilisateur",
       icon: <Report />,
       color: "#ff9800",
@@ -591,7 +591,7 @@ const FeedbackPage = () => {
     }
   }
 
-  const progress = ((currentStep + 1) / steps.length) * 100
+  const progress = (currentStep / steps.length) * 100
 
   const getFeedbackTypeInfo = () => {
     return feedbackTypes.find((type) => type.value === formData.feedbackType)
@@ -606,13 +606,13 @@ const FeedbackPage = () => {
       {/* En-tête */}
       <Box sx={{ mb: 4, textAlign: "center" }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold" color="primary">
-          📝 {t("feedback.feedbackCenter")}
+          📝 Réclamation
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          Aidez-nous à améliorer votre expérience en partageant vos commentaires
+          Signalez-nous vos problèmes et préoccupations concernant notre service
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Votre feedback est précieux pour nous permettre d'améliorer continuellement notre plateforme LMS
+          Vos réclamations nous permettent de résoudre rapidement les dysfonctionnements et d'améliorer notre plateforme LMS
         </Typography>
       </Box>
 

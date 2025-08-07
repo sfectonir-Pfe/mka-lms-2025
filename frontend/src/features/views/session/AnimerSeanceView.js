@@ -39,7 +39,7 @@ import { Avatar } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate } from "react-router-dom";
 import AddSeanceFeedback from '../../../features/views/feedback/feedbackForm/AddSeanceFeedback';
-import FeedbackFormateur from '../../../features/views/feedback/FeedbackFormateur';
+import FeedbackFormateur from '../feedback/feedbackForm/FeedbackFormateur';
 import SeanceFeedbackList from '../../../features/views/feedback/FeedbackList/seancefeedbacklist';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 

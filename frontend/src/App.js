@@ -10,7 +10,8 @@ import ResetSuccessPage from "./pages/auth/ResetSuccessPage";
 
 import NotFound from "./pages/error/NotFoundPage";
 import HomePage from "./pages/home/HomePage";
-import FeedbackPage from "./pages/feedback/FeedbackPage";
+import Réclamation from "./features/views/feedback/feedbackForm/Réclamation";
+import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamationlist";
 import StudentLandingPage from "./pages/session/StudentLandingPage";
 import StudentProgramPage from "./pages/session/StudentProgramPage";
 import ProfilePage from "./pages/profile/ProfilePage";
@@ -67,7 +68,7 @@ import FormateurDashboard from "./pages/dashboard/FormateurDashboard";
 import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 // --------------------------------------------------------------------------------------
 // feedbacks
-import FeedbackListPage from "./features/views/feedback/FeedbackList/FeedbackListPage";
+import FeedbackListPage from "./features/views/feedback/FeedbackList/Réclamationlist";
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
@@ -277,10 +278,12 @@ function App() {
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
                 <Route path="student/program/:programId" element={<StudentProgramPage />} />
-                <Route path="feedback" element={<FeedbackPage />} />
+                <Route path="Réclamation" element={<Réclamation />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
+                <Route path="/Réclamationlist" element={<Réclamationlist />} />
                 <Route path="/notifications" element={<NotificationsPage user={user} />} />
+                
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>

@@ -90,7 +90,13 @@ export default function AddSeanceFeedback({ seanceId }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [showStepError, setShowStepError] = useState(false)
 
-  const steps = ["Déroulement de la Séance", "Évaluation du Formateur", "Évaluation de l'Équipe", "Recommandations"]
+  // Gestionnaires optimisés pour éviter les re-rendus
+  const handleTextChange = (field) => (event) => {
+    const value = event.target.value
+    setFeedback(prev => ({ ...prev, [field]: value }))
+  }
+
+  const steps = ["Guide des Emojis", "Déroulement de la Séance", "Évaluation du Formateur", "Évaluation de l'Équipe", "Recommandations"]
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -142,6 +148,8 @@ export default function AddSeanceFeedback({ seanceId }) {
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
+        return true // Guide des emojis - étape informative
+      case 1:
         return (
           feedback.sessionRating > 0 &&
           feedback.contentQuality > 0 &&
@@ -149,7 +157,7 @@ export default function AddSeanceFeedback({ seanceId }) {
           feedback.objectivesAchieved > 0 &&
           feedback.sessionDuration !== ""
         )
-      case 1:
+      case 2:
         return (
           feedback.trainerRating > 0 &&
           feedback.trainerClarity > 0 &&
@@ -157,9 +165,9 @@ export default function AddSeanceFeedback({ seanceId }) {
           feedback.trainerAvailability > 0 &&
           feedback.trainerInteraction > 0
         )
-      case 2:
-        return true // Étape optionnelle
       case 3:
+        return true // Étape optionnelle
+      case 4:
         return feedback.wouldRecommend !== "" // Seule la recommandation est obligatoire
       default:
         return true
@@ -169,6 +177,68 @@ export default function AddSeanceFeedback({ seanceId }) {
   const renderStepContent = (step) => {
     switch (step) {
       case 0:
+        return (
+          <Card className="shadow-lg">
+            <CardHeader>
+              <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                <Recommend color="primary" />
+                Guide des Emojis et Commentaires
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Voici la signification des emojis utilisés dans ce formulaire
+              </Typography>
+            </CardHeader>
+            <CardContent>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+                  🎯 Signification des Emojis d'Évaluation
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography sx={{ fontSize: "2rem" }}>😞</Typography>
+                    <Typography><strong>Très mauvais</strong> - Performance très insatisfaisante</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography sx={{ fontSize: "2rem" }}>😐</Typography>
+                    <Typography><strong>Mauvais</strong> - Performance en dessous des attentes</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography sx={{ fontSize: "2rem" }}>🙂</Typography>
+                    <Typography><strong>Moyen</strong> - Performance acceptable</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography sx={{ fontSize: "2rem" }}>😊</Typography>
+                    <Typography><strong>Bon</strong> - Performance satisfaisante</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Typography sx={{ fontSize: "2rem" }}>🤩</Typography>
+                    <Typography><strong>Excellent</strong> - Performance exceptionnelle</Typography>
+                  </Box>
+                </Box>
+              </Box>
+              
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+                  ⏰ Autres Symboles Utilisés
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                  <Typography>⏰ <strong>Trop courte</strong> - La durée était insuffisante</Typography>
+                  <Typography>✅ <strong>Adéquate</strong> - La durée était parfaite</Typography>
+                  <Typography>⏳ <strong>Trop longue</strong> - La durée était excessive</Typography>
+                  <Typography>💬 <strong>Commentaires</strong> - Zone de texte libre</Typography>
+                </Box>
+              </Box>
+              
+              <Box sx={{ p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="body2" color="text.secondary">
+                  💡 <strong>Conseil :</strong> Prenez le temps de réfléchir à chaque critère avant de donner votre évaluation. Vos retours sont précieux pour améliorer la qualité des formations.
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        )
+
+      case 1:
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -230,18 +300,19 @@ export default function AddSeanceFeedback({ seanceId }) {
               <TextField
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 label="💬 Commentaires sur la séance (optionnel)"
                 value={feedback.sessionComments}
-                onChange={(e) => setFeedback((prev) => ({ ...prev, sessionComments: e.target.value }))}
+                onChange={handleTextChange('sessionComments')}
                 placeholder="Partagez vos impressions sur le déroulement de la séance..."
                 variant="outlined"
+                sx={{ mt: 2 }}
               />
             </CardContent>
           </Card>
         )
 
-      case 1:
+      case 2:
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -294,10 +365,10 @@ export default function AddSeanceFeedback({ seanceId }) {
               <TextField
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 label="💬 Commentaires sur le formateur (optionnel)"
                 value={feedback.trainerComments}
-                onChange={(e) => setFeedback((prev) => ({ ...prev, trainerComments: e.target.value }))}
+                onChange={handleTextChange('trainerComments')}
                 placeholder="Partagez vos impressions sur le formateur..."
                 variant="outlined"
                 sx={{ mt: 3 }}
@@ -306,7 +377,7 @@ export default function AddSeanceFeedback({ seanceId }) {
           </Card>
         )
 
-      case 2:
+      case 3:
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -353,10 +424,10 @@ export default function AddSeanceFeedback({ seanceId }) {
               <TextField
                 fullWidth
                 multiline
-                rows={3}
+                rows={4}
                 label="💬 Commentaires sur l'équipe (optionnel)"
                 value={feedback.teamComments}
-                onChange={(e) => setFeedback((prev) => ({ ...prev, teamComments: e.target.value }))}
+                onChange={handleTextChange('teamComments')}
                 placeholder="Partagez vos impressions sur le travail d'équipe..."
                 variant="outlined"
                 sx={{ mt: 3 }}
@@ -365,7 +436,7 @@ export default function AddSeanceFeedback({ seanceId }) {
           </Card>
         )
 
-      case 3:
+      case 4:
         return (
           <Card className="shadow-lg">
             <CardHeader>
@@ -430,9 +501,10 @@ export default function AddSeanceFeedback({ seanceId }) {
                 rows={4}
                 label="💡 Suggestions d'amélioration (optionnel)"
                 value={feedback.suggestions}
-                onChange={(e) => setFeedback((prev) => ({ ...prev, suggestions: e.target.value }))}
+                onChange={handleTextChange('suggestions')}
                 placeholder="Quelles améliorations suggérez-vous pour les prochaines formations ?"
                 variant="outlined"
+                sx={{ mt: 2 }}
               />
             </CardContent>
           </Card>
@@ -443,7 +515,7 @@ export default function AddSeanceFeedback({ seanceId }) {
     }
   }
 
-  const progress = ((currentStep + 1) / steps.length) * 100
+  const progress = (currentStep / steps.length) * 100
 
   if (isSubmitted) {
     return (
