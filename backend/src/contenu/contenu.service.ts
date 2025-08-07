@@ -1,17 +1,21 @@
-import { Injectable } from '@nestjs/common';
+
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateContenuDto } from './dto/create-contenu.dto';
-import { NotFoundException } from '@nestjs/common';
-
+import { NotificationService } from '../notification/notification.service';
+import { NotificationGateway } from '../notification/notification-gateway';
 
 @Injectable()
 export class ContenusService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
   async create(data: CreateContenuDto) {
     const { courseIds, ...contenuData } = data;
-
-    console.log('Creating content with data:', contenuData);
 
     const created = await this.prisma.contenu.create({
       data: contenuData,
@@ -23,13 +27,24 @@ export class ContenusService {
           courseId,
           contenuId: created.id,
         })),
-
       });
     }
 
+    // 🔔 Notify all users
+    const users = await this.prisma.user.findMany();
+    for (const user of users) {
+      const notification = await this.notificationService.createNotification({
+        userId: user.id,
+        type: 'info',
+        message: `Nouveau contenu ajouté : ${created.title} (${new Date().toLocaleDateString()})`,
+        link: null,
+      });
+      this.notificationGateway.sendRealTimeNotification(user.id, notification);
+    }
 
     return created;
   }
+
   
 
   findAll() {
