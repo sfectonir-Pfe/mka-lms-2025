@@ -59,6 +59,9 @@ model User {
   GeneralChatMessage         GeneralChatMessage[]
   Notification               Notification[]
   Reclamation                Reclamation[]
+  studentGroups              StudentGroup[] @relation("StudentGroupMembers")
+  feedbacksGiven             StudentFeedback[] @relation("StudentFeedbackFrom")
+  feedbacksReceived          StudentFeedback[] @relation("StudentFeedbackTo")
 }
 
 model Formateur {
@@ -337,6 +340,7 @@ model SeanceFormateur {
   medias           SeanceMedia[]
   chatMessages     ChatMessage[]
   WhiteboardAction WhiteboardAction[]
+  studentGroups    StudentGroup[]
 }
 
 model SeanceMedia {
@@ -558,6 +562,36 @@ model Reclamation {
   updatedAt    DateTime           @updatedAt
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model StudentGroup {
+  id              String            @id @default(uuid())
+  name            String
+  seanceId        Int
+  seance          SeanceFormateur   @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  students        User[]            @relation("StudentGroupMembers")
+  studentFeedbacks StudentFeedback[] @relation("GroupFeedbacks")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model StudentFeedback {
+  id            String       @id @default(uuid())
+  fromStudentId Int
+  toStudentId   Int
+  groupId       String
+  rating        Int          // 1-5
+  comment       String
+  category      String       // 'collaboration', 'communication', 'participation', 'qualité_travail'
+  isAnonymous   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  fromStudent   User         @relation("StudentFeedbackFrom", fields: [fromStudentId], references: [id], onDelete: Cascade)
+  toStudent     User         @relation("StudentFeedbackTo", fields: [toStudentId], references: [id], onDelete: Cascade)
+  group         StudentGroup @relation("GroupFeedbacks", fields: [groupId], references: [id], onDelete: Cascade)
+  
+  @@unique([fromStudentId, toStudentId, groupId])
 }
 
 enum Role {

@@ -17,8 +17,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
-  Checkbox,
-  FormGroup,
+
   Button,
   Box,
   Grid,
@@ -29,7 +28,7 @@ import {
   StepLabel,
   LinearProgress,
   Chip,
-  Divider,
+
   Avatar,
   Paper,
   IconButton,
@@ -50,7 +49,7 @@ import {
   PriorityHigh,
   CheckCircle,
   Warning,
-  Info,
+
 } from "@mui/icons-material"
 
 const FeedbackPage = () => {
@@ -68,8 +67,6 @@ const FeedbackPage = () => {
     actualBehavior: "",
     browser: "",
     device: "",
-    contactInfo: "",
-    allowContact: false,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -81,7 +78,6 @@ const FeedbackPage = () => {
     t("feedback.steps.category"),
     t("feedback.steps.description"),
     t("feedback.steps.technical"),
-    t("feedback.steps.contact"),
   ]
 
   const feedbackTypes = [
@@ -223,6 +219,8 @@ const FeedbackPage = () => {
       case 3:
         // Étape optionnelle
         break
+      default:
+        break
     }
     return true
   }
@@ -276,8 +274,6 @@ const FeedbackPage = () => {
           actualBehavior: "",
           browser: "",
           device: "",
-          contactInfo: "",
-          allowContact: false,
         })
         setCurrentStep(0)
         setShowSuccess(false)
@@ -542,49 +538,7 @@ const FeedbackPage = () => {
           </Card>
         )
 
-      case 4:
-        return (
-          <Card sx={{ mb: 3 }}>
-            <CardHeader
-              title="Contact et Finalisation"
-              subheader="Informations de contact et récapitulatif de votre demande"
-            />
-            <CardContent>
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="📧 Informations de contact (optionnel)"
-                    placeholder="Email ou téléphone pour vous recontacter"
-                    value={formData.contactInfo}
-                    onChange={(e) => handleInputChange("contactInfo", e.target.value)}
-                    helperText="Nous vous contacterons uniquement si nous avons besoin de plus d'informations"
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.allowContact}
-                        onChange={(e) => handleInputChange("allowContact", e.target.checked)}
-                      />
-                    }
-                    label="✅ J'autorise l'équipe à me recontacter si nécessaire"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setShowPreview(true)}
-                    startIcon={<Info />}
-                  >
-                    Aperçu de votre feedback
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        )
+
 
       default:
         return null

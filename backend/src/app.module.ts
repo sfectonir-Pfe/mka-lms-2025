@@ -29,6 +29,7 @@ import { NotificationModule } from './notification/notification.module';
 import {SeanceFeedbackModule} from './seance-feedback/seance-feedback.module';
 import {SessionFeedbackModule} from './session-feedback/session-feedback.module';
 import { RéclamationModule } from './réclamation/réclamation.module';
+import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
 
 
 
@@ -54,7 +55,7 @@ imports: [
   Session2ChatModule, 
   ChatbotModule,
   S3Module,
-  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule,
+  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule, FeedbackÉtudiantModule,
 ],
 
   controllers: [AppController],

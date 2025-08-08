@@ -32,58 +32,6 @@ import { Close, Send, NavigateNext, NavigateBefore } from "@mui/icons-material"
 const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) => {
   console.log("FeedbackForm rendered with props:", { open, session })
 
-  // Catégories de commentaires détaillés
-  const commentCategories = [
-    {
-      value: "content",
-      label: "📚 Qualité du contenu",
-      description: "Pertinence, clarté et utilité du contenu présenté",
-      icon: "📚",
-      color: "#2196f3",
-    },
-    {
-      value: "trainer",
-      label: "👨‍🏫 Performance du formateur",
-      description: "Pédagogie, expertise et capacité d'animation",
-      icon: "👨‍🏫",
-      color: "#4caf50",
-    },
-    {
-      value: "organization",
-      label: "📅 Organisation de la session",
-      description: "Structure, timing et déroulement de la formation",
-      icon: "📅",
-      color: "#ff9800",
-    },
-    {
-      value: "materials",
-      label: "📝 Matériel pédagogique",
-      description: "Supports, documents et ressources fournis",
-      icon: "📝",
-      color: "#9c27b0",
-    },
-    {
-      value: "interaction",
-      label: "💬 Niveau d'interaction",
-      description: "Participation, échanges et dynamique de groupe",
-      icon: "💬",
-      color: "#00bcd4",
-    },
-    {
-      value: "technical",
-      label: "💻 Aspects techniques",
-      description: "Outils, plateforme et support technique",
-      icon: "💻",
-      color: "#607d8b",
-    },
-  ]
-
-  const commentPriorities = [
-    { value: "low", label: "🟢 Suggestion", description: "Amélioration mineure", color: "#4caf50" },
-    { value: "medium", label: "🟡 Important", description: "Point à améliorer", color: "#ff9800" },
-    { value: "high", label: "🔴 Prioritaire", description: "Problème significatif", color: "#f44336" },
-  ]
-
   const [currentStep, setCurrentStep] = useState(0)
   const [ratings, setRatings] = useState({})
   const [formData, setFormData] = useState({
@@ -250,6 +198,8 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
         }
         break
       case 7: // Commentaires Détaillés - optionnel
+        break
+      default:
         break
     }
     return true
@@ -815,7 +765,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
                   <FormGroup>
                     {[
                       "📚 Contenu de qualité",
-                      "👨‍🏫 Formateur compétent",
+                      "👨🏫 Formateur compétent",
                       "💻 Exercices pratiques",
                       "🗣️ Interaction et échanges",
                       "📖 Support pédagogique",

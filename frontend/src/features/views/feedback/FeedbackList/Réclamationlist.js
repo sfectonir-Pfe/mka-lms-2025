@@ -18,10 +18,9 @@ import {
 import { Close as CloseIcon, Report as ReportIcon } from "@mui/icons-material";
 import { DataGrid } from '@mui/x-data-grid';
 import axios from "axios";
-import { useTranslation } from 'react-i18next';
+
 
 const ReclamationList = () => {
-  const { t } = useTranslation('reclamations');
   const [reclamations, setReclamations] = useState([]);
   const [selectedReclamation, setSelectedReclamation] = useState(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);

@@ -22,7 +22,6 @@ import {
   School,
   Star,
   Person,
-  Group,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
 

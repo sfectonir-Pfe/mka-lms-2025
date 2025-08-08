@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Container,
   TextField,
@@ -20,6 +20,10 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -91,6 +95,74 @@ const EditProfilePage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState("");
+  
+  // États pour le dropdown des pays
+  const [countryCode, setCountryCode] = useState("+216");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Liste des pays avec leurs codes et drapeaux
+  const countries = [
+    { code: "+33", nameKey: "france", flagCode: "fr" },
+    { code: "+1", nameKey: "usa", flagCode: "us" },
+    { code: "+44", nameKey: "uk", flagCode: "gb" },
+    { code: "+49", nameKey: "germany", flagCode: "de" },
+    { code: "+34", nameKey: "spain", flagCode: "es" },
+    { code: "+39", nameKey: "italy", flagCode: "it" },
+    { code: "+212", nameKey: "morocco", flagCode: "ma" },
+    { code: "+213", nameKey: "algeria", flagCode: "dz" },
+    { code: "+216", nameKey: "tunisia", flagCode: "tn" },
+    { code: "+20", nameKey: "egypt", flagCode: "eg" },
+    { code: "+966", nameKey: "saudi", flagCode: "sa" },
+    { code: "+971", nameKey: "uae", flagCode: "ae" },
+    { code: "+7", nameKey: "russia", flagCode: "ru" },
+    { code: "+86", nameKey: "china", flagCode: "cn" },
+    { code: "+81", nameKey: "japan", flagCode: "jp" },
+    { code: "+82", nameKey: "korea", flagCode: "kr" },
+    { code: "+91", nameKey: "india", flagCode: "in" },
+    { code: "+55", nameKey: "brazil", flagCode: "br" },
+    { code: "+52", nameKey: "mexico", flagCode: "mx" },
+    { code: "+54", nameKey: "argentina", flagCode: "ar" },
+    { code: "+61", nameKey: "australia", flagCode: "au" },
+    { code: "+64", nameKey: "newzealand", flagCode: "nz" },
+    { code: "+27", nameKey: "southafrica", flagCode: "za" },
+    { code: "+234", nameKey: "nigeria", flagCode: "ng" },
+    { code: "+254", nameKey: "kenya", flagCode: "ke" },
+    { code: "+90", nameKey: "turkey", flagCode: "tr" },
+    { code: "+98", nameKey: "iran", flagCode: "ir" },
+    { code: "+92", nameKey: "pakistan", flagCode: "pk" },
+    { code: "+880", nameKey: "bangladesh", flagCode: "bd" },
+    { code: "+84", nameKey: "vietnam", flagCode: "vn" },
+    { code: "+66", nameKey: "thailand", flagCode: "th" },
+    { code: "+65", nameKey: "singapore", flagCode: "sg" },
+    { code: "+60", nameKey: "malaysia", flagCode: "my" },
+    { code: "+62", nameKey: "indonesia", flagCode: "id" },
+    { code: "+63", nameKey: "philippines", flagCode: "ph" },
+    { code: "+32", nameKey: "belgium", flagCode: "be" },
+    { code: "+31", nameKey: "netherlands", flagCode: "nl" },
+    { code: "+41", nameKey: "switzerland", flagCode: "ch" },
+    { code: "+43", nameKey: "austria", flagCode: "at" },
+    { code: "+46", nameKey: "sweden", flagCode: "se" },
+    { code: "+47", nameKey: "norway", flagCode: "no" },
+    { code: "+45", nameKey: "denmark", flagCode: "dk" },
+    { code: "+358", nameKey: "finland", flagCode: "fi" },
+    { code: "+48", nameKey: "poland", flagCode: "pl" },
+    { code: "+420", nameKey: "czech", flagCode: "cz" },
+    { code: "+36", nameKey: "hungary", flagCode: "hu" },
+    { code: "+30", nameKey: "greece", flagCode: "gr" },
+    { code: "+351", nameKey: "portugal", flagCode: "pt" },
+    { code: "+353", nameKey: "ireland", flagCode: "ie" },
+    { code: "+1", nameKey: "canada", flagCode: "ca" }
+  ];
+
+  const filteredCountries = countries.filter(country =>
+    t(`countries.${country.nameKey}`).toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.code.includes(countrySearch)
+  );
+
+  const selectedCountry = countries.find(c => c.code === countryCode) || countries[8]; // Default to Tunisia
 
   // Fonction pour traduire le rôle
   const translateRole = (role) => {
@@ -224,6 +296,9 @@ const EditProfilePage = () => {
       if (!event.target.closest('.skills-dropdown-container')) {
         setShowSkillsDropdown(false);
       }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCountryDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -231,6 +306,28 @@ const EditProfilePage = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Effet pour initialiser les valeurs du téléphone
+  useEffect(() => {
+    if (user && user.phone) {
+      // Extraire le code pays et le numéro du téléphone complet
+      const phone = user.phone;
+      let extractedCountryCode = "+216"; // Default
+      let extractedPhoneNumber = phone;
+      
+      // Trouver le code pays correspondant
+      for (const country of countries) {
+        if (phone.startsWith(country.code)) {
+          extractedCountryCode = country.code;
+          extractedPhoneNumber = phone.substring(country.code.length);
+          break;
+        }
+      }
+      
+      setCountryCode(extractedCountryCode);
+      setPhoneNumber(extractedPhoneNumber);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -401,7 +498,21 @@ const EditProfilePage = () => {
   }, [email, navigate]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'phone') {
+      // Pour le champ téléphone, on met à jour seulement le numéro
+      setPhoneNumber(e.target.value);
+      // Mettre à jour le formulaire avec le numéro complet
+      setForm({ ...form, phone: countryCode + e.target.value });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleCountryChange = (newCountryCode) => {
+    setCountryCode(newCountryCode);
+    setForm({ ...form, phone: newCountryCode + phoneNumber });
+    setShowCountryDropdown(false);
+    setCountrySearch('');
   };
 
   const handleFileChange = async (e) => {
@@ -1059,23 +1170,94 @@ const EditProfilePage = () => {
                 }}
               />
 
-              <TextField
-                label={t('profile.phone')}
-                name="phone"
-                fullWidth
-                value={form.phone || ""}
-                onChange={handleChange}
-                margin="normal"
-                slotProps={{
-                  input: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Phone color="action" />
-                      </InputAdornment>
-                    )
-                  }
-                }}
-              />
+              <Box sx={{ mt: 2, mb: 1 }}>
+                <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                  {t('profile.phone')}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Box sx={{ position: 'relative' }} ref={dropdownRef}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                      sx={{
+                        minWidth: '140px',
+                        height: '56px',
+                        justifyContent: 'flex-start',
+                        textTransform: 'none',
+                        borderColor: 'rgba(0, 0, 0, 0.23)',
+                        color: 'text.primary',
+                        '&:hover': {
+                          borderColor: 'rgba(0, 0, 0, 0.87)'
+                        }
+                      }}
+                    >
+                      <img 
+                        src={`https://flagcdn.com/20x15/${selectedCountry.flagCode}.png`} 
+                        alt={t(`countries.${selectedCountry.nameKey}`)} 
+                        style={{ marginRight: '8px' }}
+                      /> 
+                      {selectedCountry.code}
+                    </Button>
+                    {showCountryDropdown && (
+                      <Paper
+                        sx={{
+                          position: 'absolute',
+                          top: '100%',
+                          left: 0,
+                          zIndex: 1000,
+                          maxHeight: '300px',
+                          overflowY: 'auto',
+                          width: '300px',
+                          mt: 1
+                        }}
+                      >
+                        <Box sx={{ p: 2 }}>
+                          <TextField
+                            size="small"
+                            fullWidth
+                            placeholder={t('common.search')}
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </Box>
+                        {filteredCountries.map((country) => (
+                          <MenuItem
+                            key={country.code + country.flagCode}
+                            onClick={() => handleCountryChange(country.code)}
+                            sx={{ px: 2 }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 'auto', mr: 1 }}>
+                              <img 
+                                src={`https://flagcdn.com/20x15/${country.flagCode}.png`} 
+                                alt={t(`countries.${country.nameKey}`)} 
+                                style={{ width: '20px', height: '15px' }}
+                              />
+                            </ListItemIcon>
+                            <ListItemText>
+                              {country.code} - {t(`countries.${country.nameKey}`)}
+                            </ListItemText>
+                          </MenuItem>
+                        ))}
+                      </Paper>
+                    )}
+                  </Box>
+                  <TextField
+                    name="phone"
+                    fullWidth
+                    value={phoneNumber}
+                    onChange={handleChange}
+                    placeholder={t('users.phonePlaceholder')}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Phone color="action" />
+                        </InputAdornment>
+                      )
+                    }}
+                  />
+                </Box>
+              </Box>
 
               <TextField
                 label={t('profile.location')}
@@ -1084,6 +1266,7 @@ const EditProfilePage = () => {
                 value={form.location || ""}
                 onChange={handleChange}
                 margin="normal"
+                sx={{ mt: 2 }}
                 slotProps={{
                   input: {
                     startAdornment: (

@@ -21,7 +21,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback } from "@mui/icons-material";
+import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback, Download } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -137,8 +137,26 @@ const SessionList = () => {
     setShareModal({ open: true, session });
   };
 
-  const handleSocialShare = (platform) => {
+  const handleSocialShare = async (platform) => {
     const encodedText = encodeURIComponent(shareText);
+    
+    if (platform === 'facebook') {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success(t('sessions.textCopiedForFacebook'), {
+          autoClose: 8000,
+          position: "top-center"
+        });
+        // Délai pour laisser le temps à l'utilisateur de voir la notification
+        setTimeout(() => {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400');
+        }, 1000);
+        return;
+      } catch (err) {
+        console.error('Failed to copy text:', err);
+      }
+    }
+    
     const urls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
       twitter: `https://twitter.com/intent/tweet?text=${encodedText}`,
@@ -655,6 +673,7 @@ const SessionList = () => {
             <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
             <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
             <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
+            <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={{ bgcolor: '#4caf50' }}>🖼️ {t("sessions.downloadImage")}</Button>
           </Stack>
         </DialogContent>
       </Dialog>

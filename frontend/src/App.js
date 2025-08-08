@@ -68,7 +68,6 @@ import FormateurDashboard from "./pages/dashboard/FormateurDashboard";
 import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 // --------------------------------------------------------------------------------------
 // feedbacks
-import FeedbackListPage from "./features/views/feedback/FeedbackList/Réclamationlist";
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
