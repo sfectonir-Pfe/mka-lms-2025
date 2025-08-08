@@ -8,6 +8,8 @@ import {
   Button,
   Collapse,
   Divider,
+  Rating,
+  Chip,
 } from "@mui/material";
 
 const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSelectedSeance, setFeedbackOpen }) => {
@@ -18,26 +20,29 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
 
   useEffect(() => {
     if (!seances || seances.length === 0) return;
-    // Pour chaque séance, fetch feedbacklist et calcule la moyenne
+    
+    // Utiliser l'endpoint backend pour obtenir les moyennes des feedbacks
     const fetchAverages = async () => {
-      const results = await Promise.all(
-        seances.map(async (s) => {
-          try {
-            const res = await fetch(`http://localhost:8000/feedback/feedbacklist/${s.id}`);
-            const data = await res.json();
-            // Récupère toutes les réponses numériques (1-5)
-            const allRatings = data.flatMap(fb => (fb.answers || []).map(qa => Number(qa.answer)).filter(val => !isNaN(val) && val >= 1 && val <= 5));
-            const avg = allRatings.length > 0 ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length) : null;
-            return { id: s.id, avg };
-          } catch {
-            return { id: s.id, avg: null };
-          }
-        })
-      );
-      const avgObj = {};
-      results.forEach(({ id, avg }) => { avgObj[id] = avg; });
-      setFeedbackAverages(avgObj);
+      if (!seances || seances.length === 0) return;
+      
+      // Obtenir l'ID de session depuis la première séance
+      const sessionId = seances[0]?.session2?.id;
+      if (!sessionId) return;
+
+      try {
+        const res = await fetch(`http://localhost:8000/session2/session/${sessionId}/with-feedback`);
+        const data = await res.json();
+        
+        const avgObj = {};
+        data.forEach(seance => {
+          avgObj[seance.id] = seance.averageFeedbackScore;
+        });
+        setFeedbackAverages(avgObj);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des moyennes de feedback:", error);
+      }
     };
+    
     fetchAverages();
   }, [seances]);
 

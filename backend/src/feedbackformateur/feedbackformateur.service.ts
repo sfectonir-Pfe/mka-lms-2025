@@ -47,7 +47,7 @@ export class FeedbackFormateurService {
 
   async findAllByFormateur(userId: number) {
     const feedbacks = await this.prisma.feedbackFormateur.findMany({
-      where: { userId },
+      where: { formateurId: userId },
     });
 
     return await Promise.all(
@@ -87,7 +87,7 @@ export class FeedbackFormateurService {
   async findAllByFormateurAndSeance(formateurId: number, seanceId: number) {
     const feedbacks = await this.prisma.feedbackFormateur.findMany({
       where: {
-        userId: formateurId,
+        formateurId: formateurId,
         seanceId,
       },
     });

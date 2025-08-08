@@ -35,11 +35,40 @@ const ProgramList = () => {
   };
 
   const columns = [
-    { valueGetter: (value) => {
-
-      return "P-"+value
-    },field: "id", headerName: t('table.id'), width: 80 },
-    { field: "name", headerName: t('programs.programName'), flex: 1 },
+    { 
+      valueGetter: (value) => {
+        return "P-"+value
+      },
+      field: "id", 
+      headerName: t('table.id'), 
+      width: 80 
+    },
+    { 
+      field: "name", 
+      headerName: t('programs.programName'), 
+      flex: 1 
+    },
+    {
+      field: "sessionsAssociees",
+      headerName: t('programs.associatedSessions'),  // Changed translation key to 'programs.associatedSessions'
+      width: 200,
+      renderCell: (params) => {
+        if (!params || !params.row) {
+          return '-';
+        }
+        
+        // Safely access buildProgram sessions
+        const buildProgramSessions = params.row.buildProgram?.sessions?.map(session => session?.name)?.filter(Boolean) || [];
+        
+        // Safely access direct sessions
+        const directSessions = params.row.sessions2?.map(s => s?.name)?.filter(Boolean) || [];
+        
+        // Combine both sources and remove duplicates
+        const allSessions = [...new Set([...buildProgramSessions, ...directSessions])];
+        
+        return allSessions.length > 0 ? allSessions.join(', ') : '-';
+      }
+    },
     {
       field: "actions",
       headerName: t('common.actions'),

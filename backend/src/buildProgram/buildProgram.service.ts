@@ -52,7 +52,7 @@ export class buildProgramService {
   }
 
   async findAll() {
-    return this.prisma.buildProgram.findMany({
+    const buildPrograms = await this.prisma.buildProgram.findMany({
       include: {
         program: true,
         modules: {
@@ -72,6 +72,55 @@ export class buildProgramService {
         },
       },
     });
+
+    const buildProgramsWithRatings = await Promise.all(
+      buildPrograms.map(async (buildProgram) => {
+        const sessions = await this.prisma.session2.findMany({
+          where: { programId: buildProgram.programId },
+        });
+
+        let totalRating = 0;
+        let totalFeedbacks = 0;
+
+        for (const session of sessions) {
+          const feedbacks = await this.prisma.sessionFeedback.findMany({
+            where: { sessionId: session.id },
+            select: { rating: true, comments: true },
+          });
+
+          feedbacks.forEach(fb => {
+            let ratingsData = null;
+            try {
+              if (fb.comments) {
+                const parsedComments = JSON.parse(fb.comments);
+                ratingsData = parsedComments.ratings;
+              }
+            } catch (error) {
+              console.error('Error parsing comments for ratings:', error);
+            }
+            
+            const score = this.calculateWeightedScore(ratingsData);
+            if (score > 0) {
+              totalRating += score;
+              totalFeedbacks++;
+            }
+          });
+        }
+
+        const averageRating = totalFeedbacks > 0
+          ? Math.round((totalRating / totalFeedbacks) * 10) / 10
+          : null;
+
+        return {
+          ...buildProgram,
+          averageRating,
+          sessionCount: sessions.length,
+          feedbackCount: totalFeedbacks,
+        };
+      })
+    );
+
+    return buildProgramsWithRatings;
   }
 
   async remove(id: number) {
@@ -138,7 +187,7 @@ export class buildProgramService {
   return { message: "✅ Program modifiée avec succès !" };
 }
 async findByProgramId(programId: number) {
-  return this.prisma.buildProgram.findFirst({
+  const buildProgram = await this.prisma.buildProgram.findFirst({
     where: { programId },
     include: {
       program: true,
@@ -159,6 +208,99 @@ async findByProgramId(programId: number) {
       },
     },
   });
+
+  if (!buildProgram) return null;
+
+  const sessions = await this.prisma.session2.findMany({
+    where: { programId: buildProgram.programId },
+  });
+
+  let totalRating = 0;
+  let totalFeedbacks = 0;
+
+  for (const session of sessions) {
+    const feedbacks = await this.prisma.sessionFeedback.findMany({
+      where: { sessionId: session.id },
+      select: { rating: true, comments: true },
+    });
+
+    feedbacks.forEach(fb => {
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const score = this.calculateWeightedScore(ratingsData);
+      if (score > 0) {
+        totalRating += score;
+        totalFeedbacks++;
+      }
+    });
+  }
+
+  const averageRating = totalFeedbacks > 0
+    ? Math.round((totalRating / totalFeedbacks) * 10) / 10
+    : null;
+
+  return {
+    ...buildProgram,
+    averageRating,
+    sessionCount: sessions.length,
+    feedbackCount: totalFeedbacks,
+  };
 }
+
+  private processFrontendRatings(ratings: any): any {
+    if (!ratings || typeof ratings !== 'object') return {};
+
+    const emojiMap: Record<string, number> = {
+      '😞': 1,
+      '😐': 2,
+      '🙂': 3,
+      '😊': 4,
+      '🤩': 5
+    };
+
+    const processed: any = {};
+    Object.entries(ratings).forEach(([key, value]) => {
+      if (typeof value === 'string' && emojiMap[value]) {
+        processed[key] = emojiMap[value];
+      } else if (typeof value === 'number') {
+        processed[key] = value;
+      }
+    });
+
+    return processed;
+  }
+
+  private calculateWeightedScore(ratings: any): number {
+    if (!ratings) return 0;
+
+    try {
+      const ratingsData = typeof ratings === 'string' ? JSON.parse(ratings) : ratings;
+
+      if (!ratingsData || typeof ratingsData !== 'object') return 0;
+
+      const processedRatings = this.processFrontendRatings(ratingsData);
+
+      const validRatings = Object.values(processedRatings)
+        .filter(rating => typeof rating === 'number' && rating >= 1 && rating <= 5) as number[];
+
+      if (validRatings.length === 0) return 0;
+
+      const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
+      const average = sum / validRatings.length;
+      
+      return Math.round(average * 10) / 10;
+    } catch (error) {
+      console.error('Erreur lors du calcul du score moyen:', error);
+      return 0;
+    }
+  }
 
 }

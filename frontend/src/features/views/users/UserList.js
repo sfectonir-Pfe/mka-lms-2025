@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { useTranslation } from 'react-i18next'
 import axios from "axios"
@@ -501,7 +499,7 @@ export default function UserList() {
                             sx={{ color: "primary.main", "&:hover": { bgcolor: alpha("#1976d2", 0.1) } }}
                             onClick={() => {
                               sessionStorage.setItem("editingUser", JSON.stringify(user))
-                              window.location.href = `/EditProfile/${user.id}`
+                              window.location.href = `/EditProfile/${user.email}`
                             }}
                           >
                             <Edit />

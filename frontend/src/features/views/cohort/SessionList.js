@@ -21,12 +21,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
-import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback } from "@mui/icons-material";
+import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback, Download } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import SessionFeedbackForm from '../../../features/views/feedback/feedbackForm/session-feedback-form';
+import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
 
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
@@ -137,8 +137,26 @@ const SessionList = () => {
     setShareModal({ open: true, session });
   };
 
-  const handleSocialShare = (platform) => {
+  const handleSocialShare = async (platform) => {
     const encodedText = encodeURIComponent(shareText);
+    
+    if (platform === 'facebook') {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success(t('sessions.textCopiedForFacebook'), {
+          autoClose: 8000,
+          position: "top-center"
+        });
+        // Délai pour laisser le temps à l'utilisateur de voir la notification
+        setTimeout(() => {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank', 'width=600,height=400');
+        }, 1000);
+        return;
+      } catch (err) {
+        console.error('Failed to copy text:', err);
+      }
+    }
+    
     const urls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
       twitter: `https://twitter.com/intent/tweet?text=${encodedText}`,
@@ -313,6 +331,14 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => navigate(`/sessions/${session.id}/feedbacklist`)}
+                  >
+                    📊 {t("sessions.feedbackList")}
+                  </Button>
                 </Stack>
               )}
 
@@ -353,6 +379,27 @@ const SessionList = () => {
                 📅 {t("sessions.period")} <strong>{session.startDate?.slice(0, 10)}</strong> {t("sessions.to")}{" "}
                 <strong>{session.endDate?.slice(0, 10)}</strong>
               </Typography>
+              
+              {/* Average Feedback Rating */}
+              <Box mt={1} display="flex" alignItems="center" gap={1}>
+                <Typography variant="body2" fontWeight="bold">
+                  ⭐ Average Rating:
+                </Typography>
+                {session.averageRating ? (
+                  <>
+                    <Typography variant="body2" color="primary" fontWeight="bold">
+                      {session.averageRating.toFixed(1)}/5
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      ({session.feedbackCount} {session.feedbackCount === 1 ? 'feedback' : 'feedbacks'})
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No feedback yet
+                  </Typography>
+                )}
+              </Box>
 
               {/* Modules and Contents */}
               {session.session2Modules?.length > 0 && (
@@ -626,12 +673,13 @@ const SessionList = () => {
             <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
             <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
             <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
+            <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={{ bgcolor: '#4caf50' }}>🖼️ {t("sessions.downloadImage")}</Button>
           </Stack>
         </DialogContent>
       </Dialog>
 
       {/* Feedback Dialog */}
-      <SessionFeedbackForm 
+      <AddSessionFeedback
         open={openFeedbackDialog} 
         onClose={() => setOpenFeedbackDialog(false)}
         session={selectedSession}

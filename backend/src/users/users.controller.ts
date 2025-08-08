@@ -305,7 +305,7 @@ async getStudentsWithoutFeedback(
 
   // 3. Exclure ceux qui ont déjà reçu un feedback de ce formateur pour cette séance
   const feedbacks = await this.prisma.feedbackFormateur.findMany({
-    where: { userId: Number(formateurId), seanceId: Number(seanceId) },
+    where: { formateurId: Number(formateurId), seanceId: Number(seanceId) },
     select: { studentId: true }
   });
   const alreadyFeedbackStudentIds = feedbacks.map(f => f.studentId);

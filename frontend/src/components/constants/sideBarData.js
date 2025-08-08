@@ -30,9 +30,16 @@ export const sideBarData = [
   
   
 
-  { text: "sidebar.sessions", icon: <CalendarMonthIcon />, path: "/sessions" },
-  { text: "sidebar.feedback", icon: <MdFeedback />, path: "/feedback" },
-  { text: "sidebar.feedbackList", icon: <MdFeedback />, path: "/feedback-list" },
+  { 
+    text: "sidebar.sessions", 
+    icon: <CalendarMonthIcon />, 
+    path: "/sessions",
+    children: [
+      { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+    ]
+  },
+  { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+  { text: "sidebar.RéclamationList", icon: <MdFeedback />, path: "/Réclamationlist" },
 //  {text: "Séances", icon: <DesktopMacIcon />, path: "/formateur/seances" },
 
 

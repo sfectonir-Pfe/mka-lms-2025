@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
-
 import { $Enums } from '@prisma/client';
 
 @Injectable()
@@ -9,177 +11,363 @@ export class Session2Service {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: any, file?: Express.Multer.File) {
-    console.log('🔍 Session2 create - Received data:', data);
-    console.log('🔍 Session2 create - File:', file?.filename);
-    
     const { name, programId, startDate, endDate } = data;
-    
-    console.log('🔍 Session2 create - Extracted fields:', { name, programId, startDate, endDate });
 
-    try {
-      const programStructure = await this.prisma.buildProgram.findFirst({
-        where: { programId: Number(programId) },
-        include: {
-          modules: {
-            include: {
-              module: true,
-              courses: {
-                include: {
-                  course: true,
-                  contenus: {
-                    include: { contenu: true },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      console.log('🔍 Session2 create - Program structure found:', !!programStructure);
-      if (programStructure) {
-        console.log('🔍 Session2 create - Modules count:', programStructure.modules?.length || 0);
-      }
-
-      if (!programStructure) {
-        console.error('❌ Session2 create - No program structure found for programId:', programId);
-        throw new Error("Structure du programme introuvable.");
-      }
-
-      console.log('🔍 Session2 create - Creating session2 record...');
-      const session2 = await this.prisma.session2.create({
-        data: {
-          name,
-          programId: Number(programId),
-          startDate: startDate ? new Date(startDate) : undefined,
-          endDate: endDate ? new Date(endDate) : undefined,
-          imageUrl: file
-            ? `http://localhost:8000/uploads/sessions/${file.filename}`
-            : undefined,
-        },
-      });
-      console.log('🔍 Session2 create - Session2 created with ID:', session2.id);
-
-      console.log('🔍 Session2 create - Creating modules and courses...');
-      for (const mod of programStructure.modules) {
-        console.log('🔍 Session2 create - Processing module:', mod.moduleId);
-        const s2mod = await this.prisma.session2Module.create({
-          data: {
-            session2Id: session2.id,
-            moduleId: mod.moduleId,
-          },
-        });
-
-        for (const course of mod.courses) {
-          console.log('🔍 Session2 create - Processing course:', course.courseId);
-          const s2course = await this.prisma.session2Course.create({
-            data: {
-              session2ModuleId: s2mod.id,
-              courseId: course.courseId,
-            },
-          });
-
-          for (const ct of course.contenus) {
-            console.log('🔍 Session2 create - Processing contenu:', ct.contenuId);
-            await this.prisma.session2Contenu.create({
-              data: {
-                session2CourseId: s2course.id,
-                contenuId: ct.contenuId,
-              },
-            });
-          }
-        }
-      }
-
-      console.log('✅ Session2 create - Successfully created session with all structure');
-      return { message: "✅ Session2 créée avec structure copiée avec succès" };
-    } catch (error) {
-      console.error('❌ Session2 create - Error:', error.message);
-      console.error('❌ Session2 create - Stack:', error.stack);
-      throw error;
-    }
-  }
-
-  async remove(id: number) {
-    return this.prisma.session2.delete({
-      where: { id },
-    });
-  }
-  async findAll() {
-  return this.prisma.session2.findMany({
-    include: {
-      program: true,
-      session2Modules: {
-        include: {
-          module: true,
-          courses: {
-            include: {
-              course: true,
-              contenus: {
-                include: {
-                  contenu: true,
+    const programStructure = await this.prisma.buildProgram.findFirst({
+      where: { programId: Number(programId) },
+      include: {
+        modules: {
+          include: {
+            module: true,
+            courses: {
+              include: {
+                course: true,
+                contenus: {
+                  include: { contenu: true },
                 },
               },
             },
           },
         },
       },
-    },
-  });
-}
- async addUserToSession(session2Id: number, email: string) {
+    });
+
+    if (!programStructure) {
+      throw new Error('Structure du programme introuvable.');
+    }
+
+    const session2 = await this.prisma.session2.create({
+      data: {
+        name,
+        programId: Number(programId),
+        startDate: startDate ? new Date(startDate) : undefined,
+        endDate: endDate ? new Date(endDate) : undefined,
+        imageUrl: file
+          ? `http://localhost:8000/uploads/sessions/${file.filename}`
+          : undefined,
+      },
+    });
+
+    for (const mod of programStructure.modules) {
+      const s2mod = await this.prisma.session2Module.create({
+        data: {
+          session2Id: session2.id,
+          moduleId: mod.moduleId,
+        },
+      });
+
+      for (const course of mod.courses) {
+        const s2course = await this.prisma.session2Course.create({
+          data: {
+            session2ModuleId: s2mod.id,
+            courseId: course.courseId,
+          },
+        });
+
+        for (const ct of course.contenus) {
+          await this.prisma.session2Contenu.create({
+            data: {
+              session2CourseId: s2course.id,
+              contenuId: ct.contenuId,
+            },
+          });
+        }
+      }
+    }
+
+    return {
+      message: '✅ Session2 créée avec structure copiée avec succès',
+    };
+  }
+
+  async remove(id: number) {
+    return this.prisma.session2.delete({ where: { id } });
+  }
+
+  async findAll() {
+    const sessions = await this.prisma.session2.findMany({
+      include: {
+        program: true,
+        session2Modules: {
+          include: {
+            module: true,
+            courses: {
+              include: {
+                course: true,
+                contenus: {
+                  include: { contenu: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const sessionsWithFeedback = await Promise.all(
+      sessions.map(async (session) => {
+        const feedbacks = await this.prisma.sessionFeedback.findMany({
+          where: { sessionId: session.id },
+          select: { rating: true, comments: true },
+        });
+
+        let totalScore = 0;
+        let validScores = 0;
+
+        feedbacks.forEach(fb => {
+          let ratingsData = null;
+          try {
+            if (fb.comments) {
+              const parsedComments = JSON.parse(fb.comments);
+              ratingsData = parsedComments.ratings;
+            }
+          } catch (error) {
+            console.error('Error parsing comments for ratings:', error);
+          }
+          
+          const score = this.calculateWeightedScore(ratingsData);
+          if (score > 0) {
+            totalScore += score;
+            validScores++;
+          }
+        });
+
+        const averageRating = validScores > 0
+          ? Math.round((totalScore / validScores) * 10) / 10
+          : null;
+
+        return {
+          ...session,
+          averageRating,
+          feedbackCount: feedbacks.length,
+        };
+      })
+    );
+
+    return sessionsWithFeedback;
+  }
+
+  async addUserToSession(session2Id: number, email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException("Utilisateur introuvable");
+    if (!user) throw new NotFoundException('Utilisateur introuvable');
 
     const exists = await this.prisma.userSession2.findUnique({
       where: { userId_session2Id: { userId: user.id, session2Id } },
     });
-    if (exists) throw new BadRequestException("Utilisateur déjà dans la session");
+    if (exists)
+      throw new BadRequestException('Utilisateur déjà dans la session');
 
     await this.prisma.userSession2.create({
       data: { userId: user.id, session2Id },
     });
 
-    return { message: "Utilisateur ajouté à la session !" };
+    return { message: 'Utilisateur ajouté à la session !' };
   }
-  // session2.service.ts
-async getUsersForSession(session2Id: number) {
-  // Assumes you have a join table: userSession2 (with userId, session2Id)
-  // Adjust field names as needed!
-  const assigned = await this.prisma.userSession2.findMany({
-    where: { session2Id },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          profilePic: true,
-          role: true,
+
+  async getUsersForSession(session2Id: number) {
+    const assigned = await this.prisma.userSession2.findMany({
+      where: { session2Id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePic: true,
+            role: true,
+          },
         },
       },
-    },
-  });
-  // Return just the users:
-  return assigned.map(item => item.user);
-}
-// session2.service.ts
-
-async removeUserFromSession(session2Id: number, userId: number) {
-  return this.prisma.userSession2.deleteMany({
-    where: {
-      session2Id,
-      userId,
-    },
-  });
-}
-async updateStatus(id: number, status: string) {
-  if (!['ACTIVE', 'INACTIVE', 'COMPLETED', 'ARCHIVED'].includes(status)) {
-    throw new BadRequestException('Invalid status');
+    });
+    return assigned.map((item) => item.user);
   }
-  return this.prisma.session2.update({
-    where: { id },
-    data: { status: { set: status as $Enums.Session2Status } }, // ✅ CORRECT!
-  });
-}
+
+  async removeUserFromSession(session2Id: number, userId: number) {
+    return this.prisma.userSession2.deleteMany({
+      where: { session2Id, userId },
+    });
+  }
+
+  async updateStatus(id: number, status: string) {
+    if (
+      !['ACTIVE', 'INACTIVE', 'COMPLETED', 'ARCHIVED'].includes(status)
+    ) {
+      throw new BadRequestException('Invalid status');
+    }
+
+    return this.prisma.session2.update({
+      where: { id },
+      data: { status: { set: status as $Enums.Session2Status } },
+    });
+  }
+
+  async getSessionById(id: number) {
+    const session = await this.prisma.session2.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+    if (!session) {
+      throw new NotFoundException(`Session with id ${id} not found`);
+    }
+    return session;
+  }
+
+  async findSeancesWithAvgFeedback(sessionId: number) {
+    const seances = await this.prisma.seanceFormateur.findMany({
+      where: { session2Id: sessionId },
+    });
+
+    const seancesWithFeedback = await Promise.all(
+      seances.map(async (seance) => {
+        const feedbacks = await this.prisma.seanceFeedback.findMany({
+          where: { seanceId: seance.id },
+          select: { sessionRating: true }, // uniquement ce champ autorisé
+        });
+
+        const ratings = feedbacks
+          .map((fb) => fb.sessionRating)
+          .filter((r) => typeof r === 'number');
+
+        const averageRating =
+          ratings.length > 0
+            ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+            : null;
+
+        return {
+          ...seance,
+          averageFeedbackScore: averageRating,
+        };
+      })
+    );
+
+    return seancesWithFeedback;
+  }
+
+  async getAverageSessionFeedback(sessionId: number) {
+    const feedbacks = await this.prisma.sessionFeedback.findMany({
+      where: { sessionId },
+      select: { rating: true, comments: true },
+    });
+
+    let totalScore = 0;
+    let validScores = 0;
+
+    feedbacks.forEach(fb => {
+      let ratingsData = null;
+      try {
+        if (fb.comments) {
+          const parsedComments = JSON.parse(fb.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const score = this.calculateWeightedScore(ratingsData);
+      if (score > 0) {
+        totalScore += score;
+        validScores++;
+      }
+    });
+
+    const average = validScores > 0
+      ? Math.round((totalScore / validScores) * 10) / 10
+      : 0;
+
+    return { average, count: validScores };
+  }
+
+  async getSessionFeedbackList(sessionId: number) {
+    const feedbacks = await this.prisma.sessionFeedback.findMany({
+      where: { sessionId },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return feedbacks.map((feedback) => {
+      let ratingsData = null;
+      try {
+        if (feedback.comments) {
+          const parsedComments = JSON.parse(feedback.comments);
+          ratingsData = parsedComments.ratings;
+        }
+      } catch (error) {
+        console.error('Error parsing comments for ratings:', error);
+      }
+      
+      const averageRating = this.calculateWeightedScore(ratingsData);
+
+      return {
+        id: feedback.id,
+        studentName: feedback.user?.name || 'Utilisateur inconnu',
+        studentEmail: feedback.user?.email || '',
+        averageRating: averageRating > 0 ? averageRating : null,
+      };
+    });
+  }
+
+  async getSessionFeedbackOverview(sessionId: number) {
+    const feedbackList = await this.getSessionFeedbackList(sessionId);
+    
+    return {
+      sessionFeedbackList: feedbackList,
+    };
+  }
+
+  private processFrontendRatings(ratings: any): any {
+    if (!ratings || typeof ratings !== 'object') return {};
+
+    const emojiMap: Record<string, number> = {
+      '😞': 1,
+      '😐': 2,
+      '🙂': 3,
+      '😊': 4,
+      '🤩': 5
+    };
+
+    const processed: any = {};
+    Object.entries(ratings).forEach(([key, value]) => {
+      if (typeof value === 'string' && emojiMap[value]) {
+        processed[key] = emojiMap[value];
+      } else if (typeof value === 'number') {
+        processed[key] = value;
+      }
+    });
+
+    return processed;
+  }
+
+  private calculateWeightedScore(ratings: any): number {
+    if (!ratings) return 0;
+
+    try {
+      const ratingsData = typeof ratings === 'string' ? JSON.parse(ratings) : ratings;
+
+      if (!ratingsData || typeof ratingsData !== 'object') return 0;
+
+      const processedRatings = this.processFrontendRatings(ratingsData);
+
+      const validRatings = Object.values(processedRatings)
+        .filter(rating => typeof rating === 'number' && rating >= 1 && rating <= 5) as number[];
+
+      if (validRatings.length === 0) return 0;
+
+      const sum = validRatings.reduce((acc, rating) => acc + rating, 0);
+      const average = sum / validRatings.length;
+      
+      return Math.round(average * 10) / 10;
+    } catch (error) {
+      console.error('Erreur lors du calcul du score moyen:', error);
+      return 0;
+    }
+  }
 }

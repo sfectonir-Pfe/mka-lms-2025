@@ -116,6 +116,12 @@ export default function BuildProgramOverviewPage() {
               </Typography>
             )}
 
+            {buildProgram.averageRating && (
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                ⭐ {t('buildProgram.averageRating', 'Note moyenne')}: <strong>{buildProgram.averageRating}/5</strong>
+              </Typography>
+            )}
+
             <Divider sx={{ my: 1 }} />
 
             {buildProgram.modules.map((m) => (
