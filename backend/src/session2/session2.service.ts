@@ -224,21 +224,60 @@ export class Session2Service {
       seances.map(async (seance) => {
         const feedbacks = await this.prisma.seanceFeedback.findMany({
           where: { seanceId: seance.id },
-          select: { sessionRating: true }, // uniquement ce champ autorisé
+          select: {
+            sessionRating: true,
+            contentQuality: true,
+            sessionDuration: true,
+            sessionOrganization: true,
+            objectivesAchieved: true,
+            trainerRating: true,
+            trainerClarity: true,
+            trainerAvailability: true,
+            trainerPedagogy: true,
+            trainerInteraction: true,
+            teamRating: true,
+            teamCollaboration: true,
+            teamParticipation: true,
+            teamCommunication: true,
+          },
         });
 
-        const ratings = feedbacks
-          .map((fb) => fb.sessionRating)
-          .filter((r) => typeof r === 'number');
+        const perFeedbackAverages: number[] = feedbacks
+          .map((fb) => {
+            const values = [
+              fb.sessionRating,
+              fb.contentQuality,
+              fb.sessionDuration,
+              fb.sessionOrganization,
+              fb.objectivesAchieved,
+              fb.trainerRating,
+              fb.trainerClarity,
+              fb.trainerAvailability,
+              fb.trainerPedagogy,
+              fb.trainerInteraction,
+              fb.teamRating,
+              fb.teamCollaboration,
+              fb.teamParticipation,
+              fb.teamCommunication,
+            ].filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+
+            if (values.length === 0) return null;
+            const avg = values.reduce((a, b) => a + b, 0) / values.length;
+            return avg;
+          })
+          .filter((v): v is number => typeof v === 'number');
 
         const averageRating =
-          ratings.length > 0
-            ? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+          perFeedbackAverages.length > 0
+            ? Math.round(
+                (perFeedbackAverages.reduce((a, b) => a + b, 0) / perFeedbackAverages.length) * 10
+              ) / 10
             : null;
 
         return {
           ...seance,
           averageFeedbackScore: averageRating,
+          feedbackCount: perFeedbackAverages.length,
         };
       })
     );

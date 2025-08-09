@@ -294,7 +294,7 @@ const FeedbackList = () => {
     {
       field: 'averageRating',
       headerName: t('averageRating'),
-      width: 180,
+      width: 190,
       renderCell: (params) => {
         const avg = params.row.averageRating;
         if (avg === null || avg === undefined) return t('noRating');
@@ -305,7 +305,7 @@ const FeedbackList = () => {
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span style={{ fontSize: 22 }}>{moodEmoji}</span>
             <span style={{ fontWeight: 'bold', marginLeft: 4 }}>{moodLabels[rounded - 1]}</span>
-            <span style={{ color: '#888', marginLeft: 4 }}>({avg.toFixed(2)})</span>
+            <span style={{ color: '#888', marginLeft: 4 }}>({avg.toFixed(1)})</span>
           </span>
         );
       }

@@ -17,6 +17,7 @@ const SeanceFormateurPage = () => {
   const [sessionName, setSessionName] = useState('');
   const [averageRating, setAverageRating] = useState(null);
   const [loadingRating, setLoadingRating] = useState(true);
+  const [totalFeedbacks, setTotalFeedbacks] = useState(0);
 
   const fetchSeances = async () => {
     try {
@@ -43,17 +44,28 @@ const SeanceFormateurPage = () => {
       const res = await axios.get(`http://localhost:8000/session2/session/${sessionId}/with-feedback`);
       const seancesWithFeedback = res.data;
       
-      // Calculate overall average rating across all seances
-      const allRatings = seancesWithFeedback
-        .map(seance => seance.averageFeedbackScore)
-        .filter(rating => rating !== null && rating !== undefined);
-      
-      if (allRatings.length > 0) {
-        const sum = allRatings.reduce((a, b) => a + b, 0);
-        const avg = sum / allRatings.length;
+      // Weighted average across all seances by their feedback counts
+      const items = seancesWithFeedback.filter(
+        (s) => s.averageFeedbackScore !== null && s.averageFeedbackScore !== undefined && Number.isFinite(s.averageFeedbackScore)
+      );
+      const totalResponses = items.reduce((acc, s) => acc + (s.feedbackCount || 0), 0);
+      if (items.length > 0 && totalResponses > 0) {
+        const weightedSum = items.reduce(
+          (acc, s) => acc + s.averageFeedbackScore * (s.feedbackCount || 0),
+          0
+        );
+        const avg = weightedSum / totalResponses;
         setAverageRating(avg.toFixed(1));
+        setTotalFeedbacks(totalResponses);
+      } else if (items.length > 0) {
+        // fallback to simple mean if counts missing
+        const sum = items.reduce((acc, s) => acc + s.averageFeedbackScore, 0);
+        const avg = sum / items.length;
+        setAverageRating(avg.toFixed(1));
+        setTotalFeedbacks(items.length);
       } else {
         setAverageRating(null);
+        setTotalFeedbacks(0);
       }
     } catch (err) {
       console.error('Error fetching average rating:', err);
@@ -117,7 +129,7 @@ const SeanceFormateurPage = () => {
                 {averageRating} / 5
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Basée sur toutes les séances
+                Basée sur {totalFeedbacks} avis
               </Typography>
             </Box>
           )}

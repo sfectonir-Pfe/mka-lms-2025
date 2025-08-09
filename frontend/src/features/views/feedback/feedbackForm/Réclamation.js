@@ -444,39 +444,9 @@ const FeedbackPage = () => {
                 </Grid>
                 {formData.feedbackType === "bug" && (
                   <>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={3}
-                        label="🔍 Étapes pour reproduire"
-                        placeholder="1. Allez sur la page...&#10;2. Cliquez sur...&#10;3. Le problème apparaît..."
-                        value={formData.stepsToReproduce}
-                        onChange={(e) => handleInputChange("stepsToReproduce", e.target.value)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={3}
-                        label="✅ Comportement attendu"
-                        placeholder="Ce qui devrait se passer normalement..."
-                        value={formData.expectedBehavior}
-                        onChange={(e) => handleInputChange("expectedBehavior", e.target.value)}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={3}
-                        label="❌ Comportement actuel"
-                        placeholder="Ce qui se passe actuellement..."
-                        value={formData.actualBehavior}
-                        onChange={(e) => handleInputChange("actualBehavior", e.target.value)}
-                      />
-                    </Grid>
+                    
+                    
+                    
                   </>
                 )}
               </Grid>

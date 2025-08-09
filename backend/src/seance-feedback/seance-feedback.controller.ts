@@ -26,6 +26,14 @@ export class SeanceFeedbackController {
     return this.seanceFeedbackService.getFeedbackList(+seanceId);
   }
 
+  @Get(':seanceId')
+  async getFeedbacksBySeance(@Param('seanceId') seanceId: string) {
+    if (!seanceId) {
+      throw new BadRequestException('seanceId is required');
+    }
+    return this.seanceFeedbackService.getFeedbackList(+seanceId);
+  }
+
   @Get('details/:seanceId/:userId')
   async getFeedbackDetails(
     @Param('seanceId') seanceId: string,
