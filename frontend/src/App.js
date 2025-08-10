@@ -15,7 +15,7 @@ import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamatio
 import StudentLandingPage from "./pages/session/StudentLandingPage";
 import StudentProgramPage from "./pages/session/StudentProgramPage";
 import ProfilePage from "./pages/profile/ProfilePage";
-import EditProfilePage from "./pages/profile/EditProfilePage";
+import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 
 // Auth / Main/chatbot containers
 import Auth from "./apps/Auth";

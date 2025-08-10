@@ -249,13 +249,13 @@ const AnimerSeanceView = () => {
 
     return (
       <Box>
-        <Typography variant="h6" mb={1}>📘 <strong>{t('program')} : {programDetails.program.title}</strong></Typography>
+        <Typography variant="h6" mb={1}>📘 <strong>{t('program')} : {programDetails.program.name}</strong></Typography>
 
         <Box ml={2} mt={2}>
           {programDetails.session2Modules.map((mod) => (
             <Box key={mod.id} mt={2}>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ color: "#1976d2" }}>
-                📦 {mod.module.title}
+                📦 {mod.module.name}
               </Typography>
 
               <Box ml={3}>
@@ -333,7 +333,7 @@ const AnimerSeanceView = () => {
       {/* Programme */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Chip label={`${t('program')} : ${programDetails?.program?.title || ""}`} color="info" />
+          <Chip label={`${t('program')} : ${programDetails?.program?.name || ""}`} color="info" />
           <Button
             startIcon={<ZoomInMapIcon />}
             onClick={() => setShowContenus(!showContenus)}
