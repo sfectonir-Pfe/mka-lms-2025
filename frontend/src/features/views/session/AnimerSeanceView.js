@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Box,
@@ -23,7 +23,7 @@ import ReactPlayer from "react-player";
 import {
   Description as DescriptionIcon,
   Quiz as QuizIcon,
-  Chat as ChatIcon,
+
   InsertDriveFile as InsertDriveFileIcon,
   AddPhotoAlternate as AddPhotoAlternateIcon,
   Movie as MovieIcon,
@@ -31,16 +31,18 @@ import {
   ZoomInMap as ZoomInMapIcon,
   Feedback as FeedbackIcon,
   List as ListIcon,
+  Group as GroupIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
-import io from "socket.io-client";
-import EmojiPicker from "emoji-picker-react";
-import { Avatar } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+
 import { useNavigate } from "react-router-dom";
-import SeanceFeedbackForm from '../../../features/views/feedback/feedbackForm/SeanceFeedbackForm';
-import FeedbackFormateur from '../../../features/views/feedback/FeedbackFormateur';
+import AddSeanceFeedback from '../../../features/views/feedback/feedbackForm/AddSeanceFeedback';
+import FeedbackFormateur from '../feedback/feedbackForm/FeedbackFormateur';
+import FeedbackEtudiant from '../feedback/feedbackForm/FeedbackEtudiant';
 import SeanceFeedbackList from '../../../features/views/feedback/FeedbackList/seancefeedbacklist';
+import Regroupement from './Regroupement';
 import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
 
 const AnimerSeanceView = () => {
@@ -60,44 +62,14 @@ const AnimerSeanceView = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [showFeedbackSidebar, setShowFeedbackSidebar] = useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
-  const [chatMessages, setChatMessages] = useState([]);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [showFeedbackTab, setShowFeedbackTab] = useState(false);
-  const [newMsg, setNewMsg] = useState("");
-  const [showEmoji, setShowEmoji] = useState(false);
-  const [newFile, setNewFile] = useState(null);
-  const chatBottomRef = useRef();
-  const [socket, setSocket] = useState(null);
+
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
-  // Init socket.io
-  useEffect(() => {
-    const s = io("http://localhost:8000");
-    setSocket(s);
-    s.emit("joinRoom", { seanceId: Number(seanceId) });
 
-    s.on("newMessage", (msg) => {
-      setChatMessages((prev) => [...prev, msg]);
-    });
-
-    s.on("deleteMessage", (payload) => {
-      setChatMessages((prev) => prev.filter((m) => m.id !== payload.id));
-    });
-
-    return () => {
-      s.disconnect();
-    };
-  }, [seanceId]);
-
-  // Load old messages
-  useEffect(() => {
-    if (!seanceId) return;
-    axios.get(`http://localhost:8000/chat-messages/${seanceId}`)
-      .then((res) => setChatMessages(res.data))
-      .catch(() => setChatMessages([]));
-  }, [seanceId]);
 
   // Load feedbacks
   const reloadFeedbacks = () => {
@@ -133,62 +105,9 @@ const AnimerSeanceView = () => {
     reloadFeedbacks();
   }, [seanceId]);
 
-  // Always scroll to bottom
-  useEffect(() => {
-    if (chatBottomRef.current) {
-      chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [chatMessages]);
 
-  const handleEmoji = (e) => {
-    setNewMsg((prev) => prev + e.emoji);
-    setShowEmoji(false);
-  };
 
-  const handleChatSend = async () => {
-    if (!socket) return;
-    if (newFile) {
-      const formData = new FormData();
-      formData.append("file", newFile);
-      formData.append("seanceId", seanceId);
-      try {
-        const res = await axios.post("http://localhost:8000/chat-messages/upload-chat", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
 
-        socket.emit("sendMessage", {
-          content: res.data.fileUrl,
-          type: res.data.fileType || "file",
-          seanceId: Number(seanceId),
-          senderId: user.id,
-        });
-
-        setNewFile(null);
-      } catch {
-        alert(t('fileUploadError'));
-      }
-    } else if (newMsg.trim()) {
-      socket.emit("sendMessage", {
-        content: newMsg,
-        type: "text",
-        seanceId: Number(seanceId),
-        senderId: user.id,
-      });
-
-      setNewMsg("");
-    }
-  };
-
-  const handleDeleteMsg = async (msgId) => {
-    try {
-      await axios.delete(`http://localhost:8000/chat-messages/${msgId}`, {
-        data: { userId: user.id },
-      });
-      setChatMessages((prev) => prev.filter((m) => m.id !== msgId));
-    } catch (err) {
-      alert(t('seances.deleteMessageError'));
-    }
-  };
 
   useEffect(() => {
     const fetchSeance = async () => {
@@ -242,7 +161,7 @@ const AnimerSeanceView = () => {
   };
 
   const handleTabChange = (e, newValue) => {
-    if (newValue !== 4 && newValue !== 5) setPrevTab(tab);
+    if (newValue !== 3 && newValue !== 4) setPrevTab(tab);
     setTab(newValue);
   };
 
@@ -289,6 +208,14 @@ const AnimerSeanceView = () => {
     }
   };
 
+  const toggleFeedbackTab = () => {
+    setShowFeedbackTab(!showFeedbackTab);
+  };
+
+
+
+
+
   const feedbackColumns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'studentName', headerName: t('seances.studentName'), width: 200 },
@@ -322,13 +249,13 @@ const AnimerSeanceView = () => {
 
     return (
       <Box>
-        <Typography variant="h6" mb={1}>📘 <strong>{t('program')} : {programDetails.program.title}</strong></Typography>
+        <Typography variant="h6" mb={1}>📘 <strong>{t('program')} : {programDetails.program.name}</strong></Typography>
 
         <Box ml={2} mt={2}>
           {programDetails.session2Modules.map((mod) => (
             <Box key={mod.id} mt={2}>
               <Typography variant="subtitle1" fontWeight="bold" sx={{ color: "#1976d2" }}>
-                📦 {mod.module.title}
+                📦 {mod.module.name}
               </Typography>
 
               <Box ml={3}>
@@ -406,7 +333,7 @@ const AnimerSeanceView = () => {
       {/* Programme */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Chip label={`${t('program')} : ${programDetails?.program?.title || ""}`} color="info" />
+          <Chip label={`${t('program')} : ${programDetails?.program?.name || ""}`} color="info" />
           <Button
             startIcon={<ZoomInMapIcon />}
             onClick={() => setShowContenus(!showContenus)}
@@ -436,9 +363,10 @@ const AnimerSeanceView = () => {
         <Tabs orientation="vertical" value={tab} onChange={handleTabChange} sx={{ borderRight: 1, borderColor: "divider", minWidth: 180 }}>
           <Tab icon={<DescriptionIcon />} iconPosition="start" label={t('sessionAdditions')} />
           <Tab icon={<QuizIcon />} iconPosition="start" label={t('quizComing')} />
-          <Tab icon={<ChatIcon />} iconPosition="start" label={t('notesChat')} />
           <Tab icon={<InsertDriveFileIcon />} iconPosition="start" label={t('whiteboard')} onClick={() => navigate(`/whiteboard/${seanceId}`)} />
+          <Tab icon={<GroupIcon />} iconPosition="start" label="Regroupement" />
           <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('feedbackFormateur') || 'Feedback Formateur'} />
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label="Feedback Étudiant" />
           {showFeedbackTab && (
             <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('feedback')} />
           )}
@@ -503,124 +431,6 @@ const AnimerSeanceView = () => {
           {/* Onglet 3 */}
           {tab === 2 && (
             <Box>
-              <Typography variant="h6" mb={1}>💬 {t('sessionChat')}</Typography>
-              <Paper sx={{
-                p: 2, mb: 2, maxHeight: 320, minHeight: 150, overflowY: "auto",
-                border: "1px solid #ccc", borderRadius: 2, background: "#f9f9f9"
-              }}>
-                <Stack spacing={1}>
-                  {chatMessages.map((msg, i) => (
-                    <Paper
-                      key={i}
-                      sx={{
-                        p: 1,
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        mb: 1,
-                        gap: 1,
-                      }}
-                    >
-                      {msg.sender?.profilePic
-                        ? (
-                          <img
-                            src={
-                              msg.sender?.profilePic?.startsWith('http')
-                                ? msg.sender.profilePic
-                                : `http://localhost:8000${msg.sender?.profilePic || '/profile-pics/default.png'}`
-                            }
-                            alt={msg.sender?.name}
-                            style={{ width: 32, height: 32, borderRadius: "50%", marginRight: 8 }}
-                          />
-                        ) : (
-                          <Avatar sx={{ width: 32, height: 32, marginRight: 1 }}>
-                            {msg.sender?.name?.[0]?.toUpperCase() || "?"}
-                          </Avatar>
-                        )
-                      }
-
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight="bold" color="primary">
-                          {msg.sender?.name || t('anonymous')}
-                          {msg.sender?.role && (
-                            <span style={{ color: "#888", fontWeight: 400, marginLeft: 8, fontSize: 13 }}>
-                              · {msg.sender.role}
-                            </span>
-                          )}
-                          {msg.createdAt && (
-                            <span style={{ color: "#888", fontSize: 11, marginLeft: 8 }}>
-                              {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </span>
-                          )}{msg.sender?.id === user.id && (
-                            <IconButton size="small" onClick={() => handleDeleteMsg(msg.id)} color="error">
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          )}
-                        </Typography>
-
-                        {/* Message Content */}
-                        {msg.type === "text" && <span>{msg.content}</span>}
-                        {msg.type === "image" && (
-                          <img src={msg.content} alt="img" style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                        )}
-                        {msg.type === "audio" && (
-                          <audio controls src={msg.content} style={{ maxWidth: 180, marginTop: 4 }} />
-                        )}
-                        {msg.type === "video" && (
-                          <video controls src={msg.content} style={{ maxWidth: 180, borderRadius: 6, marginTop: 4 }} />
-                        )}
-                        {msg.type === "file" && (
-                          <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4 }}>
-                            📎 {msg.content.split("/").pop()}
-                          </a>
-                        )}
-                      </Box>
-                    </Paper>
-                  ))}
-                  <div ref={chatBottomRef} />
-                </Stack>
-              </Paper>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <TextField
-                  fullWidth
-                  value={newMsg}
-                  size="small"
-                  placeholder={t('writeMessage')}
-                  onChange={(e) => setNewMsg(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleChatSend()}
-                  sx={{ background: "#fff", borderRadius: 1 }}
-                />
-                <IconButton onClick={() => setShowEmoji((v) => !v)}>
-                  <span role="img" aria-label="emoji">😀</span>
-                </IconButton>
-                <IconButton component="label" color={newFile ? "success" : "primary"}>
-                  <AddPhotoAlternateIcon />
-                  <input
-                    hidden
-                    type="file"
-                    accept="image/*,video/*,audio/*,application/pdf"
-                    onChange={(e) => setNewFile(e.target.files[0])}
-                  />
-                </IconButton>
-                <Button onClick={handleChatSend} variant="contained" disabled={!newMsg.trim() && !newFile}>
-                  {t('send')}
-                </Button>
-              </Stack>
-              {showEmoji && (
-                <Box sx={{ position: "absolute", zIndex: 11 }}>
-                  <EmojiPicker onEmojiClick={handleEmoji} autoFocusSearch={false} />
-                </Box>
-              )}
-              {newFile && (
-                <Typography color="primary" fontSize={12} ml={1} mt={0.5}>
-                  {t('fileReady')}: {newFile.name}
-                </Typography>
-              )}
-            </Box>
-          )}
-          {/* Onglet 4 */}
-          {tab === 3 && (
-            <Box>
               <Typography variant="h6" mt={1}>
                 {t('sessionImages')}
                 <IconButton color="primary" component="label">
@@ -668,6 +478,7 @@ const AnimerSeanceView = () => {
               </Button>
             </Box>
           )}
+
           {/* Onglet FeedbackFormateur */}
           {tab === 4 && (
             <Box>
@@ -675,17 +486,28 @@ const AnimerSeanceView = () => {
               <FeedbackFormateur seanceId={seanceId} />
             </Box>
           )}
+          {/* Onglet Feedback Étudiant */}
+          {tab === 5 && (
+            <Box>
+              <Typography variant="h6" mb={2}>Feedback Étudiant</Typography>
+              <FeedbackEtudiant seanceId={seanceId} />
+            </Box>
+          )}
           {/* Onglet Feedback (dynamique) */}
-          {showFeedbackTab && tab === 5 && (
+          {showFeedbackTab && tab === 6 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
                 <Typography variant="h6">📝 {t('sessionFeedback')}</Typography>
               </Stack>
-              <SeanceFeedbackForm seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
+              <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
             </Box>
           )}
+          {/* Onglet Regroupement */}
+          {tab === 3 && (
+            <Regroupement />
+          )}
           {/* Onglet FeedbackList */}
-          {tab === 6 && (
+          {tab === 7 && (
             <SeanceFeedbackList />
           )}
         </Box>

@@ -62,6 +62,7 @@ const AddUserView = () => {
         email,
         phone: countryCode + phone,
         role,
+        session2Ids: selectedSessions.map(id => parseInt(id)), // Convertir les IDs en nombres
       });
       alert(t('users.createSuccess'));
       navigate("/users");

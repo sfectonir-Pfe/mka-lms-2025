@@ -8,6 +8,8 @@ import {
   Button,
   Collapse,
   Divider,
+  Rating,
+  Chip,
 } from "@mui/material";
 
 const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSelectedSeance, setFeedbackOpen }) => {
@@ -17,27 +19,41 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
   const [feedbackAverages, setFeedbackAverages] = useState({});
 
   useEffect(() => {
-    if (!seances || seances.length === 0) return;
-    // Pour chaque séance, fetch feedbacklist et calcule la moyenne
+    if (!seances || seances.length === 0) {
+      setFeedbackAverages({});
+      return;
+    }
+    
     const fetchAverages = async () => {
-      const results = await Promise.all(
-        seances.map(async (s) => {
-          try {
-            const res = await fetch(`http://localhost:8000/feedback/feedbacklist/${s.id}`);
-            const data = await res.json();
-            // Récupère toutes les réponses numériques (1-5)
-            const allRatings = data.flatMap(fb => (fb.answers || []).map(qa => Number(qa.answer)).filter(val => !isNaN(val) && val >= 1 && val <= 5));
-            const avg = allRatings.length > 0 ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length) : null;
-            return { id: s.id, avg };
-          } catch {
-            return { id: s.id, avg: null };
-          }
-        })
-      );
       const avgObj = {};
-      results.forEach(({ id, avg }) => { avgObj[id] = avg; });
+      
+      for (const seance of seances) {
+        try {
+          const res = await fetch(`http://localhost:8000/feedback/seance/${seance.id}`);
+          if (!res.ok) continue;
+          
+          const feedbacks = await res.json();
+          console.log(`Feedbacks pour séance ${seance.id}:`, feedbacks);
+          
+          if (Array.isArray(feedbacks) && feedbacks.length > 0) {
+            const validRatings = feedbacks
+              .map(f => f.averageRating)
+              .filter(rating => rating !== null && rating !== undefined && rating > 0);
+            
+            if (validRatings.length > 0) {
+              const average = validRatings.reduce((sum, rating) => sum + rating, 0) / validRatings.length;
+              avgObj[seance.id] = average;
+            }
+          }
+        } catch (error) {
+          console.error(`Erreur feedback pour séance ${seance.id}:`, error);
+        }
+      }
+      
+      console.log('Feedback averages calculées:', avgObj);
       setFeedbackAverages(avgObj);
     };
+    
     fetchAverages();
   }, [seances]);
 
@@ -66,9 +82,9 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
           <Paper key={s.id} elevation={3} sx={{ p: 2, mb: 2 }}>
             <Typography variant="h6">{s.title}</Typography>
             {/* Affichage de la moyenne des feedbacks */}
-            {feedbackAverages[s.id] !== undefined && feedbackAverages[s.id] !== null && (
+            {feedbackAverages[s.id] && (
               <Typography variant="body2" color="secondary">
-                ⭐ {t('averageRating')}: {feedbackAverages[s.id].toFixed(2)} / 5
+                ⭐ Note moyenne: {feedbackAverages[s.id].toFixed(1)} / 5
               </Typography>
             )}
             <Typography variant="body2">
