@@ -113,7 +113,40 @@ return { ...safeUser, needsVerification: false }; // Always include this
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    await this.prisma.user.delete({ where: { id } });
+    await this.prisma.$transaction(async (tx) => {
+      // 1) Relations m:n et tables de liaison
+      await tx.userSession2.deleteMany({ where: { userId: id } });
+
+      // 2) Entités dépendantes obligatoires → delete
+      await tx.notification.deleteMany({ where: { userId: id } });
+      await tx.reclamation.deleteMany({ where: { userId: id } });
+      await tx.feedbackList.deleteMany({ where: { userId: id } });
+      await tx.resetToken.deleteMany({ where: { userId: id } });
+      await tx.formateur.deleteMany({ where: { userId: id } });
+      await tx.etudiant.deleteMany({ where: { userId: id } });
+      await tx.createur_De_Formation.deleteMany({ where: { userId: id } });
+      await tx.admin.deleteMany({ where: { userId: id } });
+      await tx.etablissement.deleteMany({ where: { userId: id } });
+
+      // 3) Entités avec FK optionnelle → set NULL
+      await tx.feedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.seanceFeedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.sessionFeedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.chatMemory.updateMany({ where: { userId: id }, data: { userId: null } });
+
+      await tx.chatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.session2ChatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.generalChatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.whiteboardAction.updateMany({ where: { createdById: id }, data: { createdById: null } });
+
+      // 4) FeedbackFormateur: studentId (requis) → delete, autres FK → null
+      await tx.feedbackFormateur.deleteMany({ where: { studentId: id } });
+      await tx.feedbackFormateur.updateMany({ where: { formateurId: id }, data: { formateurId: null } });
+      await tx.feedbackFormateur.updateMany({ where: { userId: id }, data: { userId: null } });
+
+      // 5) Enfin supprimer l'utilisateur
+      await tx.user.delete({ where: { id } });
+    });
     return { id };
   }
 

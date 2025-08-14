@@ -142,7 +142,9 @@ const Chatbot = () => {
         onClick={toggleChatbot}
         aria-label={isOpen ? uiMessages.close : uiMessages.open}
       >
-        {isOpen ? '✕' : <span role="img" aria-label="chat">💬</span>}
+        {isOpen ? '✕' : (
+          <img src={BOT_AVATAR} alt="Chatbot" style={{ width: 32, height: 32, borderRadius: '50%', background: 'transparent' }} />
+        )}
       </button>
 
       {/* Chat Window */}
@@ -178,7 +180,7 @@ const Chatbot = () => {
             gap: 12,
             flexShrink: 0
           }}>
-            <img src={BOT_AVATAR} alt="Bot" style={{ width: 40, height: 40, borderRadius: '50%', background: '#fff', flexShrink: 0 }} />
+            <img src={BOT_AVATAR} alt="Chatbot" style={{ width: 40, height: 40, borderRadius: '50%', background: '#fff', flexShrink: 0 }} />
             <div style={{ fontWeight: 600, fontSize: 20, lineHeight: '1.2', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {uiMessages.chatTitle}
             </div>
@@ -205,7 +207,7 @@ const Chatbot = () => {
                 }}
               >
                 {msg.isBot && (
-                  <img src={BOT_AVATAR} alt="Bot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8, alignSelf: 'flex-end' }} />
+                  <img src={BOT_AVATAR} alt="Chatbot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8, alignSelf: 'flex-end' }} />
                 )}
                 <div
                   style={{
@@ -226,7 +228,7 @@ const Chatbot = () => {
             ))}
             {isLoading && (
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                <img src={BOT_AVATAR} alt="Bot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }} />
+                <img src={BOT_AVATAR} alt="Chatbot" style={{ width: 32, height: 32, borderRadius: '50%', marginRight: 8 }} />
                 <div style={{ 
                   background: 'white', 
                   color: '#333', 

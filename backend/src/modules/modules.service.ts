@@ -1,14 +1,42 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+// src/modules/modules.service.ts
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
-import { CreateModuleDto } from './dto/create-module.dto';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationGateway } from '../notification/notification-gateway'; // path as needed
 
 @Injectable()
 export class ModulesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
-  create(data: CreateModuleDto) {
-    return this.prisma.module.create({ data });
+  async create(dto: any) {
+    // 1. Create the module as usual
+    const module = await this.prisma.module.create({ data: dto });
+
+    // 2. Fetch ALL users
+    const users = await this.prisma.user.findMany();
+
+    // 3. For each user, create notification and emit socket event
+    for (const user of users) {
+  const notification = await this.notificationService.createNotification({
+    userId: user.id,
+    type: 'info',
+    message: `Nouveau module ajouté: ${module.name} (${new Date().toLocaleDateString()})`,
+    link: null,
+  });
+  // Real-time emit
+  this.notificationGateway.sendRealTimeNotification(user.id, notification);
+}
+
+    return module;
   }
+
+
+
+
 
   findAll() {
     return this.prisma.module.findMany({

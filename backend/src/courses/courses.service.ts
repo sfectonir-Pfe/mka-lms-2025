@@ -1,14 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationGateway } from '../notification/notification-gateway';
 
 @Injectable()
 export class CoursesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
-  create(data: CreateCourseDto) {
-    return this.prisma.course.create({ data });
+  async create(data: CreateCourseDto) {
+    // 1. Create the course
+    const course = await this.prisma.course.create({ data });
+
+    // 2. Fetch all users
+    const users = await this.prisma.user.findMany();
+
+    // 3. For each user, create and emit notification
+    for (const user of users) {
+      const notification = await this.notificationService.createNotification({
+        userId: user.id,
+        type: 'info',
+        message: `Nouveau cours ajouté: ${course.title} (${new Date().toLocaleDateString()})`,
+        link: null,
+      });
+      this.notificationGateway.sendRealTimeNotification(user.id, notification);
+    }
+
+    return course;
   }
 
   findAll() {
@@ -17,9 +39,7 @@ export class CoursesService {
         modules: {
           include: {
             module: {
-              select: {
-                name: true
-              }
+              select: { name: true }
             }
           }
         },
@@ -27,11 +47,7 @@ export class CoursesService {
           include: {
             buildProgramModule: {
               include: {
-                module: {
-                  select: {
-                    name: true
-                  }
-                }
+                module: { select: { name: true } }
               }
             }
           }
@@ -43,6 +59,4 @@ export class CoursesService {
   remove(id: number) {
     return this.prisma.course.delete({ where: { id } });
   }
- 
-
 }
