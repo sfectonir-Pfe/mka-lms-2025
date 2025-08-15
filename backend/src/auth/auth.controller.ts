@@ -42,30 +42,16 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     try {
-      console.log('Login request received:', {
-        email: dto.email,
-        rememberMe: dto.rememberMe,
-
-      });
-
-
-
-      // Authentifier l'utilisateur
       const result = await this.authService.login(dto);
-
-      // Ajouter une information sur rememberMe dans la réponse
       return {
         success: true,
         message: 'Connexion réussie',
         data: {
           ...result,
           rememberMe: dto.rememberMe || false,
-          // Ajouter un access_token fictif pour le moment (à remplacer par un vrai JWT plus tard)
-          access_token: `temp_token_${Date.now()}_${dto.rememberMe ? 'long' : 'short'}`
         }
       };
     } catch (error) {
-      console.error('Login error:', error);
       throw new HttpException(
         error.message || 'Échec de la connexion',
         error.status || HttpStatus.UNAUTHORIZED,
@@ -155,11 +141,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
-
-  async reset(
-
-    @Body() dto: ResetPassword
-  ) {
+  async reset(@Body() dto: ResetPassword) {
     try {
       const result = await this.authService.resetPassword(dto.token, dto.newPass, dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
@@ -189,16 +171,11 @@ export class AuthController {
     }
   }
 
-
-
   @Post('logout')
   async logout(@Body() body?: any) {
     try {
       console.log('Logout request received');
-
-      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
-      // Dans une vraie application avec JWT, on invaliderait le token ici
-
+      // No JWT invalidation yet; just a placeholder
       return {
         success: true,
         message: 'Déconnexion réussie',
@@ -215,6 +192,7 @@ export class AuthController {
       );
     }
   }
+
   @Post('update-user')
   async updateUser(@Body() body: { email: string }) {
     try {

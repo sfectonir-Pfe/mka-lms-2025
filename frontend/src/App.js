@@ -50,6 +50,8 @@ import AddSeanceFormateurView from "./features/views/session/AddSeanceFormateurV
 import SeanceFormateurList from "./features/views/session/SeanceFormateurList";
 import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
 // import SessionDetail from "./pages/cohort/SessionDetail";
+// router.jsx
+
 
 //chatbot
 import Chatbot from './components/Chatbot';
@@ -231,6 +233,8 @@ function App() {
 
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+                <Route path="/seances/:seanceId/quiz/:contenuId" element={<PlayQuizPage />} />
+
 
                 <Route path="/programs/build/:programId" element={<BuildProgramView />} />
                 <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />

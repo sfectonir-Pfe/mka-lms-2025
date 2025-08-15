@@ -18,3 +18,25 @@ prisma db seed or yarn run seed
 
 # Delete all migration history
 rm -rf prisma/migrations
+
+# Open interactive DB GUI
+npx prisma studio
+
+# Validate your Prisma schema
+npx prisma validate
+
+# Restore the missing file
+ls migrations/
+
+
+git log -- prisma/migrations
+# or
+git log -- migrations
+
+# after 
+git checkout <commit_id> -- migrations/
+
+
+
+
+

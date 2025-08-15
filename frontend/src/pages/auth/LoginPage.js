@@ -1,35 +1,3 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { useTranslation } from 'react-i18next';
-import toastErrorUtils from "../../utils/toastError";
-// import "bootstrap/dist/css/bootstrap.min.css";
-// import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
-import { toast } from "react-toastify"; 
-
-const LoginPage = () => {
-  const { t } = useTranslation();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [msgError, setMsgError] = useState("");
-  
-const [rememberMe, setRememberMe] = useState(false);
-// const [errors, setErrors] = useState({ email: "", password: "" });
-
-
-
-
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const emailFromUrl = params.get("email");
-    if (emailFromUrl) {
-      setEmail(emailFromUrl);
-    }
-  }, [location]);
 
   // const validate = () => {
   //   let valid = true;
@@ -55,51 +23,85 @@ const [rememberMe, setRememberMe] = useState(false);
   //   return valid;
   // };
 
+ import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { useTranslation } from 'react-i18next';
+import toastErrorUtils from "../../utils/toastError";
+import { toast } from "react-toastify"; 
+import api from "../../api/axiosInstance";
+const LoginPage = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [msgError, setMsgError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const emailFromUrl = params.get("email");
+    if (emailFromUrl) setEmail(emailFromUrl);
+  }, [location]);
+
   const handleRequest = async (e) => {
-    e.preventDefault();
-    setMsgError("");
-  // if (!validate()) return;
-    try {
-      const res = await axios.post("http://localhost:8000/auth/login", {
-        email,
-        password,
+  e.preventDefault();
+  setMsgError("");
+
+  try {
+    const res = await api.post("/auth/login", {
+      email,
+      password,
+      rememberMe, // optional
+    });
+
+    const user = res?.data?.data;
+    if (!user) throw new Error("Réponse inattendue du serveur");
+
+    // Not verified → no token, go verify
+    if (user.needsVerification) {
+      toast.warning("Votre compte n’est pas encore vérifié. Veuillez vérifier par SMS.");
+      navigate("/verify-sms", {
+        state: { email: user.email, phone: user.phone || "" },
       });
-
-      const user = res.data.data;
-
-      if (user.needsVerification) {
-        toast.warning("Votre compte n’est pas encore vérifié. Veuillez vérifier par SMS.");
-        navigate("/verify-sms", {
-          state: {
-            email: user.email,
-            phone: user.phone || "",
-          },
-        });
-        return;
-      }
-
-      const userData = {
-        id: user.id,
-        email: user.email,
-        role: user.role || "Etudiant",
-        name: user.name || user.email.split("@")[0],
-        profilePic: user.profilePic || null,
-        token: user.access_token,
-      };
-
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("userEmail", user.email);
-
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Login error:", error);
-      const message = t('auth.loginFailed') + " " + (error.response?.data?.message || "");
-      setMsgError(message);
-      toastErrorUtils.showError(message);
-
-      setPassword("");
+      return;
     }
-  };
+
+    // Save token + user
+    const token = user.access_token;
+    if (!token) throw new Error("Jeton manquant. Essayez avec un compte vérifié.");
+
+    localStorage.setItem("authToken", token);
+
+    const currentUser = {
+      id: user.id,
+      email: user.email,
+      role: user.role || "Etudiant",
+      name: user.name || (user.email ? user.email.split("@")[0] : ""),
+      profilePic: user.profilePic || null,
+    };
+    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+
+    // (Legacy) keep old key if other pages use it
+    localStorage.setItem("user", JSON.stringify({ ...currentUser, token }));
+    localStorage.setItem("userEmail", user.email);
+
+    if (rememberMe) localStorage.setItem("rememberMe", "1");
+    else localStorage.removeItem("rememberMe");
+
+    window.location.href = "/";
+  } catch (error) {
+    console.error("Login error:", error);
+    const message =
+      t("auth.loginFailed") + " " + (error?.response?.data?.message || error?.message || "");
+    setMsgError(message);
+    toastErrorUtils.showError(message);
+    setPassword("");
+  }
+};
+
 
   return (
     <div className="container-fluid p-3 my-5">
@@ -110,7 +112,6 @@ const [rememberMe, setRememberMe] = useState(false);
             className="img-fluid"
             alt="Login Illustration"
           />
-
         </div>
         <div className="col-md-6">
           <form onSubmit={handleRequest}>
@@ -118,39 +119,38 @@ const [rememberMe, setRememberMe] = useState(false);
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
             <div className="mb-3 position-relative">
-  <label className="form-label">Adresse email</label>
-  <div className="input-group">
-    <span className="input-group-text">
-      <i className="bi bi-envelope"></i>
-    </span>
-    <input
-      type="email"
-      className="form-control"
-      placeholder="Entrez votre email"
-      value={email}
-      required
-      onChange={(e) => setEmail(e.target.value)}
-    />
-  </div>
-</div>
+              <label className="form-label">Adresse email</label>
+              <div className="input-group">
+                <span className="input-group-text">
+                  <i className="bi bi-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Entrez votre email"
+                  value={email}
+                  required
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
 
-<div className="mb-4 position-relative">
-  <label className="form-label">Mot de passe</label>
-  <div className="input-group">
-    <span className="input-group-text">
-      <i className="bi bi-lock"></i>
-    </span>
-    <input
-      type="password"
-      className="form-control"
-      placeholder="Entrez votre mot de passe"
-      value={password}
-      required
-      onChange={(e) => setPassword(e.target.value)}
-    />
-  </div>
-</div>
-
+            <div className="mb-4 position-relative">
+              <label className="form-label">Mot de passe</label>
+              <div className="input-group">
+                <span className="input-group-text">
+                  <i className="bi bi-lock"></i>
+                </span>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Entrez votre mot de passe"
+                  value={password}
+                  required
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
 
             <div className="d-flex justify-content-between mb-4">
               <div className="form-check">

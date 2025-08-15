@@ -70,7 +70,46 @@ I: [pulseaudio] sink-input.c:     module-stream-restore.id = "sink-input-by-medi
 I: [pulseaudio] core.c: default_source: auto_null.monitor -> jibri-loop.monitor
 I: [pulseaudio] core.c: default_sink: auto_null -> jibri-loop
 I: [pulseaudio] module.c: Loaded "module-virtual-sink" (index: #12; argument: "sink_name=jibri-loop").
+W: [pulseaudio] server-lookup.c: Unable to contact D-Bus: org.freedesktop.DBus.Error.Spawn.ExecFailed: /usr/bin/dbus-launch terminated abnormally with the following error: Autolaunch error: X11 initialization failed.
+W: [pulseaudio] main.c: Unable to contact D-Bus: org.freedesktop.DBus.Error.Spawn.ExecFailed: /usr/bin/dbus-launch terminated abnormally with the following error: Autolaunch error: X11 initialization failed.
 I: [pulseaudio] main.c: Daemon startup complete.
 I: [pulseaudio] module-suspend-on-idle.c: Sink jibri-loop idle for too long, suspending ...
-I: [pulseaudio] module-suspend-on-idle.c: Sink auto_null idle for too long, suspending ...
-I: [pulseaudio] core.c: All sinks and sources are suspended, vacuuming memory
+I: [pulseaudio] main.c: Got signal SIGTERM.
+I: [pulseaudio] main.c: Exiting.
+I: [pulseaudio] main.c: Daemon shutdown initiated.
+I: [pulseaudio] module.c: Unloading "module-virtual-sink" (index: #12).
+I: [pulseaudio] core.c: default_sink: jibri-loop -> auto_null
+I: [pulseaudio] core.c: default_source: jibri-loop.monitor -> auto_null.monitor
+I: [pulseaudio] sink-input.c: Freeing input 0 "Virtual Sink Stream from Virtual Sink jibri-loop on Dummy Output"
+I: [pulseaudio] sink.c: Freeing sink 1 "jibri-loop"
+I: [pulseaudio] source.c: Freeing source 1 "jibri-loop.monitor"
+I: [pulseaudio] module.c: Unloaded "module-virtual-sink" (index: #12).
+I: [pulseaudio] module.c: Unloading "module-position-event-sounds" (index: #11).
+I: [pulseaudio] module.c: Unloaded "module-position-event-sounds" (index: #11).
+I: [pulseaudio] module.c: Unloading "module-suspend-on-idle" (index: #10).
+I: [pulseaudio] module.c: Unloaded "module-suspend-on-idle" (index: #10).
+I: [pulseaudio] module.c: Unloading "module-intended-roles" (index: #9).
+I: [pulseaudio] module.c: Unloaded "module-intended-roles" (index: #9).
+I: [pulseaudio] module.c: Unloading "module-null-sink" (index: #8).
+I: [pulseaudio] core.c: default_sink: auto_null -> (unset)
+I: [pulseaudio] core.c: default_source: auto_null.monitor -> (unset)
+I: [pulseaudio] sink.c: Freeing sink 0 "auto_null"
+I: [pulseaudio] source.c: Freeing source 0 "auto_null.monitor"
+I: [pulseaudio] module.c: Unloaded "module-null-sink" (index: #8).
+I: [pulseaudio] module.c: Unloading "module-always-sink" (index: #7).
+I: [pulseaudio] module.c: Unloaded "module-always-sink" (index: #7).
+I: [pulseaudio] module.c: Unloading "module-default-device-restore" (index: #6).
+I: [pulseaudio] module.c: Unloaded "module-default-device-restore" (index: #6).
+I: [pulseaudio] module.c: Unloading "module-native-protocol-unix" (index: #5).
+I: [pulseaudio] module.c: Unloaded "module-native-protocol-unix" (index: #5).
+I: [pulseaudio] module.c: Unloading "module-switch-on-port-available" (index: #4).
+I: [pulseaudio] module.c: Unloaded "module-switch-on-port-available" (index: #4).
+I: [pulseaudio] module.c: Unloading "module-augment-properties" (index: #3).
+I: [pulseaudio] module.c: Unloaded "module-augment-properties" (index: #3).
+I: [pulseaudio] module.c: Unloading "module-card-restore" (index: #2).
+I: [pulseaudio] module.c: Unloaded "module-card-restore" (index: #2).
+I: [pulseaudio] module.c: Unloading "module-stream-restore" (index: #1).
+I: [pulseaudio] module.c: Unloaded "module-stream-restore" (index: #1).
+I: [pulseaudio] module.c: Unloading "module-device-restore" (index: #0).
+I: [pulseaudio] module.c: Unloaded "module-device-restore" (index: #0).
+I: [pulseaudio] main.c: Daemon terminated.

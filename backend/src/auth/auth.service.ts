@@ -4,12 +4,17 @@ import { LoginDto, RegisterDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailService } from 'src/mail/mail.service';
+import { JwtService } from '@nestjs/jwt'; // Add this import
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService, private readonly mailService: MailService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+    private readonly jwtService: JwtService, // Inject JwtService
+  ) {}
 
-  async login(dto: LoginDto) {
+async login(dto: LoginDto) {
   const user = await this.prisma.user.findUnique({
     where: { email: dto.email },
   });
@@ -23,16 +28,32 @@ export class AuthService {
     throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ Vérification : bloquer si non vérifié sauf si Admin
- if (!user.isVerified && user.role.toLowerCase() !== 'admin') {
-  console.log('🧠 Forcing verification for:', user.email, 'Role:', user.role);
-  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-  return { ...safeUser, needsVerification: true };
-}
+  // Remove all sensitive fields
+  const {
+    password,
+    resetToken,
+    resetTokenExpiry,
+    ...safeUser
+  } = user;
 
-const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-return { ...safeUser, needsVerification: false }; // Always include this
+  // If not verified and not admin, don't return token (force verification)
+  if (!user.isVerified && user.role.toLowerCase() !== 'admin') {
+    return {
+      ...safeUser,
+      needsVerification: true,
+      // no access_token!
+    };
+  }
 
+  // JWT payload
+  const payload = { sub: user.id, email: user.email, role: user.role };
+  const access_token = this.jwtService.sign(payload);
+
+  return {
+    ...safeUser,
+    needsVerification: false,
+    access_token, // JWT included
+  };
 }
 
   async register(dto: RegisterDto) {
