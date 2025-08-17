@@ -174,6 +174,31 @@ const SessionList = () => {
     }
   };
 
+  // Fonction utilitaire pour s'assurer qu'une image est chargée
+  const preloadImage = (src) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = (error) => {
+        console.warn('Image preload failed:', src, error);
+        reject(error);
+      };
+      img.src = src;
+    });
+  };
+
+  // Fonction pour vérifier si une image est accessible
+  const checkImageAccessibility = async (src) => {
+    try {
+      const response = await fetch(src, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.warn('Image accessibility check failed:', src, error);
+      return false;
+    }
+  };
+
   const handleDownloadPreview = async () => {
     try {
       // Dynamically import html2canvas
@@ -182,13 +207,52 @@ const SessionList = () => {
       const element = document.getElementById("session-preview");
       if (!element) return;
 
-      const canvas = await html2canvas(element);
+      // Vérifier et précharger l'image si elle existe
+      if (shareModal.session?.imageUrl) {
+        const isAccessible = await checkImageAccessibility(shareModal.session.imageUrl);
+        if (isAccessible) {
+          try {
+            await preloadImage(shareModal.session.imageUrl);
+          } catch (error) {
+            console.warn('Failed to preload image:', error);
+            toast.warning(t('sessions.imageLoadWarning'));
+          }
+        } else {
+          console.warn('Image not accessible:', shareModal.session.imageUrl);
+          toast.warning(t('sessions.imageLoadWarning'));
+        }
+      }
+
+      // Configuration pour html2canvas avec gestion CORS
+      const canvas = await html2canvas(element, {
+        allowTaint: true,
+        useCORS: true,
+        scale: 2, // Améliore la qualité
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 15000, // Timeout plus long pour les images
+        onclone: (clonedDoc) => {
+          // S'assurer que l'image est chargée dans le clone
+          const clonedElement = clonedDoc.getElementById("session-preview");
+          if (clonedElement && shareModal.session?.imageUrl) {
+            const imgElement = clonedElement.querySelector('img');
+            if (imgElement) {
+              // Forcer le rechargement de l'image
+              imgElement.crossOrigin = 'anonymous';
+              imgElement.src = shareModal.session.imageUrl;
+            }
+          }
+        }
+      });
+      
       const dataURL = canvas.toDataURL("image/png");
 
       const link = document.createElement("a");
       link.href = dataURL;
       link.download = `session-${shareModal.session?.name || "preview"}.png`;
       link.click();
+      
+      toast.success(t('sessions.imageDownloadSuccess'));
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error(t('sessions.imageGenerationError'));
@@ -235,6 +299,7 @@ const SessionList = () => {
                   <img
                     src={session.imageUrl}
                     alt="Session"
+                    crossOrigin="anonymous"
                     style={{
                       maxWidth: "100%",
                       maxHeight: 180,
@@ -615,6 +680,7 @@ const SessionList = () => {
                 <img
                   src={shareModal.session.imageUrl}
                   alt="Session"
+                  crossOrigin="anonymous"
                   style={{
                     maxWidth: "100%",
                     maxHeight: 240,

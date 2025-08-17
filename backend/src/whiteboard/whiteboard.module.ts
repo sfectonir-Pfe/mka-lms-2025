@@ -5,6 +5,6 @@ import { WhiteboardGateway } from './whiteboard.gateway';
 
 @Module({
   controllers: [WhiteboardController],
-  providers: [WhiteboardService,WhiteboardGateway],
+  providers: [WhiteboardService, WhiteboardGateway],
 })
 export class WhiteboardModule {}

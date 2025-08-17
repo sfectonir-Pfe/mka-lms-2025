@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './i18n';
+import { getStoredUser } from "./utils/authUtils";
 
 // Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -100,49 +101,34 @@ function App() {
   const loadUserFromStorage = () => {
     console.log("=== LOADING USER FROM STORAGE ===");
 
-    // Logique simplifiée : vérifier localStorage puis sessionStorage
-    let userStr = localStorage.getItem("user");
-    let storageType = "localStorage";
-
-    if (!userStr) {
-      userStr = sessionStorage.getItem("user");
-      storageType = "sessionStorage";
-    }
-
-    if (!userStr) {
+    const user = getStoredUser();
+    
+    if (!user) {
       console.log("❌ No user found in storage");
       return null;
     }
 
-    try {
-      const user = JSON.parse(userStr);
-      console.log(`✅ User loaded from ${storageType}:`, user.email);
+    console.log("✅ User loaded from storage:", user.email);
 
-      // Vérifier si l'utilisateur a un rôle, sinon définir "Etudiant" par défaut
-      if (!user.role || user.role === "user") {
-        user.role = "Etudiant";
-      }
-
-      // Cas spécial pour l'utilisateur khalil
-      if (user.email === "khalil@gmail.com" && user.role !== "Admin") {
-        user.role = "Admin";
-        // Mettre à jour les données utilisateur dans le storage approprié
-        const updatedUserStr = JSON.stringify(user);
-        if (storageType === "localStorage") {
-          localStorage.setItem("user", updatedUserStr);
-        } else {
-          sessionStorage.setItem("user", updatedUserStr);
-        }
-      }
-
-      return user;
-    } catch (err) {
-      console.error("❌ Error parsing stored user:", err);
-      // En cas d'erreur, nettoyer les storages
-      localStorage.removeItem("user");
-      sessionStorage.removeItem("user");
-      return null;
+    // Vérifier si l'utilisateur a un rôle, sinon définir "Etudiant" par défaut
+    if (!user.role || user.role === "user") {
+      user.role = "Etudiant";
     }
+
+    // Cas spécial pour l'utilisateur khalil
+    if (user.email === "khalil@gmail.com" && user.role !== "Admin") {
+      user.role = "Admin";
+      // Mettre à jour les données utilisateur dans le storage approprié
+      const updatedUserStr = JSON.stringify(user);
+      // Determine which storage to use based on where the user was found
+      if (localStorage.getItem("user")) {
+        localStorage.setItem("user", updatedUserStr);
+      } else if (sessionStorage.getItem("user")) {
+        sessionStorage.setItem("user", updatedUserStr);
+      }
+    }
+
+    return user;
   };
 
   useEffect(() => {

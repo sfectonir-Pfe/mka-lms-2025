@@ -565,6 +565,8 @@
     "copyError": "Error copying text",
     "downloadImage": "Download image",
     "imageGenerationError": "Error generating image",
+    "imageLoadWarning": "Warning: Session image could not be loaded. The downloaded image might not include the session image.",
+    "imageDownloadSuccess": "Session image downloaded successfully!",
     "program": "Program",
     "period": "From",
     "to": "to",
