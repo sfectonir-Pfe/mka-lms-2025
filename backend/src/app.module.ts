@@ -20,7 +20,6 @@ import { buildProgramModule } from './buildProgram/buildProgram.module'; // keep
 import { QuizModule } from './quiz/quiz.module';
 import { Session2Module } from './session2/session2.module';
 import { SeanceFormateurModule } from './seance-formateur/seance-formateur.module';
-import { FeedbackModule } from './feedback/feedback.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { ChatMessagesModule } from './chat-messages/chat-messages.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
@@ -31,17 +30,42 @@ import { CreatorDashboardModule } from './creator-dashboard/creator-dashboard.mo
 import { FormateurDashboardModule } from './formateur-dashboard/formateur-dashboard.module';
 import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard.module';
 import { S3Module } from './s3/s3.module';
-import { FeedbackSessionSeanceModule } from './feedback-session-seance/feedback-session-seance.module';
 import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 import { NotificationModule } from './notification/notification.module';
 // import { RolesGuard } from './auth/roles.guard';
+import {SeanceFeedbackModule} from './seance-feedback/seance-feedback.module';
+import {SessionFeedbackModule} from './session-feedback/session-feedback.module';
+import { RéclamationModule } from './réclamation/réclamation.module';
+import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
+import { ProgramChatModule } from './program-chat/program-chat.module';
+
+
 
 
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    PrismaModule.forRoot({ isGlobal: true }),
+  
+imports: [
+  ConfigModule.forRoot({ isGlobal: true }),
+  PrismaModule.forRoot({isGlobal:true}),
+  ChatMessagesModule, 
+  AuthModule, 
+  UsersModule, 
+  ProgramsModule, 
+  ModulesModule,
+  MailModule, 
+  CoursesModule, 
+  ContenuModule, 
+  buildProgramModule, 
+  QuizModule, 
+  Session2Module, 
+  SeanceFormateurModule, 
+  WhiteboardModule, 
+  Session2ChatModule, 
+  ChatbotModule,
+  S3Module,
+  GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule, FeedbackÉtudiantModule,
+
 
     // feature modules
     AuthModule,
@@ -55,7 +79,7 @@ import { NotificationModule } from './notification/notification.module';
     QuizModule,
     Session2Module,
     SeanceFormateurModule,
-    FeedbackModule,
+    
     ChatbotModule,
     ChatMessagesModule,
     WhiteboardModule,
@@ -66,9 +90,9 @@ import { NotificationModule } from './notification/notification.module';
     FormateurDashboardModule,
     EtudiantDashboardModule,
     S3Module,
-    FeedbackSessionSeanceModule,
     FeedbackFormateurModule,
     NotificationModule,
+    ProgramChatModule,
   ],
   controllers: [AppController],
   providers: [

@@ -51,23 +51,35 @@ const LoginPage = () => {
   setMsgError("");
 
   try {
-    const res = await api.post("/auth/login", {
-      email,
-      password,
-      rememberMe, // optional
-    });
+   const res = await api.post(
+  "/auth/login",
+  {
+    email,
+    password,
+    rememberMe,
+  },
+  {
+    withCredentials: true, // ✅ this goes in the 3rd argument
+  }
+);
+
+
 
     const user = res?.data?.data;
     if (!user) throw new Error("Réponse inattendue du serveur");
 
     // Not verified → no token, go verify
     if (user.needsVerification) {
-      toast.warning("Votre compte n’est pas encore vérifié. Veuillez vérifier par SMS.");
-      navigate("/verify-sms", {
-        state: { email: user.email, phone: user.phone || "" },
-      });
-      return;
-    }
+  toast.warning("Votre compte n’est pas encore vérifié. Choisissez votre méthode de vérification.");
+  navigate("/verify-method", {
+    state: {
+      email: user.email,
+      phone: user.phone || "",
+    },
+  });
+  return;
+}
+
 
     // Save token + user
     const token = user.access_token;

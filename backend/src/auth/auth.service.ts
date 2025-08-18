@@ -55,6 +55,13 @@ async login(dto: LoginDto) {
     access_token, // JWT included
   };
 }
+async generateJwtToken(user: any): Promise<string> {
+  return this.jwtService.signAsync({
+    sub: user.id,
+    email: user.email,
+    role: user.role,
+  });
+}
 
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
@@ -134,7 +141,40 @@ async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
-    await this.prisma.user.delete({ where: { id } });
+    await this.prisma.$transaction(async (tx) => {
+      // 1) Relations m:n et tables de liaison
+      await tx.userSession2.deleteMany({ where: { userId: id } });
+
+      // 2) Entités dépendantes obligatoires → delete
+      await tx.notification.deleteMany({ where: { userId: id } });
+      await tx.reclamation.deleteMany({ where: { userId: id } });
+      await tx.feedbackList.deleteMany({ where: { userId: id } });
+      await tx.resetToken.deleteMany({ where: { userId: id } });
+      await tx.formateur.deleteMany({ where: { userId: id } });
+      await tx.etudiant.deleteMany({ where: { userId: id } });
+      await tx.createur_De_Formation.deleteMany({ where: { userId: id } });
+      await tx.admin.deleteMany({ where: { userId: id } });
+      await tx.etablissement.deleteMany({ where: { userId: id } });
+
+      // 3) Entités avec FK optionnelle → set NULL
+      await tx.feedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.seanceFeedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.sessionFeedback.updateMany({ where: { userId: id }, data: { userId: null } });
+      await tx.chatMemory.updateMany({ where: { userId: id }, data: { userId: null } });
+
+      await tx.chatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.session2ChatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.generalChatMessage.updateMany({ where: { senderId: id }, data: { senderId: null } });
+      await tx.whiteboardAction.updateMany({ where: { createdById: id }, data: { createdById: null } });
+
+      // 4) FeedbackFormateur: studentId (requis) → delete, autres FK → null
+      await tx.feedbackFormateur.deleteMany({ where: { studentId: id } });
+      await tx.feedbackFormateur.updateMany({ where: { formateurId: id }, data: { formateurId: null } });
+      await tx.feedbackFormateur.updateMany({ where: { userId: id }, data: { userId: null } });
+
+      // 5) Enfin supprimer l'utilisateur
+      await tx.user.delete({ where: { id } });
+    });
     return { id };
   }
 
@@ -334,4 +374,42 @@ async login(dto: LoginDto) {
 
   return { message: 'Utilisateur vérifié avec succès', user: updated };
   
-  }}
+  }
+  async sendEmailVerificationCode(email: string) {
+  const user = await this.prisma.user.findUnique({ where: { email } });
+  if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+  const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+  const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+
+  await this.prisma.user.update({
+    where: { email },
+    data: {
+      emailVerificationCode: code,
+      codeExpiryDate: expiry,
+    },
+  });
+
+  await this.mailService.sendEmailVerificationCode(email, code);
+
+  return { message: 'Code envoyé par email' };
+}
+async verifyEmailCode(email: string, code: string) {
+  const user = await this.prisma.user.findUnique({ where: { email } });
+  if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+
+  if (!user.emailVerificationCode || !user.codeExpiryDate)
+    throw new HttpException('Aucun code trouvé', HttpStatus.BAD_REQUEST);
+
+  const now = new Date();
+
+  if (user.codeExpiryDate < now)
+    throw new HttpException('Code expiré', HttpStatus.BAD_REQUEST);
+
+  if (user.emailVerificationCode !== code)
+    throw new HttpException('Code invalide', HttpStatus.BAD_REQUEST);
+
+  return this.verifyUser(email); // ✅ call existing function
+}
+
+}

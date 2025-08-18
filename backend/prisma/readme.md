@@ -1,5 +1,5 @@
 # cration migration and apply this migration in DBMS (SGBD) and generate in PrismaClient
-prisma migrate dev
+prisma migrate dev --name
 
 # apply migrations if there is some migrations don't applied
 prisma migrate deploy
@@ -35,6 +35,9 @@ git log -- migrations
 
 # after 
 git checkout <commit_id> -- migrations/
+
+
+npx prisma format
 
 
 

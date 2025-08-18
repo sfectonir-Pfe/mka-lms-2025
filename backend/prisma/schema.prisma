@@ -58,6 +58,11 @@ model User {
   feedbacksFormateurReceived FeedbackFormateur[]     @relation("EtudiantFeedbacks")
   GeneralChatMessage         GeneralChatMessage[]
   Notification               Notification[]
+  Reclamation                Reclamation[]
+  studentGroups              StudentGroup[]          @relation("StudentGroupMembers")
+  feedbacksGiven             StudentFeedback[]       @relation("StudentFeedbackFrom")
+  feedbacksReceived          StudentFeedback[]       @relation("StudentFeedbackTo")
+  ProgramChatMessage         ProgramChatMessage[]
 }
 
 model Formateur {
@@ -103,13 +108,14 @@ model ResetToken {
 }
 
 model Program {
-  id           Int             @id @default(autoincrement())
-  name         String
-  published    Boolean         @default(false)
-  modules      ProgramModule[]
-  sessions2    Session2[]
-  buildProgram buildProgram[]
-  createdAt    DateTime        @default(now())
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  published          Boolean              @default(false)
+  modules            ProgramModule[]
+  sessions2          Session2[]
+  buildProgram       buildProgram[]
+  createdAt          DateTime             @default(now())
+  ProgramChatMessage ProgramChatMessage[]
 }
 
 model Module {
@@ -336,6 +342,7 @@ model SeanceFormateur {
   medias           SeanceMedia[]
   chatMessages     ChatMessage[]
   WhiteboardAction WhiteboardAction[]
+  studentGroups    StudentGroup[]
 }
 
 model SeanceMedia {
@@ -418,6 +425,18 @@ model GeneralChatMessage {
   type      String // "text" | "image" | "video" | "audio" | "file" (you can restrict by enum if needed)
   content   String // text content or file URL
   createdAt DateTime @default(now())
+}
+
+model ProgramChatMessage {
+  id        Int      @id @default(autoincrement())
+  programId Int
+  senderId  Int?
+  type      String // "text" | "image" | "video" | "audio"
+  content   String // text content or file URL
+  createdAt DateTime @default(now())
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  sender  User?   @relation(fields: [senderId], references: [id])
 }
 
 model Feedback {
@@ -541,6 +560,56 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Reclamation {
+  id           Int                 @id @default(autoincrement())
+  userId       Int
+  userName     String
+  userEmail    String
+  subject      String
+  description  String
+  category     String
+  priority     ReclamationPriority @default(MOYENNE)
+  status       ReclamationStatus   @default(EN_ATTENTE)
+  response     String?
+  responseDate DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model StudentGroup {
+  id               String            @id @default(uuid())
+  name             String
+  seanceId         Int
+  seance           SeanceFormateur   @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  students         User[]            @relation("StudentGroupMembers")
+  studentFeedbacks StudentFeedback[] @relation("GroupFeedbacks")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model StudentFeedback {
+  id            String   @id @default(uuid())
+  fromStudentId Int
+  toStudentId   Int
+  groupId       String
+  rating        Int
+  comment       String
+  category      String
+  isAnonymous   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fromStudent User         @relation("StudentFeedbackFrom", fields: [fromStudentId], references: [id], onDelete: Cascade)
+  toStudent   User         @relation("StudentFeedbackTo", fields: [toStudentId], references: [id], onDelete: Cascade)
+  group       StudentGroup @relation("GroupFeedbacks", fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([fromStudentId, toStudentId, groupId, category]) // <- add category
+  @@index([groupId, fromStudentId]) // optional: speeds up your GET
+  @@index([groupId, toStudentId]) // optional
+}
+
 enum Role {
   Etudiant
   Formateur
@@ -582,4 +651,17 @@ enum Session2Status {
   INACTIVE
   COMPLETED
   ARCHIVED
+}
+
+enum ReclamationPriority {
+  HAUTE
+  MOYENNE
+  BASSE
+}
+
+enum ReclamationStatus {
+  EN_ATTENTE
+  EN_COURS
+  RESOLU
+  REJETE
 }

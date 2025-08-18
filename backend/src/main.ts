@@ -10,7 +10,8 @@ async function bootstrap() {
   app.enableCors({
   origin: ["http://localhost:3000"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
-  allowedHeaders: "Content-Type, Authorization",
+ allowedHeaders: ['Content-Type', 'Authorization', 'user-id'],
+  credentials: true,
 });
 
   // Serve files from the top-level /uploads folder

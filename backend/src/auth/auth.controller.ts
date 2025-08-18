@@ -205,4 +205,24 @@ export class AuthController {
       );
     }
   }
+  @Post('send-email-code')
+sendEmailCode(@Body('email') email: string) {
+  return this.authService.sendEmailVerificationCode(email);
+}
+
+@Post('verify-email-code')
+async verifyEmailCode(@Body('email') email: string, @Body('code') code: string) {
+  const user = await this.authService.verifyEmailCode(email, code);
+  const token = await this.authService.generateJwtToken(user);
+
+  return {
+    message: "Email verified successfully",
+    data: {
+      access_token: token,
+      user,
+    },
+  };
+}
+
+
 }
