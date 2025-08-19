@@ -6,6 +6,7 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EmojiPicker from "emoji-picker-react";
 import io from "socket.io-client";
+import api from "../../api/axiosInstance";
 
 const SOCKET_URL = "http://localhost:8000";
 
@@ -67,8 +68,8 @@ export default function UnifiedSessionChatPopup({ user }) {
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const res = await fetch(`http://localhost:8000/users/${user.id}/sessions2`);
-      const data = await res.json();
+      const res = await api.get(`/users/${user.id}/sessions2`);
+      const data = res.data;
 
       // Normalize into [{id, name, programId?}]
       const sessions = data.map(s =>
@@ -97,8 +98,8 @@ export default function UnifiedSessionChatPopup({ user }) {
       const idsToResolve = [...progMap.entries()].filter(([_, name]) => !name).map(([id]) => id);
       for (const pid of idsToResolve) {
         try {
-          const rp = await fetch(`http://localhost:8000/programs/${pid}`);
-          const pj = await rp.json();
+          const rp = await api.get(`/programs/${pid}`);
+          const pj = rp.data;
           progMap.set(pid, pj?.name || `Programme ${pid}`);
         } catch {
           progMap.set(pid, `Programme ${pid}`);
@@ -117,42 +118,47 @@ export default function UnifiedSessionChatPopup({ user }) {
       setSeances([]); setSeanceId(null);
       return;
     }
-    fetch(`http://localhost:8000/seance-formateur/session/${session2Id}`)
-      .then(res => res.json())
-      .then(data => {
-        setSeances(data);
-        setSeanceId(data[0]?.id ?? null);
+    api.get(`/seance-formateur/session/${session2Id}`)
+      .then(res => {
+        setSeances(res.data);
+        setSeanceId(res.data[0]?.id ?? null);
       });
   }, [session2Id]);
 
   // --- Fetch messages for session & seance (unchanged) ---
   useEffect(() => {
     if (session2Id) {
-      fetch(`http://localhost:8000/session2-chat-messages/${session2Id}`)
-        .then(res => res.json())
-        .then(msgs => setSessionChatMessages(msgs));
+      api.get(`/session2-chat-messages/${session2Id}`)
+        .then(res => setSessionChatMessages(res.data));
     }
     if (seanceId) {
-      fetch(`http://localhost:8000/chat-messages/${seanceId}`)
-        .then(res => res.json())
-        .then(msgs => setSeanceChatMessages(msgs));
+      api.get(`/chat-messages/${seanceId}`)
+        .then(res => setSeanceChatMessages(res.data));
     }
   }, [session2Id, seanceId]);
 
-  // --- NEW: Fetch messages for program chat when programId changes ---
- // Fetch programs for the user
-// --- Fetch programs (real names) for the user
-useEffect(() => {
-  if (!user?.id) return;
-  fetch(`http://localhost:8000/program-chat/my-programs/${user.id}`)
-    .then(res => res.json())
-    .then(list => {
-      // list = [{ id, name }]
-      setPrograms(list);
-      setProgramId(list[0]?.id ?? null);
-    })
-    .catch(() => setPrograms([]));
-}, [user?.id]);
+  // --- Fetch programs (real names) for the user ---
+  useEffect(() => {
+    if (!user?.id) return;
+    api.get(`/program-chat/my-programs/${user.id}`)
+      .then(res => {
+        // res.data = [{ id, name }]
+        setPrograms(res.data);
+        setProgramId(res.data[0]?.id ?? null);
+      })
+      .catch(() => setPrograms([]));
+  }, [user?.id]);
+
+  // --- Fetch program chat messages when programId changes ---
+  useEffect(() => {
+    if (!programId) {
+      setProgramChatMessages([]);
+      return;
+    }
+    api.get(`/program-chat/messages/${programId}`)
+      .then(res => setProgramChatMessages(res.data))
+      .catch(() => setProgramChatMessages([]));
+  }, [programId]);
 
 
 
@@ -246,20 +252,24 @@ useEffect(() => {
 
       let uploadUrl = "";
       if (selectedTab === "general") {
-        uploadUrl = "http://localhost:8000/general-chat-messages/upload-chat";
+        uploadUrl = "/general-chat-messages/upload-chat";
       } else if (selectedTab === "session") {
         formData.append("session2Id", session2Id);
-        uploadUrl = "http://localhost:8000/session2-chat-messages/upload-chat";
+        uploadUrl = "/session2-chat-messages/upload-chat";
       } else if (selectedTab === "seance") {
         formData.append("seanceId", seanceId);
-        uploadUrl = "http://localhost:8000/chat-messages/upload-chat";
+        uploadUrl = "/chat-messages/upload-chat";
       } else if (selectedTab === "program") {
-        uploadUrl = "http://localhost:8000/program-chat/upload";
+        formData.append("programId", programId);
+        formData.append("senderId", user.id);
+        uploadUrl = "/program-chat/upload";
       }
 
       try {
-        const res = await fetch(uploadUrl, { method: "POST", body: formData });
-        const fileData = await res.json();
+        const res = await api.post(uploadUrl, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const fileData = res.data;
 
         if (selectedTab === "general") {
           socket.emit("sendGeneralMessage", {
@@ -323,27 +333,23 @@ useEffect(() => {
   // Delete message (NOW includes 'program')
   const handleDeleteMsg = async (msgId) => {
     if (selectedTab === "session") {
-      await fetch(`http://localhost:8000/session2-chat-messages/${msgId}`, {
-        method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      await api.delete(`/session2-chat-messages/${msgId}`, {
+        data: { userId: user.id }
       });
       setSessionChatMessages(prev => prev.filter(m => m.id !== msgId));
     } else if (selectedTab === "seance") {
-      await fetch(`http://localhost:8000/chat-messages/${msgId}`, {
-        method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      await api.delete(`/chat-messages/${msgId}`, {
+        data: { userId: user.id }
       });
       setSeanceChatMessages(prev => prev.filter(m => m.id !== msgId));
     } else if (selectedTab === "general") {
-      await fetch(`http://localhost:8000/general-chat-messages/${msgId}`, {
-        method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      await api.delete(`/general-chat-messages/${msgId}`, {
+        data: { userId: user.id }
       });
       setGeneralChatMessages(prev => prev.filter(m => m.id !== msgId));
     } else if (selectedTab === "program") {
-      await fetch(`http://localhost:8000/program-chat/${msgId}`, {
-        method: "DELETE", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user.id }),
+      await api.delete(`/program-chat/${msgId}`, {
+        data: { userId: user.id }
       });
       setProgramChatMessages(prev => prev.filter(m => m.id !== msgId));
     }

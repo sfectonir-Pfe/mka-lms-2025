@@ -31,9 +31,24 @@ export class ProgramChatController {
     private readonly programChatGateway: ProgramChatGateway,
   ) {}
 
-  // GET /program-chat/:programId?limit=50
-  @Get(':programId')
+  // GET /program-chat/my-programs/:userId - Get programs for a user
+  @Get('my-programs/:userId')
+  async getMyPrograms(@Param('userId') userId: string) {
+    return this.programChatService.getUserPrograms(Number(userId));
+  }
+
+  // GET /program-chat/messages/:programId - Get messages for a program
+  @Get('messages/:programId')
   getMessages(
+    @Param('programId') programId: string,
+    @Query('limit') limit = '50',
+  ) {
+    return this.programChatService.findByProgram(Number(programId), Math.min(+limit || 50, 200));
+  }
+
+  // GET /program-chat/:programId?limit=50 (keep for backward compatibility)
+  @Get(':programId')
+  getMessagesLegacy(
     @Param('programId') programId: string,
     @Query('limit') limit = '50',
   ) {

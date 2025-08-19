@@ -49,4 +49,31 @@ export class ProgramChatService {
   async deleteAllByProgram(programId: number) {
     return this.prisma.programChatMessage.deleteMany({ where: { programId } });
   }
+
+  async getUserPrograms(userId: number) {
+    // Get all programs where the user has sessions
+    const userSessions = await this.prisma.userSession2.findMany({
+      where: { userId },
+      include: {
+        session2: {
+          include: {
+            program: {
+              select: { id: true, name: true }
+            }
+          }
+        }
+      }
+    });
+
+    // Extract unique programs
+    const programsMap = new Map();
+    userSessions.forEach(session => {
+      if (session.session2?.program) {
+        const program = session.session2.program;
+        programsMap.set(program.id, program);
+      }
+    });
+
+    return Array.from(programsMap.values());
+  }
 }

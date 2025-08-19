@@ -39,6 +39,24 @@ export class ProgramsService {
     });
   }
 
+  async findOne(id: number) {
+    const program = await this.prisma.program.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        published: true,
+        createdAt: true,
+      },
+    });
+    
+    if (!program) {
+      throw new NotFoundException('Programme non trouvé');
+    }
+    
+    return program;
+  }
+
   async remove(id: number) {
     return this.prisma.program.delete({ where: { id } });
   }
