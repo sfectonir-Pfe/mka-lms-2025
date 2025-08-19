@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { TextField, Button, Container, Box } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddProgramList = () => {
@@ -11,7 +11,7 @@ const AddProgramList = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/programs", { name });
+      const res = await api.post("/programs", { name });
 
       // Affiche la réponse dans la console pour vérification
       console.log("Réponse du backend :", res.data);

@@ -31,9 +31,9 @@ import {
   Chip,
 } from "@mui/material";
 import { NavigateBefore, NavigateNext } from "@mui/icons-material";
-import axios from "axios";
+import api from "../../../../api/axiosInstance";
 
-const API_BASE = "http://localhost:8000/feedback-etudiant";
+// const API_BASE = "http://localhost:8000/feedback-etudiant";
 
 const EMOJIS = [
   { emoji: "🤨", value: "poor", label: "Peu participatif" },
@@ -87,8 +87,8 @@ export default function FeedbackEtudiant() {
           email: user.email || "etudiant@test.com",
         });
 
-        const groupRes = await axios.get(
-          `${API_BASE}/groups/student/${currentUserId}/seance/${seanceId}`
+        const groupRes = await api.get(
+          `/groups/student/${currentUserId}/seance/${seanceId}`
         );
         if (!groupRes.data) {
           setCurrentGroup(null);
@@ -97,8 +97,8 @@ export default function FeedbackEtudiant() {
         const group = groupRes.data;
         setCurrentGroup(group);
 
-        const questionsRes = await axios.get(
-          `${API_BASE}/questions/group/${group.id}`,
+        const questionsRes = await api.get(
+          `/questions/group/${group.id}`,
           { headers: { "user-id": currentUserId } }
         );
         const qs = Array.isArray(questionsRes.data) ? questionsRes.data : [];
@@ -112,8 +112,8 @@ export default function FeedbackEtudiant() {
         }
 
         // load existing feedbacks GIVEN BY current user in this group
-        const givenRes = await axios.get(
-          `${API_BASE}/feedbacks/group/${group.id}/student/${currentUserId}`
+        const givenRes = await api.get(
+          `/feedbacks/group/${group.id}/student/${currentUserId}`
         );
         const given = Array.isArray(givenRes.data) ? givenRes.data : [];
         setCompletedFeedbacks(
@@ -144,7 +144,7 @@ export default function FeedbackEtudiant() {
       const q = questions[currentQuestionIndex];
       if (!q) return;
 
-      await axios.post(`${API_BASE}/feedbacks`, {
+      await api.post(`/feedbacks`, {
         questionId: q.id,
         studentId: currentUserId,
         targetStudentId: selectedStudent.id,
@@ -154,8 +154,8 @@ export default function FeedbackEtudiant() {
       });
 // put this above handleFeedback
 const refreshGivenFeedbacks = async (groupId, currentUserId) => {
-  const givenRes = await axios.get(
-    `${API_BASE}/feedbacks/group/${groupId}/student/${currentUserId}`
+  const givenRes = await api.get(
+    `/feedbacks/group/${groupId}/student/${currentUserId}`
   );
   const given = Array.isArray(givenRes.data) ? givenRes.data : [];
   setCompletedFeedbacks(

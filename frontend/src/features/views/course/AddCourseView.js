@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Container, TextField, Button, Box, Typography } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddCourseView = () => {
@@ -11,7 +11,7 @@ const AddCourseView = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post("http://localhost:8000/courses", { title });
+      await api.post(`/courses`, { title });
       navigate("/courses");
     } catch (err) {
       console.error("Erreur création cours", err);

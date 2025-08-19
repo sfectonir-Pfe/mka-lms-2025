@@ -21,7 +21,7 @@ import {
 } from "@mui/material"
 import { Send, Person, Group, MenuBook, NavigateNext, NavigateBefore, Recommend } from "@mui/icons-material"
 import "bootstrap/dist/css/bootstrap.min.css"
-import axios from "axios";
+import api from "../../../../api/axiosInstance";
 
 const EmojiRating = ({ rating, onRatingChange, label }) => {
   const emojis = ["😞", "😐", "🙂", "😊", "🤩"]
@@ -109,7 +109,7 @@ export default function AddSeanceFeedback({ seanceId }) {
       const user = JSON.parse(localStorage.getItem("user"));
       // Exclure tout champ 'id' du feedback
       const { id, ...feedbackData } = feedback;
-      await axios.post("http://localhost:8000/feedback/seance", {
+      await api.post("/feedback/seance", {
         ...feedbackData,
         seanceId: Number(seanceId),
         userId: user?.id,

@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, TextField, Button, Alert, Box } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../src/api/axiosInstance';
 // Firebase imports
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
@@ -235,7 +235,7 @@ const VerifyAccountPage = () => {
             console.log('Calling backend verification API with email:', email);
             try {
                 // Try the update endpoint with minimal data
-                const backendRes = await axios.post('http://localhost:8000/auth/update-user', {
+                const backendRes = await api.post('/auth/update-user', {
                     email: email,
                     verified: true
                 });

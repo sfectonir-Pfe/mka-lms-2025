@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useTranslation } from 'react-i18next'
-import axios from "axios"
+import api from "../../../api/axiosInstance"
 import {
   Box,
   Button,
@@ -64,7 +64,7 @@ export default function UserList() {
     setLoading(true)
     try {
       console.log("🔄 Fetching users...")
-      const response = await axios.get("http://localhost:8000/users")
+      const response = await api.get("/users")
       console.log("✅ Users fetched:", response.data)
       setUsers(response.data)
     } catch (error) {
@@ -86,7 +86,7 @@ export default function UserList() {
     setActionLoading(true)
     try {
       console.log("🗑️ Deleting user:", deleteDialog.user.id)
-      await axios.delete(`http://localhost:8000/users/${deleteDialog.user.id}`)
+      await api.delete(`/users/${deleteDialog.user.id}`)
       setUsers(users.filter((u) => u.id !== deleteDialog.user.id))
       showNotification(t('users.deleteSuccess'), "success")
       console.log("✅ User deleted successfully")
@@ -112,7 +112,7 @@ export default function UserList() {
       console.log("👤 User:", { id: user.id, email: user.email, currentStatus: user.isActive })
       console.log("🎯 Target status:", newStatus)
 
-      // Configuration axios avec headers explicites
+      // Configuration api avec headers explicites
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -126,14 +126,14 @@ export default function UserList() {
 
       // Méthode 1: Utiliser l'endpoint de mise à jour par ID (le plus simple)
       try {
-        const url = `http://localhost:8000/users/${user.id}`
+        const url = `/users/${user.id}`
         const payload = { isActive: newStatus }
 
         console.log("🌐 Method 1 - Update by ID:")
         console.log("📍 URL:", url)
         console.log("📦 Payload:", payload)
 
-        response = await axios.patch(url, payload, config)
+        response = await api.patch(url, payload, config)
         success = true
         console.log("✅ Method 1 SUCCESS")
         console.log("📥 Response:", response.data)
@@ -145,14 +145,14 @@ export default function UserList() {
 
         // Méthode 2: Utiliser l'endpoint toggle-status par ID
         try {
-          const url = `http://localhost:8000/users/${user.id}/toggle-status`
+          const url = `/users/${user.id}/toggle-status`
           const payload = { isActive: newStatus }
 
           console.log("🌐 Method 2 - Toggle by ID:")
           console.log("📍 URL:", url)
           console.log("📦 Payload:", payload)
 
-          response = await axios.patch(url, payload, config)
+          response = await api.patch(url, payload, config)
           success = true
           console.log("✅ Method 2 SUCCESS")
           console.log("📥 Response:", response.data)
@@ -165,13 +165,13 @@ export default function UserList() {
           // Méthode 3: Utiliser l'endpoint spécifique activate/deactivate
           try {
             const action = newStatus ? "activate" : "deactivate"
-            const url = `http://localhost:8000/users/email/${encodeURIComponent(user.email)}/${action}`
+            const url = `/users/email/${encodeURIComponent(user.email)}/${action}`
 
             console.log("🌐 Method 3 - Specific action:")
             console.log("📍 URL:", url)
             console.log("🎬 Action:", action)
 
-            response = await axios.patch(url, {}, config)
+            response = await api.patch(url, {}, config)
             success = true
             console.log("✅ Method 3 SUCCESS")
             console.log("📥 Response:", response.data)
@@ -442,7 +442,7 @@ export default function UserList() {
                       <TableCell>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                           <Avatar
-                            src={user.profilePic ? `http://localhost:8000/uploads${user.profilePic}` : undefined}
+                            src={user.profilePic ? `/uploads${user.profilePic}` : undefined}
                             sx={{
                               bgcolor: "#388e3c",
                               width: 50,

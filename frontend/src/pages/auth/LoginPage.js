@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import toastErrorUtils from "../../utils/toastError";
 import { toast } from "react-toastify"; 
 import api from "../../api/axiosInstance";
+
 const LoginPage = () => {
   const { t } = useTranslation();
   const location = useLocation();

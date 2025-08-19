@@ -23,7 +23,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback, Download } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
@@ -44,13 +44,13 @@ const SessionList = () => {
 
   const fetchSessions = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/session2");
+      const res = await api.get("/session2");
       setSessions(res.data);
       const usersMap = {};
       await Promise.all(
         res.data.map(async (session) => {
           try {
-            const resp = await axios.get(`http://localhost:8000/session2/${session.id}/users`);
+            const resp = await api.get(`/session2/${session.id}/users`);
             usersMap[session.id] = resp.data || [];
           } catch {
             usersMap[session.id] = [];
@@ -69,7 +69,7 @@ const SessionList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/session2/${id}`);
+      await api.delete(`/session2/${id}`);
       toast.success(t("sessions.deleteSuccess"));
       fetchSessions();
     } catch {
@@ -79,7 +79,7 @@ const SessionList = () => {
 
   const handleStatusChange = async (sessionId, newStatus) => {
     try {
-      await axios.patch(`http://localhost:8000/session2/${sessionId}/status`, {
+      await api.patch(`/session2/${sessionId}/status`, {
         status: newStatus,
       });
       toast.success(t("sessions.statusUpdated"));
@@ -91,7 +91,7 @@ const SessionList = () => {
 
   const handleRemoveUser = async (sessionId, userId) => {
     try {
-      await axios.delete(`http://localhost:8000/session2/${sessionId}/remove-user/${userId}`);
+      await api.delete(`/session2/${sessionId}/remove-user/${userId}`);
       toast.success(t("sessions.userRemoved"));
       await fetchSessions();
     } catch (e) {
@@ -108,7 +108,7 @@ const SessionList = () => {
     }
     setAddLoading(true);
     try {
-      await axios.post(`http://localhost:8000/session2/${sessionId}/add-user`, {
+      await api.post(`/session2/${sessionId}/add-user`, {
         email: userEmail,
       });
       toast.success(t("sessions.userAdded"));

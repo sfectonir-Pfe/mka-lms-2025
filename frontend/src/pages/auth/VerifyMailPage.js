@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios"; // ✅ using axios directly
+import api from "../../api/axiosInstance"; // ✅ using api directly
 
-const API_BASE = "http://localhost:8000"; // adjust if needed
+// const API_BASE = "http://localhost:8000"; // adjust if needed
 
 const VerifyMailPage = () => {
   const location = useLocation();
@@ -18,7 +18,7 @@ const VerifyMailPage = () => {
     if (!email) return toast.error("Email requis");
     try {
       setIsLoading(true);
-      await axios.post(`${API_BASE}/auth/send-email-code`, { email });
+      await api.post(`/auth/send-email-code`, { email });
       toast.success("Code envoyé à votre adresse email");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Échec de l'envoi du code");
@@ -33,7 +33,7 @@ const VerifyMailPage = () => {
 
   try {
     setIsLoading(true);
-    const res =      await axios.post(`${API_BASE}/auth/verify-email-code`, { email, code });
+    const res =      await api.post(`/auth/verify-email-code`, { email, code });
 
 
     toast.success("Email vérifié avec succès !");

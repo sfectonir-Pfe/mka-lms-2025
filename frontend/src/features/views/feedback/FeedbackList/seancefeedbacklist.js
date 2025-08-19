@@ -15,7 +15,7 @@ import {
   Grid,
 } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../../api/axiosInstance";
 import { DataGrid } from '@mui/x-data-grid';
 import { Feedback as FeedbackIcon, Close } from "@mui/icons-material";
 
@@ -219,7 +219,7 @@ const FeedbackList = () => {
 
   const reloadFeedbacks = useCallback(() => {
     if (seanceId) {
-      axios.get(`http://localhost:8000/feedback/seance/feedbacklist/${seanceId}`)
+      api.get(`/feedback/seance/feedbacklist/${seanceId}`)
         .then(res => {
           console.log("Feedbacks reçus:", res.data);
           // Map the data according to backend response structure
@@ -258,7 +258,7 @@ const FeedbackList = () => {
           onClick={async () => {
             try {
               // Récupérer les détails complets du feedback
-              const response = await axios.get(`http://localhost:8000/feedback/seance/details/${seanceId}/${params.row.userId || params.row.id}`);
+              const response = await api.get(`/feedback/seance/details/${seanceId}/${params.row.userId || params.row.id}`);
               setSelectedFeedback(response.data);
               setFeedbackDialogOpen(true);
             } catch (error) {

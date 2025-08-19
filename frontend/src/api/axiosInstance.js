@@ -1,10 +1,11 @@
-// src/api/api.js
+// src/api/axiosinstance.js
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_BASE,
   withCredentials: true, // only needed if using cookies
 });
+console.log( "hello",process.env.REACT_APP_API_BASE)
 
 api.interceptors.request.use((config) => {
   let token = null;

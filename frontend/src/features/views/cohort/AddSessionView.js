@@ -9,7 +9,7 @@ import {
   Stack,
   Divider,
 } from "@mui/material";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
@@ -25,8 +25,8 @@ const AddSessionView = () => {
 
   // Fetch published programs
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/programs")
+    api
+      .get("/programs")
       .then((res) => {
         const published = res.data.filter((p) => p.published);
         setPrograms(published);
@@ -37,7 +37,7 @@ const AddSessionView = () => {
   // Fetch program structure (preview)
   const fetchStructure = async (programId) => {
     try {
-      const res = await axios.get(`http://localhost:8000/buildProgram/program/${programId}`);
+      const res = await api.get(`/buildProgram/program/${programId}`);
       setStructure(res.data);
     } catch {
       toast.error(t("sessions.loadError"));
@@ -73,7 +73,7 @@ const AddSessionView = () => {
   }
 
   try {
-    await axios.post("http://localhost:8000/session2", formData);
+    await api.post("/session2", formData);
     toast.success(t("sessions.sessionSaved"));
     setSelectedProgramId("");
     setStartDate("");

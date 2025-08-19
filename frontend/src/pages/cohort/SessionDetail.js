@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Typography, Paper, Box, Chip, Stack, Divider } from "@mui/material";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 import { Helmet } from "react-helmet";
 
 const SessionDetail = () => {
@@ -11,7 +11,7 @@ const SessionDetail = () => {
   useEffect(() => {
     const fetchSession = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/session2/${id}`);
+        const res = await api.get(`/session2/${id}`);
         setSession(res.data);
       } catch (error) {
         console.error("Erreur lors du chargement de la session:", error);

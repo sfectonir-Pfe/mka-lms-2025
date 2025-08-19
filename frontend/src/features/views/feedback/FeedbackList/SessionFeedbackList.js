@@ -19,7 +19,7 @@ import {
 import { Close as CloseIcon } from "@mui/icons-material";
 import { DataGrid } from '@mui/x-data-grid';
 import { Feedback as FeedbackIcon } from "@mui/icons-material";
-import axios from "axios";
+import api from "../../../../api/axiosInstance";
 import { useTranslation } from 'react-i18next';
 import { useParams } from "react-router-dom";
 
@@ -33,7 +33,7 @@ const SessionFeedbackList = () => {
   const reloadFeedbacks = React.useCallback(() => {
     if (sessionId) {
       console.log("🔄 Rechargement des feedbacks pour la session:", sessionId);
-      axios.get(`http://localhost:8000/feedback/session/list/${sessionId}`)
+      api.get(`/feedback/session/list/${sessionId}`)
         .then(res => {
           console.log("✅ Feedbacks reçus:", res.data);
           setFeedbacks(res.data);
@@ -53,7 +53,7 @@ const SessionFeedbackList = () => {
 
   const handleShowMore = (userId) => {
     if (sessionId && userId) {
-      axios.get(`http://localhost:8000/feedback/session/${sessionId}/student/${userId}`)
+      api.get(`/feedback/session/${sessionId}/student/${userId}`)
         .then(res => {
           setSelectedStudentFeedbacks(res.data);
           setFeedbackDialogOpen(true);

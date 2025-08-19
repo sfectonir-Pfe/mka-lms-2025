@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 const ProgramList = () => {
   const { t } = useTranslation();
@@ -12,7 +12,7 @@ const ProgramList = () => {
 
   const fetchPrograms = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/programs");
+      const res = await api.get("/programs");
       setPrograms(res.data);
     } catch (err) {
       console.error("Erreur chargement programmes", err);
@@ -27,7 +27,7 @@ const ProgramList = () => {
     if (!window.confirm(t('programs.confirmDelete'))) return;
 
     try {
-      await axios.delete(`http://localhost:8000/programs/${id}`);
+      await api.delete(`/programs/${id}`);
       setPrograms((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Erreur suppression", err);

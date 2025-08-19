@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 
@@ -12,14 +12,14 @@ const CourseList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:8000/courses").then((res) => {
+    api.get("/courses").then((res) => {
       setCourses(res.data);
     });
   }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm(t('courses.confirmDelete'))) return;
-    await axios.delete(`http://localhost:8000/courses/${id}`);
+    await api.delete(`/courses/${id}`);
     setCourses((prev) => prev.filter((c) => c.id !== id));
   };
 

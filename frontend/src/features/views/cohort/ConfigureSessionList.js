@@ -22,7 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 
 
 const ConfigureSessionList = () => {
@@ -33,7 +33,7 @@ const ConfigureSessionList = () => {
   const [selectedSession, setSelectedSession] = useState(null);
 
   const fetchSessions = () => {
-    axios.get("http://localhost:8000/sessions")
+    api.get("/sessions")
       .then(res => setSessions(res.data))
       .catch(err => {
         console.error("Erreur chargement sessions", err);
@@ -48,7 +48,7 @@ const ConfigureSessionList = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(t('sessions.confirmDelete'))) return;
     try {
-      await axios.delete(`http://localhost:8000/sessions/${id}`);
+      await api.delete(`/sessions/${id}`);
       fetchSessions();
     } catch (err) {
       console.error("Erreur suppression session", err);
@@ -90,12 +90,12 @@ const ConfigureSessionList = () => {
 >
   <Box sx={{ position: 'relative' }}>
     <img
-  src={s.imageUrl ?? "http://localhost:8000/uploads/sessions/default.png"}
+  src={s.imageUrl ?? "/uploads/sessions/default.png"}
   alt="Session"
   style={{ width: '100%', height: '180px', objectFit: 'cover', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}
   onError={(e) => {
     e.target.onerror = null;
-    e.target.src = "http://localhost:8000/uploads/sessions/default.png";
+    e.target.src = "/uploads/sessions/default.png";
   }}
 />
 

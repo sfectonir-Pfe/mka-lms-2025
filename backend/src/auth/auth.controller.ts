@@ -15,6 +15,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ApiBody, ApiProperty } from '@nestjs/swagger';
+import { Public } from './public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +39,7 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('login')
   async login(@Body() dto: LoginDto) {
     try {
@@ -58,7 +59,7 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     try {
@@ -126,7 +127,7 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('forgot-password')
   async forgot(@Body('email') email: string) {
     try {
@@ -139,7 +140,7 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('reset-password')
   async reset(@Body() dto: ResetPassword) {
     try {
@@ -205,24 +206,4 @@ export class AuthController {
       );
     }
   }
-  @Post('send-email-code')
-sendEmailCode(@Body('email') email: string) {
-  return this.authService.sendEmailVerificationCode(email);
-}
-
-@Post('verify-email-code')
-async verifyEmailCode(@Body('email') email: string, @Body('code') code: string) {
-  const user = await this.authService.verifyEmailCode(email, code);
-  const token = await this.authService.generateJwtToken(user);
-
-  return {
-    message: "Email verified successfully",
-    data: {
-      access_token: token,
-      user,
-    },
-  };
-}
-
-
 }

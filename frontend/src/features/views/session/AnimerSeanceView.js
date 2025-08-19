@@ -30,7 +30,7 @@ import {
   Grid,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import ReactPlayer from "react-player";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -98,7 +98,7 @@ const AnimerSeanceView = () => {
 
   const reloadFeedbacks = () => {
     if (!seanceId) return;
-    axios.get(`http://localhost:8000/feedback/seance/feedbacklist/${seanceId}`)
+    api.get(`/feedback/seance/feedbacklist/${seanceId}`)
 
       .then((res) => {
         const mapped = [];
@@ -128,13 +128,13 @@ const AnimerSeanceView = () => {
   useEffect(() => {
     const fetchSeance = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/seance-formateur/${seanceId}`);
+        const res = await api.get(`/seance-formateur/${seanceId}`);
         const base = res.data;
         setSeance(base);
 
         if (base?.session2?.id) {
-          const detailRes = await axios.get(
-            `http://localhost:8000/seance-formateur/details/${base.session2.id}`
+          const detailRes = await api.get(
+            `/seance-formateur/details/${base.session2.id}`
           );
           setProgramDetails(detailRes.data);
         }
@@ -147,8 +147,8 @@ const AnimerSeanceView = () => {
 
   useEffect(() => {
     if (!seanceId) return;
-    axios
-      .get(`http://localhost:8000/seance-formateur/${seanceId}/media`)
+    api
+      .get(`/seance-formateur/${seanceId}/media`)
       .then((res) => {
         setSessionImages(res.data.filter((m) => m.type === "IMAGE"));
         setSessionVideos(res.data.filter((m) => m.type === "VIDEO"));
@@ -176,8 +176,8 @@ const AnimerSeanceView = () => {
 
     Promise.all(
       ids.map((id) =>
-        axios
-          .get(`http://localhost:8000/quizzes/by-contenu/${id}`)
+        api
+          .get(`/quizzes/by-contenu/${id}`)
           .then((r) => ({ id, meta: r.data }))
           .catch(() => ({ id, meta: null }))
       )
@@ -201,8 +201,8 @@ const AnimerSeanceView = () => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
-    const res = await axios.post(
-      `http://localhost:8000/seance-formateur/${seanceId}/upload-media`,
+    const res = await api.post(
+      `/seance-formateur/${seanceId}/upload-media`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -251,12 +251,12 @@ const AnimerSeanceView = () => {
         return copy;
       });
 
-      await axios.patch(`http://localhost:8000/contenus/${contenuId}/publish`, {
+      await api.patch(`/contenus/${contenuId}/publish`, {
         published: nextPublished,
       });
 
-      const detailRes = await axios.get(
-        `http://localhost:8000/seance-formateur/details/${seance.session2.id}`
+      const detailRes = await api.get(
+        `/seance-formateur/details/${seance.session2.id}`
       );
       setProgramDetails(detailRes.data);
     } catch {
@@ -383,7 +383,7 @@ const AnimerSeanceView = () => {
                                               if (!cn?.fileUrl) return;
                                               const url = cn.fileUrl.startsWith("http")
                                                 ? cn.fileUrl
-                                                : `http://localhost:8000${cn.fileUrl.startsWith("/") ? "" : "/"}${cn.fileUrl}`;
+                                                : `${cn.fileUrl.startsWith("/") ? "" : "/"}${cn.fileUrl}`;
                                               window.open(url, "_blank");
                                             }}
                                           >

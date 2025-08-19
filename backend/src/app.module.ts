@@ -7,7 +7,7 @@ import { PrismaModule } from 'nestjs-prisma';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-// import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 
 import { UsersModule } from './users/users.module';
@@ -32,7 +32,7 @@ import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard
 import { S3Module } from './s3/s3.module';
 import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 import { NotificationModule } from './notification/notification.module';
-// import { RolesGuard } from './auth/roles.guard';
+import { RolesGuard } from './auth/roles.guard';
 import {SeanceFeedbackModule} from './seance-feedback/seance-feedback.module';
 import {SessionFeedbackModule} from './session-feedback/session-feedback.module';
 import { RéclamationModule } from './réclamation/réclamation.module';
@@ -98,8 +98,8 @@ imports: [
   providers: [
     AppService,
     // // 🔒 make JWT required everywhere by default
-    // { provide: APP_GUARD, useClass: JwtAuthGuard },
-    // //  { provide: APP_GUARD, useClass: RolesGuard },   // then roles
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+     { provide: APP_GUARD, useClass: RolesGuard },   // then roles
   ],
 })
 export class AppModule {}
