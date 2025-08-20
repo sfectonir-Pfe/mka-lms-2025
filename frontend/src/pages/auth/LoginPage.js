@@ -1,3 +1,42 @@
+<<<<<<< HEAD
+=======
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { useTranslation } from 'react-i18next';
+import toastErrorUtils from "../../utils/toastError";
+import { storeUser } from "../../utils/authUtils";
+import { IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+// import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
+import { toast } from "react-toastify"; 
+
+const LoginPage = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [msgError, setMsgError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  
+const [rememberMe, setRememberMe] = useState(false);
+// const [errors, setErrors] = useState({ email: "", password: "" });
+
+
+
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const emailFromUrl = params.get("email");
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    }
+  }, [location]);
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 
   // const validate = () => {
   //   let valid = true;
@@ -48,8 +87,20 @@ const LoginPage = () => {
   }, [location]);
 
   const handleRequest = async (e) => {
+<<<<<<< HEAD
   e.preventDefault();
   setMsgError("");
+=======
+    e.preventDefault();
+    setMsgError("");
+  // if (!validate()) return;
+    try {
+      const res = await axios.post("http://localhost:8000/auth/login", {
+        email,
+        password,
+        rememberMe: rememberMe,
+      });
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 
   try {
    const res = await api.post(
@@ -64,10 +115,35 @@ const LoginPage = () => {
   }
 );
 
+<<<<<<< HEAD
+=======
+      if (user.needsVerification) {
+        toast.warning("Votre compte n'est pas encore vérifié. Veuillez vérifier par SMS.");
+        navigate("/verify-sms", {
+          state: {
+            email: user.email,
+            phone: user.phone || "",
+          },
+        });
+        return;
+      }
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 
 
+<<<<<<< HEAD
     const user = res?.data?.data;
     if (!user) throw new Error("Réponse inattendue du serveur");
+=======
+      // Use the storeUser function from authUtils to handle remember me properly
+      storeUser(userData, rememberMe);
+      
+      // Also store email separately for backward compatibility
+      if (rememberMe) {
+        localStorage.setItem("userEmail", user.email);
+      } else {
+        sessionStorage.setItem("userEmail", user.email);
+      }
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 
     // Not verified → no token, go verify
     if (user.needsVerification) {
@@ -132,6 +208,7 @@ const LoginPage = () => {
             {msgError && <div className="alert alert-danger">{msgError}</div>}
 
             <div className="mb-3 position-relative">
+<<<<<<< HEAD
               <label className="form-label">Adresse email</label>
               <div className="input-group">
                 <span className="input-group-text">
@@ -147,6 +224,55 @@ const LoginPage = () => {
                 />
               </div>
             </div>
+=======
+  <label className="form-label">Adresse email</label>
+  <div className="input-group">
+    <span className="input-group-text">
+      <i className="bi bi-envelope"></i>
+    </span>
+    <input
+      type="email"
+      className="form-control"
+      placeholder="Entrez votre email"
+      value={email}
+      required
+      onChange={(e) => setEmail(e.target.value)}
+    />
+  </div>
+</div>
+
+<div className="mb-4 position-relative">
+  <label className="form-label">Mot de passe</label>
+  <div className="input-group">
+    <span className="input-group-text">
+      <i className="bi bi-lock"></i>
+    </span>
+    <input
+      type={showPassword ? "text" : "password"}
+      className="form-control"
+      placeholder="Entrez votre mot de passe"
+      value={password}
+      required
+      onChange={(e) => setPassword(e.target.value)}
+    />
+    <IconButton
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      sx={{
+        borderLeft: '1px solid #ced4da',
+        borderRadius: '0 0.375rem 0.375rem 0',
+        padding: '8px 12px',
+        backgroundColor: '#f8f9fa',
+        '&:hover': {
+          backgroundColor: '#e9ecef'
+        }
+      }}
+    >
+      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+    </IconButton>
+  </div>
+</div>
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 
             <div className="mb-4 position-relative">
               <label className="form-label">Mot de passe</label>

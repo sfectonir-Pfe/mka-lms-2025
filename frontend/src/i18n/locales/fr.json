@@ -594,6 +594,8 @@
     "copyError": "Erreur lors de la copie",
     "downloadImage": "Télécharger l'image",
     "imageGenerationError": "Erreur lors de la génération de l'image",
+    "imageLoadWarning": "Attention: L'image de la session n'a pas pu être chargée. L'image téléchargée pourrait ne pas inclure l'image de la session.",
+    "imageDownloadSuccess": "Image de la session téléchargée avec succès !",
     "program": "Programme",
     "period": "Du",
     "to": "au",

@@ -296,8 +296,81 @@ const FeedbackList = () => {
       headerName: t('averageRating'),
       width: 190,
       renderCell: (params) => {
-        const avg = params.row.averageRating;
-        if (avg === null || avg === undefined) return t('noRating');
+        // Utiliser la même logique de calcul que dans le dialog
+        let avg = params.row.averageRating;
+        
+        // Si averageRating n'est pas disponible ou invalide, calculer avec la même logique
+        if (!avg || avg <= 0) {
+          // Créer les réponses à partir du feedback pour calculer la moyenne pondérée
+          const answers = createAnswersFromFeedback(params.row);
+          const numericAnswers = answers
+            .map(qa => Number(qa.answer))
+            .filter(val => !isNaN(val) && val >= 1 && val <= 5);
+          
+          if (numericAnswers.length > 0) {
+            // Calcul pondéré basé sur les types de questions
+            const sessionQuestions = ['note de la session', 'qualité du contenu', 'organisation', 'objectifs', 'durée'];
+            const trainerQuestions = ['note du formateur', 'clarté', 'disponibilité', 'pédagogie', 'interaction'];
+            const teamQuestions = ['note de l\'équipe', 'collaboration', 'participation', 'communication'];
+            
+            let sessionScore = 0, sessionCount = 0;
+            let trainerScore = 0, trainerCount = 0;
+            let teamScore = 0, teamCount = 0;
+            let otherScore = 0, otherCount = 0;
+            
+            answers.forEach(qa => {
+              const question = qa.question.toLowerCase();
+              const answer = Number(qa.answer);
+              
+              if (!isNaN(answer) && answer >= 1 && answer <= 5) {
+                if (sessionQuestions.some(keyword => question.includes(keyword))) {
+                  sessionScore += answer;
+                  sessionCount++;
+                } else if (trainerQuestions.some(keyword => question.includes(keyword))) {
+                  trainerScore += answer;
+                  trainerCount++;
+                } else if (teamQuestions.some(keyword => question.includes(keyword))) {
+                  teamScore += answer;
+                  teamCount++;
+                } else {
+                  // Autres questions numériques
+                  otherScore += answer;
+                  otherCount++;
+                }
+              }
+            });
+            
+            // Calcul pondéré : Session (35%), Formateur (35%), Équipe (20%), Autres (10%)
+            let totalWeightedScore = 0;
+            let totalWeight = 0;
+            
+            if (sessionCount > 0) {
+              totalWeightedScore += (sessionScore / sessionCount) * 0.35;
+              totalWeight += 0.35;
+            }
+            if (trainerCount > 0) {
+              totalWeightedScore += (trainerScore / trainerCount) * 0.35;
+              totalWeight += 0.35;
+            }
+            if (teamCount > 0) {
+              totalWeightedScore += (teamScore / teamCount) * 0.20;
+              totalWeight += 0.20;
+            }
+            if (otherCount > 0) {
+              totalWeightedScore += (otherScore / otherCount) * 0.10;
+              totalWeight += 0.10;
+            }
+            
+            if (totalWeight > 0) {
+              avg = Math.round((totalWeightedScore / totalWeight) * 10) / 10;
+            } else {
+              // Fallback: moyenne simple
+              avg = Math.round((numericAnswers.reduce((a, b) => a + b, 0) / numericAnswers.length) * 10) / 10;
+            }
+          }
+        }
+        
+        if (avg === null || avg === undefined || avg <= 0) return t('noRating');
         const rounded = Math.round(avg);
         const moodLabels = [t('veryDissatisfied'), t('dissatisfied'), t('neutral'), t('satisfied'), t('verySatisfied')];
         const moodEmoji = ["😞", "😐", "🙂", "😊", "🤩"][rounded - 1] || "❓";
@@ -383,8 +456,72 @@ const FeedbackList = () => {
               const numericAnswers = answers
                 .map(qa => Number(qa.answer))
                 .filter(val => !isNaN(val) && val >= 1 && val <= 5);
-              const averageRating = selectedFeedback?.averageRating ||
-                (numericAnswers.length > 0 ? numericAnswers.reduce((a, b) => a + b, 0) / numericAnswers.length : 0);
+              
+              // Utiliser la même logique que dans le datagrid
+              let averageRating = 0;
+              if (selectedFeedback?.averageRating && selectedFeedback.averageRating > 0) {
+                averageRating = selectedFeedback.averageRating;
+              } else if (numericAnswers.length > 0) {
+                // Calcul pondéré basé sur les types de questions
+                const sessionQuestions = ['note de la session', 'qualité du contenu', 'organisation', 'objectifs', 'durée'];
+                const trainerQuestions = ['note du formateur', 'clarté', 'disponibilité', 'pédagogie', 'interaction'];
+                const teamQuestions = ['note de l\'équipe', 'collaboration', 'participation', 'communication'];
+                
+                let sessionScore = 0, sessionCount = 0;
+                let trainerScore = 0, trainerCount = 0;
+                let teamScore = 0, teamCount = 0;
+                let otherScore = 0, otherCount = 0;
+                
+                answers.forEach(qa => {
+                  const question = qa.question.toLowerCase();
+                  const answer = Number(qa.answer);
+                  
+                  if (!isNaN(answer) && answer >= 1 && answer <= 5) {
+                    if (sessionQuestions.some(keyword => question.includes(keyword))) {
+                      sessionScore += answer;
+                      sessionCount++;
+                    } else if (trainerQuestions.some(keyword => question.includes(keyword))) {
+                      trainerScore += answer;
+                      trainerCount++;
+                    } else if (teamQuestions.some(keyword => question.includes(keyword))) {
+                      teamScore += answer;
+                      teamCount++;
+                    } else {
+                      // Autres questions numériques
+                      otherScore += answer;
+                      otherCount++;
+                    }
+                  }
+                });
+                
+                // Calcul pondéré : Session (35%), Formateur (35%), Équipe (20%), Autres (10%)
+                let totalWeightedScore = 0;
+                let totalWeight = 0;
+                
+                if (sessionCount > 0) {
+                  totalWeightedScore += (sessionScore / sessionCount) * 0.35;
+                  totalWeight += 0.35;
+                }
+                if (trainerCount > 0) {
+                  totalWeightedScore += (trainerScore / trainerCount) * 0.35;
+                  totalWeight += 0.35;
+                }
+                if (teamCount > 0) {
+                  totalWeightedScore += (teamScore / teamCount) * 0.20;
+                  totalWeight += 0.20;
+                }
+                if (otherCount > 0) {
+                  totalWeightedScore += (otherScore / otherCount) * 0.10;
+                  totalWeight += 0.10;
+                }
+                
+                if (totalWeight > 0) {
+                  averageRating = Math.round((totalWeightedScore / totalWeight) * 10) / 10;
+                } else {
+                  // Fallback: moyenne simple
+                  averageRating = Math.round((numericAnswers.reduce((a, b) => a + b, 0) / numericAnswers.length) * 10) / 10;
+                }
+              }
 
               const moodLabels = [t('veryDissatisfied'), t('dissatisfied'), t('neutral'), t('satisfied'), t('verySatisfied')];
 

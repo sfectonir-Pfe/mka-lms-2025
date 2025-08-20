@@ -29,7 +29,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { CreatorDashboardModule } from './creator-dashboard/creator-dashboard.module';
 import { FormateurDashboardModule } from './formateur-dashboard/formateur-dashboard.module';
 import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard.module';
-import { S3Module } from './s3/s3.module';
+
 import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 import { NotificationModule } from './notification/notification.module';
 import { RolesGuard } from './auth/roles.guard';
@@ -63,7 +63,7 @@ imports: [
   WhiteboardModule, 
   Session2ChatModule, 
   ChatbotModule,
-  S3Module,
+
   GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule, FeedbackÉtudiantModule,
 
 
