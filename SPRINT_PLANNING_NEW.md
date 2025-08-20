@@ -277,8 +277,9 @@ Planification de 3 sprints pour le développement du système de gestion d'appre
 - [ ] **Tâche 11.4 :** Édition et suppression de quiz (2 jours)
 - [ ] **Tâche 11.5 :** Gestion des versions de quiz (2 jours)
 - [ ] **Tâche 11.6 :** Tests des quiz (1 jour)
+ - [ ] **Tâche 11.7 :** Visibilité Formateur/Admin — liste des quiz (1 jour)
 
-**Estimation totale :** 12 jours (7 jours terminés)
+**Estimation totale :** 13 jours (7 jours terminés)
 
 #### FB-012: Passage de quiz
 **User Story :** En tant qu'étudiant, je veux passer des quiz pour évaluer mes connaissances
@@ -384,6 +385,7 @@ Planification de 3 sprints pour le développement du système de gestion d'appre
 - [x] **Tâche 17.2 :** Interface de feedback (3 jours) ✅ **TERMINÉE**
 - [x] **Tâche 17.3 :** Système de notation (2 jours) ✅ **TERMINÉE**
 - [ ] **Tâche 17.4 :** Tests de feedback (1 jour)
+ - [ ] **Tâche 17.5 :** Visibilité Formateur/Admin — liste des feedbacks entre étudiants (1 jour)
 
 **Estimation totale :** 8 jours (7 jours terminés)
 
@@ -398,17 +400,43 @@ Planification de 3 sprints pour le développement du système de gestion d'appre
 
 **Estimation totale :** 7 jours (6 jours terminés)
 
-#### FB-023: Feedback de session et de séance
-**User Story :** En tant qu'étudiant et formateur, je veux donner/recevoir un feedback par session et par séance
+#### FB-018.1: Feedback formateur → étudiants
+**User Story :** En tant que formateur, je veux donner un feedback à mes étudiants
 
 **Tâches :**
-- [x] **Tâche 23.1 :** Modèle `SessionFeedback` et endpoints CRUD (2 jours) ✅ **TERMINÉE**
-- [x] **Tâche 23.2 :** Modèle `SeanceFeedback` et endpoints CRUD (2 jours) ✅ **TERMINÉE**
-- [x] **Tâche 23.3 :** Liaison aux utilisateurs et sessions/séances (2 jours) ✅ **TERMINÉE**
-- [ ] **Tâche 23.4 :** Agrégation et visualisation dans dashboards (1 jour)
-- [ ] **Tâche 23.5 :** Tests (1 jour)
+- [ ] **Tâche 18.5 :** Modèle et endpoints (1 jour)
+- [ ] **Tâche 18.6 :** Interface formateur pour donner un feedback (1 jour)
+- [ ] **Tâche 18.7 :** Liste et consultation des feedbacks donnés (1 jour)
+- [ ] **Tâche 18.8 :** Permissions (rôles/guards) et tests d’intégration (1 jour)
 
-**Estimation totale :** 8 jours (6 jours terminés)
+**Estimation totale :** 4 jours
+
+
+#### FB-023.1: Feedback de session — Soumission étudiant + visibilité Formateur/Admin
+**User Story :** En tant qu'étudiant, je veux soumettre un feedback de session; en tant que formateur et administrateur, je veux consulter la liste des feedbacks de session.
+
+**Tâches :**
+- [ ] **Tâche 23.6 :** Backend — endpoints création/listing/détails (session) (0.5 jour)
+- [ ] **Tâche 23.7 :** UI — formulaire feedback session + validation (1 jour)
+- [ ] **Tâche 23.8 :** Persistance + calcul de la note moyenne/pondérée (backend) (0.5 jour)
+- [ ] **Tâche 23.9 :** UI — liste `SessionFeedbackList` (consultation + détail) (1 jour)
+- [ ] **Tâche 23.14 :** Sécurité — permissions/guards (formateur/admin) + scopes API (0.5 jour)
+- [ ] **Tâche 23.15 :** Qualité — tests d’intégration API + tests UI de base (0.5 jour)
+
+**Estimation totale :** 4 jours
+
+#### FB-023.2: Feedback de séance — Soumission étudiant + visibilité Formateur/Admin
+**User Story :** En tant qu'étudiant, je veux soumettre un feedback de séance; en tant que formateur et administrateur, je veux consulter la liste des feedbacks de séance.
+
+**Tâches :**
+- [ ] **Tâche 23.10 :** Backend — endpoints création/listing/détails (séance) (0.5 jour)
+- [ ] **Tâche 23.11 :** UI — formulaire feedback séance + validation (1 jour)
+- [ ] **Tâche 23.12 :** Persistance + calcul de la note moyenne/pondérée (backend) (0.5 jour)
+- [ ] **Tâche 23.13 :** UI — liste `SeanceFeedbackList` (consultation + détail) (1 jour)
+- [ ] **Tâche 23.16 :** Sécurité — permissions/guards (formateur/admin) + scopes API (0.5 jour)
+- [ ] **Tâche 23.17 :** Qualité — tests d’intégration API + tests UI de base (0.5 jour)
+
+**Estimation totale :** 4 jours
 
 #### FB-019: Assistant IA intelligent
 **User Story :** En tant qu'utilisateur, je veux interagir avec un assistant IA pour obtenir de l'aide
