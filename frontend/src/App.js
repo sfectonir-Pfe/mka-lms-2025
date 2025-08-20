@@ -21,6 +21,8 @@ import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 // Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
 import Main from "./apps/Main";
+import VerifyMailPage from "./pages/auth/VerifyMailPage";
+import VerifyMethodPage from "./pages/auth/VerifyMethodPage";
 
 
 // User-related pages
@@ -55,6 +57,8 @@ import AddSeanceFormateurView from "./features/views/session/AddSeanceFormateurV
 import SeanceFormateurList from "./features/views/session/SeanceFormateurList";
 import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
 // import SessionDetail from "./pages/cohort/SessionDetail";
+// router.jsx
+
 
 //chatbot
 import Chatbot from './components/Chatbot';
@@ -80,7 +84,7 @@ import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionF
 
 
 
-  
+
 // UI
 import Spinner from "react-bootstrap/Spinner";
 import { ToastContainer } from "react-toastify";
@@ -221,6 +225,8 @@ function App() {
 
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+                <Route path="/seances/:seanceId/quiz/:contenuId" element={<PlayQuizPage />} />
+
 
                 <Route path="/programs/build/:programId" element={<BuildProgramView />} />
                 <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
@@ -268,7 +274,7 @@ function App() {
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
                 <Route path="/Réclamationlist" element={<Réclamationlist />} />
                 <Route path="/notifications" element={<NotificationsPage user={user} />} />
-                
+
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -277,6 +283,9 @@ function App() {
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
+                <Route path="/verify-email" element={<VerifyMailPage />} />
+                <Route path="/verify-method" element={<VerifyMethodPage />} />
+
 
               </Route>
             )}

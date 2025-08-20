@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Typography, Grid,Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 
@@ -13,7 +13,7 @@ const ContenusList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:8000/contenus").then((res) => {
+    api.get("/contenus").then((res) => {
       console.log('Contenus data:', res.data);
       setContenus(res.data);
     });
@@ -22,7 +22,7 @@ const ContenusList = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(t('content.confirmDelete'))) return;
     try {
-      await axios.delete(`http://localhost:8000/contenus/${id}`);
+      await api.delete(`/contenus/${id}`);
       setContenus((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       alert(t('content.deleteError'));

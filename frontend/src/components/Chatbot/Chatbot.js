@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../api/axiosInstance';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { LanguageService } from '../../services/languageService';
 import QuickSuggestions from './QuickSuggestions';
@@ -103,7 +103,7 @@ const Chatbot = () => {
         userLanguage: userLanguage
       });
 
-      const response = await axios.post('http://localhost:8000/chatbot/message', {
+      const response = await api.post('/chatbot/message', {
         message: inputMessage,
         sessionId: sessionId,
         userId: userInfo.id,

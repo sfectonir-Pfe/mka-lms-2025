@@ -3,9 +3,9 @@ import { Typography, List, ListItem, ListItemText, IconButton, Chip } from '@mui
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { io } from 'socket.io-client';
-import axios from 'axios';
+import api from '../../api/axiosInstance';
 
-const API_URL = 'http://localhost:8000';
+// const API_URL = 'http://localhost:8000';
 
 const NotificationsPage = ({ user }) => {
   const [notifications, setNotifications] = useState([]);
@@ -14,10 +14,10 @@ const NotificationsPage = ({ user }) => {
   useEffect(() => {
     if (!user?.id) return;
     // Initial load
-    axios.get(`${API_URL}/notifications/${user.id}`)
+    api.get(`/notifications/${user.id}`)
       .then(res => setNotifications(res.data));
     // Socket for real-time
-    const socketInstance = io(API_URL, { query: { userId: user.id } });
+    const socketInstance = io(api, { query: { userId: user.id } });  //API_URL
     setSocket(socketInstance);
     socketInstance.on('new-notification', notif => {
       setNotifications(prev => [notif, ...prev]);
@@ -26,12 +26,12 @@ const NotificationsPage = ({ user }) => {
   }, [user?.id]);
 
   const handleMarkAllAsRead = async () => {
-    await axios.patch(`${API_URL}/notifications/${user.id}/mark-all-read`);
+    await api.patch(`/notifications/${user.id}/mark-all-read`);
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`${API_URL}/notifications/${id}`);
+    await api.delete(`/notifications/${id}`);
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
@@ -52,7 +52,7 @@ const NotificationsPage = ({ user }) => {
                   {!n.read && <Chip size="small" color="primary" label="New" sx={{ ml: 1 }} />}
                 </>
               }
-              onClick={() => !n.read && axios.patch(`${API_URL}/notifications/${n.id}/read`).then(() =>
+              onClick={() => !n.read && api.patch(`/notifications/${n.id}/read`).then(() =>
                 setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))
               )}
               sx={{ cursor: 'pointer' }}

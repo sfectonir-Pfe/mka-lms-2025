@@ -51,6 +51,12 @@ model User {
   GeneralChatMessage         GeneralChatMessage[]
   Notification               Notification[]
   Reclamation                Reclamation[]
+<<<<<<< HEAD
+  studentGroups              StudentGroup[]          @relation("StudentGroupMembers")
+  feedbacksGiven             StudentFeedback[]       @relation("StudentFeedbackFrom")
+  feedbacksReceived          StudentFeedback[]       @relation("StudentFeedbackTo")
+  ProgramChatMessage         ProgramChatMessage[]
+=======
   ResetToken                 ResetToken[]
   seanceFeedbacks            SeanceFeedback[]
   SeanceFormateur            SeanceFormateur[]
@@ -62,6 +68,7 @@ model User {
   userSessions2              UserSession2[]
   whiteboardActions          WhiteboardAction[]
   studentGroups              StudentGroup[]          @relation("StudentGroupMembers")
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model Formateur {
@@ -107,6 +114,16 @@ model ResetToken {
 }
 
 model Program {
+<<<<<<< HEAD
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  published          Boolean              @default(false)
+  modules            ProgramModule[]
+  sessions2          Session2[]
+  buildProgram       buildProgram[]
+  createdAt          DateTime             @default(now())
+  ProgramChatMessage ProgramChatMessage[]
+=======
   id           Int             @id @default(autoincrement())
   name         String
   published    Boolean         @default(false)
@@ -114,6 +131,7 @@ model Program {
   modules      ProgramModule[]
   sessions2    Session2[]
   buildProgram buildProgram[]
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model Module {
@@ -409,6 +427,18 @@ model GeneralChatMessage {
   sender    User?    @relation(fields: [senderId], references: [id])
 }
 
+model ProgramChatMessage {
+  id        Int      @id @default(autoincrement())
+  programId Int
+  senderId  Int?
+  type      String // "text" | "image" | "video" | "audio"
+  content   String // text content or file URL
+  createdAt DateTime @default(now())
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  sender  User?   @relation(fields: [senderId], references: [id])
+}
+
 model Feedback {
   id        Int                @id @default(autoincrement())
   rating    Int
@@ -522,7 +552,12 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+<<<<<<< HEAD
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+=======
   user      User     @relation(fields: [userId], references: [id])
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model Reclamation {
@@ -539,28 +574,54 @@ model Reclamation {
   responseDate DateTime?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
+<<<<<<< HEAD
+
+  user User @relation(fields: [userId], references: [id])
+=======
   user         User                @relation(fields: [userId], references: [id])
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model StudentGroup {
   id               String            @id @default(uuid())
   name             String
   seanceId         Int
+<<<<<<< HEAD
+  seance           SeanceFormateur   @relation(fields: [seanceId], references: [id], onDelete: Cascade)
+  students         User[]            @relation("StudentGroupMembers")
+  studentFeedbacks StudentFeedback[] @relation("GroupFeedbacks")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+=======
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   studentFeedbacks StudentFeedback[] @relation("GroupFeedbacks")
   seance           SeanceFormateur   @relation(fields: [seanceId], references: [id], onDelete: Cascade)
   students         User[]            @relation("StudentGroupMembers")
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model StudentFeedback {
-  id            String       @id @default(uuid())
+  id            String   @id @default(uuid())
   fromStudentId Int
   toStudentId   Int
   groupId       String
   rating        Int
   comment       String
   category      String
+<<<<<<< HEAD
+  isAnonymous   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fromStudent User         @relation("StudentFeedbackFrom", fields: [fromStudentId], references: [id], onDelete: Cascade)
+  toStudent   User         @relation("StudentFeedbackTo", fields: [toStudentId], references: [id], onDelete: Cascade)
+  group       StudentGroup @relation("GroupFeedbacks", fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([fromStudentId, toStudentId, groupId, category]) // <- add category
+  @@index([groupId, fromStudentId]) // optional: speeds up your GET
+  @@index([groupId, toStudentId]) // optional
+=======
   isAnonymous   Boolean      @default(false)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -569,6 +630,7 @@ model StudentFeedback {
   toStudent     User         @relation("StudentFeedbackTo", fields: [toStudentId], references: [id], onDelete: Cascade)
 
   @@unique([fromStudentId, toStudentId, groupId])
+>>>>>>> cc32f4250d733347ef9ae30fd906d7b3f9982cc3
 }
 
 model annotation_tag_entity {

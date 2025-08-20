@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddUserView = () => {
@@ -36,8 +36,8 @@ const AddUserView = () => {
 
   useEffect(() => {
     // Fetch sessions on mount
-    axios
-      .get("http://localhost:8000/session2")
+    api
+      .get("/session2")
       .then(res => setSessions(res.data))
       .catch(() => setSessions([]));
   }, []);
@@ -58,7 +58,7 @@ const AddUserView = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:8000/users", {
+      await api.post("/users", {
         email,
         phone: countryCode + phone,
         role,

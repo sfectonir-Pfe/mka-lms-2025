@@ -13,7 +13,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import ScoreReveal from "../../../features/views/quiz/ScoreReveal"; 
 
 const PlayQuizPage = () => {
@@ -28,8 +28,8 @@ const PlayQuizPage = () => {
 
 
   useEffect(() => {
-    axios
-  .get(`http://localhost:8000/quizzes/by-contenu/${contenuId}`)
+    api
+  .get(`/quizzes/by-contenu/${contenuId}`)
   .then((res) => {
     const quiz = res.data;
     setQuestions(quiz.questions);

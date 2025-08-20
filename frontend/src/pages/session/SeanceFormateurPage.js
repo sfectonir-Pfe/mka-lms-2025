@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../api/axiosInstance";
 import { useParams } from "react-router-dom";
 
 import AddSeanceFormateurView from "../../features/views/session/AddSeanceFormateurView";
@@ -21,7 +21,7 @@ const SeanceFormateurPage = () => {
 
   const fetchSeances = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/seance-formateur/session/${sessionId}`);
+      const res = await api.get(`/seance-formateur/session/${sessionId}`);
       setSeances(res.data);
     } catch (err) {
       console.error('Error fetching seances:', err);
@@ -31,7 +31,7 @@ const SeanceFormateurPage = () => {
 
   const fetchSessionName = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/session2/${sessionId}`);
+      const res = await api.get(`/session2/${sessionId}`);
       setSessionName(res.data.name);
     } catch (err) {
       // handle error
@@ -41,7 +41,7 @@ const SeanceFormateurPage = () => {
   const fetchAverageRating = async () => {
     try {
       setLoadingRating(true);
-      const res = await axios.get(`http://localhost:8000/session2/session/${sessionId}/with-feedback`);
+      const res = await api.get(`/session2/session/${sessionId}/with-feedback`);
       const seancesWithFeedback = res.data;
       
       // Weighted average across all seances by their feedback counts
@@ -86,7 +86,7 @@ const SeanceFormateurPage = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Confirmer la suppression de cette séance ?")) {
-      await axios.delete(`http://localhost:8000/seance-formateur/${id}`);
+      await api.delete(`/seance-formateur/${id}`);
       fetchSeances();
     }
   };

@@ -409,4 +409,19 @@ export class Session2Service {
       return 0;
     }
   }
+  async findOne(id: number) {
+  return this.prisma.session2.findUnique({
+    where: { id },
+    include: {
+      program: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+
 }

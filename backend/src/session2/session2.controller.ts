@@ -101,4 +101,14 @@ export class Session2Controller {
   async getAverageFeedback(@Param('id') id: string) {
     return this.service.getAverageSessionFeedback(Number(id));
   }
+  @Get(':id')
+findOne(@Param('id') id: string) {
+  return this.prisma.session2.findUnique({
+    where: { id: Number(id) },
+    include: {
+      program: true, // ✅ you MUST include this
+    },
+  });
+}
+
 }

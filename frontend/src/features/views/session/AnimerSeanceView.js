@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -10,115 +10,131 @@ import {
   Button,
   Collapse,
   Stack,
-  TextField,
   IconButton,
   Divider,
   Dialog,
   DialogTitle,
   DialogContent,
+  Skeleton,
+  LinearProgress,
+  ImageList,
+  ImageListItem,
+  ButtonGroup,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Card,
+  CardContent,
+  Tooltip,
+  Switch,
+  Grid,
 } from "@mui/material";
-import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import { useTranslation } from "react-i18next";
+import api from "../../../api/axiosInstance";
 import ReactPlayer from "react-player";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import LaunchIcon from "@mui/icons-material/Launch";
 import {
   Description as DescriptionIcon,
   Quiz as QuizIcon,
-
   InsertDriveFile as InsertDriveFileIcon,
   AddPhotoAlternate as AddPhotoAlternateIcon,
   Movie as MovieIcon,
-  Save as SaveIcon,
   ZoomInMap as ZoomInMapIcon,
   Feedback as FeedbackIcon,
-  List as ListIcon,
   Group as GroupIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 
-import { useNavigate } from "react-router-dom";
-import AddSeanceFeedback from '../../../features/views/feedback/feedbackForm/AddSeanceFeedback';
-import FeedbackFormateur from '../feedback/feedbackForm/FeedbackFormateur';
-import FeedbackEtudiant from '../feedback/feedbackForm/FeedbackEtudiant';
-import SeanceFeedbackList from '../../../features/views/feedback/FeedbackList/seancefeedbacklist';
-import Regroupement from './Regroupement';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
+// NEW feedback bits you asked to integrate
+import AddSeanceFeedback from "../../../features/views/feedback/feedbackForm/AddSeanceFeedback";
+import FeedbackFormateur from "../feedback/feedbackForm/FeedbackFormateur";
+import FeedbackEtudiant from "../feedback/feedbackForm/FeedbackEtudiant";
+import SeanceFeedbackList from "../../../features/views/feedback/FeedbackList/seancefeedbacklist";
+import Regroupement from "./Regroupement";
 
 const AnimerSeanceView = () => {
-  const { t } = useTranslation('seances');
+  const { t } = useTranslation("seances");
   const { id: seanceId } = useParams();
+  const navigate = useNavigate();
+
+  // --- state ---
   const [seance, setSeance] = useState(null);
   const [programDetails, setProgramDetails] = useState(null);
   const [tab, setTab] = useState(0);
-  const [prevTab, setPrevTab] = useState(0);
   const [showContenus, setShowContenus] = useState(true);
   const [sessionImages, setSessionImages] = useState([]);
   const [sessionVideos, setSessionVideos] = useState([]);
   const [zoomedImage, setZoomedImage] = useState(null);
   const [expandedCourses, setExpandedCourses] = useState({});
-  const [sessionNotes, setSessionNotes] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [showFeedbackSidebar, setShowFeedbackSidebar] = useState(false);
-  const [feedbacks, setFeedbacks] = useState([]);
-  const [selectedFeedback, setSelectedFeedback] = useState(null);
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [showFeedbackTab, setShowFeedbackTab] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [quizMetaByContenu, setQuizMetaByContenu] = useState({}); // {contenuId: {timeLimit, questions: []}}
 
-  const user = JSON.parse(localStorage.getItem("user"));
-  const navigate = useNavigate();
-
-
-
-  // Load feedbacks
-  const reloadFeedbacks = () => {
-    if (seanceId) {
-      axios.get(`http://localhost:8000/feedback/feedbacklist/${seanceId}`)
-        .then(res => {
-          console.log("Feedbacks reçus:", res.data);
-          const mapped = [];
-          const seenEmails = new Set();
-          res.data.forEach(fb => {
-            if (!seenEmails.has(fb.email)) {
-              mapped.push({
-                ...fb,
-                studentName: fb.nom || '',
-                studentEmail: fb.email || '',
-                content: fb.feedback || '',
-                sessionComments: fb.sessionComments,
-                trainerComments: fb.trainerComments,
-                teamComments: fb.teamComments,
-                suggestions: fb.suggestions,
-                answers: fb.answers || [],
-              });
-              seenEmails.add(fb.email);
-            }
-          });
-          setFeedbacks(mapped);
-        })
-        .catch(err => console.error("Erreur chargement feedbacklist:", err));
-    }
+  // --- helpers ---
+  const getSessionQuizzes = () => {
+    if (!programDetails) return [];
+    const items = [];
+    programDetails.session2Modules?.forEach((mod) => {
+      mod.courses?.forEach((c) => {
+        c.contenus?.forEach((ct) => {
+          const cn = ct?.contenu;
+          if (cn?.type === "Quiz") {
+            items.push({
+              contenuId: cn.id,
+              title: cn.title,
+              published: !!cn.published,
+              courseTitle: c?.course?.title || "",
+            });
+          }
+        });
+      });
+    });
+    return items;
   };
 
-  useEffect(() => {
-    reloadFeedbacks();
-  }, [seanceId]);
+  const reloadFeedbacks = () => {
+    if (!seanceId) return;
+    api.get(`/feedback/seance/feedbacklist/${seanceId}`)
 
+      .then((res) => {
+        const mapped = [];
+        const seenEmails = new Set();
+        res.data.forEach((fb) => {
+          if (!seenEmails.has(fb.email)) {
+            mapped.push({
+              ...fb,
+              studentName: fb.nom || "",
+              studentEmail: fb.email || "",
+              content: fb.feedback || "",
+              sessionComments: fb.sessionComments,
+              trainerComments: fb.trainerComments,
+              teamComments: fb.teamComments,
+              suggestions: fb.suggestions,
+              answers: fb.answers || [],
+            });
+            seenEmails.add(fb.email);
+          }
+        });
+        setFeedbacks(mapped);
+      })
+      .catch(() => {});
+  };
 
-
-
-
+  // --- effects ---
   useEffect(() => {
     const fetchSeance = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/seance-formateur/${seanceId}`);
+        const res = await api.get(`/seance-formateur/${seanceId}`);
         const base = res.data;
         setSeance(base);
 
         if (base?.session2?.id) {
-          const detailRes = await axios.get(
-            `http://localhost:8000/seance-formateur/details/${base.session2.id}`
+          const detailRes = await api.get(
+            `/seance-formateur/details/${base.session2.id}`
           );
           setProgramDetails(detailRes.data);
         }
@@ -131,38 +147,66 @@ const AnimerSeanceView = () => {
 
   useEffect(() => {
     if (!seanceId) return;
-    axios.get(`http://localhost:8000/seance-formateur/${seanceId}/media`)
-      .then(res => {
-        setSessionImages(res.data.filter(m => m.type === "IMAGE"));
-        setSessionVideos(res.data.filter(m => m.type === "VIDEO"));
+    api
+      .get(`/seance-formateur/${seanceId}/media`)
+      .then((res) => {
+        setSessionImages(res.data.filter((m) => m.type === "IMAGE"));
+        setSessionVideos(res.data.filter((m) => m.type === "VIDEO"));
       })
-      .catch(err => {
-        console.error("Erreur chargement médias:", err);
-      });
+      .catch(() => {});
   }, [seanceId]);
+
+  // fetch quiz metas for all quiz contenus in this session
+  useEffect(() => {
+    if (!programDetails) return;
+
+    const ids = [];
+    programDetails.session2Modules?.forEach((m) =>
+      m.courses?.forEach((c) =>
+        c.contenus?.forEach((ct) => {
+          if (ct?.contenu?.type === "Quiz" && ct?.contenu?.id) ids.push(ct.contenu.id);
+        })
+      )
+    );
+
+    if (!ids.length) {
+      setQuizMetaByContenu({});
+      return;
+    }
+
+    Promise.all(
+      ids.map((id) =>
+        api
+          .get(`/quizzes/by-contenu/${id}`)
+          .then((r) => ({ id, meta: r.data }))
+          .catch(() => ({ id, meta: null }))
+      )
+    ).then((arr) => {
+      const map = {};
+      arr.forEach(({ id, meta }) => {
+        if (meta) map[id] = meta;
+      });
+      setQuizMetaByContenu(map);
+    });
+  }, [programDetails]);
+
+  useEffect(() => {
+    reloadFeedbacks();
+  }, [seanceId]);
+
+  // --- actions ---
+  const handleTabChange = (_e, newValue) => setTab(newValue);
 
   const uploadMedia = async (file, type) => {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("type", type);
-    const res = await axios.post(
-      `http://localhost:8000/seance-formateur/${seanceId}/upload-media`,
+    const res = await api.post(
+      `/seance-formateur/${seanceId}/upload-media`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
     return res.data;
-  };
-
-  const toggleCourseVisibility = (courseId) => {
-    setExpandedCourses((prev) => ({
-      ...prev,
-      [courseId]: !prev[courseId],
-    }));
-  };
-
-  const handleTabChange = (e, newValue) => {
-    if (newValue !== 3 && newValue !== 4) setPrevTab(tab);
-    setTab(newValue);
   };
 
   const handleAddImage = async (e) => {
@@ -171,8 +215,8 @@ const AnimerSeanceView = () => {
     try {
       const media = await uploadMedia(file, "IMAGE");
       setSessionImages((prev) => [...prev, media]);
-    } catch (err) {
-      alert(t('uploadImageError'));
+    } catch {
+      alert(t("uploadImageError"));
     }
   };
 
@@ -182,176 +226,287 @@ const AnimerSeanceView = () => {
     try {
       const media = await uploadMedia(file, "VIDEO");
       setSessionVideos((prev) => [...prev, media]);
-    } catch (err) {
-      alert(t('uploadVideoError'));
+    } catch {
+      alert(t("uploadVideoError"));
     }
   };
 
-  const handleSaveSession = async () => {
-    setSaving(true);
-    setTimeout(() => setSaving(false), 1000);
-    alert(t('seance.saveSuccess'));
-  };
+  const toggleCourseVisibility = (courseId) =>
+    setExpandedCourses((prev) => ({ ...prev, [courseId]: !prev[courseId] }));
 
-  const handlePublishContenu = async (contenuId) => {
+  const handlePublishContenu = async (contenuId, nextPublished) => {
     if (!contenuId) return;
     try {
-      await axios.patch(`http://localhost:8000/contenus/${contenuId}/publish`, {
-        published: true,
+      // optimistic UI
+      setProgramDetails((prev) => {
+        if (!prev) return prev;
+        const copy = JSON.parse(JSON.stringify(prev));
+        copy.session2Modules.forEach((mod) =>
+          mod.courses.forEach((c) =>
+            c.contenus.forEach((cc) => {
+              if (cc.contenu?.id === contenuId) cc.contenu.published = nextPublished;
+            })
+          )
+        );
+        return copy;
       });
-      const detailRes = await axios.get(
-        `http://localhost:8000/seance-formateur/details/${seance.session2.id}`
+
+      await api.patch(`/contenus/${contenuId}/publish`, {
+        published: nextPublished,
+      });
+
+      const detailRes = await api.get(
+        `/seance-formateur/details/${seance.session2.id}`
       );
       setProgramDetails(detailRes.data);
     } catch {
-      alert(t('statusChangeError'));
+      alert(t("statusChangeError"));
     }
   };
 
-  const toggleFeedbackTab = () => {
-    setShowFeedbackTab(!showFeedbackTab);
-  };
-
-
-
-
-
-  const feedbackColumns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'studentName', headerName: t('seances.studentName'), width: 200 },
-    { field: 'studentEmail', headerName: t('seances.studentEmail'), width: 250 },
-    {
-      field: 'createdAt',
-      headerName: t('seances.date'),
-      width: 180,
-      valueGetter: (params) => new Date(params.row.createdAt).toLocaleString()
-    },
-    {
-      field: 'actions',
-      type: 'actions',
-      headerName: t('seances.actions'),
-      width: 120,
-      getActions: (params) => [
-        <GridActionsCellItem
-          icon={<DescriptionIcon />}
-          label={t('seances.viewFeedback')}
-          onClick={() => {
-            setSelectedFeedback(params.row);
-            setFeedbackDialogOpen(true);
-          }}
-        />
-      ],
-    },
-  ];
-
+  // --- UI: hierarchy (accordion, cards) ---
   const renderProgramHierarchy = () => {
-    if (!programDetails) return <Typography>{t('loadingProgram')}</Typography>;
+    if (!programDetails) return <Typography>{t("loadingProgram")}</Typography>;
 
     return (
       <Box>
-        <Typography variant="h6" mb={1}>📘 <strong>{t('program')} : {programDetails.program.name}</strong></Typography>
+        <Typography variant="h6" mb={1}>
+          📘 <strong>{t("program")} : {programDetails.program.title}</strong>
+        </Typography>
 
-        <Box ml={2} mt={2}>
+        <Box mt={2}>
           {programDetails.session2Modules.map((mod) => (
-            <Box key={mod.id} mt={2}>
-              <Typography variant="subtitle1" fontWeight="bold" sx={{ color: "#1976d2" }}>
-                📦 {mod.module.name}
-              </Typography>
+            <Accordion key={mod.id} disableGutters sx={{ mb: 1, borderRadius: 2, overflow: "hidden" }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography sx={{ fontWeight: 700, color: "#1976d2" }}>
+                  📦 {mod.module.name}
+                </Typography>
+              </AccordionSummary>
 
-              <Box ml={3}>
+              <AccordionDetails sx={{ pt: 0 }}>
                 {mod.courses.map((course) => (
-                  <Box key={course.id} mt={1}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body1" fontWeight="bold" sx={{ color: "#1e88e5" }}>
+                  <Accordion
+                    key={course.id}
+                    disableGutters
+                    sx={{
+                      mb: 1,
+                      ml: 1,
+                      borderRadius: 2,
+                      overflow: "hidden",
+                      bgcolor: "#fafafa",
+                      "&:before": { display: "none" },
+                    }}
+                  >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography sx={{ fontWeight: 600, color: "#1e88e5" }}>
                         📘 {course.course.title}
                       </Typography>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => toggleCourseVisibility(course.id)}
-                      >
-                        {expandedCourses[course.id] ? t('hide') : t('show')}
-                      </Button>
-                    </Stack>
+                    </AccordionSummary>
 
-                    <Collapse in={expandedCourses[course.id]}>
-                      {course.contenus.map((ct) => (
-                        <Box key={ct.contenu?.id ?? uuidv4()} display="flex" alignItems="center" gap={1} flexWrap="wrap" mt={1}>
-                          <Chip
-                            icon={<InsertDriveFileIcon sx={{ fontSize: 22, color: ct.contenu.published ? "#4caf50" : "#b0bec5" }} />}
-                            label={ct.contenu.title}
-                            variant="outlined"
-                            onClick={() => ct.contenu?.fileUrl && window.open(ct.contenu.fileUrl, "_blank")}
-                            sx={{
-                              cursor: ct.contenu?.fileUrl ? "pointer" : "default",
-                              borderColor: ct.contenu.published ? "#4caf50" : "#b0bec5",
-                              color: ct.contenu.published ? "#2e7d32" : "#546e7a",
-                              fontWeight: "bold",
-                              minWidth: 140,
-                              justifyContent: "flex-start",
-                            }}
-                          />
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color={ct.contenu?.published ? "success" : "warning"}
-                            onClick={() => handlePublishContenu(ct.contenu?.id)}
-                          >
-                            {ct.contenu?.published ? t('unpublish') : t('publish')}
-                          </Button>
-                        </Box>
-                      ))}
-                    </Collapse>
-                  </Box>
+                    <AccordionDetails>
+                      <Grid container spacing={1.5}>
+                        {course.contenus.map((ct) => {
+                          const cn = ct.contenu;
+                          const isQuiz = cn?.type === "Quiz";
+                          const meta = isQuiz ? quizMetaByContenu[cn.id] : null;
+
+                          return (
+                            <Grid item xs={12} md={6} key={cn?.id ?? uuidv4()}>
+                              <Card
+                                variant="outlined"
+                                sx={{
+                                  borderRadius: 2,
+                                  "&:hover": { boxShadow: 3, borderColor: "#e0e0e0" },
+                                  borderLeft: `4px solid ${isQuiz ? "#1976d2" : "#4caf50"}`,
+                                }}
+                              >
+                                <CardContent
+                                  sx={{
+                                    py: 1.5,
+                                    display: "grid",
+                                    gridTemplateColumns: "auto 1fr auto",
+                                    alignItems: "center",
+                                    gap: 1.25,
+                                  }}
+                                >
+                                  <Box sx={{ display: "grid", placeItems: "center" }}>
+                                    {isQuiz ? (
+                                      <QuizIcon sx={{ fontSize: 24, color: cn?.published ? "#1976d2" : "#b0bec5" }} />
+                                    ) : (
+                                      <InsertDriveFileIcon sx={{ fontSize: 24, color: cn?.published ? "#4caf50" : "#b0bec5" }} />
+                                    )}
+                                  </Box>
+
+                                  <Box sx={{ minWidth: 0 }}>
+                                    <Typography noWrap sx={{ fontWeight: 600 }}>
+                                      {cn?.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" noWrap>
+                                      {isQuiz
+                                        ? `Questions: ${meta?.questions?.length ?? "—"} · Time: ${meta?.timeLimit ? `${meta.timeLimit} min` : "—"}`
+                                        : (cn?.fileType || "File")}
+                                    </Typography>
+                                  </Box>
+
+                                  <Stack direction="row" alignItems="center" spacing={1}>
+                                    <Tooltip title={cn?.published ? t("unpublish") : t("publish")}>
+                                      <Switch
+                                        size="small"
+                                        checked={!!cn?.published}
+                                        onChange={(e) => handlePublishContenu(cn?.id, e.target.checked)}
+                                      />
+                                    </Tooltip>
+
+                                    {isQuiz ? (
+                                      <Tooltip title={cn?.published ? t("open") : t("publishFirst")}>
+                                        <span>
+                                          <Button
+                                            size="small"
+                                            variant="contained"
+                                            startIcon={<PlayArrowIcon />}
+                                            disabled={!cn?.published}
+                                            onClick={() => navigate(`/seances/${seanceId}/quiz/${cn.id}`)}
+                                          >
+                                            {t("open")}
+                                          </Button>
+                                        </span>
+                                      </Tooltip>
+                                    ) : (
+                                      <Tooltip title={t("open")}>
+                                        <span>
+                                          <Button
+                                            size="small"
+                                            variant="outlined"
+                                            startIcon={<LaunchIcon />}
+                                            disabled={!cn?.fileUrl}
+                                            onClick={() => {
+                                              if (!cn?.fileUrl) return;
+                                              const url = cn.fileUrl.startsWith("http")
+                                                ? cn.fileUrl
+                                                : `${cn.fileUrl.startsWith("/") ? "" : "/"}${cn.fileUrl}`;
+                                              window.open(url, "_blank");
+                                            }}
+                                          >
+                                            {t("open")}
+                                          </Button>
+                                        </span>
+                                      </Tooltip>
+                                    )}
+                                  </Stack>
+                                </CardContent>
+                              </Card>
+                            </Grid>
+                          );
+                        })}
+                      </Grid>
+                    </AccordionDetails>
+                  </Accordion>
                 ))}
-              </Box>
-            </Box>
+              </AccordionDetails>
+            </Accordion>
           ))}
         </Box>
       </Box>
     );
   };
 
-  if (!seance) return <Typography>{t('loadingSession')}</Typography>;
+  // --- loading skeleton ---
+  if (!seance) {
+    return (
+      <Paper sx={{ p: 3, borderRadius: 3, border: "1px solid #e5e7eb" }}>
+        <LinearProgress sx={{ mb: 2 }} />
+        <Skeleton variant="text" width="40%" height={32} />
+        <Skeleton variant="rectangular" height={280} sx={{ borderRadius: 2, mt: 1 }} />
+      </Paper>
+    );
+  }
 
   return (
     <Box p={2}>
       {/* Meet */}
-      <Paper sx={{
-        mb: 3, p: 0, background: "#f8fafc", minHeight: "70vh",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        border: "2px solid #bcbcbc", overflow: "hidden",
-      }}>
-        <iframe
-          src={`https://localhost:8443/${seance.title || "default-room"}`}
-          allow="camera; microphone; fullscreen; display-capture"
-          style={{ width: "100%", height: "70vh", border: "none" }}
-          title={t('jitsiMeeting')}
-        />
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          borderRadius: 3,
+          overflow: "hidden",
+          border: "1px solid #e5e7eb",
+          bgcolor: "#fff",
+        }}
+      >
+        <Box
+          sx={{
+            px: 2,
+            py: 1.25,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            bgcolor: "#f8fafc",
+            borderBottom: "1px solid #e5e7eb",
+          }}
+        >
+          <Stack direction="row" spacing={1.25} alignItems="center">
+            <Chip size="small" color="primary" label="LIVE" />
+            <Typography variant="subtitle1" fontWeight={700}>
+              {seance.title || t("jitsiMeeting")}
+            </Typography>
+          </Stack>
+          {seance?.startTime && (
+            <Typography variant="body2" color="text.secondary">
+              {new Date(seance.startTime).toLocaleString()}
+            </Typography>
+          )}
+        </Box>
+
+        <Box
+          sx={{
+            background: "linear-gradient(180deg,#fafafa, #f3f4f6)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <iframe
+            src={`https://localhost:8443/${seance.title || "default-room"}`}
+            allow="camera; microphone; fullscreen; display-capture"
+            style={{ width: "100%", height: "68vh", border: "none" }}
+            title={t("jitsiMeeting")}
+          />
+        </Box>
       </Paper>
 
-      {/* Programme */}
-      <Paper sx={{ p: 2, mb: 2 }}>
+      {/* Programme controls */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 2,
+          borderRadius: 3,
+          border: "1px solid #e5e7eb",
+          bgcolor: "#fff",
+        }}
+      >
         <Stack direction="row" alignItems="center" spacing={2}>
-          <Chip label={`${t('program')} : ${programDetails?.program?.name || ""}`} color="info" />
-          <Button
-            startIcon={<ZoomInMapIcon />}
-            onClick={() => setShowContenus(!showContenus)}
+          <Chip
             variant="outlined"
-            size="small"
-          >
-            {showContenus ? t('hideHierarchy') : t('showHierarchy')}
-          </Button>
-          <Button
-            startIcon={<FeedbackIcon />}
-            onClick={() => setShowFeedbackTab((v) => !v)}
-            variant={showFeedbackTab ? "outlined" : "contained"}
-            color="secondary"
-            size="small"
-          >
-            {showFeedbackTab ? t('hideFeedback') : t('showFeedback')}
-          </Button>
+            label={`${t("program")} : ${programDetails?.program?.title || ""}`}
+            color="primary"
+          />
+          <ButtonGroup variant="outlined" size="small">
+            <Button startIcon={<ZoomInMapIcon />} onClick={() => setShowContenus(!showContenus)}>
+              {showContenus ? t("hideHierarchy") : t("showHierarchy")}
+            </Button>
+            <Button
+              startIcon={<FeedbackIcon />}
+              onClick={() => setShowFeedbackTab((v) => !v)}
+              variant={showFeedbackTab ? "outlined" : "contained"}
+              color="secondary"
+            >
+              {showFeedbackTab ? t("hideFeedback") : t("showFeedback")}
+            </Button>
+          </ButtonGroup>
         </Stack>
+
         <Collapse in={showContenus}>
           <Divider sx={{ my: 2 }} />
           {renderProgramHierarchy()}
@@ -360,166 +515,221 @@ const AnimerSeanceView = () => {
 
       {/* Tabs */}
       <Box display="flex" mt={2}>
-        <Tabs orientation="vertical" value={tab} onChange={handleTabChange} sx={{ borderRight: 1, borderColor: "divider", minWidth: 180 }}>
-          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t('sessionAdditions')} />
-          <Tab icon={<QuizIcon />} iconPosition="start" label={t('quizComing')} />
-          <Tab icon={<InsertDriveFileIcon />} iconPosition="start" label={t('whiteboard')} onClick={() => navigate(`/whiteboard/${seanceId}`)} />
+        <Tabs
+          orientation="vertical"
+          value={tab}
+          onChange={handleTabChange}
+          sx={{
+            minWidth: 220,
+            borderRight: "1px solid #e5e7eb",
+            "& .MuiTab-root": {
+              alignItems: "flex-start",
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 1,
+              mb: 0.5,
+              minHeight: 44,
+            },
+            "& .Mui-selected": { bgcolor: "#eef2ff" },
+            "& .MuiTabs-indicator": { left: 0, width: 3, bgcolor: "#6366f1" },
+          }}
+        >
+          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t("sessionAdditions")} />
+          <Tab icon={<QuizIcon />} iconPosition="start" label={t("quizComing")} />
+          <Tab
+            icon={<InsertDriveFileIcon />}
+            iconPosition="start"
+            label={t("whiteboard")}
+            onClick={() => navigate(`/whiteboard/${seanceId}`)}
+          />
           <Tab icon={<GroupIcon />} iconPosition="start" label="Regroupement" />
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('feedbackFormateur') || 'Feedback Formateur'} />
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackFormateur") || "Feedback Formateur"} />
           <Tab icon={<FeedbackIcon />} iconPosition="start" label="Feedback Étudiant" />
-          {showFeedbackTab && (
-            <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('feedback')} />
-          )}
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t('feedbackList')} />
+          {showFeedbackTab && <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedback")} />}
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackList")} />
         </Tabs>
 
         <Box flex={1} pl={3}>
-          {/* Onglet 1 */}
+          {/* Tab 0: images/videos */}
           {tab === 0 && (
             <Box>
-              <Typography variant="h6" mt={1}>
-                {t('sessionImages')}
-                <IconButton color="primary" component="label">
-                  <AddPhotoAlternateIcon />
-                  <input type="file" accept="image/*" hidden onChange={handleAddImage} />
-                </IconButton>
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {sessionImages.map((img) => (
-                  <img
-                    key={img.id}
-                    src={img.fileUrl}
-                    alt=""
-                    style={{ maxHeight: 100, margin: 2, cursor: "pointer", borderRadius: 8, boxShadow: "0 1px 6px #bbb" }}
-                    onClick={() => setZoomedImage(img.fileUrl)}
-                  />
-                ))}
+              <Stack direction="row" alignItems="center" spacing={1} mt={0.5} mb={1}>
+                <Typography variant="h6">{t("sessionImages")}</Typography>
+                <Tooltip title={t("uploadImage") || "Upload image"}>
+                  <IconButton color="primary" component="label" size="small">
+                    <AddPhotoAlternateIcon />
+                    <input type="file" accept="image/*" hidden onChange={handleAddImage} />
+                  </IconButton>
+                </Tooltip>
               </Stack>
 
-              <Typography variant="h6" mt={2}>
-                {t('sessionVideos')}
-                <IconButton color="primary" component="label">
-                  <MovieIcon />
-                  <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
-                </IconButton>
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {sessionVideos.map((vid) => (
-                  <Box key={vid.id} sx={{ width: 180 }}>
-                    <ReactPlayer url={vid.fileUrl} controls width="100%" height={100} />
-                  </Box>
-                ))}
+              {sessionImages.length ? (
+                <ImageList variant="masonry" cols={4} gap={8}>
+                  {sessionImages.map((img) => (
+                    <ImageListItem
+                      key={img.id}
+                      onClick={() => setZoomedImage(img.fileUrl)}
+                      sx={{ cursor: "zoom-in" }}
+                    >
+                      <img
+                        src={img.fileUrl}
+                        alt=""
+                        style={{ width: "100%", borderRadius: 8, boxShadow: "0 1px 6px #bbb" }}
+                        loading="lazy"
+                      />
+                    </ImageListItem>
+                  ))}
+                </ImageList>
+              ) : (
+                <Typography color="text.secondary" sx={{ mb: 2 }}>
+                  {t("noImages") || "No images yet."}
+                </Typography>
+              )}
+
+              <Stack direction="row" alignItems="center" spacing={1} mt={3} mb={1}>
+                <Typography variant="h6">{t("sessionVideos")}</Typography>
+                <Tooltip title={t("uploadVideo") || "Upload video"}>
+                  <IconButton color="primary" component="label" size="small">
+                    <MovieIcon />
+                    <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
+                  </IconButton>
+                </Tooltip>
               </Stack>
 
-              <Typography variant="h6" mt={2}>{t('sessionNotes')}</Typography>
-              <TextField
-                fullWidth multiline minRows={3}
-                placeholder={t('notesPlaceholder')}
-                value={sessionNotes}
-                onChange={(e) => setSessionNotes(e.target.value)}
-                sx={{ my: 1 }}
-              />
-              <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSaveSession} disabled={saving}>
-                {saving ? t('saving') : t('saveSession')}
-              </Button>
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {sessionVideos.length ? (
+                  sessionVideos.map((vid) => (
+                    <Paper
+                      key={vid.id}
+                      variant="outlined"
+                      sx={{ width: 220, p: 1, borderRadius: 2, bgcolor: "#fafafa" }}
+                    >
+                      <ReactPlayer url={vid.fileUrl} controls width="100%" height={120} />
+                    </Paper>
+                  ))
+                ) : (
+                  <Typography color="text.secondary">
+                    {t("noVideos") || "No videos yet."}
+                  </Typography>
+                )}
+              </Stack>
             </Box>
           )}
-          {/* Onglet 2 */}
+
+          {/* Tab 1: quizzes */}
           {tab === 1 && (
-            <Typography color="text.secondary">🧪 {t('quizFeature')}</Typography>
-          )}
-          {/* Onglet 3 */}
-          {tab === 2 && (
             <Box>
-              <Typography variant="h6" mt={1}>
-                {t('sessionImages')}
-                <IconButton color="primary" component="label">
-                  <AddPhotoAlternateIcon />
-                  <input type="file" accept="image/*" hidden onChange={handleAddImage} />
-                </IconButton>
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {sessionImages.map((img) => (
-                  <img
-                    key={img.id}
-                    src={img.fileUrl}
-                    alt=""
-                    style={{ maxHeight: 100, margin: 2, cursor: "pointer", borderRadius: 8, boxShadow: "0 1px 6px #bbb" }}
-                    onClick={() => setZoomedImage(img.fileUrl)}
-                  />
-                ))}
-              </Stack>
+              <Typography variant="h6" mb={2}>🧪 {t("quizComing") || "Quizzes (session)"}</Typography>
+              {getSessionQuizzes().length === 0 ? (
+                <Typography color="text.secondary">No quizzes linked to this session yet.</Typography>
+              ) : (
+                <Stack spacing={1.25}>
+                  {getSessionQuizzes().map((q) => {
+                    const meta = quizMetaByContenu[q.contenuId];
+                    const qCount = meta?.questions?.length ?? "—";
+                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} min` : "—";
 
-              <Typography variant="h6" mt={2}>
-                {t('sessionVideos')}
-                <IconButton color="primary" component="label">
-                  <MovieIcon />
-                  <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
-                </IconButton>
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {sessionVideos.map((vid) => (
-                  <Box key={vid.id} sx={{ width: 180 }}>
-                    <ReactPlayer url={vid.fileUrl} controls width="100%" height={100} />
-                  </Box>
-                ))}
-              </Stack>
+                    return (
+                      <Paper
+                        key={q.contenuId}
+                        variant="outlined"
+                        sx={{
+                          p: 1.25,
+                          borderRadius: 2,
+                          display: "grid",
+                          gridTemplateColumns: "1fr auto auto auto",
+                          alignItems: "center",
+                          gap: 1,
+                          "&:hover": { boxShadow: 2, borderColor: "#e0e0e0" },
+                        }}
+                      >
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <QuizIcon />
+                          <Box>
+                            <Typography fontWeight={700}>{q.title}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {t("course") || "Course"}: {q.courseTitle || "—"}
+                            </Typography>
+                          </Box>
+                        </Stack>
 
-              <Typography variant="h6" mt={2}>{t('sessionNotes')}</Typography>
-              <TextField
-                fullWidth multiline minRows={3}
-                placeholder={t('notesPlaceholder')}
-                value={sessionNotes}
-                onChange={(e) => setSessionNotes(e.target.value)}
-                sx={{ my: 1 }}
-              />
-              <Button startIcon={<SaveIcon />} variant="contained" onClick={handleSaveSession} disabled={saving}>
-                {saving ? t('saving') : t('saveSession')}
-              </Button>
+                        <Chip
+                          label={q.published ? "Published" : "Draft"}
+                          color={q.published ? "success" : "default"}
+                          size="small"
+                          variant={q.published ? "filled" : "outlined"}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {t("questions") || "Questions"}: <b>{qCount}</b> · {t("time") || "Time"}: <b>{timeStr}</b>
+                        </Typography>
+
+                        <Tooltip title={q.published ? t("open") : t("publishFirst")}>
+                          <span>
+                            <Button
+                              variant="contained"
+                              size="small"
+                              startIcon={<PlayArrowIcon />}
+                              disabled={!q.published}
+                              onClick={() => navigate(`/seances/${seanceId}/quiz/${q.contenuId}`)}
+                            >
+                              {t("open")}
+                            </Button>
+                          </span>
+                        </Tooltip>
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              )}
             </Box>
           )}
 
-          {/* Onglet FeedbackFormateur */}
+          {/* Tab 2: whiteboard (navigates on click) */}
+          {tab === 2 && <Box />}
+
+          {/* Tab 3: Regroupement */}
+          {tab === 3 && <Regroupement />}
+
+          {/* Tab 4: Feedback Formateur */}
           {tab === 4 && (
             <Box>
-              <Typography variant="h6" mb={2}>{t('feedbackFormateur') || 'Feedback Formateur'}</Typography>
+              <Typography variant="h6" mb={2}>
+                {t("feedbackFormateur") || "Feedback Formateur"}
+              </Typography>
               <FeedbackFormateur seanceId={seanceId} />
             </Box>
           )}
-          {/* Onglet Feedback Étudiant */}
+
+          {/* Tab 5: Feedback Étudiant */}
           {tab === 5 && (
             <Box>
               <Typography variant="h6" mb={2}>Feedback Étudiant</Typography>
               <FeedbackEtudiant seanceId={seanceId} />
             </Box>
           )}
-          {/* Onglet Feedback (dynamique) */}
+
+          {/* Dynamic Feedback form (only if toggled) */}
           {showFeedbackTab && tab === 6 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t('sessionFeedback')}</Typography>
+                <Typography variant="h6">📝 {t("sessionFeedback")}</Typography>
               </Stack>
               <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
             </Box>
           )}
-          {/* Onglet Regroupement */}
-          {tab === 3 && (
-            <Regroupement />
-          )}
-          {/* Onglet FeedbackList */}
-          {tab === 7 && (
-            <SeanceFeedbackList />
-          )}
+
+          {/* Feedback list (last tab) */}
+          {tab === (showFeedbackTab ? 7 : 6) && <SeanceFeedbackList />}
         </Box>
       </Box>
 
-      {/* Feedback Dialog */}
+      {/* Feedback dialog (kept for future use; currently not invoked) */}
       <Dialog open={feedbackDialogOpen} onClose={() => setFeedbackDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           <Stack direction="row" alignItems="center" spacing={2}>
             <FeedbackIcon color="primary" />
             <Box>
-              {t('feedbackFrom')} <b>{selectedFeedback?.studentName}</b>
+              {t("feedbackFrom")} <b>{selectedFeedback?.studentName}</b>
               <Typography variant="body2" color="text.secondary">
                 {selectedFeedback?.studentEmail}
               </Typography>
@@ -527,152 +737,7 @@ const AnimerSeanceView = () => {
           </Stack>
         </DialogTitle>
         <DialogContent dividers sx={{ bgcolor: "#f8fafc", maxHeight: 500 }}>
-          <Stack spacing={2}>
-            <Box>
-              <Typography variant="subtitle2" color="text.secondary">
-                {t('date')}: {selectedFeedback?.createdAt && new Date(selectedFeedback.createdAt).toLocaleString()}
-              </Typography>
-            </Box>
-            {selectedFeedback?.answers?.length > 0 && (() => {
-              // Définition des sections thématiques
-              const sections = [
-                {
-                  title: t('sessionSection'),
-                  keywords: [
-                    'note de la session',
-                    'organisation',
-                    'objectifs',
-                    'durée',
-                    'durée de la séance',
-                    'qualité du contenu',
-                    'commentaires sur la session'
-                  ]
-                },
-                {
-                  title: t('trainerSection'),
-                  keywords: ['note du formateur', 'clarté', 'disponibilité', 'pédagogie', 'interaction', 'commentaires sur le formateur']
-                },
-                {
-                  title: t('teamSection'),
-                  keywords: ['note de l\'équipe', 'collaboration', 'participation', 'communication', 'commentaires sur l\'équipe']
-                },
-                {
-                  title: t('suggestionsSection'),
-                  keywords: ['suggestions', 'amélioration', 'recommanderait']
-                }
-              ];
-              // Grouper les réponses par section avec un matching robuste
-              function normalize(str) {
-                return str
-                  .toLowerCase()
-                  .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // retire les accents
-                  .replace(/[^a-z0-9]/g, ''); // retire tout sauf lettres/chiffres
-              }
-              const groupedAnswers = selectedFeedback && selectedFeedback.answers ? sections.map(section => ({
-                ...section,
-                answers: selectedFeedback.answers.filter(qa =>
-                  section.keywords.some(keyword =>
-                    normalize(qa.question).includes(normalize(keyword))
-                  )
-                )
-              })) : [];
-              // Réponses non classées
-              const otherAnswers = selectedFeedback && selectedFeedback.answers
-                ? selectedFeedback.answers.filter(qa =>
-                    !sections.some(section =>
-                      section.keywords.some(keyword =>
-                        normalize(qa.question).includes(normalize(keyword))
-                      )
-                    )
-                  )
-                : [];
-              // Emoji/label pour toutes les réponses numériques (1-5)
-              const moodEmojis = ["😞", "😐", "🙂", "😊", "🤩"];
-              const moodLabels = [t('veryDissatisfied'), t('dissatisfied'), t('neutral'), t('satisfied'), t('verySatisfied')];
-              return (
-                <>
-                  {groupedAnswers.map((section, idx) =>
-                    section.answers.length > 0 && (
-                      <Box key={idx} mb={2}>
-                        <Divider sx={{ mb: 1 }}>{section.title}</Divider>
-                        <Stack spacing={2}>
-                          {section.answers.map((qa, qidx) => {
-                            let isNumeric = !isNaN(Number(qa.answer)) && Number(qa.answer) >= 1 && Number(qa.answer) <= 5;
-                            let value = isNumeric ? Number(qa.answer) : null;
-                            return (
-                              <Paper key={qidx} elevation={1} sx={{ p: 2, bgcolor: "#fff" }}>
-                                <Typography fontWeight="bold" gutterBottom>
-                                  {qa.question}
-                                </Typography>
-                                {isNumeric ? (
-                                  <Box display="flex" alignItems="center" gap={1}>
-                                    <Typography fontSize={32}>{moodEmojis[value - 1]}</Typography>
-                                    <Typography fontWeight="bold">{moodLabels[value - 1]}</Typography>
-                                    <Typography color="text.secondary">({value})</Typography>
-                                  </Box>
-                                ) : (
-                                  <Typography style={{ whiteSpace: 'pre-line' }}>{qa.answer || t('noAnswer')}</Typography>
-                                )}
-                              </Paper>
-                            );
-                          })}
-                        </Stack>
-                      </Box>
-                    )
-                  )}
-                  {otherAnswers.length > 0 && (
-                    <Box mb={2}>
-                      <Divider sx={{ mb: 1 }}>{t('otherSection')}</Divider>
-                      <Stack spacing={2}>
-                        {otherAnswers.map((qa, qidx) => {
-                          let isNumeric = !isNaN(Number(qa.answer)) && Number(qa.answer) >= 1 && Number(qa.answer) <= 5;
-                          let value = isNumeric ? Number(qa.answer) : null;
-                          return (
-                            <Paper key={qidx} elevation={1} sx={{ p: 2, bgcolor: "#fff" }}>
-                              <Typography fontWeight="bold" gutterBottom>
-                                {qa.question}
-                              </Typography>
-                              {isNumeric ? (
-                                <Box display="flex" alignItems="center" gap={1}>
-                                  <Typography fontSize={32}>{moodEmojis[value - 1]}</Typography>
-                                  <Typography fontWeight="bold">{moodLabels[value - 1]}</Typography>
-                                  <Typography color="text.secondary">({value})</Typography>
-                                </Box>
-                              ) : (
-                                <Typography style={{ whiteSpace: 'pre-line' }}>{qa.answer || t('noAnswer')}</Typography>
-                              )}
-                            </Paper>
-                          );
-                        })}
-                      </Stack>
-                    </Box>
-                  )}
-                </>
-              );
-            })()}
-            {/* Note moyenne de feedback */}
-            <Divider>{t('averageRating')}</Divider>
-            {(() => {
-              // Récupère toutes les réponses numériques (1-5)
-              const numericAnswers = selectedFeedback && selectedFeedback.answers ? selectedFeedback.answers
-                .map(qa => Number(qa.answer))
-                .filter(val => !isNaN(val) && val >= 1 && val <= 5) : [];
-              if (numericAnswers.length === 0) {
-                return <Typography color="text.secondary">{t('noRating')}</Typography>;
-              }
-              const avg = numericAnswers.reduce((a, b) => a + b, 0) / numericAnswers.length;
-              const rounded = Math.round(avg);
-              const moodEmojis = ["😞", "😐", "🙂", "😊", "🤩"];
-              const moodLabels = [t('veryDissatisfied'), t('dissatisfied'), t('neutral'), t('satisfied'), t('verySatisfied')];
-              return (
-                <Box display="flex" alignItems="center" gap={1} mt={1} mb={2}>
-                  <Typography fontSize={32}>{moodEmojis[rounded - 1]}</Typography>
-                  <Typography fontWeight="bold">{moodLabels[rounded - 1]}</Typography>
-                  <Typography color="text.secondary">({avg.toFixed(2)})</Typography>
-                </Box>
-              );
-            })()}
-          </Stack>
+          {/* body omitted intentionally */}
         </DialogContent>
       </Dialog>
 
@@ -681,9 +746,17 @@ const AnimerSeanceView = () => {
         <Box
           onClick={() => setZoomedImage(null)}
           sx={{
-            position: "fixed", top: 0, left: 0, zIndex: 2000, width: "100vw", height: "100vh",
-            background: "rgba(0,0,0,0.88)", display: "flex", alignItems: "center",
-            justifyContent: "center", cursor: "zoom-out",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 2000,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.88)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "zoom-out",
           }}
         >
           <img

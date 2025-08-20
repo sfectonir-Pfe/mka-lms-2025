@@ -1,13 +1,13 @@
 // Feedback service for handling feedback-related API calls
-import axios from 'axios';
+import api from '../../src/api/axiosInstance';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const feedbackService = {
   // Get all feedback
   getAllFeedback: async () => {
     try {
-      const response = await axios.get(`${API_URL}/feedback`);
+      const response = await api.get(`/feedback`);
       return response.data;
     } catch (error) {
       console.error('Error fetching feedback:', error);
@@ -18,7 +18,7 @@ const feedbackService = {
   // Get feedback by ID
   getFeedbackById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/feedback/${id}`);
+      const response = await api.get(`/feedback/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching feedback:', error);
@@ -29,7 +29,7 @@ const feedbackService = {
   // Create new feedback
   createFeedback: async (feedbackData) => {
     try {
-      const response = await axios.post(`${API_URL}/feedback`, feedbackData);
+      const response = await api.post(`/feedback`, feedbackData);
       return response.data;
     } catch (error) {
       console.error('Error creating feedback:', error);
@@ -40,7 +40,7 @@ const feedbackService = {
   // Submit session feedback
   submitSessionFeedback: async (sessionId, feedbackData) => {
     try {
-      const response = await axios.post(`${API_URL}/feedback/session/${sessionId}`, feedbackData);
+      const response = await api.post(`/feedback/session/${sessionId}`, feedbackData);
       return response.data;
     } catch (error) {
       console.error('Error submitting session feedback:', error);
@@ -51,7 +51,7 @@ const feedbackService = {
   // Get feedback for a specific formateur
   getFormateurFeedback: async (formateurId) => {
     try {
-      const response = await axios.get(`${API_URL}/feedback/formateur/${formateurId}`);
+      const response = await api.get(`/feedback/formateur/${formateurId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching formateur feedback:', error);
@@ -63,7 +63,7 @@ const feedbackService = {
   submitGeneralFeedback: async (feedbackData) => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const response = await axios.post(`${API_URL}/reclamation`, {
+      const response = await api.post(`/reclamation`, {
         userId: user.id || feedbackData.userId,
         userName: user.name || 'Utilisateur',
         userEmail: user.email || 'email@example.com',
@@ -83,7 +83,7 @@ const feedbackService = {
   // Get all réclamations
   getAllReclamations: async () => {
     try {
-      const response = await axios.get(`${API_URL}/reclamation/list`);
+      const response = await api.get(`/reclamation/list`);
       return response.data;
     } catch (error) {
       console.error('Error fetching réclamations:', error);
@@ -94,7 +94,7 @@ const feedbackService = {
   // Get réclamation by ID
   getReclamationById: async (id) => {
     try {
-      const response = await axios.get(`${API_URL}/reclamation/${id}`);
+      const response = await api.get(`/reclamation/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching réclamation:', error);
@@ -105,7 +105,7 @@ const feedbackService = {
   // Update réclamation (for admin responses)
   updateReclamation: async (id, updateData) => {
     try {
-      const response = await axios.patch(`${API_URL}/reclamation/${id}`, updateData);
+      const response = await api.patch(`/reclamation/${id}`, updateData);
       return response.data;
     } catch (error) {
       console.error('Error updating réclamation:', error);
@@ -116,7 +116,7 @@ const feedbackService = {
   // Get réclamations by user ID
   getUserReclamations: async (userId) => {
     try {
-      const response = await axios.get(`${API_URL}/reclamation/user/${userId}`);
+      const response = await api.get(`/reclamation/user/${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching user réclamations:', error);

@@ -10,13 +10,13 @@ import {
   IconButton,
 } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
-const API_BASE = "http://localhost:8000/feedback-etudiant";
+// const API_BASE = "http://localhost:8000/feedback-etudiant";
 
 const Regroupement = () => {
   const { t } = useTranslation('seances');
@@ -27,7 +27,7 @@ const Regroupement = () => {
   const createGroup = async () => {
     try {
       console.log('🔄 Création groupe avec seanceId:', seanceId);
-      const response = await axios.post(`${API_BASE}/groups`, {
+      const response = await api.post(`/groups`, {
         name: `Groupe ${groups.length + 1}`,
         seanceId: parseInt(seanceId),
         studentIds: []
@@ -42,7 +42,7 @@ const Regroupement = () => {
 
   const deleteGroup = async (groupId) => {
     try {
-      await axios.delete(`${API_BASE}/groups/${groupId}`);
+      await api.delete(`/groups/${groupId}`);
       const group = groups.find(g => g.id === groupId);
       if (group) {
         setStudents([...students, ...group.students]);
@@ -55,7 +55,7 @@ const Regroupement = () => {
 
   const addStudentToGroup = async (groupId, student) => {
     try {
-      await axios.post(`${API_BASE}/groups/${groupId}/students/${student.id}`);
+      await api.post(`/groups/${groupId}/students/${student.id}`);
       setGroups(groups.map(g => 
         g.id === groupId 
           ? { ...g, students: [...g.students, student] }
@@ -69,7 +69,7 @@ const Regroupement = () => {
 
   const removeStudentFromGroup = async (groupId, studentId) => {
     try {
-      await axios.delete(`${API_BASE}/groups/${groupId}/students/${studentId}`);
+      await api.delete(`/groups/${groupId}/students/${studentId}`);
       const group = groups.find(g => g.id === groupId);
       const student = group.students.find(s => s.id === studentId);
       setGroups(groups.map(g => 
@@ -90,8 +90,8 @@ const Regroupement = () => {
       try {
         // Charger les étudiants et les groupes en parallèle
         const [studentsRes, groupsRes] = await Promise.all([
-          axios.get(`${API_BASE}/students/seance/${seanceId}`),
-          axios.get(`${API_BASE}/groups/seance/${seanceId}`)
+          api.get(`/students/seance/${seanceId}`),
+          api.get(`/groups/seance/${seanceId}`)
         ]);
         
         const allStudents = studentsRes.data;

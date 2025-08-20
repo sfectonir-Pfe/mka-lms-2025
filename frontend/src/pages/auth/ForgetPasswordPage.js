@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import api from '../../api/axiosInstance';
 function ForgotPasswordPage() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
@@ -20,7 +20,7 @@ function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:8000/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email });
       setSubmitted(true);
     } catch (error) {
       console.error(error);

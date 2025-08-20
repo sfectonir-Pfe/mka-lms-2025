@@ -10,7 +10,7 @@ import {
   Divider,
   Collapse,
 } from "@mui/material";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useTranslation } from "react-i18next";
 
 
@@ -30,8 +30,8 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
 
   useEffect(() => {
     if (sessionId) {
-      axios
-        .get(`http://localhost:8000/seance-formateur/details/${sessionId}`)
+      api
+        .get(`/seance-formateur/details/${sessionId}`)
         .then((res) => setSessionData(res.data))
         .catch((err) =>
           console.error("Erreur chargement session complète:", err)
@@ -55,7 +55,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
     };
 
     try {
-      await axios.post("http://localhost:8000/seance-formateur", payload);
+      await api.post("/seance-formateur", payload);
       setTitle("");
       setDate("");
       setTime("");

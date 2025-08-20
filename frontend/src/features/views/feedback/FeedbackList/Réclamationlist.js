@@ -43,7 +43,7 @@ import {
   Refresh as RefreshIcon,
   PendingActions as PendingIcon,
 } from "@mui/icons-material"
-import axios from "axios"
+import api from "../../../../api/axiosInstance";
 
 const ReclamationList = () => {
   const [reclamations, setReclamations] = useState([])
@@ -60,8 +60,8 @@ const ReclamationList = () => {
   const reloadReclamations = useCallback(() => {
     console.log("🔄 Rechargement des réclamations")
     setIsLoading(true)
-    axios
-      .get(`http://localhost:8000/reclamation/list`)
+    api
+      .get(`/reclamation/list`)
       .then((res) => {
         console.log("✅ Réclamations reçues:", res.data)
         setReclamations(res.data)
@@ -99,8 +99,8 @@ const ReclamationList = () => {
   }, [reclamations, searchTerm, statusFilter])
 
   const handleShowDetails = (reclamationId) => {
-    axios
-      .get(`http://localhost:8000/reclamation/${reclamationId}`)
+    api
+      .get(`/reclamation/${reclamationId}`)
       .then((res) => {
         setSelectedReclamation(res.data)
         setDetailDialogOpen(true)
@@ -125,7 +125,7 @@ const ReclamationList = () => {
     if (!selectedReclamation) return
     try {
       setIsUpdatingStatus(true)
-      const { data } = await axios.patch(`http://localhost:8000/reclamation/${selectedReclamation.id}`, {
+      const { data } = await api.patch(`/reclamation/${selectedReclamation.id}`, {
         status: newStatus,
       })
       setSelectedReclamation(data)

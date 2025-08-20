@@ -5,3 +5,9 @@ docker-compose.override.yml
 log-analyser/grafana
 **/.DS_Store
 **/.idea
+/config/jibri/logs
+/config/jvb/jvb.conf
+/config/prosody/config/data/auth%2elocalhost/accounts/
+/config/prosody/config/data/auth%2elocalhost/accounts/
+/config/prosody/config/data/auth%2elocalhost/cron.dat
+/config/prosody/config/data/prosody.pid
