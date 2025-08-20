@@ -7,15 +7,15 @@ const VerifyMethodPage = () => {
   const navigate = useNavigate();
 
   const email = location.state?.email || "";
-  const phone = location.state?.phone || "";
+  // const phone = location.state?.phone || "";
 
   const handleEmail = () => {
     navigate("/verify-email", { state: { email } });
   };
 
-  const handleSMS = () => {
-    navigate("/verify-account", { state: { email, phone } });
-  };
+  // const handleSMS = () => {
+  //   navigate("/verify-account", { state: { email, phone } });
+  // };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 6 }}>
@@ -39,14 +39,14 @@ const VerifyMethodPage = () => {
             📧 Vérification par Email
           </Button>
 
-          <Button
+          {/* <Button
             variant="outlined"
             fullWidth
             onClick={handleSMS}
             disabled={!phone}
           >
             📱 Vérification par SMS
-          </Button>
+          </Button> */}
         </Box>
       </Paper>
     </Container>

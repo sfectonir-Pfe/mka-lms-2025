@@ -16,11 +16,14 @@ import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/c
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ApiBody, ApiProperty } from '@nestjs/swagger';
 import { Public } from './public.decorator';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly jwtService: JwtService, 
+    
   ) { }
 
   @Post('verify')
@@ -206,4 +209,28 @@ export class AuthController {
       );
     }
   }
+  @Public()
+  @Post('send-email-code')
+  sendEmailCode(@Body('email') email: string) {
+    return this.authService.sendEmailVerificationCode(email);
+  }
+  @Public()
+  @Post('verify-email-code')
+  async verifyEmailCode(
+    @Body('email') email: string,
+    @Body('code') code: string
+  ) {
+    const { user } = await this.authService.verifyEmailCode(email, code);
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const access_token = this.jwtService.sign(payload);  // <-- sign directly
+
+    return {
+      success: true,
+      message: 'Email verified successfully',
+      data: { access_token, user },
+    };
+  }
 }
+  
+

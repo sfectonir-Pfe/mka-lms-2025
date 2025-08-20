@@ -1,426 +1,344 @@
-Jibri 2025-08-18 17:56:52.936 INFO: [1] MainKt.handleCommandLineArgs#188: Jibri run with args [--config, /etc/jitsi/jibri/config.json]
-Jibri 2025-08-18 17:56:53.222 INFO: [1] MainKt.setupLegacyConfig#213: Checking legacy config file /etc/jitsi/jibri/config.json
-Jibri 2025-08-18 17:56:53.236 INFO: [1] MainKt.setupLegacyConfig#216: Legacy config file /etc/jitsi/jibri/config.json doesn't exist
-Jibri 2025-08-18 17:56:54.353 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:12.349 INFO: [1] MainKt.handleCommandLineArgs#188: Jibri run with args [--config, /etc/jitsi/jibri/config.json]
+Jibri 2025-08-19 09:00:12.558 INFO: [1] MainKt.setupLegacyConfig#213: Checking legacy config file /etc/jitsi/jibri/config.json
+Jibri 2025-08-19 09:00:12.573 INFO: [1] MainKt.setupLegacyConfig#216: Legacy config file /etc/jitsi/jibri/config.json doesn't exist
+Jibri 2025-08-19 09:00:13.520 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   LambdaSupplier: 'JibriConfig::jibriId'
   ConfigSourceSupplier: key: 'jibri.id', type: 'kotlin.String', source: 'config'
-Jibri 2025-08-18 17:56:54.357 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::jibriId
-Jibri 2025-08-18 17:56:54.370 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::jibriId': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$Error: class java.lang.NullPointerException
-Jibri 2025-08-18 17:56:54.379 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.id' from source 'config' as type kotlin.String
-Jibri 2025-08-18 17:56:54.456 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value jibri-819672635 for key 'jibri.id' from source 'config' as type kotlin.String
-Jibri 2025-08-18 17:56:54.459 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.id', type: 'kotlin.String', source: 'config'
-Jibri 2025-08-18 17:56:54.459 INFO: [1] MainKt.main#55: Jibri starting up with id jibri-819672635
-Jibri 2025-08-18 17:56:54.473 FINE: [1] MetricsContainer.registerCounter#160: Counter 'sessions_started' was renamed to 'sessions_started_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.480 FINE: [1] MetricsContainer.registerCounter#160: Counter 'sessions_stopped' was renamed to 'sessions_stopped_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.482 FINE: [1] MetricsContainer.registerCounter#160: Counter 'errors' was renamed to 'errors_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.483 FINE: [1] MetricsContainer.registerCounter#160: Counter 'busy' was renamed to 'busy_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.484 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_connected' was renamed to 'xmpp_connected_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.485 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_reconnecting' was renamed to 'xmpp_reconnecting_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.486 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_reconnection_failed' was renamed to 'xmpp_reconnection_failed_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.487 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_ping_failed' was renamed to 'xmpp_ping_failed_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.488 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_closed' was renamed to 'xmpp_closed_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.492 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_closed_on_error' was renamed to 'xmpp_closed_on_error_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.501 FINE: [1] MetricsContainer.registerCounter#160: Counter 'stopped_on_xmpp_closed' was renamed to 'stopped_on_xmpp_closed_total' to ensure consistent metric naming.
-Jibri 2025-08-18 17:56:54.507 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:13.549 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::jibriId
+Jibri 2025-08-19 09:00:13.563 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::jibriId': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$Error: class java.lang.NullPointerException
+Jibri 2025-08-19 09:00:13.570 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.id' from source 'config' as type kotlin.String
+Jibri 2025-08-19 09:00:13.698 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value jibri-759877111 for key 'jibri.id' from source 'config' as type kotlin.String
+Jibri 2025-08-19 09:00:13.707 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.id', type: 'kotlin.String', source: 'config'
+Jibri 2025-08-19 09:00:13.712 INFO: [1] MainKt.main#55: Jibri starting up with id jibri-759877111
+Jibri 2025-08-19 09:00:13.759 FINE: [1] MetricsContainer.registerCounter#160: Counter 'sessions_started' was renamed to 'sessions_started_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.772 FINE: [1] MetricsContainer.registerCounter#160: Counter 'sessions_stopped' was renamed to 'sessions_stopped_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.773 FINE: [1] MetricsContainer.registerCounter#160: Counter 'errors' was renamed to 'errors_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.775 FINE: [1] MetricsContainer.registerCounter#160: Counter 'busy' was renamed to 'busy_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.776 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_connected' was renamed to 'xmpp_connected_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.777 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_reconnecting' was renamed to 'xmpp_reconnecting_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.777 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_reconnection_failed' was renamed to 'xmpp_reconnection_failed_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.779 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_ping_failed' was renamed to 'xmpp_ping_failed_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.781 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_closed' was renamed to 'xmpp_closed_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.782 FINE: [1] MetricsContainer.registerCounter#160: Counter 'xmpp_closed_on_error' was renamed to 'xmpp_closed_on_error_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.783 FINE: [1] MetricsContainer.registerCounter#160: Counter 'stopped_on_xmpp_closed' was renamed to 'stopped_on_xmpp_closed_total' to ensure consistent metric naming.
+Jibri 2025-08-19 09:00:13.794 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   LambdaSupplier: 'JibriConfig::enableStatsD'
   ConfigSourceSupplier: key: 'jibri.stats.enable-stats-d', type: 'kotlin.Boolean', source: 'config'
-Jibri 2025-08-18 17:56:54.508 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::enableStatsD
-Jibri 2025-08-18 17:56:54.510 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::enableStatsD': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$Error: class java.lang.NullPointerException
-Jibri 2025-08-18 17:56:54.511 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.enable-stats-d' from source 'config' as type kotlin.Boolean
-Jibri 2025-08-18 17:56:54.515 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value true for key 'jibri.stats.enable-stats-d' from source 'config' as type kotlin.Boolean
-Jibri 2025-08-18 17:56:54.516 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.stats.enable-stats-d', type: 'kotlin.Boolean', source: 'config'
-Jibri 2025-08-18 17:56:54.520 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.host' from source 'config' as type kotlin.String
-Jibri 2025-08-18 17:56:54.523 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value localhost for key 'jibri.stats.host' from source 'config' as type kotlin.String
-Jibri 2025-08-18 17:56:54.524 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:54.528 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 8125 for key 'jibri.stats.port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:54.556 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:13.795 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::enableStatsD
+Jibri 2025-08-19 09:00:13.796 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::enableStatsD': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$Error: class java.lang.NullPointerException
+Jibri 2025-08-19 09:00:13.797 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.enable-stats-d' from source 'config' as type kotlin.Boolean
+Jibri 2025-08-19 09:00:13.810 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value true for key 'jibri.stats.enable-stats-d' from source 'config' as type kotlin.Boolean
+Jibri 2025-08-19 09:00:13.815 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.stats.enable-stats-d', type: 'kotlin.Boolean', source: 'config'
+Jibri 2025-08-19 09:00:13.832 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.host' from source 'config' as type kotlin.String
+Jibri 2025-08-19 09:00:13.835 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value localhost for key 'jibri.stats.host' from source 'config' as type kotlin.String
+Jibri 2025-08-19 09:00:13.839 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:13.846 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 8125 for key 'jibri.stats.port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:13.894 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   ConfigSourceSupplier: key: 'jibri.webhook.subscribers', type: 'kotlin.collections.List<kotlin.String>', source: 'config'
-Jibri 2025-08-18 17:56:54.557 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.webhook.subscribers' from source 'config' as type kotlin.collections.List<kotlin.String>
-Jibri 2025-08-18 17:56:54.566 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value [] for key 'jibri.webhook.subscribers' from source 'config' as type kotlin.collections.List<kotlin.String>
-Jibri 2025-08-18 17:56:54.567 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.webhook.subscribers', type: 'kotlin.collections.List<kotlin.String>', source: 'config'
-Jibri 2025-08-18 17:56:55.239 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.jwt-info' from source 'config' as type com.typesafe.config.ConfigObject
-Jibri 2025-08-18 17:56:55.266 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value SimpleConfigObject({}) for key 'jibri.jwt-info' from source 'config' as type com.typesafe.config.ConfigObject
-Jibri 2025-08-18 17:56:55.266 INFO: [1] JwtInfo$Companion.fromConfig#40: got jwtConfig: {}
+Jibri 2025-08-19 09:00:13.897 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.webhook.subscribers' from source 'config' as type kotlin.collections.List<kotlin.String>
+Jibri 2025-08-19 09:00:13.913 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value [] for key 'jibri.webhook.subscribers' from source 'config' as type kotlin.collections.List<kotlin.String>
+Jibri 2025-08-19 09:00:13.917 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.webhook.subscribers', type: 'kotlin.collections.List<kotlin.String>', source: 'config'
+Jibri 2025-08-19 09:00:14.717 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.jwt-info' from source 'config' as type com.typesafe.config.ConfigObject
+Jibri 2025-08-19 09:00:14.751 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value SimpleConfigObject({}) for key 'jibri.jwt-info' from source 'config' as type com.typesafe.config.ConfigObject
+Jibri 2025-08-19 09:00:14.752 INFO: [1] JwtInfo$Companion.fromConfig#40: got jwtConfig: {}
 
-Jibri 2025-08-18 17:56:55.267 INFO: [1] JwtInfo$Companion.fromConfig#50: Unable to create JwtInfo: com.typesafe.config.ConfigException$Missing: reference.conf @ jar:file:/opt/jitsi/jibri/jibri.jar!/reference.conf: 158: No configuration setting found for key 'signing-key-path'
-Jibri 2025-08-18 17:56:55.276 FINE: [1] RefreshingProperty.getValue#44: Refreshing property jwt (not yet initialized or expired)...
-Jibri 2025-08-18 17:56:55.452 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:14.754 INFO: [1] JwtInfo$Companion.fromConfig#50: Unable to create JwtInfo: com.typesafe.config.ConfigException$Missing: reference.conf @ jar:file:/opt/jitsi/jibri/jibri.jar!/reference.conf: 158: No configuration setting found for key 'signing-key-path'
+Jibri 2025-08-19 09:00:14.773 FINE: [1] RefreshingProperty.getValue#44: Refreshing property jwt (not yet initialized or expired)...
+Jibri 2025-08-19 09:00:15.147 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   ConfigSourceSupplier: key: 'internal_http_port', type: 'kotlin.Int', source: 'command line args'
   ConfigSourceSupplier: key: 'jibri.api.http.internal-api-port', type: 'kotlin.Int', source: 'config'
-Jibri 2025-08-18 17:56:55.453 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'internal_http_port' from source 'command line args' as type kotlin.Int
-Jibri 2025-08-18 17:56:55.455 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via ConfigSourceSupplier: key: 'internal_http_port', type: 'kotlin.Int', source: 'command line args': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: not found
-Jibri 2025-08-18 17:56:55.457 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.http.internal-api-port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:55.458 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 3333 for key 'jibri.api.http.internal-api-port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:55.459 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.api.http.internal-api-port', type: 'kotlin.Int', source: 'config'
-Jibri 2025-08-18 17:56:55.461 INFO: [1] MainKt.main#128: Using port 3333 for internal HTTP API
-Jibri 2025-08-18 17:56:55.475 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 17:56:55.767 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:15.148 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'internal_http_port' from source 'command line args' as type kotlin.Int
+Jibri 2025-08-19 09:00:15.152 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via ConfigSourceSupplier: key: 'internal_http_port', type: 'kotlin.Int', source: 'command line args': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: not found
+Jibri 2025-08-19 09:00:15.154 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.http.internal-api-port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:15.156 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 3333 for key 'jibri.api.http.internal-api-port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:15.157 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.api.http.internal-api-port', type: 'kotlin.Int', source: 'config'
+Jibri 2025-08-19 09:00:15.160 INFO: [1] MainKt.main#128: Using port 3333 for internal HTTP API
+Jibri 2025-08-19 09:00:15.176 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:00:15.746 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   LambdaSupplier: 'JibriConfig::xmppEnvironments'
   TypeConvertingSupplier: converting value from ConfigSourceSupplier: key: 'jibri.api.xmpp.environments', type: 'kotlin.collections.List<com.typesafe.config.Config>', source: 'config'
-Jibri 2025-08-18 17:56:55.768 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::xmppEnvironments
-Jibri 2025-08-18 17:56:55.769 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::xmppEnvironments': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: Considering empty XMPP envs list as not found
-Jibri 2025-08-18 17:56:55.770 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.xmpp.environments' from source 'config' as type kotlin.collections.List<com.typesafe.config.Config>
-Jibri 2025-08-18 17:56:55.772 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value [Config(SimpleConfigObject({"base-url":"https://localhost:8443","call-login":{"domain":"recorder.localhost","password":"record123123recrod","username":"recorder"},"control-login":{"domain":"auth.localhost","password":"record1230123recrod","port":"5222","username":"jibri"},"control-muc":{"domain":"internal-muc.localhost","nickname":"jibri-819672635","room-name":"jibribrewery"},"name":"<no value>-0","strip-from-room-domain":"muc.","trust-all-xmpp-certs":true,"usage-timeout":"0","xmpp-domain":"localhost","xmpp-server-hosts":["xmpp.meet.jitsi"]}))] for key 'jibri.api.xmpp.environments' from source 'config' as type kotlin.collections.List<com.typesafe.config.Config>
-Jibri 2025-08-18 17:56:55.788 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: TypeConvertingSupplier: Converted value type from ConfigSourceSupplier: key: 'jibri.api.xmpp.environments', type: 'kotlin.collections.List<com.typesafe.config.Config>', source: 'config' to [XmppEnvironmentConfig(name=<no value>-0, xmppServerHosts=[xmpp.meet.jitsi], xmppDomain=localhost, baseUrl=https://localhost:8443, controlLogin=XmppCredentials(domain=auth.localhost, port=5222, username=jibri, password=*****), controlMuc=XmppMuc(domain=internal-muc.localhost, roomName=jibribrewery, nickname=jibri-819672635), sipControlMuc=null, callLogin=XmppCredentials(domain=recorder.localhost, port=null, username=recorder, password=*****), stripFromRoomDomain=muc., usageTimeoutMins=0, trustAllXmppCerts=true, securityMode=null)]
-Jibri 2025-08-18 17:56:55.789 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via TypeConvertingSupplier: converting value from ConfigSourceSupplier: key: 'jibri.api.xmpp.environments', type: 'kotlin.collections.List<com.typesafe.config.Config>', source: 'config'
-Jibri 2025-08-18 17:56:56.091 INFO: [1] XmppApi.updatePresence#202: Jibri reports its status is now JibriStatus(busyStatus=IDLE, health=OverallHealth(healthStatus=HEALTHY, details={})), publishing presence to connections
-Jibri 2025-08-18 17:56:56.098 FINE: [1] MucClientManager.setPresenceExtension#160: Setting a presence extension: org.jitsi.xmpp.extensions.jibri.JibriStatusPacketExt@3a66e67e
-Jibri 2025-08-18 17:56:56.105 INFO: [1] XmppApi.start#149: Connecting to xmpp environment on xmpp.meet.jitsi with config XmppEnvironmentConfig(name=<no value>-0, xmppServerHosts=[xmpp.meet.jitsi], xmppDomain=localhost, baseUrl=https://localhost:8443, controlLogin=XmppCredentials(domain=auth.localhost, port=5222, username=jibri, password=*****), controlMuc=XmppMuc(domain=internal-muc.localhost, roomName=jibribrewery, nickname=jibri-819672635), sipControlMuc=null, callLogin=XmppCredentials(domain=recorder.localhost, port=null, username=recorder, password=*****), stripFromRoomDomain=muc., usageTimeoutMins=0, trustAllXmppCerts=true, securityMode=null)
-Jibri 2025-08-18 17:56:56.107 INFO: [1] XmppApi.start#167: The trustAllXmppCerts config is enabled for this domain, all XMPP server provided certificates will be accepted
-Jibri 2025-08-18 17:56:56.130 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
+Jibri 2025-08-19 09:00:15.750 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: LambdaSupplier: Trying to retrieve value via JibriConfig::xmppEnvironments
+Jibri 2025-08-19 09:00:15.751 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via LambdaSupplier: 'JibriConfig::xmppEnvironments': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: Considering empty XMPP envs list as not found
+Jibri 2025-08-19 09:00:15.752 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.xmpp.environments' from source 'config' as type kotlin.collections.List<com.typesafe.config.Config>
+Jibri 2025-08-19 09:00:15.756 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value [Config(SimpleConfigObject({"base-url":"https://localhost:8443","call-login":{"domain":"recorder.localhost","password":"record123123recrod","username":"recorder"},"control-login":{"domain":"auth.localhost","password":"record1230123recrod","port":"5222","username":"jibri"},"control-muc":{"domain":"internal-muc.localhost","nickname":"jibri-759877111","room-name":"jibribrewery"},"name":"<no value>-0","strip-from-room-domain":"muc.","trust-all-xmpp-certs":true,"usage-timeout":"0","xmpp-domain":"localhost","xmpp-server-hosts":["xmpp.meet.jitsi"]}))] for key 'jibri.api.xmpp.environments' from source 'config' as type kotlin.collections.List<com.typesafe.config.Config>
+Jibri 2025-08-19 09:00:15.785 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: TypeConvertingSupplier: Converted value type from ConfigSourceSupplier: key: 'jibri.api.xmpp.environments', type: 'kotlin.collections.List<com.typesafe.config.Config>', source: 'config' to [XmppEnvironmentConfig(name=<no value>-0, xmppServerHosts=[xmpp.meet.jitsi], xmppDomain=localhost, baseUrl=https://localhost:8443, controlLogin=XmppCredentials(domain=auth.localhost, port=5222, username=jibri, password=*****), controlMuc=XmppMuc(domain=internal-muc.localhost, roomName=jibribrewery, nickname=jibri-759877111), sipControlMuc=null, callLogin=XmppCredentials(domain=recorder.localhost, port=null, username=recorder, password=*****), stripFromRoomDomain=muc., usageTimeoutMins=0, trustAllXmppCerts=true, securityMode=null)]
+Jibri 2025-08-19 09:00:15.795 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via TypeConvertingSupplier: converting value from ConfigSourceSupplier: key: 'jibri.api.xmpp.environments', type: 'kotlin.collections.List<com.typesafe.config.Config>', source: 'config'
+Jibri 2025-08-19 09:00:16.126 INFO: [1] XmppApi.updatePresence#202: Jibri reports its status is now JibriStatus(busyStatus=IDLE, health=OverallHealth(healthStatus=HEALTHY, details={})), publishing presence to connections
+Jibri 2025-08-19 09:00:16.132 FINE: [1] MucClientManager.setPresenceExtension#160: Setting a presence extension: org.jitsi.xmpp.extensions.jibri.JibriStatusPacketExt@1b956cfa
+Jibri 2025-08-19 09:00:16.142 INFO: [1] XmppApi.start#149: Connecting to xmpp environment on xmpp.meet.jitsi with config XmppEnvironmentConfig(name=<no value>-0, xmppServerHosts=[xmpp.meet.jitsi], xmppDomain=localhost, baseUrl=https://localhost:8443, controlLogin=XmppCredentials(domain=auth.localhost, port=5222, username=jibri, password=*****), controlMuc=XmppMuc(domain=internal-muc.localhost, roomName=jibribrewery, nickname=jibri-759877111), sipControlMuc=null, callLogin=XmppCredentials(domain=recorder.localhost, port=null, username=recorder, password=*****), stripFromRoomDomain=muc., usageTimeoutMins=0, trustAllXmppCerts=true, securityMode=null)
+Jibri 2025-08-19 09:00:16.144 INFO: [1] XmppApi.start#167: The trustAllXmppCerts config is enabled for this domain, all XMPP server provided certificates will be accepted
+Jibri 2025-08-19 09:00:16.180 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: checking for value via suppliers:
   ConfigSourceSupplier: key: 'http_api_port', type: 'kotlin.Int', source: 'command line args'
   ConfigSourceSupplier: key: 'jibri.api.http.external-api-port', type: 'kotlin.Int', source: 'config'
-Jibri 2025-08-18 17:56:56.131 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'http_api_port' from source 'command line args' as type kotlin.Int
-Jibri 2025-08-18 17:56:56.131 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via ConfigSourceSupplier: key: 'http_api_port', type: 'kotlin.Int', source: 'command line args': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: not found
-Jibri 2025-08-18 17:56:56.132 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.http.external-api-port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:56.133 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 2222 for key 'jibri.api.http.external-api-port' from source 'config' as type kotlin.Int
-Jibri 2025-08-18 17:56:56.134 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.api.http.external-api-port', type: 'kotlin.Int', source: 'config'
-Jibri 2025-08-18 17:56:56.134 INFO: [1] MainKt.main#154: Using port 2222 for HTTP API
-Jibri 2025-08-18 17:56:56.137 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.initializeConnectAndJoin#300: Initializing a new MucClient for [ org.jitsi.xmpp.mucclient.MucClientConfiguration id=xmpp.meet.jitsi domain=auth.localhost hostname=xmpp.meet.jitsi port=5222 username=jibri mucs=[jibribrewery@internal-muc.localhost] mucNickname=jibri-819672635 disableCertificateVerification=true]
-Jibri 2025-08-18 17:56:56.142 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.prometheus.enabled' from source 'config' as type kotlin.Boolean
-Jibri 2025-08-18 17:56:56.144 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value false for key 'jibri.stats.prometheus.enabled' from source 'config' as type kotlin.Boolean
-Jibri 2025-08-18 17:56:56.173 WARNING: [36] MucClient.createXMPPTCPConnectionConfiguration#119: Disabling certificate verification!
-Jibri 2025-08-18 17:56:56.208 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.initializeConnectAndJoin#401: Dispatching a thread to connect and login.
-Jibri 2025-08-18 17:56:56.502 FINE: [36] JibriMetrics.incrementStatsDCounter#41: Incrementing statsd counter: xmpp-connected:xmpp_server_host:xmpp.meet.jitsi
-Jibri 2025-08-18 17:56:56.509 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$2.connected#338: Connected. isSmEnabled:false isSmAvailable:false isSmResumptionPossible:false
-Jibri 2025-08-18 17:56:56.510 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.lambda$getConnectAndLoginCallable$9#703: Logging in.
-Jibri 2025-08-18 17:56:56.702 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$2.authenticated#351: Authenticated, resumed=false
-Jibri 2025-08-18 17:56:56.704 FINE: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$MucWrapper.resetLastPresenceSent#901: Resetting lastPresenceSent
-Jibri 2025-08-18 17:56:56.812 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$MucWrapper.join#826: Joined MUC: jibribrewery@internal-muc.localhost
-Jibri 2025-08-18 17:56:56.826 FINE: [49] org.jitsi.xmpp.extensions.DefaultPacketExtensionProvider.parse: Could not find a provider for element busy-status from namespace http://jitsi.org/protocol/jibri
-Jibri 2025-08-18 17:56:56.831 FINE: [49] org.jitsi.xmpp.extensions.DefaultPacketExtensionProvider.parse: Could not find a provider for element health-status from namespace http://jitsi.org/protocol/health
-Jibri 2025-08-18 17:57:55.523 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 17:58:52.780 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 17:59:48.937 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:00:44.286 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:01:39.667 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:02:35.050 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:03:30.425 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:04:25.813 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:05:21.197 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:06:16.575 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:07:11.966 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:08:07.348 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:09:02.857 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:09:58.119 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:10:53.500 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:11:48.880 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:12:44.273 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:13:39.653 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:14:35.023 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:15:30.414 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:16:25.788 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:17:21.177 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:18:16.554 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:19:11.938 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:20:06.128 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:21:07.082 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:22:03.488 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:22:58.867 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:23:54.319 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:24:49.625 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:25:45.024 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:26:44.135 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:27:35.768 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:28:31.172 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:29:26.545 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:30:21.937 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:31:17.319 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:32:12.710 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:33:08.068 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:34:03.451 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:34:58.834 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:35:54.225 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:36:49.597 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:37:44.987 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:38:40.372 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:39:35.748 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:40:31.137 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:41:26.525 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:42:21.910 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:43:17.308 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:44:12.819 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:45:08.072 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:46:03.431 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:47:00.026 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:47:59.433 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:48:59.333 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:49:59.324 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:50:59.322 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:51:59.349 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:52:59.367 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:53:59.366 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:54:59.378 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:55:59.370 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:56:59.371 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:57:59.347 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:58:59.318 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 18:59:59.343 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:00:59.337 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:01:59.332 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:02:59.328 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:03:59.318 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:04:59.303 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:05:59.305 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:06:59.296 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:07:59.289 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:08:59.276 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:09:59.294 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:10:59.291 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:11:59.282 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:12:59.272 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:13:59.262 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:14:59.253 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:15:59.244 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:16:59.222 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:17:59.219 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:18:59.213 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:19:59.201 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:20:59.189 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:21:59.186 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:22:59.177 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:23:59.211 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:24:59.190 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:25:59.177 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:26:59.167 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:27:59.154 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:28:59.127 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:29:59.111 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:30:59.088 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:31:59.069 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:32:59.038 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:33:59.026 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:34:59.012 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:35:58.994 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:36:58.969 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:37:58.943 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:38:58.930 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:39:58.920 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:40:58.916 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:41:58.909 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:42:58.886 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:43:58.865 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:44:58.845 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:45:58.813 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:46:58.789 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:47:58.764 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:48:58.713 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:49:58.694 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:50:58.669 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:51:58.680 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:52:58.679 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:53:58.676 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:54:58.652 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:55:58.634 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:56:58.620 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:57:58.621 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:58:58.598 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 19:59:58.588 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:00:58.579 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:01:58.563 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:02:58.412 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:03:58.365 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:04:58.356 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:05:58.339 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:06:58.966 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:08:00.169 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:09:00.177 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:10:00.142 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:11:00.094 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:12:00.044 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:12:59.990 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:13:59.945 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:14:59.901 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:15:59.863 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:16:59.824 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:17:59.790 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:18:59.743 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:19:59.693 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:20:59.655 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:21:59.577 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:22:59.536 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:23:59.495 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:24:59.454 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:25:59.410 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:26:59.356 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:27:59.317 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:28:59.276 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:29:59.235 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:30:59.193 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:31:59.145 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:32:59.102 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:33:59.070 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:34:59.022 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:35:58.981 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:36:58.933 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:37:58.865 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:38:58.822 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:39:58.773 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:40:58.737 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:41:58.705 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:42:58.659 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:43:58.605 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:44:58.560 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:45:58.489 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:46:58.440 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:47:58.385 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:48:58.334 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:49:58.285 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:50:58.237 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:51:58.170 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:52:58.124 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:53:58.058 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:54:58.006 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:55:57.960 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:56:57.914 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:57:57.869 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:58:57.822 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 20:59:57.773 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:00:57.720 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:01:57.670 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:02:57.615 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:03:57.591 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:04:57.540 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:05:57.506 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:06:57.451 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:07:57.405 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:08:57.344 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:09:57.305 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:10:57.238 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:11:57.197 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:12:57.127 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:13:57.071 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:14:56.998 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:15:56.939 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:16:56.866 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:17:56.788 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:18:56.709 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:19:56.629 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:20:56.551 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:21:55.979 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:22:56.405 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:23:56.352 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:24:56.271 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:25:56.189 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:26:56.114 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:27:56.044 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:28:55.964 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:29:55.901 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:30:55.844 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:31:55.771 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:32:55.690 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:33:55.627 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:34:55.553 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:35:55.475 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:36:55.403 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:37:55.334 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:38:55.256 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:39:55.166 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:40:55.095 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:41:55.024 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:42:54.965 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:43:54.894 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:44:54.834 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:45:54.780 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:46:54.715 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:47:54.641 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:48:54.561 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:49:54.502 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:50:54.434 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:51:54.360 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:52:54.304 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:53:54.231 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:54:54.161 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:55:54.098 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:56:54.022 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:57:53.947 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:58:53.876 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 21:59:53.819 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:00:53.754 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:01:53.692 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:02:53.633 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:03:53.573 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:04:53.492 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:05:53.432 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:06:53.355 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:07:53.274 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:08:53.207 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:09:53.139 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:10:53.066 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:11:53.008 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:12:52.937 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:13:52.870 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:14:52.799 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:15:52.730 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:16:52.654 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:17:52.600 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:18:52.520 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:19:52.449 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:20:52.376 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:21:52.299 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:22:52.219 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:23:52.150 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:24:52.079 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:25:52.011 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:26:51.921 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:27:51.844 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:28:51.763 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:29:51.676 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:30:51.603 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:31:51.524 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:32:51.445 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:33:51.371 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:34:51.289 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:35:51.209 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:36:51.137 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:37:51.057 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:38:50.966 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:39:50.881 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:40:50.799 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:41:50.711 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:42:50.627 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:43:50.560 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:44:50.475 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:45:50.400 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:46:50.319 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:47:50.244 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:48:50.163 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:49:50.091 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:50:50.007 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:51:49.923 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:52:49.844 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:53:49.766 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:54:49.676 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:55:49.585 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:56:49.499 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:57:49.415 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:58:49.337 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 22:59:49.246 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:00:49.170 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:01:49.087 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:02:48.993 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:03:48.899 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:04:48.816 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:05:48.729 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:06:48.641 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:07:48.558 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:08:48.470 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:09:48.374 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:10:48.292 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:11:48.204 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:12:48.111 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:13:48.015 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:14:47.922 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:15:47.829 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:16:47.727 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:17:47.637 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:18:47.538 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:19:47.438 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:20:47.340 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:21:47.249 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:22:47.154 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:23:47.044 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:24:46.939 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:25:46.844 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:26:46.747 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
-Jibri 2025-08-18 23:27:46.635 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:00:16.181 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'http_api_port' from source 'command line args' as type kotlin.Int
+Jibri 2025-08-19 09:00:16.183 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: failed to find value via ConfigSourceSupplier: key: 'http_api_port', type: 'kotlin.Int', source: 'command line args': org.jitsi.metaconfig.ConfigException$UnableToRetrieve$NotFound: not found
+Jibri 2025-08-19 09:00:16.185 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.api.http.external-api-port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:16.186 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value 2222 for key 'jibri.api.http.external-api-port' from source 'config' as type kotlin.Int
+Jibri 2025-08-19 09:00:16.187 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: FallbackSupplier: value found via ConfigSourceSupplier: key: 'jibri.api.http.external-api-port', type: 'kotlin.Int', source: 'config'
+Jibri 2025-08-19 09:00:16.188 INFO: [1] MainKt.main#154: Using port 2222 for HTTP API
+Jibri 2025-08-19 09:00:16.189 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.initializeConnectAndJoin#300: Initializing a new MucClient for [ org.jitsi.xmpp.mucclient.MucClientConfiguration id=xmpp.meet.jitsi domain=auth.localhost hostname=xmpp.meet.jitsi port=5222 username=jibri mucs=[jibribrewery@internal-muc.localhost] mucNickname=jibri-759877111 disableCertificateVerification=true]
+Jibri 2025-08-19 09:00:16.198 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Trying to retrieve key 'jibri.stats.prometheus.enabled' from source 'config' as type kotlin.Boolean
+Jibri 2025-08-19 09:00:16.203 FINE: [1] MainKt$setupMetaconfigLogger$1.debug#234: ConfigSourceSupplier: Found value false for key 'jibri.stats.prometheus.enabled' from source 'config' as type kotlin.Boolean
+Jibri 2025-08-19 09:00:16.221 WARNING: [36] MucClient.createXMPPTCPConnectionConfiguration#119: Disabling certificate verification!
+Jibri 2025-08-19 09:00:16.278 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.initializeConnectAndJoin#401: Dispatching a thread to connect and login.
+Jibri 2025-08-19 09:00:16.627 FINE: [36] JibriMetrics.incrementStatsDCounter#41: Incrementing statsd counter: xmpp-connected:xmpp_server_host:xmpp.meet.jitsi
+Jibri 2025-08-19 09:00:16.635 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$2.connected#338: Connected. isSmEnabled:false isSmAvailable:false isSmResumptionPossible:false
+Jibri 2025-08-19 09:00:16.636 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient.lambda$getConnectAndLoginCallable$9#703: Logging in.
+Jibri 2025-08-19 09:00:16.847 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$2.authenticated#351: Authenticated, resumed=false
+Jibri 2025-08-19 09:00:16.849 FINE: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$MucWrapper.resetLastPresenceSent#901: Resetting lastPresenceSent
+Jibri 2025-08-19 09:00:16.964 INFO: [36] [hostname=xmpp.meet.jitsi id=xmpp.meet.jitsi] MucClient$MucWrapper.join#826: Joined MUC: jibribrewery@internal-muc.localhost
+Jibri 2025-08-19 09:00:16.979 FINE: [49] org.jitsi.xmpp.extensions.DefaultPacketExtensionProvider.parse: Could not find a provider for element busy-status from namespace http://jitsi.org/protocol/jibri
+Jibri 2025-08-19 09:00:16.983 FINE: [49] org.jitsi.xmpp.extensions.DefaultPacketExtensionProvider.parse: Could not find a provider for element health-status from namespace http://jitsi.org/protocol/health
+Jibri 2025-08-19 09:01:13.995 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:02:12.838 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:03:11.669 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:04:10.482 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:05:09.309 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:06:07.978 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:07:06.761 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:08:05.508 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:09:04.196 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:10:02.682 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:11:01.268 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:11:59.762 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:12:58.275 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:13:56.725 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:14:55.189 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:15:53.557 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:16:51.863 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:17:49.961 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:18:48.128 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:19:46.287 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:20:44.468 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:21:42.621 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:22:40.690 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:23:38.752 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:24:36.826 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:25:34.726 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:26:33.367 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:27:31.786 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:28:30.076 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:29:28.184 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:30:26.301 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:31:24.485 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:32:22.572 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:33:20.709 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:34:18.867 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:35:16.923 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:36:14.893 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:37:12.915 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:38:10.964 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:39:08.833 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:40:06.669 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:41:04.465 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:42:02.131 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:42:59.865 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:43:57.536 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:44:55.223 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:45:52.943 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:46:50.567 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:47:48.183 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:48:46.513 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:49:43.121 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:50:41.812 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:51:40.768 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:52:39.922 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:53:38.338 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:54:35.548 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:55:32.977 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:56:30.279 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:57:27.611 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:58:24.920 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 09:59:22.201 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:00:19.497 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:01:16.779 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:02:14.060 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:03:11.197 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:04:08.269 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:05:05.546 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:06:02.756 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:06:59.920 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:07:56.959 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:08:54.030 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:09:51.147 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:10:48.223 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:11:45.286 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:12:42.118 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:13:39.088 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:14:36.162 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:15:33.566 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:16:31.608 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:17:29.654 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:18:28.413 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:19:27.396 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:20:26.409 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:21:25.417 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:22:24.634 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:23:23.829 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:24:22.944 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:25:22.059 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:26:21.544 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:27:20.988 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:28:20.411 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:29:20.006 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:30:19.561 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:31:19.118 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:32:18.676 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:33:18.257 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:34:17.895 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:35:17.527 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:36:17.191 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:37:16.856 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:38:16.571 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:39:16.279 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:40:15.999 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:41:15.740 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:42:15.488 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:43:15.253 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:44:15.035 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:45:14.827 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:46:14.621 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:47:14.429 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:48:14.249 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:49:14.082 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:50:13.881 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:51:13.730 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:52:13.534 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:53:13.380 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:54:13.173 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:55:12.957 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:56:12.751 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:57:12.494 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:58:12.276 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 10:59:12.031 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:00:11.834 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:01:11.599 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:02:11.412 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:03:11.219 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:04:11.037 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:05:10.826 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:06:10.622 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:07:10.447 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:08:09.225 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:09:08.203 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:10:07.045 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:11:05.880 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:12:04.720 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:13:03.527 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:14:02.266 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:15:01.054 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:15:59.851 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:16:58.488 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:17:57.211 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:18:55.903 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:19:54.511 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:20:53.007 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:21:51.399 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:22:49.854 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:23:48.322 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:24:46.734 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:25:45.155 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:26:43.538 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:27:41.972 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:28:40.345 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:29:38.673 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:30:36.956 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:31:35.313 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:32:33.532 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:33:31.737 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:34:29.837 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:35:28.011 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:36:26.200 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:37:24.336 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:38:22.401 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:39:20.514 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:40:18.629 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:41:16.656 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:42:14.624 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:43:12.674 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:44:10.733 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:45:08.653 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:46:06.597 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:47:04.512 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:48:02.449 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:49:00.195 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:49:58.023 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:50:55.903 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:51:53.752 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:52:51.573 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:53:49.348 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:54:47.119 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:55:44.832 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:56:42.554 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:57:40.258 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:58:37.849 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 11:59:35.474 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:00:33.070 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:01:30.634 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:02:28.209 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:03:25.733 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:04:23.242 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:05:20.746 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:06:18.185 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:07:15.636 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:08:12.953 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:09:10.279 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:10:07.657 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:11:05.002 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:12:02.357 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:12:59.692 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:13:56.972 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:14:54.276 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:15:51.538 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:16:48.760 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:17:45.967 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:18:43.201 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:19:40.379 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:20:37.528 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:21:34.639 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:22:31.692 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:23:28.771 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:24:25.869 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:25:22.950 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:26:20.028 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:27:16.956 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:28:13.896 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:29:10.732 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:30:07.541 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:31:04.490 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:32:01.282 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:32:58.117 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:33:54.976 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:34:51.796 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:35:48.621 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:36:45.379 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:37:42.102 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:38:38.862 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:39:35.577 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:40:32.224 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:41:28.916 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:42:25.509 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:43:22.118 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:44:18.757 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:45:15.433 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:46:12.022 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:47:08.533 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:48:05.061 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:49:01.568 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:49:58.098 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:50:54.560 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:51:51.071 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:52:47.567 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:53:44.078 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:54:40.550 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:55:36.918 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:56:33.289 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:57:29.711 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:58:26.064 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 12:59:22.402 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:00:18.839 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:01:15.226 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:02:11.538 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:03:07.806 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:04:04.063 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status
+Jibri 2025-08-19 13:05:00.296 FINE: [22] WebhookClient$updateStatus$1.invokeSuspend#86: Updating 0 subscribers of status

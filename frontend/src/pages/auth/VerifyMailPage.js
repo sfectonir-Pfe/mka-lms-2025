@@ -1,9 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import api from "../../api/axiosInstance"; // ✅ using api directly
-
-// const API_BASE = "http://localhost:8000"; // adjust if needed
+import api from "../../api/axiosInstance";
 
 const VerifyMailPage = () => {
   const location = useLocation();
@@ -14,12 +12,31 @@ const VerifyMailPage = () => {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // cooldown for resend
+  const [cooldown, setCooldown] = useState(0);
+  const sentOnceRef = useRef(false);
+
+  useEffect(() => {
+    // auto-send once if we arrived here with an email
+    if (email && !sentOnceRef.current) {
+      sentOnceRef.current = true;
+      handleSendCode();
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
+
   const handleSendCode = async () => {
     if (!email) return toast.error("Email requis");
     try {
       setIsLoading(true);
       await api.post(`/auth/send-email-code`, { email });
       toast.success("Code envoyé à votre adresse email");
+      setCooldown(30); // 30s cooldown for resend
     } catch (error) {
       toast.error(error?.response?.data?.message || "Échec de l'envoi du code");
     } finally {
@@ -27,29 +44,30 @@ const VerifyMailPage = () => {
     }
   };
 
- const handleVerify = async (e) => {
-  e.preventDefault();
-  if (!email || !code) return toast.error("Veuillez remplir tous les champs");
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (!email || !code) return toast.error("Veuillez remplir tous les champs");
 
-  try {
-    setIsLoading(true);
-    const res =      await api.post(`/auth/verify-email-code`, { email, code });
+    try {
+      setIsLoading(true);
+      const res = await api.post(`/auth/verify-email-code`, { email, code });
 
+      toast.success("Email vérifié avec succès !");
+      localStorage.setItem("authToken", res.data.data.access_token);
+      localStorage.setItem("currentUser", JSON.stringify(res.data.data.user));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...res.data.data.user, token: res.data.data.access_token })
+      );
+      localStorage.setItem("userEmail", res.data.data.user.email);
 
-    toast.success("Email vérifié avec succès !");
-
-    localStorage.setItem("authToken", res.data.data.access_token);
-    localStorage.setItem("currentUser", JSON.stringify(res.data.data.user));
-    localStorage.setItem("user", JSON.stringify({ ...res.data.data.user, token: res.data.data.access_token }));
-    localStorage.setItem("userEmail", res.data.data.user.email);
-
-    window.location.href = "/";
-  } catch (error) {
-    toast.error(error?.response?.data?.message || "Code invalide ou expiré");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      window.location.href = "/";
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Code invalide ou expiré");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container py-5">
@@ -76,17 +94,19 @@ const VerifyMailPage = () => {
                 type="button"
                 className="btn btn-link btn-sm"
                 onClick={handleSendCode}
-                disabled={isLoading}
+                disabled={isLoading || cooldown > 0}
+                title={cooldown > 0 ? `Réessayer dans ${cooldown}s` : ""}
               >
-                Renvoyer le code
+                {cooldown > 0 ? `Renvoyer le code (${cooldown})` : "Renvoyer le code"}
               </button>
             </div>
+
             <input
               type="text"
               className="form-control mb-3"
               placeholder="Ex: 123456"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               maxLength={6}
             />
 

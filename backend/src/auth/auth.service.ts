@@ -334,4 +334,54 @@ async login(dto: LoginDto) {
 
   return { message: 'Utilisateur vérifié avec succès', user: updated };
   
-  }}
+  }
+  async sendEmailVerificationCode(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+  
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        emailVerificationCode: code,
+        codeExpiryDate: expiry,
+      },
+    });
+  
+    await this.mailService.sendEmailVerificationCode(email, code);
+  
+    return { message: 'Code envoyé par email' };
+  }
+  async verifyEmailCode(email: string, code: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  
+    if (!user.emailVerificationCode || !user.codeExpiryDate)
+      throw new HttpException('Aucun code trouvé', HttpStatus.BAD_REQUEST);
+  
+    const now = new Date();
+  
+    if (user.codeExpiryDate < now)
+      throw new HttpException('Code expiré', HttpStatus.BAD_REQUEST);
+  
+    if (user.emailVerificationCode !== code)
+      throw new HttpException('Code invalide', HttpStatus.BAD_REQUEST);
+  
+    return this.verifyUser(email); // ✅ call existing function
+  }
+  async generateJwtToken(user: { id: number; email: string; role: any } | number) {
+  let u;
+  if (typeof user === 'number') {
+    u = await this.prisma.user.findUnique({ where: { id: user } });
+    if (!u) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  } else {
+    u = user;
+  }
+
+  const payload = { sub: u.id, email: u.email, role: u.role };
+  return this.jwtService.sign(payload);
+}
+
+}
