@@ -71,13 +71,13 @@ const ProfilePictureUpload = ({
         const variance = (sumSquared / count) - (mean * mean);
 
         let quality;
-        if (variance > 1000) {
+        if (variance > 800) {
           quality = { level: 'excellent', score: variance, isBlurry: false };
-        } else if (variance > 500) {
+        } else if (variance > 300) {
           quality = { level: 'good', score: variance, isBlurry: false };
-        } else if (variance > 200) {
-          quality = { level: 'acceptable', score: variance, isBlurry: false };
         } else if (variance > 100) {
+          quality = { level: 'acceptable', score: variance, isBlurry: false };
+        } else if (variance > 50) {
           quality = { level: 'poor', score: variance, isBlurry: true };
         } else {
           quality = { level: 'very_poor', score: variance, isBlurry: true };
@@ -123,8 +123,11 @@ const ProfilePictureUpload = ({
       const quality = await analyzeImageQuality(file);
       setImageQuality(quality);
 
+      // Toujours permettre l'upload, mais donner un avertissement si l'image est floue
       if (quality.isBlurry) {
         toast.warning(t('profile.blurryImageWarning', { quality: quality.level }));
+        // Permettre quand même l'upload de l'image floue
+        onImageChange(file);
       } else {
         toast.success(t('profile.goodQualityImage', { quality: quality.level }));
         onImageChange(file);
@@ -133,6 +136,8 @@ const ProfilePictureUpload = ({
       console.error("Erreur lors de l'analyse de l'image:", error);
       toast.error(t('profile.imageAnalysisError'));
       setImageQuality({ level: 'error', score: 0, isBlurry: true });
+      // En cas d'erreur d'analyse, permettre quand même l'upload
+      onImageChange(file);
     } finally {
       setIsAnalyzing(false);
     }

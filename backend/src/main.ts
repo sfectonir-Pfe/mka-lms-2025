@@ -9,8 +9,15 @@ async function bootstrap() {
 
   app.enableCors();
 
-  // Serve files from the top-level /uploads folder
-  app.useStaticAssets('uploads', { prefix: '/uploads' });
+  // Serve files from the top-level /uploads folder with CORS headers
+  app.useStaticAssets('uploads', { 
+    prefix: '/uploads',
+    setHeaders: (res, path) => {
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    }
+  });
 
   const config = new DocumentBuilder()
     .setTitle('MKA-LMS')

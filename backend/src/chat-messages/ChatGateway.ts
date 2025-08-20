@@ -10,7 +10,9 @@ import { ChatMessagesService } from './chat-messages.service';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway {
-  constructor(private readonly chatService: ChatMessagesService) {}
+  constructor(
+    private readonly chatService: ChatMessagesService,
+  ) {}
 
   @WebSocketServer()
   server: Server;

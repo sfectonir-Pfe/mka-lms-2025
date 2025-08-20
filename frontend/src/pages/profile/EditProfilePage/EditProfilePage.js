@@ -65,6 +65,10 @@ const EditProfilePage = () => {
 
   // Fonction pour extraire le code pays et le numéro du téléphone
   const extractPhoneParts = (phone) => {
+    if (!phone) {
+      return { countryCode: "+216", phoneNumber: "" };
+    }
+    
     const countries = [
       "+33", "+1", "+44", "+49", "+34", "+39", "+212", "+213", "+216", "+20",
       "+966", "+971", "+7", "+86", "+81", "+82", "+91", "+55", "+52", "+54",
@@ -73,12 +77,16 @@ const EditProfilePage = () => {
       "+47", "+45", "+358", "+48", "+420", "+36", "+30", "+351", "+353"
     ];
     
+    // Essayer de trouver un code pays au début du numéro
     for (const code of countries) {
-      if (phone && phone.startsWith(code)) {
+      if (phone.startsWith(code)) {
         return { countryCode: code, phoneNumber: phone.substring(code.length) };
       }
     }
-    return { countryCode: "+216", phoneNumber: phone || "" };
+    
+    // Si aucun code pays n'est trouvé, supposer que c'est un numéro local
+    // et utiliser le code par défaut
+    return { countryCode: "+216", phoneNumber: phone };
   };
 
   // Charger les données utilisateur
@@ -103,6 +111,13 @@ const EditProfilePage = () => {
                 setUser(res.data);
                 setForm(res.data);
                 setSkills(Array.isArray(res.data.skills) ? res.data.skills : []);
+                
+                // Extraire les parties du téléphone
+                if (res.data.phone) {
+                  const { countryCode: code, phoneNumber: number } = extractPhoneParts(res.data.phone);
+                  setCountryCode(code);
+                  setPhoneNumber(number);
+                }
               }
             } catch (serverErr) {
               console.error("Error fetching complete user data:", serverErr);

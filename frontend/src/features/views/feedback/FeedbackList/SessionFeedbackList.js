@@ -89,19 +89,21 @@ const SessionFeedbackList = () => {
       headerName: t('averageRating'),
       width: 200,
       renderCell: (params) => {
-        // Use the averageRating from the backend directly as the primary source
+        // Utiliser la même logique que dans le dialog
         let finalRating = 0;
+        
+        // Priorité 1: Utiliser averageRating du backend s'il est disponible
         if (params.row.averageRating && params.row.averageRating > 0) {
           finalRating = params.row.averageRating;
         } else if (params.row.ratings) {
-          // Fallback: Calculate weighted score only if backend didn't provide it
+          // Priorité 2: Calculer le score pondéré si ratings est disponible
           try {
             const ratingsData = typeof params.row.ratings === 'string'
               ? JSON.parse(params.row.ratings)
               : params.row.ratings;
 
             if (ratingsData && typeof ratingsData === 'object') {
-              // Définir les poids pour chaque critère
+              // Définir les poids pour chaque critère (même que dans le dialog)
               const criteriaWeights = {
                 overallRating: 0.25,
                 contentRelevance: 0.20,
@@ -130,6 +132,11 @@ const SessionFeedbackList = () => {
           } catch (error) {
             console.warn('Erreur parsing ratings:', error);
           }
+        }
+        
+        // Fallback: utiliser params.row.rating ou 0
+        if (finalRating === 0) {
+          finalRating = params.row.rating || 0;
         }
 
         let comment = '';
@@ -334,32 +341,42 @@ const SessionFeedbackList = () => {
 
                 // Nouvelle fonction de calcul du score pondéré
                 const calculateWeightedScore = () => {
-                  // Définir les poids pour chaque critère
-                  const criteriaWeights = {
-                    overallRating: 0.25,
-                    contentRelevance: 0.20,
-                    learningObjectives: 0.15,
-                    skillImprovement: 0.15,
-                    satisfactionLevel: 0.10,
-                    sessionStructure: 0.10,
-                    knowledgeGain: 0.05
-                  };
+                  // Utiliser la même logique que dans le datagrid
+                  // Priorité 1: Utiliser averageRating du backend s'il est disponible
+                  if (fb.averageRating && fb.averageRating > 0) {
+                    return fb.averageRating;
+                  }
+                  
+                  // Priorité 2: Calculer le score pondéré si ratings est disponible
+                  if (ratings && typeof ratings === 'object') {
+                    // Définir les poids pour chaque critère
+                    const criteriaWeights = {
+                      overallRating: 0.25,
+                      contentRelevance: 0.20,
+                      learningObjectives: 0.15,
+                      skillImprovement: 0.15,
+                      satisfactionLevel: 0.10,
+                      sessionStructure: 0.10,
+                      knowledgeGain: 0.05
+                    };
 
-                  let totalWeightedScore = 0;
-                  let totalWeight = 0;
+                    let totalWeightedScore = 0;
+                    let totalWeight = 0;
 
-                  Object.entries(criteriaWeights).forEach(([criterion, weight]) => {
-                    const rating = ratings[criterion];
-                    if (typeof rating === 'number' && rating >= 1 && rating <= 5) {
-                      totalWeightedScore += rating * weight;
-                      totalWeight += weight;
+                    Object.entries(criteriaWeights).forEach(([criterion, weight]) => {
+                      const rating = ratings[criterion];
+                      if (typeof rating === 'number' && rating >= 1 && rating <= 5) {
+                        totalWeightedScore += rating * weight;
+                        totalWeight += weight;
+                      }
+                    });
+
+                    if (totalWeight >= 0.5) {
+                      return Math.round((totalWeightedScore / totalWeight) * 10) / 10;
                     }
-                  });
-
-                  if (totalWeight >= 0.5) {
-                    return Math.round((totalWeightedScore / totalWeight) * 10) / 10;
                   }
 
+                  // Fallback: utiliser fb.rating ou 0
                   return fb.rating || 0;
                 };
 

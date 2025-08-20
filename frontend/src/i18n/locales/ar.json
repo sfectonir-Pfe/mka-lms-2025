@@ -529,6 +529,8 @@
     "copyError": "خطأ في نسخ النص",
     "downloadImage": "تحميل الصورة",
     "imageGenerationError": "خطأ في إنشاء الصورة",
+    "imageLoadWarning": "تحذير: لم يتم تحميل صورة الجلسة. قد لا تتضمن الصورة المحملة صورة الجلسة.",
+    "imageDownloadSuccess": "تم تحميل صورة الجلسة بنجاح!",
     "program": "البرنامج",
     "period": "من",
     "to": "إلى",

@@ -42,6 +42,8 @@ export const clearStoredUser = () => {
   try {
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('userEmail');
+    sessionStorage.removeItem('userEmail');
     return true;
   } catch (error) {
     console.error('Error clearing stored user:', error);
@@ -61,7 +63,22 @@ export const getUserRole = () => {
 
 export const getUserEmail = () => {
   const user = getStoredUser();
-  return user?.email || '';
+  if (user?.email) {
+    return user.email;
+  }
+  
+  // Fallback: check both storages for userEmail
+  const persistentEmail = localStorage.getItem('userEmail');
+  if (persistentEmail) {
+    return persistentEmail;
+  }
+  
+  const sessionEmail = sessionStorage.getItem('userEmail');
+  if (sessionEmail) {
+    return sessionEmail;
+  }
+  
+  return '';
 };
 
 export const getUserName = () => {

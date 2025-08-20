@@ -3,8 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import toastErrorUtils from "../../utils/toastError";
+import { storeUser } from "../../utils/authUtils";
+import { IconButton } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 // import "bootstrap/dist/css/bootstrap.min.css";
-// import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
+import "bootstrap-icons/font/bootstrap-icons.css"; // Import des icônes Bootstrap
 import { toast } from "react-toastify"; 
 
 const LoginPage = () => {
@@ -15,6 +18,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msgError, setMsgError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
 const [rememberMe, setRememberMe] = useState(false);
 // const [errors, setErrors] = useState({ email: "", password: "" });
@@ -63,12 +67,13 @@ const [rememberMe, setRememberMe] = useState(false);
       const res = await axios.post("http://localhost:8000/auth/login", {
         email,
         password,
+        rememberMe: rememberMe,
       });
 
       const user = res.data.data;
 
       if (user.needsVerification) {
-        toast.warning("Votre compte n’est pas encore vérifié. Veuillez vérifier par SMS.");
+        toast.warning("Votre compte n'est pas encore vérifié. Veuillez vérifier par SMS.");
         navigate("/verify-sms", {
           state: {
             email: user.email,
@@ -87,8 +92,15 @@ const [rememberMe, setRememberMe] = useState(false);
         token: user.access_token,
       };
 
-      localStorage.setItem("user", JSON.stringify(userData));
-      localStorage.setItem("userEmail", user.email);
+      // Use the storeUser function from authUtils to handle remember me properly
+      storeUser(userData, rememberMe);
+      
+      // Also store email separately for backward compatibility
+      if (rememberMe) {
+        localStorage.setItem("userEmail", user.email);
+      } else {
+        sessionStorage.setItem("userEmail", user.email);
+      }
 
       window.location.href = "/";
     } catch (error) {
@@ -141,13 +153,28 @@ const [rememberMe, setRememberMe] = useState(false);
       <i className="bi bi-lock"></i>
     </span>
     <input
-      type="password"
+      type={showPassword ? "text" : "password"}
       className="form-control"
       placeholder="Entrez votre mot de passe"
       value={password}
       required
       onChange={(e) => setPassword(e.target.value)}
     />
+    <IconButton
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      sx={{
+        borderLeft: '1px solid #ced4da',
+        borderRadius: '0 0.375rem 0.375rem 0',
+        padding: '8px 12px',
+        backgroundColor: '#f8f9fa',
+        '&:hover': {
+          backgroundColor: '#e9ecef'
+        }
+      }}
+    >
+      {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+    </IconButton>
   </div>
 </div>
 
