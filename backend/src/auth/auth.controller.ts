@@ -15,11 +15,15 @@ import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ApiBody, ApiProperty } from '@nestjs/swagger';
+import { Public } from './public.decorator';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly jwtService: JwtService, 
+    
   ) { }
 
   @Post('verify')
@@ -38,41 +42,27 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('login')
   async login(@Body() dto: LoginDto) {
     try {
-      console.log('Login request received:', {
-        email: dto.email,
-        rememberMe: dto.rememberMe,
-
-      });
-
-
-
-      // Authentifier l'utilisateur
       const result = await this.authService.login(dto);
-
-      // Ajouter une information sur rememberMe dans la réponse
       return {
         success: true,
         message: 'Connexion réussie',
         data: {
           ...result,
           rememberMe: dto.rememberMe || false,
-          // Ajouter un access_token fictif pour le moment (à remplacer par un vrai JWT plus tard)
-          access_token: `temp_token_${Date.now()}_${dto.rememberMe ? 'long' : 'short'}`
         }
       };
     } catch (error) {
-      console.error('Login error:', error);
       throw new HttpException(
         error.message || 'Échec de la connexion',
         error.status || HttpStatus.UNAUTHORIZED,
       );
     }
   }
-
+  @Public()
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     try {
@@ -140,7 +130,7 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('forgot-password')
   async forgot(@Body('email') email: string) {
     try {
@@ -153,13 +143,9 @@ export class AuthController {
       );
     }
   }
-
+  @Public()
   @Post('reset-password')
-
-  async reset(
-
-    @Body() dto: ResetPassword
-  ) {
+  async reset(@Body() dto: ResetPassword) {
     try {
       const result = await this.authService.resetPassword(dto.token, dto.newPass, dto.confirmPass);
       return { success: true, message: 'Mot de passe réinitialisé', data: result };
@@ -189,16 +175,11 @@ export class AuthController {
     }
   }
 
-
-
   @Post('logout')
   async logout(@Body() body?: any) {
     try {
       console.log('Logout request received');
-
-      // Pour le moment, le logout est simple car nous n'utilisons pas de JWT
-      // Dans une vraie application avec JWT, on invaliderait le token ici
-
+      // No JWT invalidation yet; just a placeholder
       return {
         success: true,
         message: 'Déconnexion réussie',
@@ -215,6 +196,7 @@ export class AuthController {
       );
     }
   }
+
   @Post('update-user')
   async updateUser(@Body() body: { email: string }) {
     try {
@@ -227,4 +209,28 @@ export class AuthController {
       );
     }
   }
+  @Public()
+  @Post('send-email-code')
+  sendEmailCode(@Body('email') email: string) {
+    return this.authService.sendEmailVerificationCode(email);
+  }
+  @Public()
+  @Post('verify-email-code')
+  async verifyEmailCode(
+    @Body('email') email: string,
+    @Body('code') code: string
+  ) {
+    const { user } = await this.authService.verifyEmailCode(email, code);
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const access_token = this.jwtService.sign(payload);  // <-- sign directly
+
+    return {
+      success: true,
+      message: 'Email verified successfully',
+      data: { access_token, user },
+    };
+  }
 }
+  
+

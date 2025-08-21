@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from "@nestjs/common"
 import { FileInterceptor } from "@nestjs/platform-express"
 import { diskStorage } from "multer"
@@ -18,7 +19,9 @@ import { UsersService } from "./users.service"
 import type { CreateUserDto } from "./dto/create-user.dto"
 import type { UpdateUserDto } from "./dto/update-user.dto"
 import type { Express } from "express"
-import { S3Service } from "../s3/s3.service"
+
+import { Role } from '@prisma/client';
+import { PrismaService } from 'nestjs-prisma';
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
@@ -47,7 +50,7 @@ const multerOptions = {
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly s3Service: S3Service
+    private readonly prisma: PrismaService
   ) {}
 
   @Post()
@@ -221,7 +224,27 @@ export class UsersController {
   }
 
   @Patch("id/:id/photo")
-  @UseInterceptors(FileInterceptor("photo"))
+  @UseInterceptors(FileInterceptor("photo", {
+    storage: diskStorage({
+      destination: "./uploads/profile-pics",
+      filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+        const ext = extname(file.originalname).toLowerCase()
+        const filename = `profile-${uniqueSuffix}${ext}`
+        callback(null, filename)
+      },
+    }),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+      if (!allowedTypes.includes(file.mimetype)) {
+        return cb(new Error("Seules les images .jpg, .jpeg, .png, et .webp sont autorisées"), false)
+      }
+      cb(null, true)
+    },
+  }))
   async uploadProfilePic(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     try {
       const numericId = Number.parseInt(id, 10)
@@ -240,13 +263,12 @@ export class UsersController {
         throw new BadRequestException("Seules les images sont autorisées");
       }
 
-      // Upload vers S3
-      const result = await this.s3Service.uploadFile(file, 'profile-pics');
-      
-      console.log("Fichier uploadé vers S3:", result);
+      // Stockage local uniquement
+      const profilePicPath = `/profile-pics/${file.filename}`;
+      console.log("Fichier sauvegardé localement:", profilePicPath);
 
-      // Mettre à jour le profil utilisateur avec l'URL S3
-      return this.usersService.updateProfilePic(numericId, result.url)
+      // Mettre à jour le profil utilisateur
+      return this.usersService.updateProfilePic(numericId, profilePicPath)
     } catch (error) {
       console.error("Erreur lors du téléchargement de la photo de profil:", error)
       throw error
@@ -266,5 +288,46 @@ async getUserSessions2(@Param('id') userId: string) {
   return this.usersService.getUserSessions(Number(userId));
 }
 
+@Get('students')
+async getStudents() {
+  return this.usersService.getStudents();
+}
+
+@Get('students/without-feedback')
+async getStudentsWithoutFeedback(
+  @Query('formateurId') formateurId: string,
+  @Query('seanceId') seanceId: string,
+) {
+  if (!formateurId || !seanceId) return [];
+
+  // 1. Trouver la séance pour obtenir session2Id
+  const seance = await this.prisma.seanceFormateur.findUnique({
+    where: { id: Number(seanceId) },
+    select: { session2Id: true }
+  });
+  if (!seance) return [];
+
+  // 2. Trouver tous les étudiants de cette session
+  const userSessions = await this.prisma.userSession2.findMany({
+    where: { session2Id: seance.session2Id },
+    select: { userId: true }
+  });
+  const studentIds = userSessions.map(us => us.userId);
+  const students = await this.prisma.user.findMany({
+    where: {
+      id: { in: studentIds },
+      role: 'Etudiant'
+    },
+    select: { id: true, name: true, email: true, role: true }
+  });
+
+  // 3. Exclure ceux qui ont déjà reçu un feedback de ce formateur pour cette séance
+  const feedbacks = await this.prisma.feedbackFormateur.findMany({
+    where: { formateurId: Number(formateurId), seanceId: Number(seanceId) },
+    select: { studentId: true }
+  });
+  const alreadyFeedbackStudentIds = feedbacks.map(f => f.studentId);
+  return students.filter(s => !alreadyFeedbackStudentIds.includes(s.id));
+}
 
 }

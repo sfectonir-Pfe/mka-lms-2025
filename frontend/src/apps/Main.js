@@ -27,14 +27,15 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { sideBarData } from "../constants/sideBarData";
-import ScrollToTopButton from "../components/ScrollToTopButton";
-import LanguageSelectorWithFlags from "../components/LanguageSelectorWithFlags";
+import { sideBarData } from "../components/constants/sideBarData";
+import ScrollToTopButton from "../components/constants/ScrollToTopButton";
+import LanguageSelectorWithFlags from "../i18n/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
-import Session2ChatPopup from "../components/Session2ChatPopup";
+import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
+import NotificationCenter from "../components/notification/NotificationCenter";
 
 
 
@@ -158,7 +159,7 @@ export default function Main({ setUser, user }) {
     const fetchUserData = async () => {
       try {
         if (user.email) {
-          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          const response = await api.get(`/users/email/${user.email}`);
           if (response.data) {
             // Mettre à jour l'objet utilisateur avec les données à jour
             const updatedUser = {
@@ -239,7 +240,7 @@ export default function Main({ setUser, user }) {
       if (user && user.email) {
         console.log("Trying to fetch user data from backend for email:", user.email);
         try {
-          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          const response = await api.get(`/users/email/${user.email}`);
           if (response.data && response.data.id) {
             console.log("User data from backend:", response.data);
 
@@ -349,11 +350,7 @@ export default function Main({ setUser, user }) {
             <LanguageSelectorWithFlags />
 
 
-            <IconButton color="inherit">
-              <StyledBadge badgeContent={4} color="error">
-                <NotificationsIcon />
-              </StyledBadge>
-            </IconButton>
+            <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>
               {user?.name || "Utilisateur"} |{" "}

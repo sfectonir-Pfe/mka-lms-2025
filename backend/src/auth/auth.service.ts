@@ -4,12 +4,17 @@ import { LoginDto, RegisterDto } from './dto/create-auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { MailService } from 'src/mail/mail.service';
+import { JwtService } from '@nestjs/jwt'; // Add this import
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly prisma: PrismaService, private readonly mailService: MailService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+    private readonly jwtService: JwtService, // Inject JwtService
+  ) {}
 
-  async login(dto: LoginDto) {
+async login(dto: LoginDto) {
   const user = await this.prisma.user.findUnique({
     where: { email: dto.email },
   });
@@ -23,16 +28,32 @@ export class AuthService {
     throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
   }
 
-  // ✅ Vérification : bloquer si non vérifié sauf si Admin
- if (!user.isVerified && user.role.toLowerCase() !== 'admin') {
-  console.log('🧠 Forcing verification for:', user.email, 'Role:', user.role);
-  const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-  return { ...safeUser, needsVerification: true };
-}
+  // Remove all sensitive fields
+  const {
+    password,
+    resetToken,
+    resetTokenExpiry,
+    ...safeUser
+  } = user;
 
-const { password, resetToken, resetTokenExpiry, ...safeUser } = user;
-return { ...safeUser, needsVerification: false }; // Always include this
+  // If not verified and not admin, don't return token (force verification)
+  if (!user.isVerified && user.role.toLowerCase() !== 'admin') {
+    return {
+      ...safeUser,
+      needsVerification: true,
+      // no access_token!
+    };
+  }
 
+  // JWT payload
+  const payload = { sub: user.id, email: user.email, role: user.role };
+  const access_token = this.jwtService.sign(payload);
+
+  return {
+    ...safeUser,
+    needsVerification: false,
+    access_token, // JWT included
+  };
 }
 
   async register(dto: RegisterDto) {
@@ -313,4 +334,54 @@ return { ...safeUser, needsVerification: false }; // Always include this
 
   return { message: 'Utilisateur vérifié avec succès', user: updated };
   
-  }}
+  }
+  async sendEmailVerificationCode(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
+    const expiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+  
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        emailVerificationCode: code,
+        codeExpiryDate: expiry,
+      },
+    });
+  
+    await this.mailService.sendEmailVerificationCode(email, code);
+  
+    return { message: 'Code envoyé par email' };
+  }
+  async verifyEmailCode(email: string, code: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  
+    if (!user.emailVerificationCode || !user.codeExpiryDate)
+      throw new HttpException('Aucun code trouvé', HttpStatus.BAD_REQUEST);
+  
+    const now = new Date();
+  
+    if (user.codeExpiryDate < now)
+      throw new HttpException('Code expiré', HttpStatus.BAD_REQUEST);
+  
+    if (user.emailVerificationCode !== code)
+      throw new HttpException('Code invalide', HttpStatus.BAD_REQUEST);
+  
+    return this.verifyUser(email); // ✅ call existing function
+  }
+  async generateJwtToken(user: { id: number; email: string; role: any } | number) {
+  let u;
+  if (typeof user === 'number') {
+    u = await this.prisma.user.findUnique({ where: { id: user } });
+    if (!u) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+  } else {
+    u = user;
+  }
+
+  const payload = { sub: u.id, email: u.email, role: u.role };
+  return this.jwtService.sign(payload);
+}
+
+}

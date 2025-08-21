@@ -1,12 +1,11 @@
 import {
   Controller, Get, Post, Body, Param, Delete, UploadedFile,
-  UseInterceptors
+  UseInterceptors, Patch
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Session2Service } from './session2.service';
-import { Patch, } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 
 const storage = diskStorage({
@@ -58,6 +57,7 @@ export class Session2Controller {
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
+
   @Post(':session2Id/add-user')
   async addUserToSession(
     @Param('session2Id') session2Id: string,
@@ -65,28 +65,50 @@ export class Session2Controller {
   ) {
     return this.service.addUserToSession(Number(session2Id), email);
   }
-  // GET /session2/:session2Id/users
-@Get(':session2Id/users')
-async getSessionUsers(@Param('session2Id') session2Id: string) {
-  return this.service.getUsersForSession(Number(session2Id));
-}
-// In your session2.controller.ts
-@Delete(':session2Id/remove-user/:userId')
-async removeUserFromSession(
-  @Param('session2Id') session2Id: string,
-  @Param('userId') userId: string
-) {
-  return this.service.removeUserFromSession(Number(session2Id), Number(userId));
-}
 
+  @Get(':session2Id/users')
+  async getSessionUsers(@Param('session2Id') session2Id: string) {
+    return this.service.getUsersForSession(Number(session2Id));
+  }
 
-// ...inside Session2Controller
-@Patch(':id/status')
-async updateStatus(
-  @Param('id') id: string,
-  @Body('status') status: string
-) {
-  return this.service.updateStatus(Number(id), status);
+  @Delete(':session2Id/remove-user/:userId')
+  async removeUserFromSession(
+    @Param('session2Id') session2Id: string,
+    @Param('userId') userId: string
+  ) {
+    return this.service.removeUserFromSession(Number(session2Id), Number(userId));
+  }
+
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: string
+  ) {
+    return this.service.updateStatus(Number(id), status);
+  }
+
+  @Get(':id')
+  async getSessionById(@Param('id') id: string) {
+    return this.service.getSessionById(Number(id));
+  }
+
+  @Get('session/:sessionId/with-feedback')
+  async getSeancesWithFeedback(@Param('sessionId') sessionId: string) {
+    return this.service.findSeancesWithAvgFeedback(Number(sessionId));
+  }
+
+  @Get(':id/average-feedback')
+  async getAverageFeedback(@Param('id') id: string) {
+    return this.service.getAverageSessionFeedback(Number(id));
+  }
+  @Get(':id')
+findOne(@Param('id') id: string) {
+  return this.prisma.session2.findUnique({
+    where: { id: Number(id) },
+    include: {
+      program: true, // ✅ you MUST include this
+    },
+  });
 }
 
 }
