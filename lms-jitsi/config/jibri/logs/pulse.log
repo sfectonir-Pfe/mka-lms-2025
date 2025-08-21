@@ -3,6 +3,7 @@ I: [pulseaudio] main.c: setrlimit(RLIMIT_RTPRIO, (9, 9)) failed: Operation not p
 I: [pulseaudio] main.c: This is PulseAudio 16.1
 I: [pulseaudio] main.c: Page size is 4096 bytes
 I: [pulseaudio] main.c: Machine ID is e3a978545a8d467bb3518a740590c548.
+I: [pulseaudio] core-util.c: Hmm, runtime path exists, but points to an invalid directory. Changing runtime directory.
 I: [pulseaudio] main.c: Using runtime directory /home/jibri/.config/pulse/e3a978545a8d467bb3518a740590c548-runtime.
 I: [pulseaudio] main.c: Using state directory /home/jibri/.config/pulse.
 I: [pulseaudio] main.c: Using modules directory /usr/lib/pulse-16.1+dfsg1/modules.
@@ -23,11 +24,11 @@ I: [pulseaudio] database.c: Successfully opened 'card-database' database file '/
 I: [pulseaudio] module.c: Loaded "module-card-restore" (index: #2; argument: "").
 I: [pulseaudio] module.c: Loaded "module-augment-properties" (index: #3; argument: "").
 I: [pulseaudio] module.c: Loaded "module-switch-on-port-available" (index: #4; argument: "").
-W: [pulseaudio] authkey.c: Failed to open cookie file '/home/jibri/.config/pulse/cookie': No such file or directory
-W: [pulseaudio] authkey.c: Failed to load authentication key '/home/jibri/.config/pulse/cookie': No such file or directory
-W: [pulseaudio] authkey.c: Failed to open cookie file '/home/jibri/.pulse-cookie': No such file or directory
-W: [pulseaudio] authkey.c: Failed to load authentication key '/home/jibri/.pulse-cookie': No such file or directory
 I: [pulseaudio] module.c: Loaded "module-native-protocol-unix" (index: #5; argument: "").
+I: [pulseaudio] module-default-device-restore.c: Restoring default sink 'jibri-loop'.
+I: [pulseaudio] core.c: configured_default_sink: (unset) -> jibri-loop
+I: [pulseaudio] module-default-device-restore.c: Restoring default source 'jibri-loop.monitor'.
+I: [pulseaudio] core.c: configured_default_source: (unset) -> jibri-loop.monitor
 I: [pulseaudio] module.c: Loaded "module-default-device-restore" (index: #6; argument: "").
 I: [pulseaudio] sink.c: Created sink 0 "auto_null" with sample spec s16le 2ch 44100Hz and channel map front-left,front-right
 I: [pulseaudio] sink.c:     device.description = "Dummy Output"
@@ -66,21 +67,10 @@ I: [pulseaudio] sink-input.c: Created input 0 "Virtual Sink Stream from Virtual 
 I: [pulseaudio] sink-input.c:     media.name = "Virtual Sink Stream from Virtual Sink jibri-loop on Dummy Output"
 I: [pulseaudio] sink-input.c:     media.role = "filter"
 I: [pulseaudio] sink-input.c:     module-stream-restore.id = "sink-input-by-media-role:filter"
-I: [pulseaudio] module.c: Loaded "module-virtual-sink" (index: #12; argument: "sink_name=jibri-loop").
-I: [pulseaudio] core.c: configured_default_sink: (unset) -> jibri-loop
-I: [pulseaudio] core.c: default_sink: auto_null -> jibri-loop
 I: [pulseaudio] core.c: default_source: auto_null.monitor -> jibri-loop.monitor
-I: [pulseaudio] core.c: configured_default_source: (unset) -> jibri-loop.monitor
+I: [pulseaudio] core.c: default_sink: auto_null -> jibri-loop
+I: [pulseaudio] module.c: Loaded "module-virtual-sink" (index: #12; argument: "sink_name=jibri-loop").
 I: [pulseaudio] main.c: Daemon startup complete.
-I: [pulseaudio] module-device-restore.c: Storing port for device sink:auto_null.
-I: [pulseaudio] module-device-restore.c: Storing volume/mute for device+port sink:auto_null:null.
-I: [pulseaudio] module-device-restore.c: Storing port for device source:auto_null.monitor.
-I: [pulseaudio] module-device-restore.c: Storing volume/mute for device+port source:auto_null.monitor:null.
-I: [pulseaudio] module-device-restore.c: Storing port for device sink:jibri-loop.
-I: [pulseaudio] module-device-restore.c: Storing volume/mute for device+port sink:jibri-loop:null.
-I: [pulseaudio] module-device-restore.c: Storing port for device source:jibri-loop.monitor.
-I: [pulseaudio] module-device-restore.c: Storing volume/mute for device+port source:jibri-loop.monitor:null.
 I: [pulseaudio] module-suspend-on-idle.c: Sink jibri-loop idle for too long, suspending ...
 I: [pulseaudio] module-suspend-on-idle.c: Sink auto_null idle for too long, suspending ...
 I: [pulseaudio] core.c: All sinks and sources are suspended, vacuuming memory
-I: [pulseaudio] module-device-restore.c: Synced.
