@@ -2,26 +2,26 @@ admins = {
     
 
     
-    "jibri@auth.localhost",
+    "jibri@auth.51.83.75.65",
     
 
-    "focus@auth.localhost",
-    "jvb@auth.localhost"
+    "focus@auth.51.83.75.65",
+    "jvb@auth.51.83.75.65"
 }
 
 unlimited_jids = {
-    "focus@auth.localhost",
-    "jvb@auth.localhost"
+    "focus@auth.51.83.75.65",
+    "jvb@auth.51.83.75.65"
 }
 
 plugin_paths = { "/prosody-plugins/", "/prosody-plugins-custom", "/prosody-plugins-contrib" }
 
-muc_mapper_domain_base = "localhost";
+muc_mapper_domain_base = "51.83.75.65";
 muc_mapper_domain_prefix = "muc";
 
 recorder_prefixes = { "recorder@hidden.meet.jitsi" };
 
-http_default_host = "localhost"
+http_default_host = "51.83.75.65"
 
 
 
@@ -34,13 +34,13 @@ consider_websocket_secure = true;
 
 
 
-VirtualHost "localhost"
+VirtualHost "51.83.75.65"
 
     authentication = "jitsi-anonymous"
 
     ssl = {
-        key = "/config/certs/localhost.key";
-        certificate = "/config/certs/localhost.crt";
+        key = "/config/certs/51.83.75.65.key";
+        certificate = "/config/certs/51.83.75.65.crt";
     }
     modules_enabled = {
         "bosh";
@@ -65,25 +65,25 @@ VirtualHost "localhost"
 
     }
 
-    main_muc = "muc.localhost"
-    room_metadata_component = "metadata.localhost"
+    main_muc = "muc.51.83.75.65"
+    room_metadata_component = "metadata.51.83.75.65"
     
 
     
 
     
-    breakout_rooms_muc = "breakout.localhost"
+    breakout_rooms_muc = "breakout.51.83.75.65"
     
 
-    speakerstats_component = "speakerstats.localhost"
-    conference_duration_component = "conferenceduration.localhost"
+    speakerstats_component = "speakerstats.51.83.75.65"
+    conference_duration_component = "conferenceduration.51.83.75.65"
 
     
-    end_conference_component = "endconference.localhost"
+    end_conference_component = "endconference.51.83.75.65"
     
 
     
-    av_moderation_component = "avmoderation.localhost"
+    av_moderation_component = "avmoderation.51.83.75.65"
     
 
     c2s_require_encryption = true
@@ -92,10 +92,10 @@ VirtualHost "localhost"
 
     
 
-VirtualHost "auth.localhost"
+VirtualHost "auth.51.83.75.65"
     ssl = {
-        key = "/config/certs/auth.localhost.key";
-        certificate = "/config/certs/auth.localhost.crt";
+        key = "/config/certs/auth.51.83.75.65.key";
+        certificate = "/config/certs/auth.51.83.75.65.crt";
     }
     modules_enabled = {
         "limits_exception";
@@ -112,21 +112,21 @@ VirtualHost "hidden.meet.jitsi"
     authentication = "internal_hashed"
 
 
-Component "internal-muc.localhost" "muc"
+Component "internal-muc.51.83.75.65" "muc"
     storage = "memory"
     modules_enabled = {
         "muc_hide_all";
         "muc_filter_access";
         }
     restrict_room_creation = true
-    muc_filter_whitelist="auth.localhost"
+    muc_filter_whitelist="auth.51.83.75.65"
     muc_room_locking = false
     muc_room_default_public_jids = true
     muc_room_cache_size = 1000
     muc_tombstones = false
     muc_room_allow_persistent = false
 
-Component "muc.localhost" "muc"
+Component "muc.51.83.75.65" "muc"
     restrict_room_creation = true
     storage = "memory"
     modules_enabled = {
@@ -148,35 +148,35 @@ Component "muc.localhost" "muc"
     muc_room_default_public_jids = true
     
     muc_password_whitelist = {
-        "focus@auth.localhost";
+        "focus@auth.51.83.75.65";
         "recorder@hidden.meet.jitsi";
     }
     muc_tombstones = false
     muc_room_allow_persistent = false
 
-Component "focus.localhost" "client_proxy"
-    target_address = "focus@auth.localhost"
+Component "focus.51.83.75.65" "client_proxy"
+    target_address = "focus@auth.51.83.75.65"
 
-Component "speakerstats.localhost" "speakerstats_component"
-    muc_component = "muc.localhost"
+Component "speakerstats.51.83.75.65" "speakerstats_component"
+    muc_component = "muc.51.83.75.65"
 
-Component "conferenceduration.localhost" "conference_duration_component"
-    muc_component = "muc.localhost"
-
-
-Component "endconference.localhost" "end_conference"
-    muc_component = "muc.localhost"
+Component "conferenceduration.51.83.75.65" "conference_duration_component"
+    muc_component = "muc.51.83.75.65"
 
 
-
-Component "avmoderation.localhost" "av_moderation_component"
-    muc_component = "muc.localhost"
+Component "endconference.51.83.75.65" "end_conference"
+    muc_component = "muc.51.83.75.65"
 
 
 
+Component "avmoderation.51.83.75.65" "av_moderation_component"
+    muc_component = "muc.51.83.75.65"
 
 
-Component "breakout.localhost" "muc"
+
+
+
+Component "breakout.51.83.75.65" "muc"
     storage = "memory"
     restrict_room_creation = true
     muc_room_cache_size = 10000
@@ -191,9 +191,9 @@ Component "breakout.localhost" "muc"
         }
 
 
-Component "metadata.localhost" "room_metadata_component"
-    muc_component = "muc.localhost"
-    breakout_rooms_component = "breakout.localhost"
+Component "metadata.51.83.75.65" "room_metadata_component"
+    muc_component = "muc.51.83.75.65"
+    breakout_rooms_component = "breakout.51.83.75.65"
 
 
 

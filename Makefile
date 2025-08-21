@@ -3,40 +3,46 @@
 # ===========================
 FRONT_COMPOSE=./frontend/docker-compose.yml
 BACK_COMPOSE=./backend/docker-compose.yml
+JITSI_COMPOSE=./lms-jitsi/docker-compose.yml
+JITSI_JIBRI=./lms-jitsi/jibri.yml
 SERVICE=backend
 
 GREEN=\033[0;32m
 NC=\033[0m # No Color
 
 # ===========================
-# Global Commands
+# Global Commands (Frontend + Backend + Jitsi)
 # ===========================
 .PHONY: up down restart logs build-all
 
 up:
-	@echo "$(GREEN)Starting frontend and backend...$(NC)"
+	@echo "$(GREEN)Starting frontend, backend and Jitsi...$(NC)"
 	docker-compose -f $(FRONT_COMPOSE) up -d
 	docker-compose -f $(BACK_COMPOSE) up -d
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) up -d
 
 down:
-	@echo "$(GREEN)Stopping frontend and backend...$(NC)"
+	@echo "$(GREEN)Stopping frontend, backend and Jitsi...$(NC)"
 	docker-compose -f $(FRONT_COMPOSE) down
 	docker-compose -f $(BACK_COMPOSE) down
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) down
 
 restart:
-	@echo "$(GREEN)Restarting frontend and backend...$(NC)"
+	@echo "$(GREEN)Restarting all services...$(NC)"
 	make down
 	make up
 
 logs:
-	@echo "$(GREEN)Showing logs for frontend and backend...$(NC)"
+	@echo "$(GREEN)Showing logs for all services...$(NC)"
 	docker-compose -f $(FRONT_COMPOSE) logs -f &
-	docker-compose -f $(BACK_COMPOSE) logs -f
+	docker-compose -f $(BACK_COMPOSE) logs -f &
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) logs -f
 
 build-all:
-	@echo "$(GREEN)Building Docker images for frontend and backend...$(NC)"
+	@echo "$(GREEN)Building all Docker images...$(NC)"
 	docker-compose -f $(FRONT_COMPOSE) build
 	docker-compose -f $(BACK_COMPOSE) build
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build
 
 # ===========================
 # Frontend Commands
@@ -80,7 +86,6 @@ back-logs:
 	@echo "$(GREEN)Showing backend logs...$(NC)"
 	docker-compose -f $(BACK_COMPOSE) logs -f
 
-
 migrate:
 	@echo "$(GREEN)Applying Prisma migrations (deploy)...$(NC)"
 	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma migrate deploy
@@ -92,3 +97,49 @@ migrate-dev:
 studio:
 	@echo "$(GREEN)Launching Prisma Studio...$(NC)"
 	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma studio
+
+# ===========================
+# LMS (Frontend + Backend only)
+# ===========================
+.PHONY: lms-up lms-down lms-logs lms-build
+
+lms-up:
+	@echo "$(GREEN)Starting LMS (frontend + backend only)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) up -d
+	docker-compose -f $(BACK_COMPOSE) up -d
+
+lms-down:
+	@echo "$(GREEN)Stopping LMS (frontend + backend only)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) down
+	docker-compose -f $(BACK_COMPOSE) down
+
+lms-logs:
+	@echo "$(GREEN)Showing logs for LMS (frontend + backend only)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) logs -f &
+	docker-compose -f $(BACK_COMPOSE) logs -f
+
+lms-build:
+	@echo "$(GREEN)Building LMS (frontend + backend only)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) build
+	docker-compose -f $(BACK_COMPOSE) build
+
+# ===========================
+# Jitsi Commands
+# ===========================
+.PHONY: jitsi-up jitsi-down jitsi-logs jitsi-build
+
+jitsi-up:
+	@echo "$(GREEN)Starting Jitsi (with Jibri)...$(NC)"
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) up -d
+
+jitsi-down:
+	@echo "$(GREEN)Stopping Jitsi...$(NC)"
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) down
+
+jitsi-logs:
+	@echo "$(GREEN)Showing Jitsi logs...$(NC)"
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) logs -f
+
+jitsi-build:
+	@echo "$(GREEN)Building Jitsi Docker images...$(NC)"
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build

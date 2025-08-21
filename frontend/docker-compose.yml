@@ -4,13 +4,28 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: mka-lms-frontend
+    image: mka-lms-frontend
     ports:
-      - "4000:3000"     
+      - "9000:3000"   
+    environment:
+      - HTTPS=false
+      - HOST=0.0.0.0
+      - PORT=3000
+      - GENERATE_SOURCEMAP=false
+    volumes:
+      - mka-lms-frontend-volume:/app       
     restart: always
     networks:
       - lms-net
+      - meet.jitsi
+
+volumes:
+  mka-lms-frontend-volume:
 
 networks:
   lms-net:
+    driver: bridge
+  meet.jitsi:
+    external: true

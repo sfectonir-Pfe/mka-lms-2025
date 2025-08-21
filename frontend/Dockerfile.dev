@@ -1,0 +1,19 @@
+# Utiliser Node.js pour dev
+FROM node:20 AS dev
+
+WORKDIR /app
+
+# Copier package.json et yarn.lock
+COPY package.json yarn.lock ./
+
+# Installer dépendances
+RUN yarn install
+
+# Copier le reste du code
+COPY . .
+
+# Exposer port React (3000)
+EXPOSE 3000
+
+# Lancer en mode dev (hot reload)
+CMD ["yarn", "start"]

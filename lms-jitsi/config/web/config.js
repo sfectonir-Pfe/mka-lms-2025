@@ -3,7 +3,7 @@
 var config = {};
 
 config.hosts = {};
-config.hosts.domain = 'localhost';
+config.hosts.domain = '51.83.75.65';
 
 var subdir = '<!--# echo var="subdir" default="" -->';
 var subdomain = '<!--# echo var="subdomain" default="" -->';
@@ -13,8 +13,8 @@ if (subdir.startsWith('<!--')) {
 if (subdomain) {
     subdomain = subdomain.substring(0,subdomain.length-1).split('.').join('_').toLowerCase() + '.';
 }
-config.hosts.muc = 'muc.' + subdomain + 'localhost';
-config.bosh = 'https://localhost:8443/' + subdir + 'http-bind';
+config.hosts.muc = 'muc.' + subdomain + '51.83.75.65';
+config.bosh = 'https://51.83.75.65:8443/' + subdir + 'http-bind';
 config.bridgeChannel = {
     preferSctp: true
 };
@@ -85,7 +85,7 @@ config.hideAddRoomButton = false;
 // Recording.
 //
 
-config.hiddenDomain = 'recorder.localhost';
+config.hiddenDomain = 'recorder.51.83.75.65';
 config.recordingService = {
     // Whether to enable file recording or not using the "service" defined by the finalizer in Jibri
     enabled: true,
