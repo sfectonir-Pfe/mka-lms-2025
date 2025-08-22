@@ -38,6 +38,7 @@ import {SessionFeedbackModule} from './session-feedback/session-feedback.module'
 import { RéclamationModule } from './réclamation/réclamation.module';
 import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
 import { ProgramChatModule } from './program-chat/program-chat.module';
+import { Etablissement2Module } from './etablissement2/etablissement2.module';
 
 
 
@@ -79,7 +80,6 @@ imports: [
     QuizModule,
     Session2Module,
     SeanceFormateurModule,
-    
     ChatbotModule,
     ChatMessagesModule,
     WhiteboardModule,
@@ -89,10 +89,10 @@ imports: [
     CreatorDashboardModule,
     FormateurDashboardModule,
     EtudiantDashboardModule,
-    S3Module,
     FeedbackFormateurModule,
     NotificationModule,
     ProgramChatModule,
+    Etablissement2Module,
   ],
   controllers: [AppController],
   providers: [

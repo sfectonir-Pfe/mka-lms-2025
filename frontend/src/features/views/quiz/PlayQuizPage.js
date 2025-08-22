@@ -11,31 +11,57 @@ import {
   Box,
   Paper,
   TextField,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
-import ScoreReveal from "../../../features/views/quiz/ScoreReveal"; 
+import ScoreReveal from "../../../features/views/quiz/ScoreReveal";
+import { getStoredUser } from "../../../utils/authUtils"; 
 
 const PlayQuizPage = () => {
   const { t } = useTranslation();
   const { contenuId } = useParams();
+  const [quiz, setQuiz] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
+  const [totalPossible, setTotalPossible] = useState(0);
   const [timeLeft, setTimeLeft] = useState(null);
   const [timerExpired, setTimerExpired] = useState(false);
   const [showTimer, setShowTimer] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
 
 
   useEffect(() => {
-    api
-  .get(`/quizzes/by-contenu/${contenuId}`)
-  .then((res) => {
-    const quiz = res.data;
-    setQuestions(quiz.questions);
-    if (quiz.timeLimit) setTimeLeft(quiz.timeLimit);
-  });
+    // Get current user
+    const currentUser = getStoredUser();
+    if (!currentUser) {
+      setError("Please log in to take the quiz");
+      return;
+    }
+    setUser(currentUser);
 
+    // Load quiz data
+    api
+      .get(`/quizzes/by-contenu/${contenuId}`)
+      .then((res) => {
+        const quizData = res.data;
+        setQuiz(quizData);
+        setQuestions(quizData.questions);
+        
+        // Calculate total possible score
+        const total = quizData.questions.reduce((sum, q) => sum + (q.score || 1), 0);
+        setTotalPossible(total);
+        
+        if (quizData.timeLimit) setTimeLeft(quizData.timeLimit);
+      })
+      .catch((err) => {
+        console.error("Failed to load quiz:", err);
+        setError("Failed to load quiz. Please try again.");
+      });
   }, [contenuId]);
 
 
@@ -64,31 +90,49 @@ const PlayQuizPage = () => {
   };
 
 
-  const handleSubmit = () => {
-    let total = 0;
-    let earned = 0;
+  const handleSubmit = async () => {
+    if (!user || !quiz) {
+      setError("Missing user or quiz data");
+      return;
+    }
 
-    questions.forEach((q) => {
-      const ans = answers[q.id];
-      total += q.score;
+    setSubmitting(true);
+    setError(null);
 
-      if (q.type === "FILL_BLANK") {
-        if (ans && ans.trim().toLowerCase() === q.correctText?.trim().toLowerCase()) {
-          earned += q.score;
+    try {
+      // Prepare answers in the format expected by the backend
+      const formattedAnswers = questions.map((q) => {
+        const userAnswer = answers[q.id];
+        
+        if (q.type === "FILL_BLANK") {
+          return {
+            questionId: q.id,
+            textAnswer: userAnswer || ""
+          };
         } else {
-          earned -= q.negativeMark || 0;
+          return {
+            questionId: q.id,
+            selectedId: userAnswer ? parseInt(userAnswer) : null
+          };
         }
-      } else {
-        const correct = q.choices.find((c) => c.isCorrect);
-        if (parseInt(ans) === correct?.id) {
-          earned += q.score;
-        } else {
-          earned -= q.negativeMark || 0;
-        }
-      }
-    });
+      });
 
-    setScore(Math.max(0, earned));
+      // Submit to backend
+      const response = await api.post(`/quizzes/by-contenu/${contenuId}/submit`, {
+        userId: user.id,
+        answers: formattedAnswers
+      });
+
+      // Set score from backend response
+      setScore(response.data.score);
+      setTotalPossible(response.data.totalPossible);
+      
+    } catch (err) {
+      console.error("Failed to submit quiz:", err);
+      setError("Failed to submit quiz. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -96,6 +140,12 @@ const PlayQuizPage = () => {
       <Typography variant="h4" gutterBottom>
         🎯 {t('quiz.takeQuiz')}
       </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
 
       {timeLeft !== null && (
@@ -245,8 +295,13 @@ const PlayQuizPage = () => {
 
       {questions.length > 0 && score === null && !timerExpired && (
         <Box textAlign="center" mt={3}>
-          <Button variant="contained" onClick={handleSubmit}>
-            ✅ {t('quiz.submitQuiz')}
+          <Button 
+            variant="contained" 
+            onClick={handleSubmit}
+            disabled={submitting}
+            startIcon={submitting ? <CircularProgress size={20} /> : null}
+          >
+            {submitting ? t('quiz.submitting') || 'Submitting...' : `✅ ${t('quiz.submitQuiz')}`}
           </Button>
         </Box>
       )}
@@ -255,7 +310,9 @@ const PlayQuizPage = () => {
      {score !== null && (
   <ScoreReveal
     score={score}
-    total={questions.reduce((sum, q) => sum + q.score, 0)}
+    total={totalPossible}
+    quizId={quiz?.id}
+    contenuId={contenuId}
   />
 )}
 

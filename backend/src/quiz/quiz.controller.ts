@@ -67,4 +67,33 @@ export class QuizController {
     const base = process.env.APP_BASE_URL || 'http://localhost:8000';
     return { imageUrl: `${base}/uploads/${file.filename}` };
   }
+// ---- Submit & results (by quizId) ----
+  @Post(':id/submit')
+  submitQuiz(@Param('id') quizId: string, @Body() body: any) {
+    return this.quizService.submitQuiz(Number(quizId), body);
+  }
+
+  @Get(':id/user-answers')
+  getUsersByQuiz(@Param('id') quizId: string) {
+    return this.quizService.getUsersByQuiz(Number(quizId));
+  }
+
+  // ---- Submit & results (by contenuId) ----
+  @Post('by-contenu/:contenuId/submit')
+  submitByContenu(@Param('contenuId') contenuId: string, @Body() body: any) {
+    return this.quizService.submitByContenu(Number(contenuId), body);
+  }
+
+  @Get('by-contenu/:contenuId/user-answers')
+  getUsersByContenu(@Param('contenuId') contenuId: string) {
+    return this.quizService.getUsersByContenu(Number(contenuId));
+  }
+
+  // ---- History by user ----
+  @Get('user/:userId')
+  getQuizzesByUser(@Param('userId') userId: string) {
+    return this.quizService.getQuizzesByUser(Number(userId));
+  }
 }
+
+

@@ -78,29 +78,86 @@ export class UsersService {
     const tempPassword = this.generateTempPassword();
     const hashedPassword = await this.hashPassword(tempPassword);
 
+    // const newUser = await this.prisma.user.create({
+    //   data: {
+    //     email: createUserDto.email,
+    //     password: hashedPassword,
+    //     role: createUserDto.role,
+    //     name: createUserDto.name,
+    //     phone: createUserDto.phone,
+    //     location: createUserDto.location,
+    //     about: createUserDto.about,
+    //     skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+    //   },
+    //   select: {
+    //     id: true,
+    //     email: true,
+    //     name: true,
+    //     role: true,
+    //     phone: true,
+    //     location: true,
+    //     about: true,
+    //     skills: true,
+    //     profilePic: true,
+    //   },
+    // });
+    let etablissement2IdToUse: number | undefined = createUserDto.etablissement2Id;
+
+if (
+  createUserDto.role === 'Etablissement' &&
+  !etablissement2IdToUse &&
+  createUserDto.etablissement2Name
+) {
+  const newEtab = await this.prisma.etablissement2.create({
+    data: { name: createUserDto.etablissement2Name },
+  });
+  etablissement2IdToUse = newEtab.id;
+}
+
     const newUser = await this.prisma.user.create({
-      data: {
-        email: createUserDto.email,
-        password: hashedPassword,
-        role: createUserDto.role,
-        name: createUserDto.name,
-        phone: createUserDto.phone,
-        location: createUserDto.location,
-        about: createUserDto.about,
-        skills: createUserDto.skills ? [createUserDto.skills] : undefined,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        phone: true,
-        location: true,
-        about: true,
-        skills: true,
-        profilePic: true,
-      },
-    });
+  data: {
+    email: createUserDto.email,
+    password: hashedPassword,
+    role: createUserDto.role,
+    name: createUserDto.name,
+    phone: createUserDto.phone,
+    location: createUserDto.location,
+    about: createUserDto.about,
+    skills: createUserDto.skills ? [createUserDto.skills] : undefined,
+
+    Etudiants:
+      createUserDto.role === 'Etudiant' && createUserDto.etablissement2Id
+        ? {
+            create: {
+              NameEtablissement: 'to-be-dynamic', // optional, can remove
+              etablissement2Id: createUserDto.etablissement2Id,
+            },
+          }
+        : undefined,
+
+    Etablissements:
+      createUserDto.role === 'Etablissement' && etablissement2IdToUse
+        ? {
+            create: {
+              etablissement2Id: etablissement2IdToUse,
+            },
+          }
+        : undefined,
+  },
+  select: {
+    id: true,
+    email: true,
+    name: true,
+    role: true,
+    phone: true,
+    location: true,
+    about: true,
+    skills: true,
+    profilePic: true,
+  },
+});
+
+
 
     if (createUserDto.session2Ids && createUserDto.session2Ids.length > 0) {
       for (const sessionId of createUserDto.session2Ids) {
@@ -122,27 +179,60 @@ export class UsersService {
     return newUser;
   }
 
+  // async findAll() {
+  //   try {
+  //     const users = await this.prisma.user.findMany({
+  //       select: {
+  //         id: true,
+  //         email: true,
+  //         name: true,
+  //         role: true,
+  //         phone: true,
+  //         location: true,
+  //         about: true,
+  //         skills: true,
+  //         profilePic: true,
+  //         isActive: true,
+  //       },
+  //     })
+  //     return users
+  //   } catch (error) {
+  //     return this.fallbackUsers
+  //   }
+  // }
   async findAll() {
-    try {
-      const users = await this.prisma.user.findMany({
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          phone: true,
-          location: true,
-          about: true,
-          skills: true,
-          profilePic: true,
-          isActive: true,
-        },
-      })
-      return users
-    } catch (error) {
-      return this.fallbackUsers
-    }
+  try {
+    const users = await this.prisma.user.findMany({
+      include: {
+        Etudiants: { include: { Etablissement2: true } },
+        Etablissements: { include: { Etablissement2: true } },
+      },
+    });
+
+    // flatten + keep only the fields you show in the table
+    return users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      phone: u.phone,
+      location: u.location,
+      about: u.about,
+      skills: u.skills,
+      profilePic: u.profilePic,
+      isActive: u.isActive,
+      establishmentName:
+        u.role === 'Etudiant'
+          ? u.Etudiants?.[0]?.Etablissement2?.name ?? null
+          : u.role === 'Etablissement'
+          ? u.Etablissements?.[0]?.Etablissement2?.name ?? null
+          : null,
+    }));
+  } catch {
+    return this.fallbackUsers;
   }
+}
+
 
   async findOne(id: number) {
     try {
