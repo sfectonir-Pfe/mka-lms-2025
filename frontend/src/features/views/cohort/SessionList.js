@@ -387,6 +387,16 @@ const SessionList = () => {
                   >
                     📤 {t("sessions.share")}
                   </Button>
+                  {session.status === "COMPLETED" && (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      onClick={() => navigate(`/sessions/${session.id}/attestation`)}
+                    >
+                      🏅 {t("sessions.attestation")}
+                    </Button>
+                  )}
                   <Button
                     variant="contained"
                     color="info"
