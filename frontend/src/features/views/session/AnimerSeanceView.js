@@ -53,6 +53,7 @@ import FeedbackFormateur from "../feedback/feedbackForm/FeedbackFormateur";
 import FeedbackEtudiant from "../feedback/feedbackForm/FeedbackEtudiant";
 import SeanceFeedbackList from "../../../features/views/feedback/FeedbackList/seancefeedbacklist";
 import Regroupement from "./Regroupement";
+import QuizList from "../../../features/views/quiz/QuizList";
 
 const AnimerSeanceView = () => {
   const { t } = useTranslation("seances");
@@ -620,8 +621,12 @@ const AnimerSeanceView = () => {
           {tab === 1 && (
             <Box>
               <Typography variant="h6" mb={2}>🧪 {t("quizComing") || "Quizzes (session)"}</Typography>
+              <QuizList sessionId={seance?.session2?.id} />
+              
+              
               {getSessionQuizzes().length === 0 ? (
                 <Typography color="text.secondary">No quizzes linked to this session yet.</Typography>
+                
               ) : (
                 <Stack spacing={1.25}>
                   {getSessionQuizzes().map((q) => {

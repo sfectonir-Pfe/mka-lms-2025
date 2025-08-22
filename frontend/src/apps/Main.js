@@ -1,5 +1,6 @@
 import * as React from "react";
 import { styled, useTheme, alpha } from "@mui/material/styles";
+import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   Box,
   CssBaseline,
@@ -36,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
 import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
 import NotificationCenter from "../components/notification/NotificationCenter";
+import ThemeToggle from "../components/constants/ThemeToggle";
 
 
 
@@ -127,10 +129,24 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 export default function Main({ setUser, user }) {
   const theme = useTheme();
+  const { darkMode } = useCustomTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
+  // Apply dark mode class to document
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#1a1a1a';
+      document.body.style.color = '#ffffff';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#ffffff';
+      document.body.style.color = '#000000';
+    }
+  }, [darkMode]);
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -348,8 +364,7 @@ export default function Main({ setUser, user }) {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <LanguageSelectorWithFlags />
-
-
+            <ThemeToggle />
             <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>

@@ -70,6 +70,7 @@ I: [pulseaudio] sink-input.c:     module-stream-restore.id = "sink-input-by-medi
 I: [pulseaudio] core.c: default_source: auto_null.monitor -> jibri-loop.monitor
 I: [pulseaudio] core.c: default_sink: auto_null -> jibri-loop
 I: [pulseaudio] module.c: Loaded "module-virtual-sink" (index: #12; argument: "sink_name=jibri-loop").
+W: [pulseaudio] server-lookup.c: Unable to contact D-Bus: org.freedesktop.DBus.Error.Spawn.ExecFailed: /usr/bin/dbus-launch terminated abnormally with the following error: Autolaunch error: X11 initialization failed.
 I: [pulseaudio] main.c: Daemon startup complete.
 I: [pulseaudio] module-suspend-on-idle.c: Sink jibri-loop idle for too long, suspending ...
 I: [pulseaudio] module-suspend-on-idle.c: Sink auto_null idle for too long, suspending ...

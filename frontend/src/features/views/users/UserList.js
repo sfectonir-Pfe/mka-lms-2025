@@ -267,7 +267,7 @@ export default function UserList() {
   )
 
   // Test de connectivité au backend
-  
+
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
@@ -372,7 +372,7 @@ export default function UserList() {
                     },
                   }}
                 />
-                
+
               </Box>
               <Button
                 variant="contained"
@@ -424,6 +424,9 @@ export default function UserList() {
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.user')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.email')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.role')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.establishment')}
+</TableCell>
+
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.status')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('common.actions')}</TableCell>
                   </TableRow>
@@ -474,6 +477,11 @@ export default function UserList() {
                           sx={{ borderRadius: 2, fontWeight: 600, textTransform: "capitalize" }}
                         />
                       </TableCell>
+                      <TableCell>
+  <Typography variant="body2">
+    {user.establishmentName || "—"}
+  </Typography>
+</TableCell>
                       <TableCell>
                         <Chip
                           label={user.isActive ? t('users.active') : t('users.inactive')}
