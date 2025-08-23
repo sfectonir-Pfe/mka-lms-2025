@@ -7,7 +7,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 import { MenuItem } from "@mui/material";
 
@@ -32,9 +32,9 @@ const [search, setSearch] = useState("");
 const [searchScope, setSearchScope] = useState("module");
 
   useEffect(() => {
-    axios.get("http://localhost:8000/modules").then(res => setModules(res.data));
+    api.get("/modules").then(res => setModules(res.data));
 
-    axios.get(`http://localhost:8000/buildProgram/program/${programId}`)
+    api.get(`/buildProgram/program/${programId}`)
       .then(async (res) => {
         const buildProgram = res.data;
         setbuildProgramId(buildProgram.id);
@@ -51,7 +51,7 @@ const [searchScope, setSearchScope] = useState("module");
           const moduleId = sm.module.id;
 
           if (!coursesByModule[moduleId]) {
-            const res = await axios.get("http://localhost:8000/courses");
+            const res = await api.get("/courses");
             setCoursesByModule(prev => ({ ...prev, [moduleId]: res.data }));
           }
 
@@ -61,7 +61,7 @@ const [searchScope, setSearchScope] = useState("module");
             const courseId = sc.course.id;
             const key = `${moduleId}-${courseId}`;
             if (!contenusByCourse[courseId]) {
-              const res = await axios.get("http://localhost:8000/contenus");
+              const res = await api.get("/contenus");
               setContenusByCourse(prev => ({ ...prev, [courseId]: res.data }));
             }
             contenuMap[key] = sc.contenus.map(scct => scct.contenu.id);
@@ -83,7 +83,7 @@ const [searchScope, setSearchScope] = useState("module");
     setSelectedModules(updated);
 
     if (!coursesByModule[moduleId]) {
-      const res = await axios.get("http://localhost:8000/courses");
+      const res = await api.get("/courses");
       setCoursesByModule(prev => ({ ...prev, [moduleId]: res.data }));
     }
   };
@@ -96,7 +96,7 @@ const [searchScope, setSearchScope] = useState("module");
     setSelectedCourses(prev => ({ ...prev, [moduleId]: updated }));
 
     if (!contenusByCourse[courseId]) {
-      const res = await axios.get("http://localhost:8000/contenus");
+      const res = await api.get("/contenus");
       setContenusByCourse(prev => ({ ...prev, [courseId]: res.data }));
     }
   };
@@ -118,7 +118,7 @@ const [searchScope, setSearchScope] = useState("module");
 
     try {
       // 1. Update program name
-      await axios.patch(`http://localhost:8000/programs/${programId}`, {
+      await api.patch(`/programs/${programId}`, {
         name: programName,
       });
 
@@ -142,7 +142,7 @@ const [searchScope, setSearchScope] = useState("module");
       formData.append("level", level);
       formData.append("modules", JSON.stringify(modulesPayload));
 
-      await axios.patch(`http://localhost:8000/buildProgram/${buildProgramId}`, formData, {
+      await api.patch(`/buildProgram/${buildProgramId}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

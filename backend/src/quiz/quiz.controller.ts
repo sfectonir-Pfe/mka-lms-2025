@@ -2,61 +2,98 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   Param,
   UploadedFile,
-  UseInterceptors,Patch
+  UseInterceptors,
 } from '@nestjs/common';
 import { QuizService } from './quiz.service';
-import { CreateQuizDto } from './dto/create-quiz.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
-@Controller('quizzes') // 👈 required prefix!
+@Controller('quizzes')
 export class QuizController {
-  constructor(private readonly quizService: QuizService) { }
+  constructor(private readonly quizService: QuizService) {}
 
   @Post()
-  create(@Body() createQuizDto: CreateQuizDto) {
-    return this.quizService.create(createQuizDto);
+  create(@Body() body: any) {
+    return this.quizService.create(body);
   }
 
-  @Get('by-contenu/:contenuId')
-  getQuizByContenu(@Param('contenuId') contenuId: string) {
-    return this.quizService.getQuizWithQuestions(+contenuId);
+  @Get()
+  findAll() {
+    return this.quizService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.quizService.findOne(+id);
+    return this.quizService.findOne(Number(id));
   }
+
+  @Get('by-contenu/:contenuId')
+  getQuizByContenu(@Param('contenuId') contenuId: string) {
+    return this.quizService.getQuizWithQuestions(Number(contenuId));
+  }
+
   @Patch('by-contenu/:contenuId')
   updateByContenuId(
     @Param('contenuId') contenuId: string,
-    @Body() data: { timeLimit: number; questions: any[] },
+    @Body() data: any,
   ) {
-    return this.quizService.updateByContenuId(+contenuId, data);
+    return this.quizService.updateByContenuId(Number(contenuId), data);
   }
 
-
-
-  // ✅ Upload route (matches frontend)
+  // Image upload for question/choice media
   @Post('upload-question-image')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads', // must match static assets dir
+        destination: './uploads',
         filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + extname(file.originalname));
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, unique + extname(file.originalname));
         },
       }),
+      limits: { fileSize: 3 * 1024 * 1024 }, // 3MB
+      fileFilter: (req, file, cb) => {
+        const ok = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.mimetype);
+        cb(ok ? null : new Error('Only images are allowed'), ok);
+      },
     }),
   )
   uploadQuestionImage(@UploadedFile() file: Express.Multer.File) {
-    return {
-      imageUrl: `http://localhost:8000/uploads/${file.filename}`,
-    };
+    const base = process.env.APP_BASE_URL || 'http://localhost:8000';
+    return { imageUrl: `${base}/uploads/${file.filename}` };
+  }
+// ---- Submit & results (by quizId) ----
+  @Post(':id/submit')
+  submitQuiz(@Param('id') quizId: string, @Body() body: any) {
+    return this.quizService.submitQuiz(Number(quizId), body);
+  }
+
+  @Get(':id/user-answers')
+  getUsersByQuiz(@Param('id') quizId: string) {
+    return this.quizService.getUsersByQuiz(Number(quizId));
+  }
+
+  // ---- Submit & results (by contenuId) ----
+  @Post('by-contenu/:contenuId/submit')
+  submitByContenu(@Param('contenuId') contenuId: string, @Body() body: any) {
+    return this.quizService.submitByContenu(Number(contenuId), body);
+  }
+
+  @Get('by-contenu/:contenuId/user-answers')
+  getUsersByContenu(@Param('contenuId') contenuId: string) {
+    return this.quizService.getUsersByContenu(Number(contenuId));
+  }
+
+  // ---- History by user ----
+  @Get('user/:userId')
+  getQuizzesByUser(@Param('userId') userId: string) {
+    return this.quizService.getQuizzesByUser(Number(userId));
   }
 }
+
+

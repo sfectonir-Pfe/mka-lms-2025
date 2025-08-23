@@ -209,7 +209,19 @@ async findByProgramId(programId: number) {
     },
   });
 
-  if (!buildProgram) return null;
+  // if (!buildProgram) return null;
+  if (!buildProgram) {
+  return {
+    id: null,
+    programId,
+    program: { id: +programId, title: "Programme inconnu" },
+    modules: [],
+    averageRating: null,
+    sessionCount: 0,
+    feedbackCount: 0,
+  };
+}
+
 
   const sessions = await this.prisma.session2.findMany({
     where: { programId: buildProgram.programId },

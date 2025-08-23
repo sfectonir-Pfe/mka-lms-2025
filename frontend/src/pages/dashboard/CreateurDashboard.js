@@ -28,7 +28,7 @@ import PlayCircleIcon from "@mui/icons-material/PlayCircle";
 import PieChartOutlineIcon from "@mui/icons-material/PieChartOutline";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 import {
   BarChart,
   Bar,
@@ -56,7 +56,7 @@ const statusMap = {
   completed: { color: "#9b51e0", label: "Terminée", icon: <CheckCircleIcon fontSize="small" /> },
   archived:  { color: "#616161", label: "Archivée", icon: <ArchiveIcon fontSize="small" /> }
 };
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
+// const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 // Pie chart formatter (reuse logic from Admin)
 const toPieData = (dataArr, labelMap = {}) => {
@@ -91,12 +91,12 @@ export default function CreateurDashboard() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      axios.get(`${API_BASE}/creator-dashboard/stats`),
-      axios.get(`${API_BASE}/creator-dashboard/top-sessions`),
-      axios.get(`${API_BASE}/creator-dashboard/inactive-sessions`),
-      axios.get(`${API_BASE}/creator-dashboard/session-feedback`),
-      axios.get(`${API_BASE}/creator-dashboard/monthly-session-status`),
-      axios.get(`${API_BASE}/creator-dashboard/monthly-program-publish`)
+      api.get(`/creator-dashboard/stats`),
+      api.get(`/creator-dashboard/top-sessions`),
+      api.get(`/creator-dashboard/inactive-sessions`),
+      api.get(`/creator-dashboard/session-feedback`),
+      api.get(`/creator-dashboard/monthly-session-status`),
+      api.get(`/creator-dashboard/monthly-program-publish`)
     ]).then(
       ([
         statsRes,

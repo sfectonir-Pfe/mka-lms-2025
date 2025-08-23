@@ -17,9 +17,9 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import EventBusyIcon from "@mui/icons-material/EventBusy";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
-const API_BASE = "http://localhost:8000";
+// const API_BASE = "http://localhost:8000";
 
 export default function EtudiantDashboardPage() {
   // TODO: Replace with your real user id (from auth/localStorage)
@@ -38,8 +38,8 @@ export default function EtudiantDashboardPage() {
   useEffect(() => {
   setLoading(true);
   Promise.all([
-    axios.get(`${API_BASE}/dashboard-etudiant/joined-sessions?userId=${userId}`),
-    axios.get(`${API_BASE}/dashboard-etudiant/joined-sessions/stats?userId=${userId}`),
+    api.get(`/dashboard-etudiant/joined-sessions?userId=${userId}`),
+    api.get(`/dashboard-etudiant/joined-sessions/stats?userId=${userId}`),
   ])
     .then(([listRes, statsRes]) => {
       console.log("joined sessions:", listRes.data); // <--- add this!

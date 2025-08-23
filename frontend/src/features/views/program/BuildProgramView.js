@@ -8,7 +8,7 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 
 const BuildProgramView = () => {
@@ -32,7 +32,7 @@ const BuildProgramView = () => {
   const [level, setLevel] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:8000/modules").then(res => setModules(res.data));
+    api.get("/modules").then(res => setModules(res.data));
   }, []);
 
   const handleModuleToggle = async (moduleId) => {
@@ -42,7 +42,7 @@ const BuildProgramView = () => {
     setSelectedModules(updated);
 
     if (!coursesByModule[moduleId]) {
-      const res = await axios.get("http://localhost:8000/courses");
+      const res = await api.get("/courses");
       setCoursesByModule(prev => ({ ...prev, [moduleId]: res.data }));
     }
   };
@@ -55,7 +55,7 @@ const BuildProgramView = () => {
     setSelectedCourses(prev => ({ ...prev, [moduleId]: updated }));
 
     if (!contenusByCourse[courseId]) {
-      const res = await axios.get("http://localhost:8000/contenus");
+      const res = await api.get("/contenus");
       setContenusByCourse(prev => ({ ...prev, [courseId]: res.data }));
     }
   };
@@ -97,7 +97,7 @@ const BuildProgramView = () => {
     ));
 
     try {
-      await axios.post("http://localhost:8000/buildProgram", formData, {
+      await api.post("/buildProgram", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       alert(t('buildProgram.buildSuccess'));

@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 
 
 const ModuleList = () => {
@@ -13,7 +13,7 @@ const ModuleList = () => {
 
   const fetchModules = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/modules");
+      const res = await api.get("/modules");
       setModules(res.data);
     } catch (err) {
       console.error("Erreur chargement modules", err);
@@ -27,7 +27,7 @@ const ModuleList = () => {
   const handleDelete = async (id) => {
     if (!window.confirm(t('modules.confirmDelete'))) return;
     try {
-      await axios.delete(`http://localhost:8000/modules/${id}`);
+      await api.delete(`/modules/${id}`);
       setModules((prev) => prev.filter((m) => m.id !== id));
     } catch (err) {
       console.error("Erreur suppression", err);

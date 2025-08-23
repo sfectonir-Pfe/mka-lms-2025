@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddUserView = () => {
@@ -16,6 +16,8 @@ const AddUserView = () => {
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const dropdownRef = useRef(null);
+const [etabs, setEtabs] = useState([]);
+const [etablissement2Id, setEtablissement2Id] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -36,11 +38,17 @@ const AddUserView = () => {
 
   useEffect(() => {
     // Fetch sessions on mount
-    axios
-      .get("http://localhost:8000/session2")
+    api
+      .get("/session2")
       .then(res => setSessions(res.data))
       .catch(() => setSessions([]));
   }, []);
+useEffect(() => {
+  api
+    .get("/etablissement2")
+    .then(res => setEtabs(res.data))
+    .catch(() => setEtabs([]));
+}, []);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,45 +56,59 @@ const AddUserView = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage("");
+  e.preventDefault();
+  setErrorMessage("");
 
-    if (!validateEmail(email)) {
-      setErrorMessage(t('users.invalidEmail'));
-      return;
-    }
+  if (!validateEmail(email)) {
+    setErrorMessage(t('users.invalidEmail'));
+    return;
+  }
 
-    setLoading(true);
-    try {
-      await axios.post("http://localhost:8000/users", {
-        email,
-        phone: countryCode + phone,
-        role,
-        session2Ids: selectedSessions.map(id => parseInt(id)), // Convertir les IDs en nombres
-      });
-      alert(t('users.createSuccess'));
-      navigate("/users");
-    } catch (error) {
-      console.error(error);
-      if (
-        error.response &&
-        error.response.status === 409 &&
-        error.response.data.message.includes("Email invalide")
-      ) {
-        setErrorMessage(t('users.emailInvalidOrUndeliverable'));
-      } else if (
-        error.response &&
-        error.response.status === 409 &&
-        error.response.data.message.includes("existe déjà")
-      ) {
-        setErrorMessage(t('users.userAlreadyExists'));
-      } else {
-        setErrorMessage(t('users.createError'));
-      }
-    } finally {
-      setLoading(false);
+  setLoading(true);
+
+  const payload = {
+  email,
+  phone: countryCode + phone,
+  role,
+  session2Ids: selectedSessions.map((id) => Number(id)),
+};
+
+if (role === "Etudiant" && etablissement2Id) {
+  payload.etablissement2Id = Number(etablissement2Id);
+}
+
+if (role === "Etablissement" && etablissement2Id.trim()) {
+  // here etablissement2Id is used as the text name
+  payload.etablissement2Name = etablissement2Id.trim();
+}
+
+
+  try {
+    await api.post("/users", payload); // <--- NOW using correct payload
+    alert(t('users.createSuccess'));
+    navigate("/users");
+  } catch (error) {
+    console.error(error);
+    if (
+      error.response &&
+      error.response.status === 409 &&
+      error.response.data.message.includes("Email invalide")
+    ) {
+      setErrorMessage(t('users.emailInvalidOrUndeliverable'));
+    } else if (
+      error.response &&
+      error.response.status === 409 &&
+      error.response.data.message.includes("existe déjà")
+    ) {
+      setErrorMessage(t('users.userAlreadyExists'));
+    } else {
+      setErrorMessage(t('users.createError'));
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const countries = [
     { code: "+33", nameKey: "france", flagCode: "fr" },
@@ -245,10 +267,13 @@ const AddUserView = () => {
         <div className="mb-3">
           <label className="form-label">{t('profile.role')} :</label>
           <select
-            className="form-select"
-            value={role}
-            onChange={e => setRole(e.target.value)}
-          >
+  className="form-select"
+  value={role}
+  onChange={e => {
+    setRole(e.target.value);
+    setEtablissement2Id(''); // reset
+  }}
+>
             {roleOptions.map((r) => (
               <option key={r.value} value={r.value}>
                 {t('role.' + r.key)}
@@ -256,6 +281,39 @@ const AddUserView = () => {
             ))}
           </select>
         </div>
+{role === "Etudiant" && (
+  <div className="mb-3">
+    <label className="form-label">Choisir un établissement :</label>
+    <select
+      className="form-select"
+      value={etablissement2Id}
+      onChange={(e) => setEtablissement2Id(e.target.value)}
+      required
+    >
+      <option value="">-- Sélectionner --</option>
+      {etabs.map((e) => (
+        <option key={e.id} value={e.id}>
+          {e.name || `Etablissement ${e.id}`}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
+
+{role === "Etablissement" && (
+  <div className="mb-3">
+    <label className="form-label">Nom du nouvel établissement :</label>
+    <input
+      type="text"
+      className="form-control"
+      value={etablissement2Id}
+      onChange={(e) => setEtablissement2Id(e.target.value)}
+      placeholder="ex: Lycée Ibn Khaldoun"
+      required
+    />
+  </div>
+)}
+
 
         <div className="mb-3">
   <label className="form-label">{t('users.assignSessions')} :</label>

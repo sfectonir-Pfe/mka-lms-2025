@@ -18,9 +18,9 @@ import GroupIcon from "@mui/icons-material/Group";
 import StarIcon from "@mui/icons-material/Star";
 import RedeemIcon from "@mui/icons-material/Redeem";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
-const API_BASE = "http://localhost:8000";
+// const API_BASE = "http://localhost:8000";
 
 export default function EtablissementDashboardPage() {
   // Liste des sessions (sessions2) récupérées du backend
@@ -58,8 +58,8 @@ export default function EtablissementDashboardPage() {
   // Récupérer les sessions2 depuis le backend
   useEffect(() => {
     // TODO: remplace par ton endpoint réel
-    axios
-      .get(`${API_BASE}/sessions2`)
+    api
+      .get(`/sessions2`)
       .then((res) => {
         setSessions([{ id: "Tous", name: "Toutes les sessions" }, ...res.data]);
       })

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './i18n';
 import { getStoredUser } from "./utils/authUtils";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import ThemeToggle from "./components/constants/ThemeToggle";
 
 // Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -20,6 +22,8 @@ import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 // Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
 import Main from "./apps/Main";
+import VerifyMailPage from "./pages/auth/VerifyMailPage";
+import VerifyMethodPage from "./pages/auth/VerifyMethodPage";
 
 
 // User-related pages
@@ -54,6 +58,8 @@ import AddSeanceFormateurView from "./features/views/session/AddSeanceFormateurV
 import SeanceFormateurList from "./features/views/session/SeanceFormateurList";
 import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
 // import SessionDetail from "./pages/cohort/SessionDetail";
+// router.jsx
+
 
 //chatbot
 import Chatbot from './components/Chatbot';
@@ -72,6 +78,9 @@ import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
+import ScoreReveal from './features/views/quiz/ScoreReveal';
+import QuizScores from './features/views/quiz/QuizScores';
+import QuizList from './features/views/quiz/QuizList';
 
 
 
@@ -80,21 +89,28 @@ import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionF
 
 
 
-  
 // UI
 import Spinner from "react-bootstrap/Spinner";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaRegMoon } from "react-icons/fa";
-import { GoSun } from "react-icons/go";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 
-function App() {
+function AppContent() {
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { darkMode } = useTheme();
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
 
 
@@ -184,10 +200,8 @@ function App() {
   return (
     <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
-      <div className="d-flex justify-content-end">
-        <button className="btn btn-light d-flex align-items-center" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? <GoSun /> : <FaRegMoon />}
-        </button>
+      <div className="d-flex justify-content-end p-2">
+        <ThemeToggle />
       </div>
       {user && <Chatbot />}
 
@@ -219,8 +233,11 @@ function App() {
 
                 <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
 
+                <Route path="/quizzes" element={<QuizList />} />
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
+                <Route path="/seances/:seanceId/quiz/:contenuId" element={<PlayQuizPage />} />
+
 
                 <Route path="/programs/build/:programId" element={<BuildProgramView />} />
                 <Route path="/programs/overview/:programId" element={<BuildProgramOverviewPage />} />
@@ -231,7 +248,7 @@ function App() {
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
                 <Route path="/seances-formateur" element={<SeanceFormateurList />} />
-
+<Route path="/quiz/scores/:quizId" element={<QuizScores />} />
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/feedbacklist" element={<SessionFeedbackList />} />
@@ -269,7 +286,7 @@ function App() {
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
                 <Route path="/Réclamationlist" element={<Réclamationlist />} />
                 <Route path="/notifications" element={<NotificationsPage user={user} />} />
-                
+
               </Route>
             ) : (
               <Route path="/" element={<Auth />}>
@@ -278,6 +295,9 @@ function App() {
                 <Route path="ResetPasswordPage" element={<ResetPasswordPage />} />
                 <Route path="/reset-success" element={<ResetSuccessPage />} />
                 <Route path="/verify-sms" element={<VerifyAccountPage />} />
+                <Route path="/verify-email" element={<VerifyMailPage />} />
+                <Route path="/verify-method" element={<VerifyMethodPage />} />
+
 
               </Route>
             )}
@@ -292,6 +312,14 @@ function App() {
         </BrowserRouter>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

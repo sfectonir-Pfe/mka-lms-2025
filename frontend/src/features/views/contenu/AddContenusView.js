@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 
 const AddContenusView = () => {
   const { t } = useTranslation();
@@ -37,7 +37,7 @@ const AddContenusView = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:8000/contenus/upload", formData, {
+      const res = await api.post("/contenus/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

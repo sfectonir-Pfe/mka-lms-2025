@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
@@ -88,8 +88,8 @@ const AddQuizForm = ({
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await axios.post(
-          "http://localhost:8000/quizzes/upload-question-image",
+        const res = await api.post(
+          "/quizzes/upload-question-image",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -140,8 +140,8 @@ const AddQuizForm = ({
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await axios.post(
-          "http://localhost:8000/quizzes/upload-question-image",
+        const res = await api.post(
+          "/quizzes/upload-question-image",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -182,10 +182,10 @@ const AddQuizForm = ({
   // ✅ Submit after validation
   try {
     const endpoint = editMode
-      ? `http://localhost:8000/quizzes/by-contenu/${contenuId}`
-      : `http://localhost:8000/quizzes`;
+      ? `/quizzes/by-contenu/${contenuId}`
+      : `/quizzes`;
 
-    const method = editMode ? axios.patch : axios.post;
+    const method = editMode ? api.patch : api.post;
 
     await method(endpoint, {
       contenuId: parseInt(contenuId),

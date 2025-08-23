@@ -27,7 +27,8 @@ import ReportIcon from "@mui/icons-material/Report";
 import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PendingIcon from "@mui/icons-material/Pending";
-import axios from "axios";
+ 
+import api from "../../api/axiosInstance";
 import {
   BarChart,
   Bar,
@@ -56,7 +57,7 @@ const ACCENT_COLORS = [
   "#06b6d4"  // Cyan
 ];
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
+// const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 const toPieData = (obj, labelMap = {}) =>
   Object.keys(obj || {})
@@ -88,12 +89,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      axios.get(`${API_BASE}/dashboard/stats`),
-      axios.get(`${API_BASE}/dashboard/top-sessions`),
-      axios.get(`${API_BASE}/dashboard/top-formateurs`),
-      axios.get(`${API_BASE}/dashboard/monthly-registrations`),
-      axios.get(`${API_BASE}/dashboard/session-status-stats`),
-      axios.get(`${API_BASE}/dashboard/reclamation-stats`)
+      api.get(`/dashboard/stats`),
+      api.get(`/dashboard/top-sessions`),
+      api.get(`/dashboard/top-formateurs`),
+      api.get(`/dashboard/monthly-registrations`),
+      api.get(`/dashboard/session-status-stats`),
+      api.get(`/dashboard/reclamation-stats`)
     ]).then(
       ([
         statsRes,

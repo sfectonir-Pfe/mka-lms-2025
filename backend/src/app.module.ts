@@ -1,16 +1,22 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from 'nestjs-prisma';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from 'nestjs-prisma';
+
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
+
 import { UsersModule } from './users/users.module';
 import { ProgramsModule } from './programs/programs.module';
 import { ModulesModule } from './modules/modules.module';
 import { CoursesModule } from './courses/courses.module';
 import { MailModule } from './mail/mail.module';
 import { ContenuModule } from './contenu/contenu.module';
-import { buildProgramModule } from './buildProgram/buildProgram.module';
+import { buildProgramModule } from './buildProgram/buildProgram.module'; // keep your actual exported class name
 import { QuizModule } from './quiz/quiz.module';
 import { Session2Module } from './session2/session2.module';
 import { SeanceFormateurModule } from './seance-formateur/seance-formateur.module';
@@ -26,16 +32,20 @@ import { EtudiantDashboardModule } from './etudiant-dashboard/etudiant-dashboard
 
 import { FeedbackFormateurModule } from './feedbackformateur/feedbackformateur.module';
 import { NotificationModule } from './notification/notification.module';
+import { RolesGuard } from './auth/roles.guard';
 import {SeanceFeedbackModule} from './seance-feedback/seance-feedback.module';
 import {SessionFeedbackModule} from './session-feedback/session-feedback.module';
 import { RéclamationModule } from './réclamation/réclamation.module';
 import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
+import { ProgramChatModule } from './program-chat/program-chat.module';
+import { Etablissement2Module } from './etablissement2/etablissement2.module';
 
 
 
 
 
 @Module({
+  
 imports: [
   ConfigModule.forRoot({ isGlobal: true }),
   PrismaModule.forRoot({isGlobal:true}),
@@ -56,10 +66,40 @@ imports: [
   ChatbotModule,
 
   GeneralChatMessageModule, DashboardModule, CreatorDashboardModule, FormateurDashboardModule, EtudiantDashboardModule, FeedbackFormateurModule, NotificationModule,SeanceFeedbackModule,SessionFeedbackModule, RéclamationModule, FeedbackÉtudiantModule,
-],
 
+
+    // feature modules
+    AuthModule,
+    UsersModule,
+    ProgramsModule,
+    ModulesModule,
+    CoursesModule,
+    MailModule,
+    ContenuModule,
+    buildProgramModule,
+    QuizModule,
+    Session2Module,
+    SeanceFormateurModule,
+    ChatbotModule,
+    ChatMessagesModule,
+    WhiteboardModule,
+    Session2ChatModule,
+    GeneralChatMessageModule,
+    DashboardModule,
+    CreatorDashboardModule,
+    FormateurDashboardModule,
+    EtudiantDashboardModule,
+    FeedbackFormateurModule,
+    NotificationModule,
+    ProgramChatModule,
+    Etablissement2Module,
+  ],
   controllers: [AppController],
-  providers: [AppService],
-
+  providers: [
+    AppService,
+    // // 🔒 make JWT required everywhere by default
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+     { provide: APP_GUARD, useClass: RolesGuard },   // then roles
+  ],
 })
-export class AppModule { }
+export class AppModule {}

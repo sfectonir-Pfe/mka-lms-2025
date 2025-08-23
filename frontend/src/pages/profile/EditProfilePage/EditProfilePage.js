@@ -23,7 +23,7 @@ import {
   Lock,
 } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 
 // Composants réutilisables
@@ -106,7 +106,7 @@ const EditProfilePage = () => {
             
             // Récupérer les données complètes
             try {
-              const res = await axios.get(`http://localhost:8000/users/email/${editingUser.email}`);
+              const res = await api.get(`/users/email/${editingUser.email}`);
               if (res.data) {
                 setUser(res.data);
                 setForm(res.data);
@@ -133,7 +133,7 @@ const EditProfilePage = () => {
         let userEmail = email || JSON.parse(localStorage.getItem("user"))?.email;
         if (!userEmail) throw new Error("No email available");
 
-        const res = await axios.get(`http://localhost:8000/users/email/${userEmail}`);
+        const res = await api.get(`/users/email/${userEmail}`);
         if (!res.data) throw new Error("No user data received");
 
         setUser(res.data);
@@ -194,7 +194,7 @@ const EditProfilePage = () => {
     setPasswordError("");
 
     try {
-      await axios.post(`http://localhost:8000/auth/change-password`, {
+      await api.post(`/auth/change-password`, {
         email: user.email,
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
@@ -224,7 +224,7 @@ const EditProfilePage = () => {
       if (typeof userId === 'string') {
         userId = parseInt(userId, 10);
         if (isNaN(userId)) {
-          const userResponse = await axios.get(`http://localhost:8000/users/email/${userEmail}`);
+          const userResponse = await api.get(`/users/email/${userEmail}`);
           if (userResponse.data?.id) {
             userId = userResponse.data.id;
           }
@@ -242,7 +242,7 @@ const EditProfilePage = () => {
         skills: skills.filter(skill => skill && skill.trim()),
       };
 
-      const updateResponse = await axios.patch(`http://localhost:8000/users/email/${userEmail}`, userData);
+      const updateResponse = await api.patch(`/users/email/${userEmail}`, userData);
       const updatedUser = updateResponse.data;
       setUser(updatedUser);
 
@@ -266,8 +266,8 @@ const EditProfilePage = () => {
           const formData = new FormData();
           formData.append("photo", selectedFile);
           
-          const photoResponse = await axios.patch(
-            `http://localhost:8000/users/id/${userId}/photo`,
+          const photoResponse = await api.patch(
+            `/users/id/${userId}/photo`,
             formData,
             { headers: { "Content-Type": "multipart/form-data" } }
           );

@@ -9,7 +9,7 @@ import {
   Grid,
 } from "@mui/material";
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddModuleView = () => {
@@ -33,7 +33,7 @@ const AddModuleView = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8000/modules", formData);
+      await api.post("/modules", formData);
       alert(t('modules.addSuccess'));
       navigate("/module");
     } catch (err) {

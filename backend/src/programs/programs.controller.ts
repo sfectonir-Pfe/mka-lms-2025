@@ -27,6 +27,11 @@ export class ProgramsController {
     return this.programsService.findAll();
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.programsService.findOne(+id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.programsService.remove(+id);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import api from "../../api/axiosInstance";
 import {
   Container,
   Typography,
@@ -60,7 +60,7 @@ export default function BuildProgramOverviewPage() {
 
   const fetchbuildProgram = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:8000/buildProgram");
+      const res = await api.get("/buildProgram");
       const all = res.data;
       setbuildProgram(programId ? all.filter(s => s.programId === Number(programId)) : all);
     } catch (err) {
@@ -179,7 +179,7 @@ export default function BuildProgramOverviewPage() {
                 color={buildProgram.program.published ? "warning" : "success"}
                 onClick={async () => {
                   try {
-                    await axios.patch(`http://localhost:8000/programs/${buildProgram.program.id}/publish`);
+                    await api.patch(`/programs/${buildProgram.program.id}/publish`);
                     toast.success(
                       buildProgram.program.published
                         ? t('buildProgram.unpublishSuccess')

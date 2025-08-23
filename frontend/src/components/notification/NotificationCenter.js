@@ -5,9 +5,10 @@ import MessageIcon from '@mui/icons-material/Message';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { io } from 'socket.io-client';
-import axios from 'axios';
+import api from "../../api/axiosInstance";
 
-const API_URL = 'http://localhost:8000';
+
+
 
 const NotificationCenter = ({ user }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -21,14 +22,14 @@ const NotificationCenter = ({ user }) => {
   console.log('[NotificationCenter] user.id:', user?.id);
 
   // Fetch notifications
-  axios.get(`${API_URL}/notifications/${user.id}`)
+  api.get(`/notifications/${user.id}`)
     .then(res => {
       setNotifications(res.data);
       setUnreadCount(res.data.filter(n => !n.read).length);
     });
 
   // Connect to socket
-  const socketInstance = io(API_URL, { query: { userId: user.id } });
+  const socketInstance = io(process.env.REACT_APP_API_BASE, { query: { userId: user.id } });
   setSocket(socketInstance);
 
   socketInstance.on('new-notification', notif => {
@@ -43,21 +44,21 @@ const NotificationCenter = ({ user }) => {
 
   // Mark as read
   const handleMarkAsRead = async (id) => {
-    await axios.patch(`${API_URL}/notifications/${id}/read`);
+    await api.patch(`/notifications/${id}/read`);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   // Mark all as read
   const handleMarkAllAsRead = async () => {
-    await axios.patch(`${API_URL}/notifications/${user.id}/mark-all-read`);
+    await api.patch(`/notifications/${user.id}/mark-all-read`);
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     setUnreadCount(0);
   };
 
   // Delete notification
   const handleDelete = async (id) => {
-    await axios.delete(`${API_URL}/notifications/${id}`);
+    await api.delete(`/notifications/${id}`);
     setNotifications(prev => prev.filter(n => n.id !== id));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };

@@ -34,16 +34,18 @@ export class FeedbackÉtudiantService {
       }
 
       const existingFeedback = await this.prisma.studentFeedback.findFirst({
-        where: {
-          fromStudentId,
-          toStudentId: createFeedbackDto.toStudentId,
-          groupId: createFeedbackDto.groupId
-        }
-      });
+  where: {
+    fromStudentId,
+    toStudentId: createFeedbackDto.toStudentId,
+    groupId: createFeedbackDto.groupId,
+    category: createFeedbackDto.category, // ← IMPORTANT
+  }
+});
 
-      if (existingFeedback) {
-        throw new Error('Vous avez déjà donné un feedback à cet étudiant dans ce groupe');
-      }
+if (existingFeedback) {
+  throw new Error('Vous avez déjà donné un feedback pour cette catégorie à cet étudiant dans ce groupe');
+}
+
 
       return await this.prisma.studentFeedback.create({
         data: {

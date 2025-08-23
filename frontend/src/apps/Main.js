@@ -1,5 +1,6 @@
 import * as React from "react";
 import { styled, useTheme, alpha } from "@mui/material/styles";
+import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   Box,
   CssBaseline,
@@ -31,11 +32,12 @@ import { sideBarData } from "../components/constants/sideBarData";
 import ScrollToTopButton from "../components/constants/ScrollToTopButton";
 import LanguageSelectorWithFlags from "../i18n/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
 import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
 import NotificationCenter from "../components/notification/NotificationCenter";
+import ThemeToggle from "../components/constants/ThemeToggle";
 
 
 
@@ -127,10 +129,24 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 export default function Main({ setUser, user }) {
   const theme = useTheme();
+  const { darkMode } = useCustomTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
+  // Apply dark mode class to document
+  React.useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.style.backgroundColor = '#1a1a1a';
+      document.body.style.color = '#ffffff';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.style.backgroundColor = '#ffffff';
+      document.body.style.color = '#000000';
+    }
+  }, [darkMode]);
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -159,7 +175,7 @@ export default function Main({ setUser, user }) {
     const fetchUserData = async () => {
       try {
         if (user.email) {
-          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          const response = await api.get(`/users/email/${user.email}`);
           if (response.data) {
             // Mettre à jour l'objet utilisateur avec les données à jour
             const updatedUser = {
@@ -240,7 +256,7 @@ export default function Main({ setUser, user }) {
       if (user && user.email) {
         console.log("Trying to fetch user data from backend for email:", user.email);
         try {
-          const response = await axios.get(`http://localhost:8000/users/email/${user.email}`);
+          const response = await api.get(`/users/email/${user.email}`);
           if (response.data && response.data.id) {
             console.log("User data from backend:", response.data);
 
@@ -348,8 +364,7 @@ export default function Main({ setUser, user }) {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <LanguageSelectorWithFlags />
-
-
+            <ThemeToggle />
             <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>

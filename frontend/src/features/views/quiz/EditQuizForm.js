@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
@@ -35,7 +35,7 @@ const EditQuizForm = () => {
   useEffect(() => {
     const loadQuiz = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/quizzes/by-contenu/${contenuId}`);
+        const response = await api.get(`/quizzes/by-contenu/${contenuId}`);
         const quiz = response.data;
         
         if (quiz) {
@@ -106,8 +106,8 @@ const EditQuizForm = () => {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await axios.post(
-          "http://localhost:8000/quizzes/upload-question-image",
+        const res = await api.post(
+          "/quizzes/upload-question-image",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -158,8 +158,8 @@ const EditQuizForm = () => {
       const formData = new FormData();
       formData.append("file", file);
       try {
-        const res = await axios.post(
-          "http://localhost:8000/quizzes/upload-question-image",
+        const res = await api.post(
+          "/quizzes/upload-question-image",
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
@@ -199,7 +199,7 @@ const EditQuizForm = () => {
 
     // ✅ Submit after validation
     try {
-      await axios.patch(`http://localhost:8000/quizzes/by-contenu/${contenuId}`, {
+      await api.patch(`/quizzes/by-contenu/${contenuId}`, {
         contenuId: parseInt(contenuId),
         timeLimit: timeLimitMinutes * 60,
         questions,

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../api/axiosInstance';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import ToastError from "../../components/toasterror/ToastError";
@@ -62,7 +62,7 @@ const [showSuccess, setShowSuccess] = useState(false);
     setLoading(true);
 
     try {
-      await axios.post('http://localhost:8000/auth/reset-password', {
+      await api.post('/auth/reset-password', {
         token,
         newPass: newPassword,
         confirmPass: confirmPassword,

@@ -97,6 +97,63 @@ export class MailService {
     `);
   }
 
+  async sendSessionActivatedEmail(to: string, userName: string, sessionName: string, sessionStartDate: string, sessionEndDate: string) {
+    return this.send(to, '🚀 Session Activée - Plateforme LMS', `
+      <div style="font-family:Segoe UI,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+
+        <!-- En-tête -->
+        <div style="background:linear-gradient(135deg, #1976d2, #42a5f5);padding:30px 20px;text-align:center;">
+          <h1 style="color:#fff;margin:0;font-size:24px;">🚀 Session Activée</h1>
+          <p style="color:#dce3ec;margin-top:8px;">Plateforme LMS</p>
+        </div>
+
+        <!-- Contenu -->
+        <div style="padding:30px 20px;">
+          <p style="font-size:16px;color:#333;">Bonjour <strong>${userName}</strong>,</p>
+          
+          <div style="background:#e3f2fd;padding:20px;border-radius:8px;margin:20px 0;border-left:4px solid #1976d2;">
+            <h2 style="color:#1976d2;margin-top:0;font-size:20px;">🎓 Session: ${sessionName}</h2>
+            <p style="font-size:16px;color:#333;margin:10px 0;">
+              <strong>Votre session a été activée !</strong>
+            </p>
+            <p style="font-size:15px;color:#555;margin:5px 0;">
+              📅 <strong>Période:</strong> ${sessionStartDate} - ${sessionEndDate}
+            </p>
+          </div>
+
+          <p style="font-size:16px;color:#333;line-height:1.6;">
+            Vous pouvez maintenant accéder à tous les contenus et ressources de cette session. 
+            Connectez-vous à la plateforme pour commencer votre apprentissage !
+          </p>
+
+          <div style="text-align:center;margin:30px 0;">
+            <a href="http://localhost:3000/login" target="_blank"
+               style="background:#1976d2;color:#fff;text-decoration:none;padding:15px 35px;border-radius:30px;font-weight:bold;font-size:16px;display:inline-block;box-shadow:0 4px 12px rgba(25,118,210,0.3);">
+              🎯 Accéder à la session
+            </a>
+          </div>
+
+          <div style="background:#f8f9fa;padding:15px;border-radius:8px;margin:20px 0;">
+            <h3 style="color:#1976d2;margin-top:0;font-size:16px;">💡 Que faire maintenant ?</h3>
+            <ul style="color:#555;line-height:1.6;">
+              <li>Consultez les modules et cours disponibles</li>
+              <li>Participez aux séances programmées</li>
+              <li>Interagissez avec les formateurs et autres participants</li>
+              <li>Suivez votre progression</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Pied de page -->
+        <div style="background:#f8f9fa;padding:20px;text-align:center;font-size:13px;color:#666;border-top:1px solid #e0e0e0;">
+          <p style="margin:0;">Besoin d'aide ? Contactez-nous à <a href="mailto:tunirdigital@gmail.com" style="color:#1976d2;text-decoration:none;">tunirdigital@gmail.com</a></p>
+          <p style="margin:8px 0 0 0;">© 2025 Plateforme LMS</p>
+        </div>
+
+      </div>
+    `);
+  }
+
   async sendPasswordChangeConfirmationEmail(to: string, timestamp: string, ipAddress?: string) {
     const loginLink = `http://localhost:3000/login`;
     return this.send(to, '🔒 Confirmation de changement de mot de passe', `
@@ -270,6 +327,97 @@ const trackingPixel = `<img src="https://0de3-196-177-86-16.ngrok-free.app/track
         <p>– Équipe LMS</p>
       `,
     });
+  }
+
+  async sendReclamationResolvedEmail(to: string, userName: string, reclamationSubject: string, response?: string) {
+    return this.send(to, '✅ Votre réclamation a été résolue - Plateforme LMS', `
+      <div style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;max-width:650px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+
+        <!-- Header avec gradient -->
+        <div style="background:linear-gradient(135deg, #4caf50 0%, #45a049 100%);padding:40px 30px;text-align:center">
+          <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:300;letter-spacing:1px">✅ Réclamation Résolue</h1>
+          <p style="color:#e8f5e8;margin:10px 0 0 0;font-size:16px;opacity:0.9">Plateforme LMS</p>
+        </div>
+
+        <!-- Contenu principal -->
+        <div style="padding:40px 30px">
+          <div style="text-align:center;margin-bottom:30px">
+            <div style="background:#f1f8e9;border-radius:50%;width:80px;height:80px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+              <span style="font-size:36px">🎉</span>
+            </div>
+            <h2 style="color:#2c3e50;margin:0;font-size:24px;font-weight:600">Bonne nouvelle !</h2>
+          </div>
+
+          <p style="color:#5a6c7d;font-size:16px;line-height:1.6;margin-bottom:25px">
+            Bonjour <strong>${userName}</strong>,
+          </p>
+
+          <div style="background:#e8f5e8;border-left:4px solid #4caf50;padding:20px;margin:30px 0;border-radius:0 8px 8px 0">
+            <h3 style="color:#2e7d32;margin:0 0 15px 0;font-size:18px;font-weight:600">✅ Votre réclamation a été résolue</h3>
+            <p style="color:#2e7d32;margin:0;font-size:16px;line-height:1.6">
+              Nous avons le plaisir de vous informer que votre réclamation concernant 
+              <strong>"${reclamationSubject}"</strong> a été traitée et résolue avec succès.
+            </p>
+          </div>
+
+          ${response ? `
+          <!-- Réponse de l'équipe -->
+          <div style="background:#f8f9ff;border:1px solid #e3f2fd;border-radius:8px;padding:25px;margin:30px 0">
+            <h3 style="color:#1976d2;margin:0 0 15px 0;font-size:16px;font-weight:600">📝 Réponse de notre équipe :</h3>
+            <div style="background:#ffffff;border-radius:6px;padding:20px;border-left:4px solid #1976d2">
+              <p style="color:#333;margin:0;font-size:15px;line-height:1.6;white-space:pre-wrap">${response}</p>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Actions recommandées -->
+          <div style="background:#fff3e0;border:1px solid #ffb74d;border-radius:8px;padding:20px;margin:25px 0">
+            <h3 style="color:#e65100;margin:0 0 15px 0;font-size:16px;font-weight:600">💡 Prochaines étapes :</h3>
+            <ul style="color:#bf360c;margin:0;padding-left:20px;line-height:1.6">
+              <li>Connectez-vous à votre espace personnel pour vérifier les modifications</li>
+              <li>Si vous avez d'autres questions, n'hésitez pas à nous contacter</li>
+              <li>Votre satisfaction est importante pour nous</li>
+            </ul>
+          </div>
+
+          <!-- Bouton d'action -->
+          <div style="text-align:center;margin:35px 0">
+            <a href="http://localhost:3000/dashboard"
+               style="background:linear-gradient(135deg, #4caf50 0%, #45a049 100%);color:#ffffff;padding:16px 32px;text-decoration:none;border-radius:50px;font-weight:600;font-size:16px;display:inline-block;box-shadow:0 4px 15px rgba(76,175,80,0.4);transition:all 0.3s ease"
+               target="_blank">
+              🚀 Accéder à mon espace
+            </a>
+          </div>
+
+          <!-- Message de satisfaction -->
+          <div style="background:#f8f9ff;border-radius:8px;padding:20px;margin:30px 0;text-align:center">
+            <p style="color:#5a6c7d;margin:0;font-size:14px;line-height:1.5">
+              Nous espérons que cette résolution répond à vos attentes. 
+              Votre feedback nous aide à améliorer continuellement notre service.
+            </p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background:#f8f9ff;padding:25px 30px;border-top:1px solid #e9ecef">
+          <div style="text-align:center">
+            <p style="color:#6c757d;margin:0 0 10px 0;font-size:14px">
+              Besoin d'aide supplémentaire ?
+            </p>
+            <p style="margin:0">
+              <a href="mailto:tunirdigital@gmail.com" style="color:#4caf50;text-decoration:none;font-weight:600">
+                📧 tunirdigital@gmail.com
+              </a>
+            </p>
+          </div>
+          <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef">
+            <p style="color:#adb5bd;margin:0;font-size:12px">
+              © 2025 Plateforme LMS - Cet email a été envoyé automatiquement
+            </p>
+          </div>
+        </div>
+      </div>
+    `);
   }
 }
 

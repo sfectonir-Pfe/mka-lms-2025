@@ -21,7 +21,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 import { useTranslation } from 'react-i18next';
-import axios from "axios";
+import api from "../../api/axiosInstance";
 
 
 const ProfilePage = () => {
@@ -38,7 +38,7 @@ const [sessionsLoading, setSessionsLoading] = useState(true);
 useEffect(() => {
   if (!user?.id) return;
   setSessionsLoading(true);
-  axios.get(`http://localhost:8000/users/${user.id}/sessions2`)
+  api.get(`/users/${user.id}/sessions2`)
     .then((res) => setSessions(res.data))
     .catch(() => setSessions([]))
     .finally(() => setSessionsLoading(false));
@@ -112,7 +112,7 @@ useEffect(() => {
 
         // Mettre à jour les données en arrière-plan
         try {
-          const res = await axios.get(`http://localhost:8000/users/id/${userId}`);
+          const res = await api.get(`/users/id/${userId}`);
           if (res.data) {
             console.log("ProfilePage: Mise à jour des données utilisateur en arrière-plan:", res.data);
 
@@ -135,7 +135,7 @@ useEffect(() => {
       // Stratégie 1: Essayer directement par ID
       try {
         console.log("ProfilePage: Stratégie 1: Chargement par ID", userId);
-        const res = await axios.get(`http://localhost:8000/users/id/${userId}`);
+        const res = await api.get(`/users/id/${userId}`);
 
         if (res.data) {
           console.log("ProfilePage: Succès - Données utilisateur chargées par ID:", res.data);
@@ -275,10 +275,10 @@ useEffect(() => {
           <Avatar
             src={user.profilePic ?
               (user.profilePic.startsWith('/profile-pics/') ?
-                `http://localhost:8000/uploads${user.profilePic}` :
+                `/uploads${user.profilePic}` :
                 (user.profilePic.startsWith('http') ?
                   user.profilePic :
-                  `http://localhost:8000/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                  `/uploads/profile-pics/${user.profilePic.split('/').pop()}`
                 )
               ) :
               undefined
