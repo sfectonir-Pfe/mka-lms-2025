@@ -225,4 +225,20 @@ async getSessionStatusStats() {
 
 // Top 3 sessions by average feedback rating
 
+  // 6. Reclamation statistics
+  async getReclamationStats() {
+    const enAttente = await this.prisma.reclamation.count({ where: { status: 'EN_ATTENTE' } });
+    const enCours = await this.prisma.reclamation.count({ where: { status: 'EN_COURS' } });
+    const resolu = await this.prisma.reclamation.count({ where: { status: 'RESOLU' } });
+    const rejete = await this.prisma.reclamation.count({ where: { status: 'REJETE' } });
+    const total = await this.prisma.reclamation.count();
+
+    return {
+      enAttente,
+      enCours,
+      resolu,
+      rejete,
+      total,
+    };
+  }
 }

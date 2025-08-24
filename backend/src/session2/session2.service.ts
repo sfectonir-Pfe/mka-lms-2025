@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { $Enums } from '@prisma/client';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class Session2Service {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async create(data: any, file?: Express.Multer.File) {
     const { name, programId, startDate, endDate } = data;
@@ -195,10 +199,85 @@ export class Session2Service {
       throw new BadRequestException('Invalid status');
     }
 
-    return this.prisma.session2.update({
+    // Récupérer les informations de la session avant la mise à jour
+    const session = await this.prisma.session2.findUnique({
+      where: { id },
+      include: {
+        program: true,
+      },
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    // Mettre à jour le statut
+    const updatedSession = await this.prisma.session2.update({
       where: { id },
       data: { status: { set: status as $Enums.Session2Status } },
     });
+
+    // Si la session devient ACTIVE, envoyer des emails aux utilisateurs
+    if (status === 'ACTIVE') {
+      try {
+        await this.sendSessionActivationEmails(id, session);
+        console.log(`✅ Emails de notification envoyés pour la session ${id} (${session.name})`);
+      } catch (error) {
+        console.error(`❌ Erreur lors de l'envoi des emails pour la session ${id}:`, error);
+        // Ne pas faire échouer la mise à jour si l'envoi d'emails échoue
+      }
+    }
+
+    return updatedSession;
+  }
+
+  private async sendSessionActivationEmails(sessionId: number, session: any) {
+    // Récupérer tous les utilisateurs de la session
+    const userSessions = await this.prisma.userSession2.findMany({
+      where: { session2Id: sessionId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (userSessions.length === 0) {
+      console.log(`ℹ️ Aucun utilisateur trouvé pour la session ${sessionId}`);
+      return;
+    }
+
+    // Formater les dates
+    const startDate = session.startDate ? new Date(session.startDate).toLocaleDateString('fr-FR') : 'Non définie';
+    const endDate = session.endDate ? new Date(session.endDate).toLocaleDateString('fr-FR') : 'Non définie';
+
+    // Envoyer un email à chaque utilisateur
+    const emailPromises = userSessions.map(async (userSession) => {
+      const user = userSession.user;
+      if (!user.email) {
+        console.warn(`⚠️ Utilisateur ${user.id} n'a pas d'email configuré`);
+        return;
+      }
+
+      try {
+        await this.mailService.sendSessionActivatedEmail(
+          user.email,
+          user.name || 'Utilisateur',
+          session.name,
+          startDate,
+          endDate
+        );
+        console.log(`✅ Email envoyé à ${user.email} pour la session ${session.name}`);
+      } catch (error) {
+        console.error(`❌ Erreur lors de l'envoi d'email à ${user.email}:`, error);
+      }
+    });
+
+    await Promise.allSettled(emailPromises);
   }
 
   async getSessionById(id: number) {

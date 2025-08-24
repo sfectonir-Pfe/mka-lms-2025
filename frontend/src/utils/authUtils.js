@@ -40,10 +40,24 @@ export const storeUser = (userData, rememberMe = false) => {
 
 export const clearStoredUser = () => {
   try {
+    // Clear user data
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
+    localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
+    
+    // Clear tokens
+    localStorage.removeItem('authToken');
+    sessionStorage.removeItem('authToken');
+    
+    // Clear email and remember me
     localStorage.removeItem('userEmail');
     sessionStorage.removeItem('userEmail');
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('rememberedEmail');
+    localStorage.removeItem('rememberedPassword');
+    
+    console.log('🧹 All authentication data cleared');
     return true;
   } catch (error) {
     console.error('Error clearing stored user:', error);
@@ -107,8 +121,64 @@ export const hasRole = (requiredRole) => {
 };
 
 export const getAuthToken = () => {
-  const user = getStoredUser();
-  return user?.token || null;
+  try {
+    // Check localStorage first (persistent login)
+    const persistentToken = localStorage.getItem('authToken');
+    if (persistentToken) {
+      return persistentToken;
+    }
+
+    // Check sessionStorage (session login)
+    const sessionToken = sessionStorage.getItem('authToken');
+    if (sessionToken) {
+      return sessionToken;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
+};
+
+export const isRememberMeActive = () => {
+  return localStorage.getItem('rememberMe') === '1';
+};
+
+export const clearRememberMeData = () => {
+  console.log('🧹 Nettoyage des données Remember Me...');
+  localStorage.removeItem('rememberMe');
+  localStorage.removeItem('rememberedEmail');
+  localStorage.removeItem('rememberedPassword');
+  console.log('✅ Remember me data cleared');
+};
+
+export const validateRememberMeData = () => {
+  const rememberMe = localStorage.getItem('rememberMe');
+  const rememberedEmail = localStorage.getItem('rememberedEmail');
+  const rememberedPassword = localStorage.getItem('rememberedPassword');
+  
+  console.log('🔍 Validation Remember Me:', {
+    rememberMe,
+    rememberedEmail: rememberedEmail ? 'Présent' : 'Manquant',
+    rememberedPassword: rememberedPassword ? 'Présent' : 'Manquant'
+  });
+  
+  // Vérifier si Remember Me est activé et si toutes les données sont présentes
+  if (rememberMe === '1' && rememberedEmail && rememberedPassword) {
+    console.log('✅ Remember Me valide');
+    return true;
+  }
+  
+  // Si Remember Me est activé mais qu'il manque des données, nettoyer
+  if (rememberMe === '1' && (!rememberedEmail || !rememberedPassword)) {
+    console.warn('⚠️ Remember me data incomplete, clearing...');
+    clearRememberMeData();
+    return false;
+  }
+  
+  console.log('ℹ️ Remember Me non activé ou données manquantes');
+  return false;
 };
 
 export const isTokenValid = () => {

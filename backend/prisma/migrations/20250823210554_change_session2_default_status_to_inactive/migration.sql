@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Session2" ALTER COLUMN "status" SET DEFAULT 'INACTIVE';

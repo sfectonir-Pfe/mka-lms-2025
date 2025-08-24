@@ -57,11 +57,11 @@ export class ChangePasswordDto {
 }
 export class ResetPassword {
     @ApiProperty()
-    token: string
-      @ApiProperty()
-    newPass: string
-      @ApiProperty()
-    confirmPass: string
-
-
+    token: string;
+    
+    @ApiProperty()
+    newPass: string;
+    
+    @ApiProperty()
+    confirmPass: string;
 }

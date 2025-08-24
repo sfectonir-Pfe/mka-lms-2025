@@ -304,7 +304,7 @@ model Session2 {
   endDate         DateTime?
   imageUrl        String?
   createdAt       DateTime              @default(now())
-  status          Session2Status        @default(ACTIVE)
+  status          Session2Status        @default(INACTIVE)
   SeanceFormateur SeanceFormateur[]
   program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
   chatMessages    Session2ChatMessage[]
