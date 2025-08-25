@@ -21,6 +21,15 @@ api.interceptors.request.use((config) => {
   // Try the clean token key first
   token = localStorage.getItem("authToken");
 
+  // Fallback to sessionStorage when rememberMe is not used
+  if (!token) {
+    try {
+      token = sessionStorage.getItem("authToken");
+    } catch (e) {
+      console.warn("Unable to access sessionStorage 'authToken'");
+    }
+  }
+
   // Fallback to old user.token
   if (!token) {
     const user = localStorage.getItem("user");
@@ -29,6 +38,18 @@ api.interceptors.request.use((config) => {
         token = JSON.parse(user)?.token;
       } catch (e) {
         console.warn("Invalid JSON in localStorage 'user'");
+      }
+    }
+  }
+
+  // Legacy fallback: some parts may still store currentUser
+  if (!token) {
+    const legacy = localStorage.getItem("currentUser");
+    if (legacy) {
+      try {
+        token = JSON.parse(legacy)?.token;
+      } catch (e) {
+        console.warn("Invalid JSON in localStorage 'currentUser'");
       }
     }
   }
@@ -47,6 +68,28 @@ api.interceptors.response.use(
     console.error("Axios error:", error);
     console.error("Error config:", error.config);
     console.error("Error response:", error.response);
+    const status = error?.response?.status;
+    if (status === 401) {
+      try {
+        // Clear tokens and user state
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("currentUser");
+        sessionStorage.removeItem("authToken");
+
+        // Notify app (if listeners exist)
+        window.dispatchEvent(new Event("userLogout"));
+
+        // Avoid redirect loop if already on login
+        const isLoginRoute = window.location.pathname.startsWith("/login");
+        if (!isLoginRoute) {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.replace(`/login?next=${next}`);
+        }
+      } catch (_) {
+        // no-op
+      }
+    }
     return Promise.reject(error);
   }
 );

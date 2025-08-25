@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 import { Box, Typography, IconButton, Tooltip, Chip, useTheme } from "@mui/material"
+import { useTranslation } from "react-i18next"
 import {
   Group as GroupIcon,
   Help as HelpIcon,
@@ -60,6 +61,7 @@ export default function ModernHeader({
   currentTool = TOOLS.PEN,
 }) {
   const theme = useTheme()
+  const { t } = useTranslation()
   const [helpOpen, setHelpOpen] = useState(false)
 
   return (
@@ -107,7 +109,7 @@ export default function ModernHeader({
         {/* Current Tool Indicator */}
         <Chip
           icon={<span style={{ fontSize: "1.2em" }}>{getToolIcon(currentTool)}</span>}
-          label={getToolName(currentTool)}
+          label={t(`whiteboard.tools.${getToolName(currentTool).toLowerCase()}`, getToolName(currentTool))}
           color="primary"
           variant="filled"
           sx={{
@@ -145,7 +147,7 @@ export default function ModernHeader({
               letterSpacing: 1,
             }}
           >
-            Session
+            {t('whiteboard.sessionLabel', 'Session')}
           </Typography>
           <Typography
             variant="body2"
@@ -174,7 +176,7 @@ export default function ModernHeader({
         />
 
         {/* Help Button */}
-        <Tooltip title="Aide et raccourcis" placement="bottom">
+        <Tooltip title={t('whiteboard.help', 'Aide et raccourcis')} placement="bottom">
           <IconButton
             onClick={() => setHelpOpen(true)}
             sx={{

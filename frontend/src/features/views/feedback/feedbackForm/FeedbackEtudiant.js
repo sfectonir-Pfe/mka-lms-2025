@@ -1,6 +1,7 @@
 // src/features/views/feedback/feedbackForm/FeedbackEtudiant.js
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Typography,
@@ -33,17 +34,16 @@ import {
 import { NavigateBefore, NavigateNext } from "@mui/icons-material";
 import api from "../../../../api/axiosInstance";
 
-// const API_BASE = "http://localhost:8000/feedback-etudiant";
-
 const EMOJIS = [
-  { emoji: "🤨", value: "poor", label: "Peu participatif" },
-  { emoji: "😐", value: "average", label: "Participait parfois" },
-  { emoji: "🙂", value: "good", label: "Bonne participation" },
-  { emoji: "😃", value: "very_good", label: "Très participatif" },
-  { emoji: "🤩", value: "excellent", label: "Exceptionnel" },
+  { emoji: "🤨", value: "poor", labelKey: "studentPeerFeedback.emojis.poor" },
+  { emoji: "😐", value: "average", labelKey: "studentPeerFeedback.emojis.average" },
+  { emoji: "🙂", value: "good", labelKey: "studentPeerFeedback.emojis.good" },
+  { emoji: "😃", value: "very_good", labelKey: "studentPeerFeedback.emojis.very_good" },
+  { emoji: "🤩", value: "excellent", labelKey: "studentPeerFeedback.emojis.excellent" },
 ];
 
 export default function FeedbackEtudiant() {
+  const { t } = useTranslation();
   const { id: seanceId } = useParams();
 
   const [currentGroup, setCurrentGroup] = useState(null);
@@ -52,16 +52,12 @@ export default function FeedbackEtudiant() {
   const [questions, setQuestions] = useState([]);
   const [studentsToEvaluate, setStudentsToEvaluate] = useState([]);
 
-  // feedbacks GIVEN BY the current user (for this group)
-  // {questionId, targetStudentId, reaction, toStudent?}
   const [completedFeedbacks, setCompletedFeedbacks] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [showSummary, setShowSummary] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  // dialog to preview a student's feedback before evaluating
   const [previewStudent, setPreviewStudent] = useState(null);
   const [openPreview, setOpenPreview] = useState(false);
 
@@ -83,7 +79,7 @@ export default function FeedbackEtudiant() {
 
         setCurrentStudent({
           id: currentUserId,
-          name: user.name || "Étudiant",
+          name: user.name || t("role.etudiant"),
           email: user.email || "etudiant@test.com",
         });
 
@@ -111,7 +107,6 @@ export default function FeedbackEtudiant() {
           setStudentsToEvaluate([]);
         }
 
-        // load existing feedbacks GIVEN BY current user in this group
         const givenRes = await api.get(
           `/feedbacks/group/${group.id}/student/${currentUserId}`
         );
@@ -132,7 +127,7 @@ export default function FeedbackEtudiant() {
     };
 
     if (seanceId) fetchAll();
-  }, [seanceId]);
+  }, [seanceId, t]);
 
   const handleFeedback = async (reaction) => {
     try {
@@ -152,21 +147,6 @@ export default function FeedbackEtudiant() {
         groupId: currentGroup.id,
         seanceId,
       });
-// put this above handleFeedback
-const refreshGivenFeedbacks = async (groupId, currentUserId) => {
-  const givenRes = await api.get(
-    `/feedbacks/group/${groupId}/student/${currentUserId}`
-  );
-  const given = Array.isArray(givenRes.data) ? givenRes.data : [];
-  setCompletedFeedbacks(
-    given.map((f) => ({
-      questionId: f.questionId,
-      targetStudentId: f.targetStudentId,
-      reaction: f.reaction,
-      toStudent: f.toStudent,
-    }))
-  );
-};
 
       setCompletedFeedbacks((prev) => {
         const idx = prev.findIndex(
@@ -191,6 +171,8 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
       console.error("Erreur envoi feedback:", err);
     }
   };
+
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -238,13 +220,12 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
     return (
       <Paper sx={{ p: 3, textAlign: "center" }}>
         <Typography variant="h6" color="text.secondary">
-          Vous n'êtes pas dans un groupe pour cette séance.
+          {t("studentPeerFeedback.notInGroup")}
         </Typography>
       </Paper>
     );
   }
 
-  // ========== TABLE SCREEN ==========
   if (!selectedStudent) {
     const feedbackCountFor = (studentId) =>
       completedFeedbacks.filter((f) => f.targetStudentId === studentId).length;
@@ -252,17 +233,17 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
     return (
       <Box p={3}>
         <Typography variant="h5" gutterBottom>
-          Étudiants à évaluer
+          {t("studentPeerFeedback.title")}
         </Typography>
 
         <TableContainer component={Paper}>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell width={80}>id</TableCell>
-                <TableCell>studentName</TableCell>
-                <TableCell>studentEmail</TableCell>
-                <TableCell align="right">Feedbacks donnés</TableCell>
+                <TableCell width={80}>{t("studentPeerFeedback.id")}</TableCell>
+                <TableCell>{t("studentPeerFeedback.studentName")}</TableCell>
+                <TableCell>{t("studentPeerFeedback.studentEmail")}</TableCell>
+                <TableCell align="right">{t("studentPeerFeedback.givenCount")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -291,7 +272,7 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
               {studentsToEvaluate.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    Aucun étudiant
+                    {t("studentPeerFeedback.none")}
                   </TableCell>
                 </TableRow>
               )}
@@ -299,10 +280,9 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
           </Table>
         </TableContainer>
 
-        {/* Preview dialog */}
         <Dialog open={openPreview} onClose={() => setOpenPreview(false)} maxWidth="sm" fullWidth>
           <DialogTitle>
-            Feedback de {previewStudent?.name}
+            {t("studentPeerFeedback.previewTitle", { name: previewStudent?.name || "" })}
           </DialogTitle>
           <DialogContent dividers>
             {questions.map((q) => {
@@ -317,10 +297,10 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
                   </Typography>
                   {e ? (
                     <Typography variant="h6">
-                      {e.emoji} {e.label}
+                      {e.emoji} {t(e.labelKey)}
                     </Typography>
                   ) : (
-                    <Typography color="text.secondary">Non évalué</Typography>
+                    <Typography color="text.secondary">{t("studentPeerFeedback.notEvaluated")}</Typography>
                   )}
                   <Divider sx={{ mt: 1 }} />
                 </Box>
@@ -328,7 +308,7 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
             })}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenPreview(false)}>Fermer</Button>
+            <Button onClick={() => setOpenPreview(false)}>{t("studentPeerFeedback.close")}</Button>
             <Button
               variant="contained"
               onClick={() => {
@@ -336,7 +316,7 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
                 setOpenPreview(false);
               }}
             >
-              Évaluer / Continuer
+              {t("studentPeerFeedback.evaluate")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -344,20 +324,19 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
     );
   }
 
-  // ========== SUMMARY ==========
   if (showSummary) {
     return (
       <Box p={3}>
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h5" gutterBottom>
-            Merci pour vos feedbacks !
+            {t("studentPeerFeedback.thanks")}
           </Typography>
-          <Typography>Vous avez évalué {selectedStudent.name}.</Typography>
+          <Typography>{t("studentPeerFeedback.youEvaluated", { name: selectedStudent.name })}</Typography>
 
           <Box mt={3}>
             <Divider sx={{ my: 2 }} />
             <Typography variant="h6" gutterBottom>
-              Récapitulatif
+              {t("studentPeerFeedback.summary")}
             </Typography>
             {questions.map((q, i) => {
               const fb = completedFeedbacks.find(
@@ -370,10 +349,10 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
                   <Box mt={1}>
                     {e ? (
                       <Typography variant="h6">
-                        {e.emoji} {e.label}
+                        {e.emoji} {t(e.labelKey)}
                       </Typography>
                     ) : (
-                      <Typography color="text.secondary">Non évalué</Typography>
+                      <Typography color="text.secondary">{t("studentPeerFeedback.notEvaluated")}</Typography>
                     )}
                   </Box>
                   {i < questions.length - 1 && <Divider sx={{ my: 2 }} />}
@@ -386,8 +365,8 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
             <Button variant="contained" onClick={handleNextStudent}>
               {studentsToEvaluate.findIndex((s) => s.id === selectedStudent.id) <
               studentsToEvaluate.length - 1
-                ? "Évaluer le prochain étudiant"
-                : "Terminer"}
+                ? t("studentPeerFeedback.nextStudent")
+                : t("studentPeerFeedback.finish")}
             </Button>
           </Box>
         </Paper>
@@ -395,13 +374,12 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
     );
   }
 
-  // ========== QUESTION FLOW ==========
   return (
     <Box p={3}>
       <Stepper activeStep={currentQuestionIndex} alternativeLabel sx={{ mb: 3 }}>
         {questions.map((q) => (
           <Step key={q.id}>
-            <StepLabel>Question</StepLabel>
+            <StepLabel>{t("studentPeerFeedback.stepQuestion")}</StepLabel>
           </Step>
         ))}
       </Stepper>
@@ -452,7 +430,7 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
             color="primary.main"
             fontWeight="bold"
           >
-            {emojiByValue.get(existingFeedback.reaction)?.label}
+            {t(emojiByValue.get(existingFeedback.reaction)?.labelKey || "")}
           </Typography>
         )}
       </Paper>
@@ -464,7 +442,7 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
           onClick={handlePreviousQuestion}
           disabled={currentQuestionIndex === 0}
         >
-          Précédent
+          {t("studentPeerFeedback.previous")}
         </Button>
         <Button
           variant="contained"
@@ -473,8 +451,8 @@ const refreshGivenFeedbacks = async (groupId, currentUserId) => {
           disabled={!existingFeedback}
         >
           {currentQuestionIndex === questions.length - 1
-            ? "Terminer l'évaluation"
-            : "Suivant"}
+            ? t("studentPeerFeedback.finishEvaluation")
+            : t("studentPeerFeedback.next")}
         </Button>
       </Box>
     </Box>

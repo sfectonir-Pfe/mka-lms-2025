@@ -84,28 +84,28 @@ const FeedbackPage = () => {
     {
       value: "bug",
       label: `🐛 ${t("feedback.feedbackTypes.bug")}`,
-      description: "Problème technique ou dysfonctionnement",
+      description: t("feedback.feedbackTypesDescriptions.bug"),
       icon: <BugReport />,
       color: "#f44336",
     },
     {
       value: "feature",
       label: `💡 ${t("feedback.feedbackTypes.feature")}`,
-      description: "Nouvelle fonctionnalité souhaitée",
+      description: t("feedback.feedbackTypesDescriptions.feature"),
       icon: <Feedback />,
       color: "#2196f3",
     },
     {
       value: "improvement",
       label: `⚡ ${t("feedback.feedbackTypes.improvement")}`,
-      description: "Amélioration d'une fonctionnalité existante",
+      description: t("feedback.feedbackTypesDescriptions.improvement"),
       icon: <Support />,
       color: "#4caf50",
     },
     {
       value: "complaint",
-      label: `⚠️ Problème de service`,
-      description: "Problème de service ou d'expérience utilisateur",
+      label: `⚠️ ${t("feedback.feedbackTypes.complaint")}`,
+      description: t("feedback.feedbackTypesDescriptions.complaint"),
       icon: <Report />,
       color: "#ff9800",
     },
@@ -113,53 +113,53 @@ const FeedbackPage = () => {
 
   const categories = {
     bug: [
-      "Interface utilisateur",
-      "Authentification",
-      "Gestion des cours",
-      "Chatbot",
-      "Vidéoconférence",
-      "Tableau blanc",
-      "Quiz et évaluations",
-      "Profil utilisateur",
-      "Notifications",
-      "Performance",
-      "Mobile/Responsive",
-      "Autre",
+      "ui",
+      "auth",
+      "courseManagement",
+      "chatbot",
+      "videoConference",
+      "whiteboard",
+      "quizAssessment",
+      "userProfile",
+      "notifications",
+      "performance",
+      "mobileResponsive",
+      "other",
     ],
     feature: [
-      "Interface utilisateur",
-      "Gestion des cours",
-      "Communication",
-      "Évaluations",
-      "Rapports",
-      "Intégrations",
-      "Accessibilité",
-      "Personnalisation",
-      "Autre",
+      "ui",
+      "courseManagement",
+      "communication",
+      "assessments",
+      "reports",
+      "integrations",
+      "accessibility",
+      "customization",
+      "other",
     ],
     improvement: [
-      "Interface utilisateur",
-      "Performance",
-      "Fonctionnalités existantes",
-      "Expérience utilisateur",
-      "Documentation",
-      "Autre",
+      "ui",
+      "performance",
+      "existingFeatures",
+      "ux",
+      "documentation",
+      "other",
     ],
     complaint: [
-      "Service client",
-      "Qualité du contenu",
-      "Problèmes techniques",
-      "Expérience utilisateur",
-      "Support",
-      "Autre",
+      "customerService",
+      "contentQuality",
+      "technicalIssues",
+      "ux",
+      "support",
+      "other",
     ],
   }
 
   const priorities = [
-    { value: "low", label: `🟢 ${t("feedback.priorities.low")}`, description: "Amélioration mineure", color: "#4caf50" },
-    { value: "medium", label: `🟡 ${t("feedback.priorities.medium")}`, description: "Problème modéré", color: "#ff9800" },
-    { value: "high", label: `🔴 ${t("feedback.priorities.high")}`, description: "Problème important", color: "#f44336" },
-    { value: "critical", label: `🚨 ${t("feedback.priorities.critical")}`, description: "Bloque l'utilisation", color: "#d32f2f" },
+    { value: "low", label: `🟢 ${t("feedback.priorities.low")}`, description: t("feedback.priorityDescriptions.low"), color: "#4caf50" },
+    { value: "medium", label: `🟡 ${t("feedback.priorities.medium")}`, description: t("feedback.priorityDescriptions.medium"), color: "#ff9800" },
+    { value: "high", label: `🔴 ${t("feedback.priorities.high")}`, description: t("feedback.priorityDescriptions.high"), color: "#f44336" },
+    { value: "critical", label: `🚨 ${t("feedback.priorities.critical")}`, description: t("feedback.priorityDescriptions.critical"), color: "#d32f2f" },
   ]
 
   const browsers = [
@@ -168,16 +168,16 @@ const FeedbackPage = () => {
     "Safari",
     "Edge",
     "Opera",
-    "Autre",
-    "Application mobile",
+    "Other",
+    "MobileApp",
   ]
 
   const devices = [
-    "Ordinateur de bureau",
-    "Ordinateur portable",
-    "Tablette",
+    "Desktop",
+    "Laptop",
+    "Tablet",
     "Smartphone",
-    "Autre",
+    "Other",
   ]
 
   const handleInputChange = (field, value) => {
@@ -200,19 +200,19 @@ const FeedbackPage = () => {
     switch (currentStep) {
       case 0:
         if (!formData.feedbackType) {
-          setValidationError("Veuillez sélectionner un type de feedback.")
+          setValidationError(t("feedback.validation.selectType"))
           return false
         }
         break
       case 1:
         if (!formData.category || !formData.priority) {
-          setValidationError("Veuillez sélectionner une catégorie et une priorité.")
+          setValidationError(t("feedback.validation.selectCategoryPriority"))
           return false
         }
         break
       case 2:
         if (!formData.title || !formData.description) {
-          setValidationError("Veuillez remplir le titre et la description.")
+          setValidationError(t("feedback.validation.fillTitleDescription"))
           return false
         }
         break
@@ -230,7 +230,7 @@ const FeedbackPage = () => {
     const missingFields = requiredFields.filter((field) => !formData[field])
 
     if (missingFields.length > 0) {
-      setValidationError("Veuillez compléter tous les champs obligatoires.")
+      setValidationError(t("feedback.validation.completeRequired"))
       return false
     }
 
@@ -281,20 +281,20 @@ const FeedbackPage = () => {
     } catch (error) {
       console.error("Erreur lors de l'envoi du feedback:", error)
       
-      let errorMessage = "Une erreur s'est produite lors de l'envoi du feedback. Veuillez réessayer."
+      let errorMessage = t("feedback.errors.generic")
       
       if (error.response) {
         // Erreur de réponse du serveur
         if (error.response.status === 400) {
-          errorMessage = "Données invalides. Veuillez vérifier vos informations."
+          errorMessage = t("feedback.errors.invalidData")
         } else if (error.response.status === 500) {
-          errorMessage = "Erreur serveur. Veuillez réessayer plus tard."
+          errorMessage = t("feedback.errors.serverError")
         } else if (error.response.data && error.response.data.message) {
           errorMessage = error.response.data.message
         }
       } else if (error.request) {
         // Erreur de connexion
-        errorMessage = "Impossible de se connecter au serveur. Vérifiez votre connexion internet."
+        errorMessage = t("feedback.errors.networkError")
       }
       
       setValidationError(errorMessage)
@@ -308,8 +308,8 @@ const FeedbackPage = () => {
         return (
           <Card sx={{ mb: 3 }}>
             <CardHeader
-              title="Quel type de feedback souhaitez-vous soumettre ?"
-              subheader="Sélectionnez le type qui correspond le mieux à votre demande"
+              title={t("feedback.headers.typeTitle")}
+              subheader={t("feedback.headers.typeSub")}
             />
             <CardContent>
               <Grid container spacing={2}>
@@ -353,15 +353,15 @@ const FeedbackPage = () => {
         return (
           <Card sx={{ mb: 3 }}>
             <CardHeader
-              title="Catégorie et Priorité"
-              subheader="Aidez-nous à mieux comprendre et prioriser votre demande"
+              title={t("feedback.headers.categoryTitle")}
+              subheader={t("feedback.headers.categorySub")}
             />
             <CardContent>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <FormControl component="fieldset" sx={{ width: "100%" }}>
                     <FormLabel component="legend" sx={{ fontWeight: 600, mb: 2 }}>
-                      📂 Catégorie *
+                      📂 {t("feedback.category")} *
                     </FormLabel>
                     <RadioGroup
                       value={formData.category}
@@ -372,7 +372,7 @@ const FeedbackPage = () => {
                           key={category}
                           value={category}
                           control={<Radio />}
-                          label={category}
+                          label={t(`feedback.categoryOptions.${category}`)}
                         />
                       ))}
                     </RadioGroup>
@@ -382,7 +382,7 @@ const FeedbackPage = () => {
                   <FormControl component="fieldset" sx={{ width: "100%" }}>
                     <FormLabel component="legend" sx={{ fontWeight: 600, mb: 2 }}>
                       <PriorityHigh sx={{ mr: 1, verticalAlign: "middle" }} />
-                      Niveau de priorité *
+                      {t("feedback.steps.category")} *
                     </FormLabel>
                     <RadioGroup
                       value={formData.priority}
@@ -415,16 +415,16 @@ const FeedbackPage = () => {
         return (
           <Card sx={{ mb: 3 }}>
             <CardHeader
-              title="Description Détaillée"
-              subheader="Décrivez votre problème ou suggestion de manière claire et précise"
+              title={t("feedback.headers.descriptionTitle")}
+              subheader={t("feedback.headers.descriptionSub")}
             />
             <CardContent>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="📝 Titre du feedback *"
-                    placeholder="Résumez votre demande en quelques mots..."
+                    label={t("feedback.formLabels.title")}
+                    placeholder={t("feedback.formLabels.titlePlaceholder")}
                     value={formData.title}
                     onChange={(e) => handleInputChange("title", e.target.value)}
                     sx={{ mb: 2 }}
@@ -435,8 +435,8 @@ const FeedbackPage = () => {
                     fullWidth
                     multiline
                     rows={4}
-                    label="📄 Description détaillée *"
-                    placeholder="Décrivez votre problème, suggestion ou réclamation en détail..."
+                    label={t("feedback.formLabels.description")}
+                    placeholder={t("feedback.formLabels.descriptionPlaceholder")}
                     value={formData.description}
                     onChange={(e) => handleInputChange("description", e.target.value)}
                     sx={{ mb: 2 }}
@@ -458,15 +458,15 @@ const FeedbackPage = () => {
         return (
           <Card sx={{ mb: 3 }}>
             <CardHeader
-              title="Informations Techniques (Optionnel)"
-              subheader="Ces informations nous aident à diagnostiquer et résoudre les problèmes"
+              title={t("feedback.headers.technicalTitle")}
+              subheader={t("feedback.headers.technicalSub")}
             />
             <CardContent>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1 }}>
-                      🌐 Navigateur utilisé
+                      {t("feedback.formLabels.browser")}
                     </FormLabel>
                     <RadioGroup
                       value={formData.browser}
@@ -477,7 +477,7 @@ const FeedbackPage = () => {
                           key={browser}
                           value={browser}
                           control={<Radio />}
-                          label={browser}
+                          label={t(`feedback.browsers.${browser}`)}
                         />
                       ))}
                     </RadioGroup>
@@ -486,7 +486,7 @@ const FeedbackPage = () => {
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <FormLabel component="legend" sx={{ fontWeight: 600, mb: 1 }}>
-                      📱 Appareil utilisé
+                      {t("feedback.formLabels.device")}
                     </FormLabel>
                     <RadioGroup
                       value={formData.device}
@@ -497,7 +497,7 @@ const FeedbackPage = () => {
                           key={device}
                           value={device}
                           control={<Radio />}
-                          label={device}
+                          label={t(`feedback.devices.${device}`)}
                         />
                       ))}
                     </RadioGroup>
@@ -530,13 +530,13 @@ const FeedbackPage = () => {
       {/* En-tête */}
       <Box sx={{ mb: 4, textAlign: "center" }}>
         <Typography variant="h3" component="h1" gutterBottom fontWeight="bold" color="primary">
-          📝 Réclamation
+          {t("feedback.header.titleComplaint")}
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-          Signalez-nous vos problèmes et préoccupations concernant notre service
+          {t("feedback.header.subtitleComplaint")}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Vos réclamations nous permettent de résoudre rapidement les dysfonctionnements et d'améliorer notre plateforme LMS
+          {t("feedback.header.descriptionComplaint")}
         </Typography>
       </Box>
 
@@ -545,7 +545,7 @@ const FeedbackPage = () => {
         <CardContent>
           <Box sx={{ mb: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Progression: {Math.round(progress)}%
+              {t("feedback.progressLabel")}: {Math.round(progress)}%
             </Typography>
             <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
           </Box>
@@ -595,12 +595,12 @@ const FeedbackPage = () => {
           startIcon={<NavigateBefore />}
           size="large"
         >
-          Précédent
+          {t("common.back")}
         </Button>
 
         <Box sx={{ flex: 1, textAlign: "center" }}>
           <Typography variant="body2" color="text.secondary">
-            Étape {currentStep + 1} sur {steps.length}
+            {t("common.loading") /* keeps minimal; optional to add step i18n later */}
           </Typography>
         </Box>
 
@@ -612,7 +612,7 @@ const FeedbackPage = () => {
             disabled={isSubmitting}
             size="large"
           >
-            {isSubmitting ? "Envoi en cours..." : "Envoyer le Feedback"}
+            {isSubmitting ? t("feedback.actions.sending") : t("feedback.sendFeedback")}
           </Button>
         ) : (
           <Button
@@ -621,7 +621,7 @@ const FeedbackPage = () => {
             endIcon={<NavigateNext />}
             size="large"
           >
-            Suivant
+            {t("common.next")}
           </Button>
         )}
       </Box>
@@ -662,21 +662,21 @@ const FeedbackPage = () => {
               {formData.category && (
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Catégorie:</strong> {formData.category}
+                    <strong>{t("feedback.previewLabels.category")}:</strong> {formData.category}
                   </Typography>
                 </Grid>
               )}
               {formData.browser && (
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Navigateur:</strong> {formData.browser}
+                    <strong>{t("feedback.previewLabels.browser")}:</strong> {t(`feedback.browsers.${formData.browser}`)}
                   </Typography>
                 </Grid>
               )}
               {formData.device && (
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>Appareil:</strong> {formData.device}
+                    <strong>{t("feedback.previewLabels.device")}:</strong> {t(`feedback.devices.${formData.device}`)}
                   </Typography>
                 </Grid>
               )}
@@ -684,7 +684,7 @@ const FeedbackPage = () => {
           </Paper>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowPreview(false)}>Fermer</Button>
+          <Button onClick={() => setShowPreview(false)}>{t("common.close")}</Button>
         </DialogActions>
       </Dialog>
     </Container>

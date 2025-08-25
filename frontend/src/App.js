@@ -77,7 +77,7 @@ import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 // feedbacks
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
-import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
+import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList/SessionFeedbackList';
 import ScoreReveal from './features/views/quiz/ScoreReveal';
 import QuizScores from './features/views/quiz/QuizScores';
 import QuizList from './features/views/quiz/QuizList';

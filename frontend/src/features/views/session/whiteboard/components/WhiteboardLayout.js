@@ -1,6 +1,7 @@
 import React from "react"
 import { Box, useMediaQuery, useTheme, Drawer, Fade } from "@mui/material"
 import ModernHeader from "./ModernHeader"
+import { useTranslation } from "react-i18next"
 import ModernToolbar from "./ModernToolbar"
 import { ZoomControls, ZoomIndicator } from "../ZoomControls"
 
@@ -21,6 +22,7 @@ const WhiteboardLayout = ({
   zoom
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Box
@@ -38,8 +40,8 @@ const WhiteboardLayout = ({
     >
       {/* Modern Header */}
       <ModernHeader
-        title="Collaborative Whiteboard"
-        subtitle={validSeanceId ? "Real-time collaboration workspace" : "No valid ID"}
+        title={t('whiteboard.collaborativeWhiteboard')}
+        subtitle={validSeanceId ? t('whiteboard.subtitleRealtime') : t('whiteboard.noValidId')}
         seanceId={seanceIdDisplay && seanceIdDisplay.length >= 6 ? seanceIdDisplay.slice(-6) : seanceIdDisplay}
         participants={1}
         isMobile={isMobile}
