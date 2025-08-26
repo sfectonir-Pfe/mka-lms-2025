@@ -1,5 +1,5 @@
 import * as React from "react";
-import { styled, useTheme, alpha } from "@mui/material/styles";
+import { styled, useTheme, alpha, ThemeProvider, createTheme } from "@mui/material/styles";
 import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   Box,
@@ -135,18 +135,19 @@ export default function Main({ setUser, user }) {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
 
-  // Apply dark mode class to document
-  React.useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      document.body.style.backgroundColor = '#1a1a1a';
-      document.body.style.color = '#ffffff';
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.style.backgroundColor = '#ffffff';
-      document.body.style.color = '#000000';
-    }
-  }, [darkMode]);
+  // Create dynamic MUI theme based on dark mode
+  const muiTheme = React.useMemo(() => createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: '#1976d2',
+      },
+      background: {
+        default: darkMode ? '#121212' : '#f5f5f5',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
+      },
+    },
+  }), [darkMode]);
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -340,9 +341,10 @@ export default function Main({ setUser, user }) {
 
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open} isRTL={isRTL}>
+    <ThemeProvider theme={muiTheme}>
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+        <AppBar position="fixed" open={open} isRTL={isRTL}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -551,16 +553,18 @@ export default function Main({ setUser, user }) {
         sx={{
           flexGrow: 1,
           p: 3,
-          backgroundColor: theme.palette.grey[50],
+          backgroundColor: muiTheme.palette.background.default,
           minHeight: "100vh",
+          overflow: "auto",
+          height: "100vh",
         }}
       >
         <DrawerHeader />
         <Box
           sx={{
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: muiTheme.palette.background.paper,
             borderRadius: 2,
-            boxShadow: theme.shadows[1],
+            boxShadow: muiTheme.shadows[1],
             p: 3,
           }}
         >
@@ -571,5 +575,6 @@ export default function Main({ setUser, user }) {
 
       </Box>
     </Box >
+    </ThemeProvider>
   );
 }

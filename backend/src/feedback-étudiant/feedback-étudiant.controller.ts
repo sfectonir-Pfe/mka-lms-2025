@@ -153,7 +153,8 @@ export class FeedbackÉtudiantController {
     return await this.feedbackÉtudiantService.getEmojiSummary(groupId);
   }
 
-
-
-
+  @Get('ratings/summary/:groupId')
+  async getStudentRatingSummary(@Param('groupId') groupId: string) {
+    return await this.feedbackÉtudiantService.getStudentRatingSummary(groupId);
+  }
 }
