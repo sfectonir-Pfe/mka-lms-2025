@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import api from "../../../../api/axiosInstance"
+
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ import {
   LinearProgress,
 } from "@mui/material"
 import { Close, Send, NavigateNext, NavigateBefore } from "@mui/icons-material"
-
+import api from "../../../../api/axiosInstance";
 const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) => {
   const { t, i18n } = useTranslation()
   const d = (fr, ar) => (i18n.language === "ar" ? ar : fr)
@@ -303,9 +303,9 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
         timestamp: new Date().toISOString(),
       }
 
-      // Make API call via Axios instance (adds auth headers, baseURL)
-      const { data: result } = await api.post('/feedback/session', feedbackData)
-      console.log("Feedback submitted successfully:", result)
+      // Make actual API call using authenticated api instance
+      const result = await api.post('/feedback/session', feedbackData)
+      console.log("Feedback submitted successfully:", result.data)
       
       setShowSuccess(true)
       setIsSubmitting(false)

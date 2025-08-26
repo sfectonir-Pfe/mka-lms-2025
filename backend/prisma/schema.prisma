@@ -310,6 +310,7 @@ model Session2 {
   chatMessages    Session2ChatMessage[]
   session2Modules Session2Module[]
   userSessions2   UserSession2[]
+  sessionFeedbacks SessionFeedback[]
 }
 
 model Session2Module {
@@ -356,6 +357,7 @@ model SeanceFormateur {
   medias           SeanceMedia[]
   studentGroups    StudentGroup[]
   WhiteboardAction WhiteboardAction[]
+  seanceFeedbacks  SeanceFeedback[]
 }
 
 model SeanceMedia {
@@ -448,7 +450,7 @@ model FeedbackResponse {
 }
 
 model SeanceFeedback {
-  id                  Int      @id @default(autoincrement())
+  id                  Int             @id @default(autoincrement())
   seanceId            Int
   userId              Int?
   sessionRating       Int
@@ -462,6 +464,7 @@ model SeanceFeedback {
   trainerPedagogy     Int
   trainerInteraction  Int
   teamRating          Int
+  seance              SeanceFormateur @relation(fields: [seanceId], references: [id], onDelete: Cascade)
   teamCollaboration   Int
   teamParticipation   Int
   teamCommunication   Int
@@ -497,6 +500,7 @@ model SessionFeedback {
   rating    Int
   comments  String?
   createdAt DateTime @default(now())
+  session   Session2 @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   user      User?    @relation(fields: [userId], references: [id])
 }
 

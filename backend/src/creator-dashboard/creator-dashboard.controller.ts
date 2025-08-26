@@ -39,4 +39,9 @@ getMonthlyProgramPublish() {
   return this.dashboardService.getMonthlyProgramPublish();
 }
 
+@Get('top-programs')
+getTopPrograms() {
+  return this.dashboardService.getTopPrograms();
+}
+
 }

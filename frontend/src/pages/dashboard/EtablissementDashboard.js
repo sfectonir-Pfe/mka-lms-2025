@@ -13,76 +13,107 @@ import {
   TextField,
   MenuItem,
   Divider,
+  Avatar,
+  CircularProgress,
+  Paper,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
 import StarIcon from "@mui/icons-material/Star";
-import RedeemIcon from "@mui/icons-material/Redeem";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import SchoolIcon from "@mui/icons-material/School";
+import PersonIcon from "@mui/icons-material/Person";
 import api from "../../api/axiosInstance";
 
-// const API_BASE = "http://localhost:8000";
-
 export default function EtablissementDashboardPage() {
-  // Liste des sessions (sessions2) récupérées du backend
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState("Tous");
+  const [students, setStudents] = useState([]);
+  const [topStudents, setTopStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [establishmentName, setEstablishmentName] = useState("");
 
-  // Étudiants à afficher (MOCK, à remplacer par requête API filtrée par session)
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Majd Bouhmid",
-      sessionId: 6, // ID session2, à matcher
-      program: "Informatique",
-      sessions: [
-        { name: "React Avancé", status: "Terminée", grade: 18 },
-        { name: "NestJS", status: "En cours", grade: 15 },
-      ],
-      moyenne: 16.5,
-      rewards: [{ name: "Bon d'achat", reason: "Top 3", date: "2025-06-01" }],
-    },
-    {
-      id: 2,
-      name: "Sarah Dridi",
-      sessionId: 8,
-      program: "Maths",
-      sessions: [
-        { name: "Statistiques", status: "Terminée", grade: 14 },
-        { name: "Analyse", status: "Terminée", grade: 15 },
-      ],
-      moyenne: 14.5,
-      rewards: [],
-    },
-  ]);
-
-  // Récupérer les sessions2 depuis le backend
+  // Get establishment name from user context (you might need to adjust this based on your auth system)
   useEffect(() => {
-    // TODO: remplace par ton endpoint réel
-    api
-      .get(`/sessions2`)
-      .then((res) => {
-        setSessions([{ id: "Tous", name: "Toutes les sessions" }, ...res.data]);
-      })
-      .catch(() => {
-        // fallback mock
-        setSessions([
-          { id: "Tous", name: "Toutes les sessions" },
-          { id: 6, name: "React Avancé" },
-          { id: 8, name: "Statistiques" },
-        ]);
-      });
+    // For now, we'll use a placeholder. In a real app, you'd get this from the logged-in user
+    // You might want to get this from localStorage, context, or an API call
+    const userEstablishment = localStorage.getItem('userEstablishment') || 'Default Establishment';
+    setEstablishmentName(userEstablishment);
   }, []);
 
-  // Filtrer étudiants par session sélectionnée
-  const filteredStudents =
-    selectedSession === "Tous"
-      ? students
-      : students.filter((s) => s.sessionId === Number(selectedSession));
+  // Fetch students and sessions data
+  useEffect(() => {
+    if (!establishmentName) return;
 
-  // Top 3 par moyenne
-  const topStudents = [...filteredStudents]
-    .sort((a, b) => b.moyenne - a.moyenne)
-    .slice(0, 3);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch students and their sessions
+        const studentsResponse = await api.get(`/dashboard-establishment/students/${encodeURIComponent(establishmentName)}`);
+        setStudents(studentsResponse.data);
+
+        // Fetch top students by rating
+        const topStudentsResponse = await api.get(`/dashboard-establishment/top-students/${encodeURIComponent(establishmentName)}`);
+        setTopStudents(topStudentsResponse.data);
+
+        // Extract unique sessions from students data
+        const allSessions = studentsResponse.data.flatMap(student => student.sessions);
+        const uniqueSessions = allSessions.reduce((acc, session) => {
+          if (!acc.find(s => s.id === session.id)) {
+            acc.push(session);
+          }
+          return acc;
+        }, []);
+        
+        setSessions([{ id: "Tous", name: "Toutes les sessions" }, ...uniqueSessions]);
+      } catch (error) {
+        console.error('Error fetching establishment data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [establishmentName]);
+
+  // Filter students by selected session
+  const filteredStudents = selectedSession === "Tous"
+    ? students
+    : students.filter(student => 
+        student.sessions.some(session => session.id === Number(selectedSession))
+      );
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'ACTIVE': return 'success';
+      case 'COMPLETED': return 'primary';
+      case 'INACTIVE': return 'default';
+      case 'ARCHIVED': return 'secondary';
+      default: return 'default';
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'ACTIVE': return 'Active';
+      case 'COMPLETED': return 'Terminée';
+      case 'INACTIVE': return 'Inactive';
+      case 'ARCHIVED': return 'Archivée';
+      default: return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="50vh"
+      >
+        <CircularProgress size={60} />
+      </Box>
+    );
+  }
 
   return (
     <Box p={3}>
@@ -109,7 +140,7 @@ export default function EtablissementDashboardPage() {
 
       {/* Statistiques */}
       <Grid container spacing={4} mb={3} maxWidth={1440} margin="auto">
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ borderRadius: 3, bgcolor: "#e3f2fd" }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
@@ -124,52 +155,32 @@ export default function EtablissementDashboardPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ borderRadius: 3, bgcolor: "#f3e5f5" }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Typography variant="h3" fontWeight={700} color="#8e24aa">
-                  {filteredStudents.length
-                    ? (
-                        filteredStudents.reduce((sum, s) => sum + (s.moyenne || 0), 0) /
-                        filteredStudents.length
-                      ).toFixed(2)
-                    : "—"}
+                  {sessions.length - 1}
                 </Typography>
-                <StarIcon sx={{ color: "#8e24aa", fontSize: 44 }} />
+                <SchoolIcon sx={{ color: "#8e24aa", fontSize: 44 }} />
               </Stack>
               <Typography mt={2} color="#6a1b9a" fontWeight={500} fontSize={18}>
-                Moyenne générale
+                Sessions actives
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 3, bgcolor: "#fce4ec" }}>
-            <CardContent>
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#d81b60">
-                  {filteredStudents.reduce((n, s) => n + (s.rewards.length || 0), 0)}
-                </Typography>
-                <RedeemIcon sx={{ color: "#d81b60", fontSize: 44 }} />
-              </Stack>
-              <Typography mt={2} color="#ad1457" fontWeight={500} fontSize={18}>
-                Cadeaux/rewards
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ borderRadius: 3, bgcolor: "#fffde7" }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Typography variant="h3" fontWeight={700} color="#fbc02d">
-                  3
+                  {topStudents.length}
                 </Typography>
                 <EmojiEventsIcon sx={{ color: "#fbc02d", fontSize: 44 }} />
               </Stack>
               <Typography mt={2} color="#f9a825" fontWeight={500} fontSize={18}>
-                Top 3 étudiants
+                Top étudiants
               </Typography>
             </CardContent>
           </Card>
@@ -191,43 +202,54 @@ export default function EtablissementDashboardPage() {
                   <ListItem alignItems="flex-start" divider>
                     <ListItemText
                       primary={
-                        <Typography fontWeight={600}>
-                          {student.name} <span style={{ color: "#789262" }}>({student.program})</span>
-                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing={2}>
+                          <Avatar 
+                            src={student.profilePic} 
+                            alt={student.name}
+                            sx={{ width: 40, height: 40 }}
+                          >
+                            <PersonIcon />
+                          </Avatar>
+                          <Box>
+                            <Typography fontWeight={600}>
+                              {student.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {student.email}
+                            </Typography>
+                          </Box>
+                          {student.averageRating > 0 && (
+                            <Chip
+                              icon={<StarIcon />}
+                              label={`${student.averageRating}⭐`}
+                              color="warning"
+                              size="small"
+                            />
+                          )}
+                        </Stack>
                       }
                       secondary={
-                        <>
-                          <Typography fontSize={14}>
-                            <b>Moyenne:</b> {student.moyenne ?? "—"}
-                            &nbsp;|&nbsp;
-                            <b>Sessions:</b>{" "}
-                            {student.sessions.map((s) => (
+                        <Box mt={1}>
+                          <Typography fontSize={14} mb={1}>
+                            <b>Sessions inscrites:</b>
+                          </Typography>
+                          <Stack direction="row" spacing={1} flexWrap="wrap">
+                            {student.sessions.map((session) => (
                               <Chip
-                                key={s.name}
-                                label={`${s.name} (${s.status})`}
-                                color={
-                                  s.status === "Terminée"
-                                    ? "success"
-                                    : s.status === "En cours"
-                                    ? "primary"
-                                    : "default"
-                                }
+                                key={session.id}
+                                label={`${session.name} (${getStatusLabel(session.status)})`}
+                                color={getStatusColor(session.status)}
                                 size="small"
-                                sx={{ mr: 0.5 }}
+                                sx={{ mb: 0.5 }}
                               />
                             ))}
-                          </Typography>
-                          {student.rewards.length > 0 && (
-                            <Typography fontSize={14} color="#c2185b">
-                              🎁 Cadeaux:{" "}
-                              {student.rewards.map((r) => (
-                                <span key={r.name + r.date}>
-                                  {r.name} <i>({r.reason})</i> le {r.date}
-                                </span>
-                              ))}
-                            </Typography>
-                          )}
-                        </>
+                            {student.sessions.length === 0 && (
+                              <Typography variant="body2" color="text.secondary">
+                                Aucune session inscrite
+                              </Typography>
+                            )}
+                          </Stack>
+                        </Box>
                       }
                     />
                   </ListItem>
@@ -238,33 +260,54 @@ export default function EtablissementDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Top 3 étudiants */}
+      {/* Top étudiants par note */}
       <Card sx={{ borderRadius: 3, mt: 4, maxWidth: 700, mx: "auto" }}>
         <CardContent>
           <Typography variant="h6" mb={2}>
-            <EmojiEventsIcon color="warning" /> Top 3 étudiants (moyenne la plus élevée)
+            <EmojiEventsIcon color="warning" /> Top étudiants (par note moyenne)
           </Typography>
-          {topStudents.map((s, idx) => (
-            <Box key={s.id}>
-              <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography fontWeight={700} fontSize={22}>
-                  #{idx + 1}
-                </Typography>
-                <Typography fontWeight={700} fontSize={18}>
-                  {s.name} ({s.program})
-                </Typography>
-                <Chip label={`Moy: ${s.moyenne}`} color="success" size="small" />
-                {s.rewards.length > 0 && (
-                  <Chip
-                    label={`🎁 ${s.rewards[0].name}`}
-                    color="secondary"
-                    size="small"
+          {topStudents.length === 0 ? (
+            <Typography color="text.secondary" textAlign="center" py={2}>
+              Aucun étudiant avec des notes disponibles
+            </Typography>
+          ) : (
+            topStudents.map((student, idx) => (
+              <Paper key={student.id} sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Avatar
+                    sx={{
+                      bgcolor: idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : '#cd7f32',
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    #{idx + 1}
+                  </Avatar>
+                  <Avatar 
+                    src={student.profilePic} 
+                    alt={student.name}
+                    sx={{ width: 40, height: 40 }}
+                  >
+                    <PersonIcon />
+                  </Avatar>
+                  <Box flex={1}>
+                    <Typography fontWeight={700} fontSize={18}>
+                      {student.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {student.sessions.length} session(s) inscrite(s)
+                    </Typography>
+                  </Box>
+                  <Chip 
+                    icon={<StarIcon />}
+                    label={`${student.averageRating}⭐`} 
+                    color="warning" 
+                    size="medium"
                   />
-                )}
-              </Stack>
-              <Divider sx={{ my: 1 }} />
-            </Box>
-          ))}
+                </Stack>
+              </Paper>
+            ))
+          )}
         </CardContent>
       </Card>
     </Box>

@@ -11,7 +11,9 @@ import {
 } from '@nestjs/common';
 import { FeedbackFormateurService } from './feedbackformateur.service';
 import { CreateFeedbackFormateurDto } from './dto/create-feedbackformateur.dto';
+// import { Public } from '../auth/public.decorator';
 
+// @Public()
 @Controller('feedback-formateur')
 export class FeedbackFormateurController {
   constructor(private readonly service: FeedbackFormateurService) {}
