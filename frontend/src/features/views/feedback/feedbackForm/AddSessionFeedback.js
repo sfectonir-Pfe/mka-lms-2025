@@ -28,7 +28,7 @@ import {
   LinearProgress,
 } from "@mui/material"
 import { Close, Send, NavigateNext, NavigateBefore } from "@mui/icons-material"
-
+import api from "../../../../api/axiosInstance";
 const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) => {
   console.log("FeedbackForm rendered with props:", { open, session })
 
@@ -288,21 +288,9 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
         timestamp: new Date().toISOString(),
       }
 
-      // Make actual API call
-      const response = await fetch('http://localhost:8000/feedback/session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(feedbackData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback')
-      }
-
-      const result = await response.json()
-      console.log("Feedback submitted successfully:", result)
+      // Make actual API call using authenticated api instance
+      const result = await api.post('/feedback/session', feedbackData)
+      console.log("Feedback submitted successfully:", result.data)
       
       setShowSuccess(true)
       setIsSubmitting(false)

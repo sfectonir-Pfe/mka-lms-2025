@@ -69,11 +69,31 @@ const toPieData = (dataArr, labelMap = {}) => {
   }));
 };
 
+// --- Status badge (reused) ---
+const StatusChip = ({ status }) => {
+  const info = statusMap[status] || { color: "#bdbdbd", label: status };
+  return (
+    <Chip
+      size="small"
+      icon={info.icon}
+      label={info.label}
+      sx={{
+        ml: 1,
+        background: info.color + "18",
+        color: info.color,
+        fontWeight: 600,
+        borderRadius: "1rem",
+        fontSize: 13,
+      }}
+    />
+  );
+};
+
 // ---- Main Component ----
 export default function CreateurDashboard() {
   const [stats, setStats] = useState(null);
   const [topSessions, setTopSessions] = useState([]);
-  const [inactiveSessions, setInactiveSessions] = useState([]);
+  const [topPrograms, setTopPrograms] = useState([]);
   const [sessionFeedback, setSessionFeedback] = useState([]);
   const [monthlySessionStatus, setMonthlySessionStatus] = useState([]);
   const [monthlyProgramPublish, setMonthlyProgramPublish] = useState([]);
@@ -93,7 +113,7 @@ export default function CreateurDashboard() {
     Promise.all([
       api.get(`/creator-dashboard/stats`),
       api.get(`/creator-dashboard/top-sessions`),
-      api.get(`/creator-dashboard/inactive-sessions`),
+      api.get(`/creator-dashboard/top-programs`),
       api.get(`/creator-dashboard/session-feedback`),
       api.get(`/creator-dashboard/monthly-session-status`),
       api.get(`/creator-dashboard/monthly-program-publish`)
@@ -101,14 +121,14 @@ export default function CreateurDashboard() {
       ([
         statsRes,
         topSessionsRes,
-        inactiveSessionsRes,
+        topProgramsRes,
         feedbackRes,
         monthlySessionStatusRes,
         monthlyProgramPublishRes
       ]) => {
         setStats(statsRes.data);
         setTopSessions(topSessionsRes.data);
-        setInactiveSessions(inactiveSessionsRes.data);
+        setTopPrograms(topProgramsRes.data);
         setSessionFeedback(feedbackRes.data);
         setMonthlySessionStatus(monthlySessionStatusRes.data);
         setMonthlyProgramPublish(monthlyProgramPublishRes.data);
@@ -143,25 +163,6 @@ export default function CreateurDashboard() {
     { name: "Non publiés", value: sumMonthly("unpublished"), color: ACCENT_COLORS[2] }
   ];
 
-  // --- Status badge (reused) ---
-  const StatusChip = ({ status }) => {
-    const info = statusMap[status] || { color: "#bdbdbd", label: status };
-    return (
-      <Chip
-        size="small"
-        icon={info.icon}
-        label={info.label}
-        sx={{
-          ml: 1,
-          background: info.color + "18",
-          color: info.color,
-          fontWeight: 600,
-          borderRadius: "1rem",
-          fontSize: 13,
-        }}
-      />
-    );
-  };
 
   return (
     <Box
@@ -465,7 +466,7 @@ export default function CreateurDashboard() {
           </Grid>
         </Grid>
 
-        {/* TOP SESSIONS & INACTIVE SESSIONS */}
+        {/* TOP SESSIONS & PROGRAMS */}
         <Grid container spacing={3} mb={5}>
           {/* Top 3 Sessions */}
           <Grid item xs={12} md={6}>
@@ -483,28 +484,17 @@ export default function CreateurDashboard() {
               </CardContent>
             </ModernCard>
           </Grid>
-          {/* Inactive Sessions */}
+          {/* Top 3 Programs */}
           <Grid item xs={12} md={6}>
             <ModernCard>
               <CardContent>
                 <Typography fontWeight={800} mb={2}>
-                  <EventBusyIcon color="error" sx={{ mb: -.5 }} /> Sessions Inactives
+                  <StarIcon color="warning" sx={{ mb: -.5 }} /> Top 3 Programmes (mieux notés)
                 </Typography>
-                {inactiveSessions.map((s, idx) => (
-                  <Box key={s.sessionId} mb={2} display="flex" alignItems="center">
-                    <Typography flex={1} fontWeight={600} fontSize={17}>
-                      {idx + 1}. {s.sessionName}
-                      {s.programName && (
-                        <span style={{ color: "#888", fontSize: 14 }}> ({s.programName})</span>
-                      )}
-                    </Typography>
-                    <StatusChip status={s.status} />
-                    <Typography color="text.secondary" fontSize={15} ml={2}>
-                      Inscrits: <b>{s.enrolledUsers}</b>
-                    </Typography>
-                  </Box>
+                {topPrograms.map((p, idx) => (
+                  <TopProgramItem key={p.programId} program={p} rank={idx} />
                 ))}
-                {!inactiveSessions.length && (
+                {!topPrograms.length && (
                   <Typography color="text.secondary">Aucune donnée.</Typography>
                 )}
               </CardContent>
@@ -512,26 +502,27 @@ export default function CreateurDashboard() {
           </Grid>
         </Grid>
 
-        {/* FEEDBACKS */}
+        {/* SESSION FEEDBACK WITH RATINGS */}
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <ModernCard>
               <CardContent>
-                <Typography fontWeight={800} mb={2}>
-                  Feedback sur les Sessions (à venir)
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={2} mb={3}>
+                  <Avatar sx={{ 
+                    bgcolor: '#f59e0b', 
+                    width: 40, 
+                    height: 40,
+                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                  }}>
+                    <StarIcon />
+                  </Avatar>
+                  <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
+                    Feedback sur les Sessions
+                  </Typography>
+                </Stack>
+                <Divider sx={{ mb: 3 }} />
                 {sessionFeedback.map((fb, idx) => (
-                  <Box key={fb.sessionId} mb={2}>
-                    <Typography fontWeight={600} fontSize={17}>
-                      {fb.sessionName}
-                      {fb.programName && (
-                        <span style={{ color: "#888", fontSize: 14 }}> ({fb.programName})</span>
-                      )}
-                    </Typography>
-                    <Typography color="text.secondary" fontSize={15}>
-                      Feedback: {fb.feedback ?? "N/A"}
-                    </Typography>
-                  </Box>
+                  <SessionFeedbackItem key={fb.sessionId} feedback={fb} />
                 ))}
                 {!sessionFeedback.length && (
                   <Typography color="text.secondary">Aucune donnée.</Typography>
@@ -660,6 +651,169 @@ function TopSessionItem({ session, rank }) {
           <Typography variant="body2" fontWeight={600} color={ACCENT_COLORS[1]}>
             {session.enrolledUsers} inscrits
           </Typography>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+// --------- Top Program Item ---------
+function TopProgramItem({ program, rank }) {
+  const medals = ["🥇", "🥈", "🥉"];
+  const gradients = [
+    'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)',
+    'linear-gradient(135deg, #c0c0c0 0%, #e5e5e5 100%)',
+    'linear-gradient(135deg, #cd7f32 0%, #daa520 100%)'
+  ];
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<StarIcon key={i} sx={{ color: '#fbbf24', fontSize: 16 }} />);
+    }
+    
+    if (hasHalfStar) {
+      stars.push(<StarIcon key="half" sx={{ color: '#fbbf24', fontSize: 16, opacity: 0.5 }} />);
+    }
+    
+    const remainingStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(<StarIcon key={`empty-${i}`} sx={{ color: '#e5e7eb', fontSize: 16 }} />);
+    }
+    
+    return stars;
+  };
+
+  return (
+    <Paper
+      sx={{
+        p: 2,
+        mb: 2,
+        borderRadius: 2,
+        background: rank === 0 ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' : '#f8fafc',
+        border: rank === 0 ? '2px solid #fbbf24' : '1px solid #e2e8f0',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateX(4px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }
+      }}
+    >
+      <Stack direction="row" alignItems="center" spacing={2}>
+        <Avatar
+          sx={{
+            width: 40,
+            height: 40,
+            background: gradients[rank] || ACCENT_COLORS[rank],
+            fontSize: 20,
+            fontWeight: 700
+          }}
+        >
+          {medals[rank] || rank + 1}
+        </Avatar>
+        <Box flex={1}>
+          <Typography fontWeight={600} color={PRIMARY_BLUE} mb={0.5}>
+            {program.programName}
+          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            {renderStars(program.rating)}
+            <Typography fontWeight={700} color={ACCENT_COLORS[1]}>
+              {program.rating}
+            </Typography>
+          </Stack>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+// --------- Session Feedback Item ---------
+function SessionFeedbackItem({ feedback }) {
+  const getRatingColor = (rating) => {
+    if (rating >= 4) return '#22c55e'; // Green
+    if (rating >= 3) return '#f59e0b'; // Orange
+    if (rating >= 2) return '#ef4444'; // Red
+    return '#6b7280'; // Gray
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 !== 0;
+    
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<StarIcon key={i} sx={{ color: '#fbbf24', fontSize: 16 }} />);
+    }
+    
+    if (hasHalfStar) {
+      stars.push(<StarIcon key="half" sx={{ color: '#fbbf24', fontSize: 16, opacity: 0.5 }} />);
+    }
+    
+    const remainingStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < remainingStars; i++) {
+      stars.push(<StarIcon key={`empty-${i}`} sx={{ color: '#e5e7eb', fontSize: 16 }} />);
+    }
+    
+    return stars;
+  };
+
+  return (
+    <Paper
+      sx={{
+        p: 2,
+        mb: 2,
+        borderRadius: 2,
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+        }
+      }}
+    >
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Box flex={1}>
+          <Typography fontWeight={600} color={PRIMARY_BLUE} mb={0.5}>
+            {feedback.sessionName}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" mb={1}>
+            {feedback.programName}
+          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <StatusChip status={feedback.status} />
+            <Typography variant="body2" color="text.secondary">
+              {feedback.enrolledUsers} inscrits
+            </Typography>
+          </Stack>
+        </Box>
+        <Box textAlign="right">
+          {feedback.averageRating ? (
+            <>
+              <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
+                {renderStars(feedback.averageRating)}
+                <Typography 
+                  fontWeight={700} 
+                  sx={{ 
+                    color: getRatingColor(feedback.averageRating),
+                    fontSize: 16 
+                  }}
+                >
+                  {feedback.averageRating}
+                </Typography>
+              </Stack>
+              <Typography variant="caption" color="text.secondary">
+                {feedback.feedbackCount} évaluation{feedback.feedbackCount > 1 ? 's' : ''}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="body2" color="text.secondary" fontStyle="italic">
+              Aucune évaluation
+            </Typography>
+          )}
         </Box>
       </Stack>
     </Paper>

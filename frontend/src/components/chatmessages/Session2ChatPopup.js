@@ -8,7 +8,7 @@ import EmojiPicker from "emoji-picker-react";
 import io from "socket.io-client";
 import api from "../../api/axiosInstance";
 
-const SOCKET_URL = "http://localhost:8000";
+const SOCKET_URL = process.env.REACT_APP_API_BASE;
 
 export default function UnifiedSessionChatPopup({ user }) {
   // --- NEW: Program chat state ---

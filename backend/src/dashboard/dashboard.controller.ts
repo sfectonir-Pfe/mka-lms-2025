@@ -39,6 +39,15 @@ getSessionStatusStats() {
 getFormateurActivity() {
   return this.dashboardService.getFormateurActivity();
 }
+@Get('top-rated-sessions')
+getTopRatedSessionsWithSeances() {
+  return this.dashboardService.getTopRatedSessionsWithSeances();
+}
+
+@Get('reclamation-stats')
+getReclamationStats() {
+  return this.dashboardService.getReclamationStats();
+}
 
 
 }

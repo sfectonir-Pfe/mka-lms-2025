@@ -11,7 +11,7 @@ import {
   Rating,
   Chip,
 } from "@mui/material";
-
+import api from "../../../api/axiosInstance";
 const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSelectedSeance, setFeedbackOpen }) => {
   const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState(null);
@@ -29,10 +29,8 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
       
       for (const seance of seances) {
         try {
-          const res = await fetch(`http://localhost:8000/feedback/seance/${seance.id}`);
-          if (!res.ok) continue;
-          
-          const feedbacks = await res.json();
+          const res = await api.get(`/feedback/seance/${seance.id}`);
+          const feedbacks = res.data;
           console.log(`Feedbacks pour séance ${seance.id}:`, feedbacks);
           
           if (Array.isArray(feedbacks) && feedbacks.length > 0) {
@@ -63,9 +61,8 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
       setExpandedId(null);
     } else {
       setExpandedId(id);
-      fetch(`http://localhost:8000/seance-formateur/details/${seance.session2.id}`)
-        .then((res) => res.json())
-        .then((data) => setDetails((prev) => ({ ...prev, [id]: data })))
+      api.get(`/seance-formateur/details/${seance.session2.id}`)
+        .then((res) => setDetails((prev) => ({ ...prev, [id]: res.data })))
         .catch((err) => console.error("Erreur chargement détails:", err));
     }
   };

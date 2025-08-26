@@ -20,7 +20,7 @@ export default function HomePage() {
         >
           Tableau de bord Admin
         </Button>
-        {/* <Button
+        <Button
           component={Link}
           to="/etablissement/dashboard"
           variant="contained"
@@ -28,7 +28,7 @@ export default function HomePage() {
           size="large"
         >
           Tableau de bord Établissement
-        </Button> */}
+        </Button>
         <Button
           component={Link}
           to="/createur/dashboard"

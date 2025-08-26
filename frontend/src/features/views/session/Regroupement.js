@@ -26,23 +26,23 @@ const Regroupement = () => {
 
   const createGroup = async () => {
     try {
-      console.log('🔄 Création groupe avec seanceId:', seanceId);
-      const response = await api.post(`/groups`, {
+      console.log(' Création groupe avec seanceId:', seanceId);
+      const response = await api.post(`/feedback-etudiant/groups`, {
         name: `Groupe ${groups.length + 1}`,
         seanceId: parseInt(seanceId),
         studentIds: []
       });
-      console.log('✅ Groupe créé:', response.data);
+      console.log(' Groupe créé:', response.data);
       setGroups([...groups, response.data]);
     } catch (error) {
-      console.error('❌ Erreur création groupe:', error.response?.data || error.message);
+      console.error(' Erreur création groupe:', error.response?.data || error.message);
       alert('Erreur lors de la création du groupe. Vérifiez la console pour plus de détails.');
     }
   };
 
   const deleteGroup = async (groupId) => {
     try {
-      await api.delete(`/groups/${groupId}`);
+      await api.delete(`/feedback-etudiant/groups/${groupId}`);
       const group = groups.find(g => g.id === groupId);
       if (group) {
         setStudents([...students, ...group.students]);
@@ -55,7 +55,7 @@ const Regroupement = () => {
 
   const addStudentToGroup = async (groupId, student) => {
     try {
-      await api.post(`/groups/${groupId}/students/${student.id}`);
+      await api.post(`/feedback-etudiant/groups/${groupId}/students/${student.id}`);
       setGroups(groups.map(g => 
         g.id === groupId 
           ? { ...g, students: [...g.students, student] }
@@ -69,7 +69,7 @@ const Regroupement = () => {
 
   const removeStudentFromGroup = async (groupId, studentId) => {
     try {
-      await api.delete(`/groups/${groupId}/students/${studentId}`);
+      await api.delete(`/feedback-etudiant/groups/${groupId}/students/${studentId}`);
       const group = groups.find(g => g.id === groupId);
       const student = group.students.find(s => s.id === studentId);
       setGroups(groups.map(g => 
@@ -90,8 +90,8 @@ const Regroupement = () => {
       try {
         // Charger les étudiants et les groupes en parallèle
         const [studentsRes, groupsRes] = await Promise.all([
-          api.get(`/students/seance/${seanceId}`),
-          api.get(`/groups/seance/${seanceId}`)
+          api.get(`/feedback-etudiant/students/seance/${seanceId}`),
+          api.get(`/feedback-etudiant/groups/seance/${seanceId}`)
         ]);
         
         const allStudents = studentsRes.data;

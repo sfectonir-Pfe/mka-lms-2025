@@ -39,6 +39,7 @@ import { RéclamationModule } from './réclamation/réclamation.module';
 import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
 import { ProgramChatModule } from './program-chat/program-chat.module';
 import { Etablissement2Module } from './etablissement2/etablissement2.module';
+import { DashboardEstablishmentModule } from './dashboard-establishment/dashboard-establishment.module';
 
 
 
@@ -93,6 +94,7 @@ imports: [
     NotificationModule,
     ProgramChatModule,
     Etablissement2Module,
+    DashboardEstablishmentModule,
   ],
   controllers: [AppController],
   providers: [
