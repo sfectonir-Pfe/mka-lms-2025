@@ -8,7 +8,7 @@ import EmojiPicker from "emoji-picker-react";
 import io from "socket.io-client";
 import api from "../../api/axiosInstance";
 
-const SOCKET_URL = "http://localhost:8000";
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || "http://localhost:8000";
 
 export default function UnifiedSessionChatPopup({ user }) {
   // --- NEW: Program chat state ---
@@ -55,7 +55,14 @@ export default function UnifiedSessionChatPopup({ user }) {
   // --- General chat socket (unchanged) ---
   useEffect(() => {
     if (generalSocketRef.current) generalSocketRef.current.disconnect();
-    const s = io(`${SOCKET_URL}/general-chat`, { transports: ["websocket"] });
+    const s = io(`${SOCKET_URL}/general-chat`, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     generalSocketRef.current = s;
     s.emit("fetchGeneralMessages");
     s.on("generalMessages", msgs => setGeneralChatMessages(msgs));
@@ -169,7 +176,14 @@ export default function UnifiedSessionChatPopup({ user }) {
       sessionSocketRef.current.emit("leaveSession2", { session2Id: Number(session2Id) });
       sessionSocketRef.current.disconnect();
     }
-    const s = io(SOCKET_URL, { transports: ["websocket"] });
+    const s = io(SOCKET_URL, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     sessionSocketRef.current = s;
     s.emit("joinSession2", { session2Id: Number(session2Id) });
     s.on("newSession2Message", msg => setSessionChatMessages(prev => [...prev, msg]));
@@ -188,7 +202,14 @@ export default function UnifiedSessionChatPopup({ user }) {
       seanceSocketRef.current.emit("leaveSeance", { seanceId: Number(seanceId) });
       seanceSocketRef.current.disconnect();
     }
-    const s = io(SOCKET_URL, { transports: ["websocket"] });
+    const s = io(SOCKET_URL, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     seanceSocketRef.current = s;
     s.emit("joinSeance", { seanceId: Number(seanceId) });
     s.on("newSeanceMessage", msg => setSeanceChatMessages(prev => [...prev, msg]));
@@ -207,7 +228,14 @@ export default function UnifiedSessionChatPopup({ user }) {
       programSocketRef.current.emit("leaveProgram", { programId: Number(programId) });
       programSocketRef.current.disconnect();
     }
-    const s = io(`${SOCKET_URL}/program-chat`, { transports: ["websocket"] });
+    const s = io(`${SOCKET_URL}/program-chat`, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     programSocketRef.current = s;
     s.emit("joinProgram", { programId: Number(programId), userId: user?.id }); // userId optional (no security now)
     s.on("newProgramMessage", msg => setProgramChatMessages(prev => [...prev, msg]));

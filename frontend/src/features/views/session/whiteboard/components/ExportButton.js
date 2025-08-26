@@ -25,9 +25,11 @@ import {
   Code as SvgIcon,
   Settings as SettingsIcon,
 } from "@mui/icons-material"
+import { useTranslation } from "react-i18next"
 
 const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
   const [anchorEl, setAnchorEl] = useState(null)
+  const { t } = useTranslation()
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [exportFormat, setExportFormat] = useState("png")
   const [exportSettings, setExportSettings] = useState({
@@ -204,14 +206,14 @@ const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
   }
 
   const exportOptions = [
-    { format: "png", label: "PNG Image", icon: ImageIcon, description: "High quality, transparent background" },
-    { format: "jpeg", label: "JPEG Image", icon: ImageIcon, description: "Compressed, smaller file size" },
-    { format: "svg", label: "SVG Vector", icon: SvgIcon, description: "Editable vector format" },
+    { format: "png", label: t('whiteboard.export.png', 'PNG Image'), icon: ImageIcon, description: t('whiteboard.export.pngDesc', 'High quality, transparent background') },
+    { format: "jpeg", label: t('whiteboard.export.jpeg', 'JPEG Image'), icon: ImageIcon, description: t('whiteboard.export.jpegDesc', 'Compressed, smaller file size') },
+    { format: "svg", label: t('whiteboard.export.svg', 'SVG Vector'), icon: SvgIcon, description: t('whiteboard.export.svgDesc', 'Editable vector format') },
   ]
 
   return (
     <>
-      <Tooltip title="Export Whiteboard" placement="right">
+      <Tooltip title={t('whiteboard.export.tooltip', 'Export Whiteboard')} placement="right">
         <IconButton
           onClick={handleExportClick}
           sx={{
@@ -273,24 +275,24 @@ const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
         <DialogTitle>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <SettingsIcon />
-            <Typography variant="h6">Export Settings</Typography>
+            <Typography variant="h6">{t('whiteboard.export.settings', 'Export Settings')}</Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             <TextField
-              label="Filename"
+              label={t('whiteboard.export.filename', 'Filename')}
               value={exportSettings.filename}
               onChange={(e) => setExportSettings(prev => ({ ...prev, filename: e.target.value }))}
               fullWidth
             />
 
             <FormControl fullWidth>
-              <InputLabel>Export Format</InputLabel>
+              <InputLabel>{t('whiteboard.export.format', 'Export Format')}</InputLabel>
               <Select
                 value={exportFormat}
                 onChange={(e) => setExportFormat(e.target.value)}
-                label="Export Format"
+                label={t('whiteboard.export.format', 'Export Format')}
               >
                 {exportOptions.map((option) => (
                   <MenuItem key={option.format} value={option.format}>
@@ -301,43 +303,43 @@ const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
             </FormControl>
 
             <TextField
-              label="Scale Factor"
+              label={t('whiteboard.export.scale', 'Scale Factor')}
               type="number"
               value={exportSettings.scale}
               onChange={(e) => setExportSettings(prev => ({ ...prev, scale: parseFloat(e.target.value) }))}
               inputProps={{ min: 0.5, max: 5, step: 0.5 }}
-              helperText="Higher scale = better quality but larger file"
+              helperText={t('whiteboard.export.scaleHelp', 'Higher scale = better quality but larger file')}
             />
 
             {(exportFormat === "jpeg" || exportFormat === "png") && (
               <TextField
-                label="Quality"
+                label={t('whiteboard.export.quality', 'Quality')}
                 type="number"
                 value={exportSettings.quality}
                 onChange={(e) => setExportSettings(prev => ({ ...prev, quality: parseFloat(e.target.value) }))}
                 inputProps={{ min: 0.1, max: 1, step: 0.1 }}
-                helperText="JPEG quality (0.1 = low, 1.0 = high)"
+                helperText={t('whiteboard.export.qualityHelp', 'JPEG quality (0.1 = low, 1.0 = high)')}
               />
             )}
 
             <FormControl fullWidth>
-              <InputLabel>Background</InputLabel>
+              <InputLabel>{t('whiteboard.export.background', 'Background')}</InputLabel>
               <Select
                 value={exportSettings.includeBackground ? "include" : "transparent"}
                 onChange={(e) => setExportSettings(prev => ({ 
                   ...prev, 
                   includeBackground: e.target.value === "include" 
                 }))}
-                label="Background"
+                label={t('whiteboard.export.background', 'Background')}
               >
-                <MenuItem value="include">Include Background</MenuItem>
-                <MenuItem value="transparent">Transparent</MenuItem>
+                <MenuItem value="include">{t('whiteboard.export.includeBg', 'Include Background')}</MenuItem>
+                <MenuItem value="transparent">{t('whiteboard.export.transparent', 'Transparent')}</MenuItem>
               </Select>
             </FormControl>
 
             {exportSettings.includeBackground && (
               <TextField
-                label="Background Color"
+                label={t('whiteboard.export.bgColor', 'Background Color')}
                 type="color"
                 value={exportSettings.backgroundColor}
                 onChange={(e) => setExportSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
@@ -354,7 +356,7 @@ const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setExportDialogOpen(false)}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleExport}
@@ -362,7 +364,7 @@ const ExportButton = ({ canvasRef, actions, zoom, panOffset }) => {
             disabled={isExporting}
             startIcon={isExporting ? <SettingsIcon /> : <ExportIcon />}
           >
-            {isExporting ? "Exporting..." : "Export"}
+            {isExporting ? t('whiteboard.export.exporting', 'Exporting...') : t('whiteboard.export.export', 'Export')}
           </Button>
         </DialogActions>
       </Dialog>

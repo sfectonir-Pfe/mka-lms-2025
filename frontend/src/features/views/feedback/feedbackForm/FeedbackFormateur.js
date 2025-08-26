@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -24,8 +25,10 @@ import {
   Person,
 } from '@mui/icons-material';
 import { DataGrid } from '@mui/x-data-grid';
+import api from "../../../../api/axiosInstance";
 
 const FeedbackFormateur = ({ seanceId }) => {
+  const { t } = useTranslation();
   const user = JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user') || 'null');
   const formateurId = user?.id;
 
@@ -44,16 +47,10 @@ const FeedbackFormateur = ({ seanceId }) => {
     const url = `/users/students/without-feedback?formateurId=${formateurId}&seanceId=${seanceId}`;
     console.log('Chargement des étudiants depuis:', url);
     
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log('Réponse étudiants sans feedback:', data);
-        setStudents(Array.isArray(data) ? data : []);
+    api.get(url)
+      .then((response) => {
+        console.log('Réponse étudiants sans feedback:', response.data);
+        setStudents(Array.isArray(response.data) ? response.data : []);
       })
       .catch((err) => {
         console.error('Erreur lors du chargement des étudiants:', err);
@@ -76,11 +73,10 @@ const FeedbackFormateur = ({ seanceId }) => {
 
     loadStudents();
 
-    fetch(`/feedback-formateur/seance/${seanceId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log('Réponse feedbacks envoyés:', data);
-        setFeedbacksEnvoyes(Array.isArray(data) ? data : []);
+    api.get(`/feedback-formateur/seance/${seanceId}`)
+      .then((response) => {
+        console.log('Réponse feedbacks envoyés:', response.data);
+        setFeedbacksEnvoyes(Array.isArray(response.data) ? response.data : []);
       })
       .catch(() => setFeedbacksEnvoyes([]));
   }, [formateurId, seanceId, loadStudents]);
@@ -90,12 +86,12 @@ const FeedbackFormateur = ({ seanceId }) => {
     : [];
 
   const emojis = [
-    { id: 1, emoji: '😊', label: 'Satisfait', color: 'success' },
-    { id: 2, emoji: '👍', label: 'Excellent', color: 'primary' },
-    { id: 3, emoji: '💡', label: 'Idées claires', color: 'warning' },
-    { id: 4, emoji: '🚀', label: 'Progrès rapide', color: 'info' },
-    { id: 5, emoji: '🧠', label: 'Bonne compréhension', color: 'secondary' },
-    { id: 6, emoji: '⚠️', label: 'Attention nécessaire', color: 'error' },
+    { id: 1, emoji: '😊', label: t('feedbackFormateur.emoji.satisfied'), color: 'success' },
+    { id: 2, emoji: '👍', label: t('feedbackFormateur.emoji.excellent'), color: 'primary' },
+    { id: 3, emoji: '💡', label: t('feedbackFormateur.emoji.clearIdeas'), color: 'warning' },
+    { id: 4, emoji: '🚀', label: t('feedbackFormateur.emoji.fastProgress'), color: 'info' },
+    { id: 5, emoji: '🧠', label: t('feedbackFormateur.emoji.goodUnderstanding'), color: 'secondary' },
+    { id: 6, emoji: '⚠️', label: t('feedbackFormateur.emoji.needsAttention'), color: 'error' },
   ];
 
   const handleSubmit = async (e) => {
@@ -133,19 +129,11 @@ const FeedbackFormateur = ({ seanceId }) => {
       ]);
       
       // 3. Envoyer la requête au serveur
-      const response = await fetch('/feedback-formateur', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur serveur');
-      }
+      const response = await api.post('/feedback-formateur', payload);
 
       // 4. Synchroniser avec le serveur
-      const updatedFeedbacks = await fetch(`/feedback-formateur/seance/${seanceId}`).then(res => res.json());
-      setFeedbacksEnvoyes(Array.isArray(updatedFeedbacks) ? updatedFeedbacks : []);
+      const updatedFeedbacks = await api.get(`/feedback-formateur/seance/${seanceId}`);
+      setFeedbacksEnvoyes(Array.isArray(updatedFeedbacks.data) ? updatedFeedbacks.data : []);
 
       setFeedbackEnvoye(true);
       setSelectedStudent(null);
@@ -154,9 +142,8 @@ const FeedbackFormateur = ({ seanceId }) => {
       
       // Annuler les modifications optimistes en cas d'erreur
       loadStudents();
-      fetch(`/feedback-formateur/seance/${seanceId}`)
-        .then(res => res.json())
-        .then(data => setFeedbacksEnvoyes(Array.isArray(data) ? data : []));
+      api.get(`/feedback-formateur/seance/${seanceId}`)
+        .then((response) => setFeedbacksEnvoyes(Array.isArray(response.data) ? response.data : []));
       
       // Message d'erreur plus spécifique
       let errorMessage = 'Une erreur est survenue lors de l\'envoi du feedback.';
@@ -184,10 +171,10 @@ const FeedbackFormateur = ({ seanceId }) => {
       <Box className="text-center p-5" sx={{ bgcolor: '#f8f9fa', borderRadius: 2 }}>
         <Star sx={{ fontSize: 60, color: 'gold', mb: 2 }} />
         <Typography variant="h4" className="text-success mb-3">
-          Feedback envoyé avec succès! 🎉
+          {t('feedbackFormateur.sentSuccessTitle')}
         </Typography>
         <Typography variant="body1" className="mb-2">
-          Feedback pour: <strong>{selectedStudent?.name}</strong>
+          {t('feedbackFormateur.sentFor', { name: selectedStudent?.name || '' })}
         </Typography>
         <Typography variant="body1" className="mb-4">
           {emojis.find((e) => e.id === selectedEmoji)?.emoji} -{' '}
@@ -200,7 +187,7 @@ const FeedbackFormateur = ({ seanceId }) => {
           startIcon={<EmojiEmotions />}
           className="me-2"
         >
-          Nouveau Feedback
+          {t('feedbackFormateur.newFeedback')}
         </Button>
         
       </Box>
@@ -213,16 +200,16 @@ const FeedbackFormateur = ({ seanceId }) => {
         <Box className="text-center mb-4">
           <School sx={{ fontSize: 50, color: 'primary.main' }} />
           <Typography variant="h4" className="mb-2">
-            Sélectionnez un étudiant 👨‍🎓👩‍🎓
+            {t('feedbackFormateur.selectStudentTitle')}
           </Typography>
           <Typography variant="subtitle1" color="text.secondary">
-            Pour lui donner un feedback personnalisé
+            {t('feedbackFormateur.selectStudentSubtitle')}
           </Typography>
         </Box>
         <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
           {studentsFiltered.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ mt: 2 }}>
-              Tous les étudiants ont reçu un feedback pour cette séance.
+              {t('feedbackFormateur.allStudentsHaveFeedback')}
             </Typography>
           ) : (
             studentsFiltered.map((student) => (
@@ -250,7 +237,7 @@ const FeedbackFormateur = ({ seanceId }) => {
         </List>
         <Box sx={{ height: 350, width: '100%', my: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Étudiants ayant déjà reçu un feedback
+            {t('feedbackFormateur.studentsAlreadyReceived')}
           </Typography>
           <DataGrid
             rows={Array.isArray(feedbacksEnvoyes) ? feedbacksEnvoyes.map((f, idx) => ({
@@ -262,10 +249,10 @@ const FeedbackFormateur = ({ seanceId }) => {
               commentaire: f && typeof f === 'object' && 'commentaire' in f ? f.commentaire : '',
             })) : []}
             columns={[
-              { field: 'name', headerName: 'Nom', flex: 1 },
-              { field: 'email', headerName: 'Email', flex: 1 },
-              { field: 'emoji', headerName: 'Emoji', width: 80 },
-              { field: 'emojiLabel', headerName: 'Label', flex: 1 },
+              { field: 'name', headerName: t('feedbackFormateur.gridName'), flex: 1 },
+              { field: 'email', headerName: t('feedbackFormateur.gridEmail'), flex: 1 },
+              { field: 'emoji', headerName: t('feedbackFormateur.gridEmoji'), width: 80 },
+              { field: 'emojiLabel', headerName: t('feedbackFormateur.gridLabel'), flex: 1 },
             ]}
             pageSize={5}
             rowsPerPageOptions={[5]}
@@ -294,7 +281,7 @@ const FeedbackFormateur = ({ seanceId }) => {
           </Box>
         </Box>
         <Typography variant="h5" className="mb-2">
-          Feedback Formateur <EmojiEmotions />
+          {t('feedbackFormateur.header')} <EmojiEmotions />
         </Typography>
         <Button
           variant="outlined"
@@ -302,14 +289,14 @@ const FeedbackFormateur = ({ seanceId }) => {
           onClick={() => setSelectedStudent(null)}
           startIcon={<Person />}
         >
-          Changer d'étudiant
+          {t('feedbackFormateur.changeStudent')}
         </Button>
       </Box>
 
       <form onSubmit={handleSubmit}>
         <Box className="mb-4" sx={{ textAlign: 'center' }}>
           <Typography variant="h6" className="mb-3">
-            Comment évaluez-vous le travail de {(selectedStudent?.name || '').split(' ')[0]}? 😊
+            {t('feedbackFormateur.question', { firstName: (selectedStudent?.name || '').split(' ')[0] })} 😊
           </Typography>
           
           <Grid container spacing={2} justifyContent="center" sx={{ maxWidth: 600, margin: '0 auto' }}>
@@ -335,14 +322,14 @@ const FeedbackFormateur = ({ seanceId }) => {
 
         <TextField
           fullWidth
-          label={`Commentaire pour ${(selectedStudent?.name || '').split(' ')[0]} ✍️`}
+          label={t('feedbackFormateur.commentLabel', { firstName: (selectedStudent?.name || '').split(' ')[0] })}
           multiline
           rows={4}
           variant="outlined"
           value={commentaire}
           onChange={(e) => setCommentaire(e.target.value)}
           className="mb-4"
-          placeholder={`Ex: ${(selectedStudent?.name || '').split(' ')[0]} a fait des progrès remarquables en...`}
+          placeholder={t('feedbackFormateur.commentPlaceholder', { firstName: (selectedStudent?.name || '').split(' ')[0] })}
           disabled={isSubmitting}
         />
 
@@ -354,7 +341,7 @@ const FeedbackFormateur = ({ seanceId }) => {
             onClick={resetForm}
             disabled={isSubmitting}
           >
-            Annuler
+            {t('feedbackFormateur.cancel')}
           </Button>
           <Button
             type="submit"
@@ -363,7 +350,7 @@ const FeedbackFormateur = ({ seanceId }) => {
             disabled={!selectedEmoji || isSubmitting}
             startIcon={isSubmitting ? <CircularProgress size={20} /> : <ThumbUp />}
           >
-            {isSubmitting ? 'Envoi en cours...' : 'Envoyer Feedback'}
+            {isSubmitting ? t('feedbackFormateur.sending') : t('feedbackFormateur.send')}
           </Button>
         </Box>
       </form>

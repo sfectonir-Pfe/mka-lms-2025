@@ -283,17 +283,17 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
         </div>
 {role === "Etudiant" && (
   <div className="mb-3">
-    <label className="form-label">Choisir un établissement :</label>
+    <label className="form-label">{t('users.chooseEstablishment')} :</label>
     <select
       className="form-select"
       value={etablissement2Id}
       onChange={(e) => setEtablissement2Id(e.target.value)}
       required
     >
-      <option value="">-- Sélectionner --</option>
+      <option value="">-- {t('common.select')} --</option>
       {etabs.map((e) => (
         <option key={e.id} value={e.id}>
-          {e.name || `Etablissement ${e.id}`}
+          {e.name || `${t('users.establishment')} ${e.id}`}
         </option>
       ))}
     </select>
@@ -302,7 +302,7 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
 
 {role === "Etablissement" && (
   <div className="mb-3">
-    <label className="form-label">Nom du nouvel établissement :</label>
+    <label className="form-label">{t('users.newEstablishmentName')} :</label>
     <input
       type="text"
       className="form-control"

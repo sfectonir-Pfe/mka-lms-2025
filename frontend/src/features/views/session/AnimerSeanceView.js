@@ -56,7 +56,7 @@ import Regroupement from "./Regroupement";
 import QuizList from "../../../features/views/quiz/QuizList";
 
 const AnimerSeanceView = () => {
-  const { t } = useTranslation("seances");
+  const { t } = useTranslation();
   const { id: seanceId } = useParams();
   const navigate = useNavigate();
 
@@ -217,7 +217,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "IMAGE");
       setSessionImages((prev) => [...prev, media]);
     } catch {
-      alert(t("uploadImageError"));
+      alert(t("seances.uploadImageError"));
     }
   };
 
@@ -228,7 +228,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "VIDEO");
       setSessionVideos((prev) => [...prev, media]);
     } catch {
-      alert(t("uploadVideoError"));
+      alert(t("seances.uploadVideoError"));
     }
   };
 
@@ -261,18 +261,18 @@ const AnimerSeanceView = () => {
       );
       setProgramDetails(detailRes.data);
     } catch {
-      alert(t("statusChangeError"));
+      alert(t("seances.statusChangeError"));
     }
   };
 
   // --- UI: hierarchy (accordion, cards) ---
   const renderProgramHierarchy = () => {
-    if (!programDetails) return <Typography>{t("loadingProgram")}</Typography>;
+    if (!programDetails) return <Typography>{t("seances.loadingProgram")}</Typography>;
 
     return (
       <Box>
         <Typography variant="h6" mb={1}>
-          📘 <strong>{t("program")} : {programDetails.program.title}</strong>
+          📘 <strong>{t("seances.program")} : {programDetails.program.title}</strong>
         </Typography>
 
         <Box mt={2}>
@@ -344,13 +344,13 @@ const AnimerSeanceView = () => {
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" noWrap>
                                       {isQuiz
-                                        ? `Questions: ${meta?.questions?.length ?? "—"} · Time: ${meta?.timeLimit ? `${meta.timeLimit} min` : "—"}`
-                                        : (cn?.fileType || "File")}
+                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash")}`
+                            : (cn?.fileType || t("seances.file"))}
                                     </Typography>
                                   </Box>
 
                                   <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Tooltip title={cn?.published ? t("unpublish") : t("publish")}>
+                                    <Tooltip title={cn?.published ? t("seances.unpublish") : t("seances.publish")}>
                                       <Switch
                                         size="small"
                                         checked={!!cn?.published}
@@ -359,7 +359,7 @@ const AnimerSeanceView = () => {
                                     </Tooltip>
 
                                     {isQuiz ? (
-                                      <Tooltip title={cn?.published ? t("open") : t("publishFirst")}>
+                                      <Tooltip title={cn?.published ? t("seances.open") : t("seances.publishFirst")}>
                                         <span>
                                           <Button
                                             size="small"
@@ -368,12 +368,12 @@ const AnimerSeanceView = () => {
                                             disabled={!cn?.published}
                                             onClick={() => navigate(`/seances/${seanceId}/quiz/${cn.id}`)}
                                           >
-                                            {t("open")}
+                                            {t("seances.open")}
                                           </Button>
                                         </span>
                                       </Tooltip>
                                     ) : (
-                                      <Tooltip title={t("open")}>
+                                      <Tooltip title={t("seances.open")}>
                                         <span>
                                           <Button
                                             size="small"
@@ -388,7 +388,7 @@ const AnimerSeanceView = () => {
                                               window.open(url, "_blank");
                                             }}
                                           >
-                                            {t("open")}
+                                            {t("seances.open")}
                                           </Button>
                                         </span>
                                       </Tooltip>
@@ -447,9 +447,9 @@ const AnimerSeanceView = () => {
           }}
         >
           <Stack direction="row" spacing={1.25} alignItems="center">
-            <Chip size="small" color="primary" label="LIVE" />
+            <Chip size="small" color="primary" label={t("seances.live")} />
             <Typography variant="subtitle1" fontWeight={700}>
-              {seance.title || t("jitsiMeeting")}
+              {seance.title || t("seances.jitsiMeeting")}
             </Typography>
           </Stack>
           {seance?.startTime && (
@@ -468,10 +468,10 @@ const AnimerSeanceView = () => {
           }}
         >
           <iframe
-            src={`https://localhost:8443/${seance.title || "default-room"}`}
+            src={`https://localhost:8443/${seance.title || t("seances.defaultRoom")}`}
             allow="camera; microphone; fullscreen; display-capture"
             style={{ width: "100%", height: "68vh", border: "none" }}
-            title={t("jitsiMeeting")}
+            title={t("seances.jitsiMeeting")}
           />
         </Box>
       </Paper>
@@ -490,12 +490,12 @@ const AnimerSeanceView = () => {
         <Stack direction="row" alignItems="center" spacing={2}>
           <Chip
             variant="outlined"
-            label={`${t("program")} : ${programDetails?.program?.title || ""}`}
+            label={`${t("seances.program")} : ${programDetails?.program?.title || ""}`}
             color="primary"
           />
           <ButtonGroup variant="outlined" size="small">
             <Button startIcon={<ZoomInMapIcon />} onClick={() => setShowContenus(!showContenus)}>
-              {showContenus ? t("hideHierarchy") : t("showHierarchy")}
+              {showContenus ? t("seances.hideHierarchy") : t("seances.showHierarchy")}
             </Button>
             <Button
               startIcon={<FeedbackIcon />}
@@ -503,7 +503,7 @@ const AnimerSeanceView = () => {
               variant={showFeedbackTab ? "outlined" : "contained"}
               color="secondary"
             >
-              {showFeedbackTab ? t("hideFeedback") : t("showFeedback")}
+              {showFeedbackTab ? t("seances.hideFeedback") : t("seances.showFeedback")}
             </Button>
           </ButtonGroup>
         </Stack>
@@ -535,19 +535,19 @@ const AnimerSeanceView = () => {
             "& .MuiTabs-indicator": { left: 0, width: 3, bgcolor: "#6366f1" },
           }}
         >
-          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t("sessionAdditions")} />
-          <Tab icon={<QuizIcon />} iconPosition="start" label={t("quizComing")} />
+          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t("seances.sessionAdditions")} />
+          <Tab icon={<QuizIcon />} iconPosition="start" label={t("seances.quizComing")} />
           <Tab
             icon={<InsertDriveFileIcon />}
             iconPosition="start"
-            label={t("whiteboard")}
+            label={t("seances.whiteboard")}
             onClick={() => navigate(`/whiteboard/${seanceId}`)}
           />
-          <Tab icon={<GroupIcon />} iconPosition="start" label="Regroupement" />
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackFormateur") || "Feedback Formateur"} />
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label="Feedback Étudiant" />
-          {showFeedbackTab && <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedback")} />}
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackList")} />
+          <Tab icon={<GroupIcon />} iconPosition="start" label={t("seances.regroupement")} />
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("seances.feedbackFormateur")} />
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("seances.feedbackEtudiant")} />
+          {showFeedbackTab && <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("seances.feedback")} />}
+          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("seances.feedbackList")} />
         </Tabs>
 
         <Box flex={1} pl={3}>
@@ -555,8 +555,8 @@ const AnimerSeanceView = () => {
           {tab === 0 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={1} mt={0.5} mb={1}>
-                <Typography variant="h6">{t("sessionImages")}</Typography>
-                <Tooltip title={t("uploadImage") || "Upload image"}>
+                <Typography variant="h6">{t("seances.sessionImages")}</Typography>
+                <Tooltip title={t("seances.uploadImage")}>
                   <IconButton color="primary" component="label" size="small">
                     <AddPhotoAlternateIcon />
                     <input type="file" accept="image/*" hidden onChange={handleAddImage} />
@@ -581,15 +581,15 @@ const AnimerSeanceView = () => {
                     </ImageListItem>
                   ))}
                 </ImageList>
-              ) : (
-                <Typography color="text.secondary" sx={{ mb: 2 }}>
-                  {t("noImages") || "No images yet."}
-                </Typography>
-              )}
+                              ) : (
+                  <Typography color="text.secondary" sx={{ mb: 2 }}>
+                    {t("seances.noImages")}
+                  </Typography>
+                )}
 
               <Stack direction="row" alignItems="center" spacing={1} mt={3} mb={1}>
-                <Typography variant="h6">{t("sessionVideos")}</Typography>
-                <Tooltip title={t("uploadVideo") || "Upload video"}>
+                <Typography variant="h6">{t("seances.sessionVideos")}</Typography>
+                <Tooltip title={t("seances.uploadVideo")}>
                   <IconButton color="primary" component="label" size="small">
                     <MovieIcon />
                     <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
@@ -610,7 +610,7 @@ const AnimerSeanceView = () => {
                   ))
                 ) : (
                   <Typography color="text.secondary">
-                    {t("noVideos") || "No videos yet."}
+                    {t("seances.noVideos")}
                   </Typography>
                 )}
               </Stack>
@@ -620,19 +620,19 @@ const AnimerSeanceView = () => {
           {/* Tab 1: quizzes */}
           {tab === 1 && (
             <Box>
-              <Typography variant="h6" mb={2}>🧪 {t("quizComing") || "Quizzes (session)"}</Typography>
+              <Typography variant="h6" mb={2}>🧪 {t("seances.quizComing") || "Quiz"}</Typography>
               <QuizList sessionId={seance?.session2?.id} />
               
               
               {getSessionQuizzes().length === 0 ? (
-                <Typography color="text.secondary">No quizzes linked to this session yet.</Typography>
+                <Typography color="text.secondary">{t("seances.noQuizzesLinked")}</Typography>
                 
               ) : (
                 <Stack spacing={1.25}>
                   {getSessionQuizzes().map((q) => {
                     const meta = quizMetaByContenu[q.contenuId];
-                    const qCount = meta?.questions?.length ?? "—";
-                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} min` : "—";
+                    const qCount = meta?.questions?.length ?? t("seances.dash");
+                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash");
 
                     return (
                       <Paper
@@ -653,22 +653,22 @@ const AnimerSeanceView = () => {
                           <Box>
                             <Typography fontWeight={700}>{q.title}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {t("course") || "Course"}: {q.courseTitle || "—"}
+                              {t("seances.course")}: {q.courseTitle || t("seances.dash")}
                             </Typography>
                           </Box>
                         </Stack>
 
                         <Chip
-                          label={q.published ? "Published" : "Draft"}
+                          label={q.published ? t("seances.published") : t("seances.draft")}
                           color={q.published ? "success" : "default"}
                           size="small"
                           variant={q.published ? "filled" : "outlined"}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {t("questions") || "Questions"}: <b>{qCount}</b> · {t("time") || "Time"}: <b>{timeStr}</b>
+                          {t("seances.questions")}: <b>{qCount}</b> · {t("seances.time")}: <b>{timeStr}</b>
                         </Typography>
 
-                        <Tooltip title={q.published ? t("open") : t("publishFirst")}>
+                        <Tooltip title={q.published ? t("seances.open") : t("seances.publishFirst")}>
                           <span>
                             <Button
                               variant="contained"
@@ -677,7 +677,7 @@ const AnimerSeanceView = () => {
                               disabled={!q.published}
                               onClick={() => navigate(`/seances/${seanceId}/quiz/${q.contenuId}`)}
                             >
-                              {t("open")}
+                              {t("seances.open")}
                             </Button>
                           </span>
                         </Tooltip>
@@ -699,7 +699,7 @@ const AnimerSeanceView = () => {
           {tab === 4 && (
             <Box>
               <Typography variant="h6" mb={2}>
-                {t("feedbackFormateur") || "Feedback Formateur"}
+                {t("seances.feedbackFormateur") || "Feedback Formateur"}
               </Typography>
               <FeedbackFormateur seanceId={seanceId} />
             </Box>
@@ -708,7 +708,7 @@ const AnimerSeanceView = () => {
           {/* Tab 5: Feedback Étudiant */}
           {tab === 5 && (
             <Box>
-              <Typography variant="h6" mb={2}>Feedback Étudiant</Typography>
+              <Typography variant="h6" mb={2}>{t("seances.feedbackEtudiant")}</Typography>
               <FeedbackEtudiant seanceId={seanceId} />
             </Box>
           )}
@@ -717,7 +717,7 @@ const AnimerSeanceView = () => {
           {showFeedbackTab && tab === 6 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t("sessionFeedback")}</Typography>
+                <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
               </Stack>
               <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
             </Box>
@@ -734,7 +734,7 @@ const AnimerSeanceView = () => {
           <Stack direction="row" alignItems="center" spacing={2}>
             <FeedbackIcon color="primary" />
             <Box>
-              {t("feedbackFrom")} <b>{selectedFeedback?.studentName}</b>
+              {t("seances.feedbackFrom")} <b>{selectedFeedback?.studentName}</b>
               <Typography variant="body2" color="text.secondary">
                 {selectedFeedback?.studentEmail}
               </Typography>
@@ -777,3 +777,5 @@ const AnimerSeanceView = () => {
 };
 
 export default AnimerSeanceView;
+
+

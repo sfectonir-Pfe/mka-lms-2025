@@ -23,6 +23,7 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback, Download } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -39,7 +40,7 @@ const SessionList = () => {
   const [shareText, setShareText] = useState('');
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
   const navigate = useNavigate();
 
   const fetchSessions = async () => {
@@ -132,7 +133,7 @@ const SessionList = () => {
   };
 
   const handleShare = (session) => {
-    const text = `🌟 ${t("sessions.newSessionAvailable")} 🌟\n\n🎯 ${session.name}\n\n📚 ${t("sessions.program")}: ${session.program?.name || t("sessions.program")}\n📅 ${t("sessions.period")}: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? `🎓 ${t("sessions.includedModules")}:\n` + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 ${t("sessions.uniqueOpportunity")}\n\n💡 ${t("sessions.registerNow")}\n\n#Formation #Éducation #DéveloppementProfessionnel #Apprentissage #Compétences #LMS #Success`;
+    const text = `🌟 ${t("sessions.newSessionAvailable")} 🌟\n\n🎯 ${session.name}\n\n📚 ${t("sessions.program")}: ${session.program?.name || t("sessions.program")}\n📅 ${t("sessions.period")}: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? `🎓 ${t("sessions.includedModules")}:\n` + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 ${t("sessions.uniqueOpportunity")}\n\n💡 ${t("sessions.registerNow")}\n\n${t("sessions.hashtags")}`;
     setShareText(text);
     setShareModal({ open: true, session });
   };
@@ -264,8 +265,21 @@ const SessionList = () => {
     setOpenFeedbackDialog(true);
   };
 
+  // Show loading state if i18n is not ready
+  if (!ready) {
+    return (
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Chargement des traductions...
+        </Typography>
+      </Paper>
+    );
+  }
+
   return (
     <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+      
+
       <Typography variant="h5" fontWeight="bold" gutterBottom>
         📋 {t('sessions.sessionList')}
       </Typography>
@@ -321,7 +335,13 @@ const SessionList = () => {
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Chip
-                    label={session.status}
+                    label={
+                      session.status === "ACTIVE" ? t("sessions.active") :
+                      session.status === "INACTIVE" ? t("sessions.inactive") :
+                      session.status === "COMPLETED" ? t("sessions.completed") :
+                      session.status === "ARCHIVED" ? t("sessions.archived") :
+                      session.status
+                    }
                     color={
                       session.status === "ACTIVE"
                         ? "success"
@@ -387,6 +407,16 @@ const SessionList = () => {
                   >
                     📤 {t("sessions.share")}
                   </Button>
+                  {session.status === "COMPLETED" && (
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      onClick={() => navigate(`/sessions/${session.id}/attestation`)}
+                    >
+                      🏅 {t("sessions.attestation")}
+                    </Button>
+                  )}
                   <Button
                     variant="contained"
                     color="info"
@@ -448,7 +478,7 @@ const SessionList = () => {
               {/* Average Feedback Rating */}
               <Box mt={1} display="flex" alignItems="center" gap={1}>
                 <Typography variant="body2" fontWeight="bold">
-                  ⭐ Average Rating:
+                  ⭐ {t("sessions.averageRating")}:
                 </Typography>
                 {session.averageRating ? (
                   <>
@@ -456,12 +486,12 @@ const SessionList = () => {
                       {session.averageRating.toFixed(1)}/5
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      ({session.feedbackCount} {session.feedbackCount === 1 ? 'feedback' : 'feedbacks'})
+                      ({session.feedbackCount} {session.feedbackCount === 1 ? t("sessions.feedback") : t("sessions.feedbacks")})
                     </Typography>
                   </>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    No feedback yet
+                    {t("sessions.noFeedbackYet")}
                   </Typography>
                 )}
               </Box>
@@ -717,7 +747,7 @@ const SessionList = () => {
               )}
 
               <Typography fontSize={14} mt={3} color="text.secondary">
-                #Formation #Éducation #LMS #Apprentissage #Succès
+                {t("sessions.hashtagsShort")}
               </Typography>
             </Box>
           </Box>
@@ -735,9 +765,9 @@ const SessionList = () => {
           />
 
           <Stack direction="row" spacing={2} flexWrap="wrap" gap={1} mb={2}>
-            <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={{ bgcolor: '#1877f2' }}>Facebook</Button>
-            <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
-            <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
+            <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={{ bgcolor: '#1877f2' }}>{t("sessions.facebook")}</Button>
+            <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>{t("sessions.twitter")}</Button>
+            <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>{t("sessions.linkedin")}</Button>
             <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
             <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={{ bgcolor: '#4caf50' }}>🖼️ {t("sessions.downloadImage")}</Button>
           </Stack>
