@@ -16,7 +16,6 @@ import HomePage from "./pages/home/HomePage";
 import Réclamation from "./features/views/feedback/feedbackForm/Réclamation";
 import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamationlist";
 import StudentLandingPage from "./pages/session/StudentLandingPage";
-import StudentProgramPage from "./pages/session/StudentProgramPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 
@@ -66,6 +65,7 @@ import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
 import Chatbot from './components/Chatbot';
 // import TestChatPage from "./pages/TestChatPage";
 import WhiteboardPage from "./pages/session/WhiteboardPage";
+import Attestation from "./features/views/cohort/attestation";
 
 //Dashboards
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
@@ -77,7 +77,7 @@ import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 // feedbacks
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
-import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
+import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList/SessionFeedbackList';
 import ScoreReveal from './features/views/quiz/ScoreReveal';
 import QuizScores from './features/views/quiz/QuizScores';
 import QuizList from './features/views/quiz/QuizList';
@@ -95,6 +95,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 
 function AppContent() {
@@ -258,6 +259,8 @@ function AppContent() {
                 <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
                 {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
                 <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
+                <Route path="/student/program/:programId/attestation" element={<Attestation />} />
+                <Route path="/sessions/:sessionId/attestation" element={<Attestation />} />
 
                 {/* //dashboard */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -278,7 +281,6 @@ function AppContent() {
 
                 {/* Student */}
                 <Route path="student" element={<StudentLandingPage />} />
-                <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="Réclamation" element={<Réclamation />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />

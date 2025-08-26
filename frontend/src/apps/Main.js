@@ -368,7 +368,7 @@ export default function Main({ setUser, user }) {
             <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>
-              {user?.name || "Utilisateur"} |{" "}
+              {user?.name || t('common.user')} |{" "}
               <span style={{ textTransform: "capitalize" }}>
                 {t('role.' + ((user?.role || 'user').toLowerCase()))}
               </span>
@@ -440,7 +440,7 @@ export default function Main({ setUser, user }) {
               >
                 <Box sx={{ px: 4, py: 4, textAlign: "center" }}>
                   <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                    {user?.name || "Utilisateur"}
+                    {user?.name || t('common.user')}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
                     {user?.email}

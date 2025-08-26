@@ -81,7 +81,7 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
             {/* Affichage de la moyenne des feedbacks */}
             {feedbackAverages[s.id] && (
               <Typography variant="body2" color="secondary">
-                ⭐ Note moyenne: {feedbackAverages[s.id].toFixed(1)} / 5
+                ⭐ {t('seances.averageRating')}: {feedbackAverages[s.id].toFixed(1)} / 5
               </Typography>
             )}
             <Typography variant="body2">
@@ -146,13 +146,13 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
                     <Typography variant="body1" fontWeight="bold">
                       {t('seances.program')} : {details[s.id].program?.name}
                     </Typography>
-                    {details[s.id].session2Modules.map((mod) => (
+                    {(Array.isArray(details[s.id].session2Modules) ? details[s.id].session2Modules : []).map((mod) => (
                       <Box key={mod.id} pl={2} mt={2}>
                         <Typography>📗 {t('seances.module')} : {mod.module.name}</Typography>
-                        {mod.courses.map((course) => (
+                        {(Array.isArray(mod.courses) ? mod.courses : []).map((course) => (
                           <Box key={course.id} pl={2} mt={1}>
                             <Typography>📘 {t('seances.course')} : {course.course.title}</Typography>
-                            {course.contenus.map((ct) => (
+                            {(Array.isArray(course.contenus) ? course.contenus : []).map((ct) => (
                               <Typography key={ct.id} pl={4}>
                                 📄 {t('seances.content')} : {ct.contenu.title}
                               </Typography>

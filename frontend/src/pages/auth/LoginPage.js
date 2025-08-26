@@ -30,6 +30,12 @@ import { useTranslation } from 'react-i18next';
 import toastErrorUtils from "../../utils/toastError";
 import { toast } from "react-toastify"; 
 import api from "../../api/axiosInstance";
+import { 
+  storeUser, 
+  validateRememberMeData, 
+  clearRememberMeData,
+  isRememberMeActive 
+} from "../../utils/authUtils";
 
 const LoginPage = () => {
   const { t } = useTranslation();
@@ -38,83 +44,125 @@ const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [msgError, setMsgError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [msgError, setMsgError] = useState("");
 
   useEffect(() => {
+    // Vérifier si l'utilisateur est déjà connecté
+    const authToken = localStorage.getItem("authToken");
+    if (authToken) {
+      navigate("/");
+      return;
+    }
+
+    // Restaurer l'email depuis l'URL si présent
     const params = new URLSearchParams(location.search);
     const emailFromUrl = params.get("email");
-    if (emailFromUrl) setEmail(emailFromUrl);
-  }, [location]);
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    }
+
+    // Vérifier et restaurer les données "Remember me"
+    if (validateRememberMeData()) {
+      const rememberedEmail = localStorage.getItem("rememberedEmail");
+      const rememberedPassword = localStorage.getItem("rememberedPassword");
+      
+      if (rememberedEmail && rememberedPassword) {
+        setEmail(rememberedEmail);
+        setPassword(rememberedPassword);
+        setRememberMe(true);
+        console.log("✅ Données Remember Me restaurées");
+      }
+    }
+
+  }, [location, navigate]);
 
   const handleRequest = async (e) => {
-  e.preventDefault();
-  setMsgError("");
+    e.preventDefault();
+    setMsgError("");
 
-  try {
-   const res = await api.post(
-  "/auth/login",
-  {
-    email,
-    password,
-    rememberMe,
-  },
-  {
-    withCredentials: true, // ✅ this goes in the 3rd argument
-  }
-);
+    try {
+      const res = await api.post(
+        "/auth/login",
+        {
+          email,
+          password,
+          rememberMe,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
+      const user = res?.data?.data;
+      if (!user) throw new Error("Réponse inattendue du serveur");
 
+      // Not verified → no token, go verify
+      if (user.needsVerification) {
+        toast.warning("Votre compte n'est pas encore vérifié. Choisissez votre méthode de vérification.");
+        navigate("/verify-method", {
+          state: {
+            email: user.email,
+            phone: user.phone || "",
+          },
+        });
+        return;
+      }
 
-    const user = res?.data?.data;
-    if (!user) throw new Error("Réponse inattendue du serveur");
+      // Save token + user
+      const token = user.access_token;
+      if (!token) throw new Error("Jeton manquant. Essayez avec un compte vérifié.");
 
-    // Not verified → no token, go verify
-    if (user.needsVerification) {
-  toast.warning("Votre compte n’est pas encore vérifié. Choisissez votre méthode de vérification.");
-  navigate("/verify-method", {
-    state: {
-      email: user.email,
-      phone: user.phone || "",
-    },
-  });
-  return;
-}
+      // Utiliser les utilitaires d'authentification pour stocker les données
+      const currentUser = {
+        id: user.id,
+        email: user.email,
+        role: user.role || "Etudiant",
+        name: user.name || (user.email ? user.email.split("@")[0] : ""),
+        profilePic: user.profilePic || null,
+        token: token,
+      };
 
+      // Stocker l'utilisateur avec rememberMe
+      storeUser(currentUser, rememberMe);
 
-    // Save token + user
-    const token = user.access_token;
-    if (!token) throw new Error("Jeton manquant. Essayez avec un compte vérifié.");
+      // Stocker le token séparément
+      if (rememberMe) {
+        localStorage.setItem("authToken", token);
+      } else {
+        sessionStorage.setItem("authToken", token);
+      }
 
-    localStorage.setItem("authToken", token);
+      // Gérer les données "Remember me"
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "1");
+        localStorage.setItem("rememberedEmail", email);
+        localStorage.setItem("rememberedPassword", password);
+        console.log("✅ Données Remember Me sauvegardées");
+      } else {
+        // Nettoyer les données Remember Me si pas activé
+        clearRememberMeData();
+      }
 
-    const currentUser = {
-      id: user.id,
-      email: user.email,
-      role: user.role || "Etudiant",
-      name: user.name || (user.email ? user.email.split("@")[0] : ""),
-      profilePic: user.profilePic || null,
-    };
-    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      // (Legacy) keep old key if other pages use it
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      localStorage.setItem("userEmail", user.email);
 
-    // (Legacy) keep old key if other pages use it
-    localStorage.setItem("user", JSON.stringify({ ...currentUser, token }));
-    localStorage.setItem("userEmail", user.email);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Login error:", error);
+      const message =
+        t("auth.loginFailed") + " " + (error?.response?.data?.message || error?.message || "");
+      setMsgError(message);
+      toastErrorUtils.showError(message);
+      setPassword("");
+    }
+  };
 
-    if (rememberMe) localStorage.setItem("rememberMe", "1");
-    else localStorage.removeItem("rememberMe");
-
-    window.location.href = "/";
-  } catch (error) {
-    console.error("Login error:", error);
-    const message =
-      t("auth.loginFailed") + " " + (error?.response?.data?.message || error?.message || "");
-    setMsgError(message);
-    toastErrorUtils.showError(message);
-    setPassword("");
-  }
-};
-
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div className="container-fluid p-3 my-5">
@@ -155,13 +203,21 @@ const LoginPage = () => {
                   <i className="bi bi-lock"></i>
                 </span>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="form-control"
                   placeholder="Entrez votre mot de passe"
                   value={password}
                   required
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={togglePasswordVisibility}
+                  style={{ borderLeft: 'none' }}
+                >
+                  <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                </button>
               </div>
             </div>
 
@@ -170,12 +226,12 @@ const LoginPage = () => {
                 <input
                   className="form-check-input"
                   type="checkbox"
-                  id="remember"
+                  id="rememberMe"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <label className="form-check-label" htmlFor="remember">
-                  {t("common.rememberMe")}
+                <label className="form-check-label" htmlFor="rememberMe">
+                  Se souvenir de moi
                 </label>
               </div>
               <a href="/forgot-password" className="text-decoration-none">

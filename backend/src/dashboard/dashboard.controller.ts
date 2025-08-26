@@ -27,10 +27,16 @@ export class DashboardController {
   getMonthlyUserRegistrations() {
     return this.dashboardService.getMonthlyUserRegistrations();
   }
-  @Get('session-status-stats')
-getSessionStatusStats() {
-  return this.dashboardService.getSessionStatusStats();
-}
+    @Get('session-status-stats')
+  getSessionStatusStats() {
+    return this.dashboardService.getSessionStatusStats();
+  }
+
+  @Get('reclamation-stats')
+  getReclamationStats() {
+    return this.dashboardService.getReclamationStats();
+  }
+
 // @Get('top-establishments')
 // getTopEstablishments() {
 //   return this.dashboardService.getTopEstablishments();
@@ -44,10 +50,10 @@ getTopRatedSessionsWithSeances() {
   return this.dashboardService.getTopRatedSessionsWithSeances();
 }
 
-@Get('reclamation-stats')
-getReclamationStats() {
-  return this.dashboardService.getReclamationStats();
-}
+// @Get('reclamation-stats')
+// getReclamationStats() {
+//   return this.dashboardService.getReclamationStats();
+// }
 
 
 }
