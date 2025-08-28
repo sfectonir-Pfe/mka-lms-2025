@@ -23,6 +23,47 @@ const AddSessionView = () => {
   const [image, setImage] = useState(null);
   const [sessionName, setSessionName] = useState("");
 
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
+
   // Fetch published programs
   useEffect(() => {
     api
@@ -132,7 +173,7 @@ const AddSessionView = () => {
           onChange={(e) => setEndDate(e.target.value)}
         />
 
-        <Button variant="outlined" component="label">
+        <Button variant="contained" sx={styles.info} component="label">
           📷 {t("sessions.uploadImage")}
           <input
             hidden
@@ -172,7 +213,7 @@ const AddSessionView = () => {
           </>
         )}
 
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" sx={styles.success} onClick={handleSubmit}>
           📤 {t("sessions.saveSession")}
         </Button>
       </Stack>

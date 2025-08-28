@@ -613,23 +613,23 @@ if (existingFeedback) {
           }
         });
       } catch (error) {
-        // Si erreur de contrainte unique, mettre à jour l'existant
+        // Si erreur de contrainte unique, mettre à jour l'existant (par catégorie)
         if (error.code === 'P2002') {
           const existingFeedback = await this.prisma.studentFeedback.findFirst({
             where: {
               fromStudentId: studentId,
               toStudentId: targetStudentId,
-              groupId
+              groupId,
+              category: category
             }
           });
-          
+
           if (existingFeedback) {
             return await this.prisma.studentFeedback.update({
               where: { id: existingFeedback.id },
               data: {
                 rating,
                 comment: `Emoji: ${reaction}`,
-                category: category,
                 updatedAt: new Date()
               }
             });
@@ -754,3 +754,4 @@ if (existingFeedback) {
 
 
 }
+

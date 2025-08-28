@@ -7,16 +7,60 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 import { MenuItem } from "@mui/material";
 
 
-const steps = ["Modules, cours et contenus", "Niveau du programme"];
-
 const EditProgramBuildView = () => {
+  const { t } = useTranslation();
+  
+  const steps = [t('buildProgram.modulesCoursesContents'), t('buildProgram.programLevel')];
   const navigate = useNavigate();
   const { programId } = useParams();
+
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
 
   const [activeStep, setActiveStep] = useState(0);
   const [programName, setProgramName] = useState("");
@@ -112,7 +156,7 @@ const [searchScope, setSearchScope] = useState("module");
 
   const handleSubmit = async () => {
     if (!buildProgramId || !programName || !level || selectedModules.length === 0) {
-      alert("Veuillez remplir tous les champs nécessaires.");
+      toast.error(t('programs.fillAllFields'));
       return;
     }
 
@@ -146,11 +190,11 @@ const [searchScope, setSearchScope] = useState("module");
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("✅ Programme modifié avec succès !");
+      toast.success(t('programs.updateSuccess'));
       navigate("/programs");
     } catch (err) {
       console.error(err);
-      alert("❌ Erreur lors de la modification du programme.");
+      toast.error(t('programs.updateError'));
     }
   };
 
@@ -185,13 +229,13 @@ return (
   <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
     <Paper sx={{ p: 4, width: "100%", maxWidth: 1000, borderRadius: 4 }}>
       <Typography variant="h5" align="center" gutterBottom>
-        🛠️ Modifier un Programme
+        🛠️ {t('programs.editProgram')}
       </Typography>
 
       {/* 🖊️ Nom du programme */}
       <TextField
         fullWidth
-        label="Nom du programme"
+        label={t('programs.programName')}
         variant="outlined"
         value={programName}
         onChange={(e) => setProgramName(e.target.value)}
@@ -231,7 +275,7 @@ return (
       {/* 👣 Étape 1 : Modules */}
       {activeStep === 0 && (
         <>
-          <Typography variant="h6">📦 Modules</Typography>
+          <Typography variant="h6">📦 {t('buildProgram.selectModules')}</Typography>
           <FormGroup>
             {filteredModules.map((m) => (
               <FormControlLabel
@@ -299,11 +343,11 @@ return (
           ))}
 
           <Box mt={3} display="flex" justifyContent="space-between">
-            <Button variant="outlined" color="error" onClick={() => navigate("/programs")}>
-              Annuler
+            <Button variant="contained" sx={styles.danger} onClick={() => navigate("/programs")}>
+              {t('common.cancel')}
             </Button>
-            <Button variant="contained" onClick={() => setActiveStep(1)}>
-              Suivant
+            <Button variant="contained" sx={styles.primary} onClick={() => setActiveStep(1)}>
+              {t('common.next')}
             </Button>
           </Box>
         </>
@@ -312,9 +356,9 @@ return (
       {/* 👣 Étape 2 : Niveau */}
       {activeStep === 1 && (
         <>
-          <Typography variant="h6">🎯 Niveau du programme</Typography>
+          <Typography variant="h6">🎯 {t('buildProgram.programLevel')}</Typography>
           <FormGroup>
-            {["Basique", "Intermédiaire", "Avancé"].map((lvl) => (
+            {[t('buildProgram.basic'), t('buildProgram.intermediate'), t('buildProgram.advanced')].map((lvl) => (
               <FormControlLabel
                 key={lvl}
                 control={
@@ -329,24 +373,23 @@ return (
           </FormGroup>
 
           <Box mt={3} display="flex" justifyContent="space-between">
-            <Button variant="outlined" onClick={() => setActiveStep(0)}>
-              Retour
+            <Button variant="contained" sx={styles.secondary} onClick={() => setActiveStep(0)}>
+              {t('common.back')}
             </Button>
             <Box>
               <Button
-                variant="outlined"
-                color="error"
-                sx={{ mr: 2 }}
+                variant="contained"
+                sx={{ ...styles.danger, mr: 2 }}
                 onClick={() => navigate("/programs")}
               >
-                Annuler
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="contained"
-                color="primary"
+                sx={styles.success}
                 onClick={handleSubmit}
               >
-                Enregistrer
+                {t('common.save')}
               </Button>
             </Box>
           </Box>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2025-08-28T10:00:00.000Z" agent="5.0" etag="sprint2-all" version="22.1.16" type="device">
+  <diagram name="Sprint 2 - Cas d'utilisation" id="sprint2-ucd">
+    <mxGraphModel dx="2020" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Acteurs -->
+        <mxCell id="actor_admin" value="Administrateur" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_creator" value="Créateur de&#xa;formation" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_trainer" value="Formateur" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="640" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_student" value="Étudiant" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="940" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_manager" value="Responsable d&#39;établissement" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_user" value="Utilisateur" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="820" width="30" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Auth (include target) -->
+        <mxCell id="uc_auth" value="S&#39;authentifier" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="60" width="150" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID1 Orchestration des sessions -->
+        <mxCell id="uc_create_plan_session" value="Créer et planifier des sessions" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="100" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_link_program_session" value="Lier un programme à une session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="180" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_manage_programs" value="Gérer la liste des programmes" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="260" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_list_sessions" value="Voir la liste des sessions" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="340" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_delete_session" value="Supprimer une session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="420" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_change_status_session" value="Changer statut session (active/inactive/archivé/terminé)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="500" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_view_program_details_session_user" value="Voir détails programme dans une session (utilisateur)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="580" width="300" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID2 Partage/cohortes -->
+        <mxCell id="uc_share_sessions" value="Partager des sessions" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="100" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_link_cohort" value="Associer cohorte à une session" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="180" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_manage_students_cohort" value="Gérer étudiants d&#39;une cohorte" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="260" width="240" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID3 Structuration pédagogique -->
+        <mxCell id="uc_modules" value="Organiser programme en modules" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="360" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_courses" value="Ajouter des cours aux modules" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="440" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_contents" value="Intégrer contenus (PDF/Vidéo/Quiz) au cours" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="520" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_program_level" value="Définir niveau du programme" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="600" width="260" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID4 Séances -->
+        <mxCell id="uc_plan_sessions" value="Planifier des séances" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="100" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_modify_cancel_session" value="Modifier/Annuler une séance" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="180" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_session_media" value="Ajouter médias à une séance" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="260" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_publish_content" value="Publier le contenu aux étudiants" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="340" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_groups" value="Créer des groupes d&#39;étudiants" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="420" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_join_session" value="Rejoindre une séance" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="500" width="220" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID5 Quiz -->
+        <mxCell id="uc_take_quiz" value="Passer des quiz (étudiant)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="360" width="240" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_review_results" value="Consulter résultats (formateur)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="440" width="240" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID6 Collaboration -->
+        <mxCell id="uc_jitsi" value="Réunions Jitsi Meet" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="520" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_whiteboard" value="Tableau blanc interactif" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="600" width="240" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID7 Notifications temps réel -->
+        <mxCell id="uc_rt_notifications" value="Notifications en temps réel (admin)" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="360" width="260" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- ID8 Emails -->
+        <mxCell id="uc_email_session_active" value="Email: session activée" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="440" width="240" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Associations (actors to use cases) -->
+        <mxCell id="e_admin_1" edge="1" parent="1" source="actor_admin" target="uc_create_plan_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_admin_2" edge="1" parent="1" source="actor_admin" target="uc_link_program_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_admin_3" edge="1" parent="1" source="actor_admin" target="uc_share_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_admin_4" edge="1" parent="1" source="actor_admin" target="uc_link_cohort"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_admin_5" edge="1" parent="1" source="actor_admin" target="uc_delete_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_admin_6" edge="1" parent="1" source="actor_admin" target="uc_change_status_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <mxCell id="e_creator_1" edge="1" parent="1" source="actor_creator" target="uc_manage_programs"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_creator_2" edge="1" parent="1" source="actor_creator" target="uc_modules"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_creator_3" edge="1" parent="1" source="actor_creator" target="uc_courses"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_creator_4" edge="1" parent="1" source="actor_creator" target="uc_contents"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_creator_5" edge="1" parent="1" source="actor_creator" target="uc_program_level"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <mxCell id="e_trainer_1" edge="1" parent="1" source="actor_trainer" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_2" edge="1" parent="1" source="actor_trainer" target="uc_modify_cancel_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_3" edge="1" parent="1" source="actor_trainer" target="uc_session_media"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_4" edge="1" parent="1" source="actor_trainer" target="uc_publish_content"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_5" edge="1" parent="1" source="actor_trainer" target="uc_groups"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_6" edge="1" parent="1" source="actor_trainer" target="uc_review_results"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_7" edge="1" parent="1" source="actor_trainer" target="uc_jitsi"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_8" edge="1" parent="1" source="actor_trainer" target="uc_whiteboard"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_trainer_9" edge="1" parent="1" source="actor_trainer" target="uc_join_session"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <mxCell id="e_student_1" edge="1" parent="1" source="actor_student" target="uc_take_quiz"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_student_2" edge="1" parent="1" source="actor_student" target="uc_jitsi"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <mxCell id="e_manager_1" edge="1" parent="1" source="actor_manager" target="uc_manage_students_cohort"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <mxCell id="e_user_1" edge="1" parent="1" source="actor_user" target="uc_list_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e_user_2" edge="1" parent="1" source="actor_user" target="uc_view_program_details_session_user"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <!-- Include vers Auth -->
+        <mxCell id="inc_create_plan_session_auth" edge="1" parent="1" source="uc_create_plan_session" target="uc_auth"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="inc_share_sessions_auth" edge="1" parent="1" source="uc_share_sessions" target="uc_auth"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="inc_plan_seances_auth" edge="1" parent="1" source="uc_plan_sessions" target="uc_auth"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="inc_take_quiz_auth" edge="1" parent="1" source="uc_take_quiz" target="uc_auth"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <!-- Extend relations -->
+        <mxCell id="ext_modify_from_plan" edge="1" parent="1" source="uc_modify_cancel_session" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ext_media_from_plan" edge="1" parent="1" source="uc_session_media" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ext_publish_from_plan" edge="1" parent="1" source="uc_publish_content" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ext_groups_from_plan" edge="1" parent="1" source="uc_groups" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ext_join_from_plan" edge="1" parent="1" source="uc_join_session" target="uc_plan_sessions"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ext_whiteboard_from_jitsi" edge="1" parent="1" source="uc_whiteboard" target="uc_jitsi"><mxGeometry relative="1" as="geometry"/></mxCell>
+        
+        <!-- Labels (visual hint) -->
+        <mxCell id="label_include" value="&lt;include&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="30" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="label_extend" value="&lt;extend&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="920" y="70" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- Title -->
+        <mxCell id="title" value="Sprint 2 - Diagramme de Cas d&#39;Utilisation" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+ 

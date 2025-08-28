@@ -28,7 +28,20 @@ const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
       <Badge badgeContent={items.length} color="primary">
         <Typography variant="h6">{title}</Typography>
       </Badge>
-      <IconButton onClick={onToggle}>
+      <IconButton 
+        onClick={onToggle}
+        sx={{
+          background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+          color: "white",
+          boxShadow: "0 4px 12px rgba(25,118,210,0.3)",
+          transition: "all 0.2s ease",
+          "&:hover": {
+            background: "linear-gradient(135deg, #1565c0, #1976d2)",
+            transform: "translateY(-1px)",
+            boxShadow: "0 6px 16px rgba(25,118,210,0.4)"
+          }
+        }}
+      >
         {expanded ? <ExpandLess /> : <ExpandMore />}
       </IconButton>
     </Box>
@@ -58,6 +71,54 @@ export default function BuildProgramOverviewPage() {
   const navigate = useNavigate();
   const { programId } = useParams();
 
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    warning: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #f57c00, #ff9800)',
+      boxShadow: '0 6px 18px rgba(245,124,0,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(245,124,0,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
+
   const fetchbuildProgram = useCallback(async () => {
     try {
       const res = await api.get("/buildProgram");
@@ -81,7 +142,7 @@ export default function BuildProgramOverviewPage() {
         <Typography variant="h4">
           🎓 {t('buildProgram.overviewTitle')}
         </Typography>
-        <Button variant="outlined" onClick={() => navigate("/programs")}>
+        <Button variant="contained" sx={styles.secondary} onClick={() => navigate("/programs")}>
           ↩️ {t('common.back')}
         </Button>
       </Box>
@@ -137,10 +198,20 @@ export default function BuildProgramOverviewPage() {
                           key={ct.id}
                           label={`📄 ${ct.contenu.title}`}
                           size="small"
-                          variant="outlined"
-                          color="secondary"
+                          variant="contained"
                           onClick={() => window.open(ct.contenu.fileUrl, "_blank")}
-                          sx={{ cursor: "pointer" }}
+                          sx={{
+                            cursor: "pointer",
+                            background: "linear-gradient(135deg, #7b1fa2, #ab47bc)",
+                            color: "white",
+                            fontWeight: "bold",
+                            boxShadow: "0 4px 12px rgba(123,31,162,0.3)",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              transform: "translateY(-2px)",
+                              boxShadow: "0 6px 16px rgba(123,31,162,0.4)"
+                            }
+                          }}
                         />
                       ))}
                     </Stack>
@@ -151,8 +222,8 @@ export default function BuildProgramOverviewPage() {
 
             <Box display="flex" justifyContent="flex-end" mt={2} gap={2} flexWrap="wrap">
               <Button
-                variant="outlined"
-                color="info"
+                variant="contained"
+                sx={styles.info}
                 onClick={() => navigate(`/programs/edit/${buildProgram.program.id}`)}
               >
                 🛠️ {t('common.edit')}
@@ -166,17 +237,22 @@ export default function BuildProgramOverviewPage() {
                     fontWeight: "bold",
                     px: 1.5,
                     borderRadius: "12px",
-                    backgroundColor: "#e6f4ea",
-                    color: "#1b5e20",
-                    border: "1px solid #1b5e20",
+                    background: "linear-gradient(135deg, #2e7d32, #66bb6a)",
+                    color: "white",
+                    boxShadow: "0 4px 12px rgba(46,125,50,0.3)",
                     height: 36,
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 6px 16px rgba(46,125,50,0.4)"
+                    }
                   }}
                 />
               )}
 
               <Button
-                variant={buildProgram.program.published ? "outlined" : "contained"}
-                color={buildProgram.program.published ? "warning" : "success"}
+                variant="contained"
+                sx={buildProgram.program.published ? styles.warning : styles.success}
                 onClick={async () => {
                   try {
                     await api.patch(`/programs/${buildProgram.program.id}/publish`);
@@ -189,21 +265,6 @@ export default function BuildProgramOverviewPage() {
                   } catch (err) {
                     toast.error(t('buildProgram.publishError'));
                   }
-                }}
-                sx={{
-                  borderRadius: "12px",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  fontSize: "0.875rem",
-                  px: 2.5,
-                  py: 0.8,
-                  height: 36,
-                  backgroundColor: buildProgram.program.published ? "#fff3e0" : "#e8f5e9",
-                  color: buildProgram.program.published ? "#ef6c00" : "#2e7d32",
-                  border: `1px solid ${buildProgram.program.published ? "#ef6c00" : "#2e7d32"}`,
-                  "&:hover": {
-                    backgroundColor: buildProgram.program.published ? "#ffe0b2" : "#c8e6c9",
-                  },
                 }}
               >
                 {buildProgram.program.published ? `❌ ${t('buildProgram.unpublish')}` : `📤 ${t('buildProgram.publish')}`}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
@@ -10,6 +11,7 @@ const ModuleList = () => {
   const { t } = useTranslation();
   const [modules, setModules] = useState([]);
   const navigate = useNavigate();
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, module: null });
 
   const fetchModules = async () => {
     try {
@@ -24,13 +26,22 @@ const ModuleList = () => {
     fetchModules();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm(t('modules.confirmDelete'))) return;
+  const confirmDelete = (moduleRow) => {
+    setDeleteDialog({ open: true, module: moduleRow });
+  };
+
+  const handleDelete = async () => {
+    const mod = deleteDialog.module;
+    if (!mod) return;
     try {
-      await api.delete(`/modules/${id}`);
-      setModules((prev) => prev.filter((m) => m.id !== id));
+      await api.delete(`/modules/${mod.id}`);
+      setModules((prev) => prev.filter((m) => m.id !== mod.id));
+      toast.success(t('modules.deleteSuccess'));
     } catch (err) {
       console.error("Erreur suppression", err);
+      toast.error(t('modules.deleteError'));
+    } finally {
+      setDeleteDialog({ open: false, module: null });
     }
   };
 
@@ -69,10 +80,17 @@ const ModuleList = () => {
   renderCell: (params) => (
     <>
       <Button
-        variant="outlined"
+        variant="contained"
         color="error"
         size="small"
-        onClick={() => handleDelete(params.row.id)}
+        onClick={() => confirmDelete(params.row)}
+        sx={{
+          borderRadius: 2,
+          background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+          boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+          transition: 'transform 0.15s ease',
+          '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+        }}
       >
         {t('common.delete')}
       </Button>
@@ -85,7 +103,14 @@ const ModuleList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('modules.moduleList')}</Typography>
-        <Button variant="contained" onClick={() => navigate("/module/add")}>
+        <Button variant="contained" onClick={() => navigate("/module/add")}
+          sx={{
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+            boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' }
+          }}
+        >
   ➕ {t('modules.addModule')}
 </Button>
 
@@ -104,6 +129,29 @@ const ModuleList = () => {
           }}
         />
       </Box>
+
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, module: null })}
+      >
+        <DialogTitle>{t('modules.confirmDelete')}</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {t('modules.deleteConfirmMessage', { name: deleteDialog.module?.name || '' })}
+            <br />
+            <br />
+            {t('users.irreversibleAction')}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialog({ open: false, module: null })} sx={{ borderRadius: 2 }}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleDelete} color="error" variant="contained" sx={{ borderRadius: 2, minWidth: 120 }}>
+            {t('modules.deleteButton')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

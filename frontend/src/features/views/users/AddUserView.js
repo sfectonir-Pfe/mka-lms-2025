@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AddUserView = () => {
   const { t } = useTranslation();
@@ -60,7 +61,9 @@ useEffect(() => {
   setErrorMessage("");
 
   if (!validateEmail(email)) {
-    setErrorMessage(t('users.invalidEmail'));
+    const msg = t('users.invalidEmail');
+    setErrorMessage(msg);
+    toast.error(msg);
     return;
   }
 
@@ -85,8 +88,8 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
 
   try {
     await api.post("/users", payload); // <--- NOW using correct payload
-    alert(t('users.createSuccess'));
-    navigate("/users");
+    toast.success(t('users.createSuccess'));
+    setTimeout(() => navigate("/users"), 600);
   } catch (error) {
     console.error(error);
     if (
@@ -94,15 +97,21 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
       error.response.status === 409 &&
       error.response.data.message.includes("Email invalide")
     ) {
-      setErrorMessage(t('users.emailInvalidOrUndeliverable'));
+      const msg = t('users.emailInvalidOrUndeliverable');
+      setErrorMessage(msg);
+      toast.error(msg);
     } else if (
       error.response &&
       error.response.status === 409 &&
       error.response.data.message.includes("existe déjà")
     ) {
-      setErrorMessage(t('users.userAlreadyExists'));
+      const msg = t('users.userAlreadyExists');
+      setErrorMessage(msg);
+      toast.error(msg);
     } else {
-      setErrorMessage(t('users.createError'));
+      const msg = t('users.createError');
+      setErrorMessage(msg);
+      toast.error(msg);
     }
   } finally {
     setLoading(false);

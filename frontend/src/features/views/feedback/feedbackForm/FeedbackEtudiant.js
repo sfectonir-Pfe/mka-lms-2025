@@ -84,7 +84,7 @@ export default function FeedbackEtudiant() {
         });
 
         const groupRes = await api.get(
-          `/groups/student/${currentUserId}/seance/${seanceId}`
+          `/feedback-etudiant/groups/student/${currentUserId}/seance/${seanceId}`
         );
         if (!groupRes.data) {
           setCurrentGroup(null);
@@ -94,7 +94,7 @@ export default function FeedbackEtudiant() {
         setCurrentGroup(group);
 
         const questionsRes = await api.get(
-          `/questions/group/${group.id}`,
+          `/feedback-etudiant/questions/group/${group.id}`,
           { headers: { "user-id": currentUserId } }
         );
         const qs = Array.isArray(questionsRes.data) ? questionsRes.data : [];
@@ -108,15 +108,22 @@ export default function FeedbackEtudiant() {
         }
 
         const givenRes = await api.get(
-          `/feedbacks/group/${group.id}/student/${currentUserId}`
+          `/feedback-etudiant/feedbacks/group/${group.id}/student/${currentUserId}`
         );
         const given = Array.isArray(givenRes.data) ? givenRes.data : [];
+        const categoryToQuestionId = {
+          collaboration: 1,
+          communication: 2,
+          participation: 3,
+          qualite_travail: 4,
+        };
+        const ratingToReaction = { 5: "excellent", 4: "very_good", 3: "good", 2: "average", 1: "poor" };
         setCompletedFeedbacks(
           given.map((f) => ({
-            questionId: f.questionId,
-            targetStudentId: f.targetStudentId,
-            reaction: f.reaction,
-            toStudent: f.toStudent,
+            questionId: f.questionId || categoryToQuestionId[f.category] || f.category,
+            targetStudentId: f.targetStudentId || f.toStudentId || f.toStudent?.id,
+            reaction: f.reaction || ratingToReaction[f.rating],
+            toStudent: f.toStudent || (f.toStudentId ? { id: f.toStudentId } : undefined),
           }))
         );
       } catch (err) {
@@ -139,7 +146,7 @@ export default function FeedbackEtudiant() {
       const q = questions[currentQuestionIndex];
       if (!q) return;
 
-      await api.post(`/feedbacks`, {
+      await api.post(`/feedback-etudiant/feedbacks`, {
         questionId: q.id,
         studentId: currentUserId,
         targetStudentId: selectedStudent.id,
