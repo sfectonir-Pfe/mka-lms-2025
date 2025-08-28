@@ -85,9 +85,11 @@ const SeanceFormateurPage = () => {
   const handleRetour = () => setSelectedSeance(null);
 
   const handleDelete = async (id) => {
-    if (window.confirm(t('seances.confirmDelete'))) {
+    try {
       await api.delete(`/seance-formateur/${id}`);
       fetchSeances();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
     }
   };
 

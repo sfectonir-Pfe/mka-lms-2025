@@ -1,17 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateFeedbackFormateurDto } from './dto/create-feedbackformateur.dto';
+import { MailService } from '../mail/mail.service'; // Added import for MailService
 
 @Injectable()
 export class FeedbackFormateurService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService, // Added MailService to constructor
+  ) {}
 
   async create(data: CreateFeedbackFormateurDto) {
     console.log('Payload reçu pour création feedback:', data);
     const etudiant = await this.prisma.user.findUnique({
       where: { id: data.etudiantId },
+      select: { name: true, email: true }, // Added email to select
+    });
+
+    const formateur = await this.prisma.user.findUnique({
+      where: { id: data.formateurId },
       select: { name: true },
     });
+
+    // Récupérer les informations de la séance (optionnel)
+    let seanceName = '';
+    if (data.seanceId) {
+      try {
+        const seance = await this.prisma.seanceFormateur.findUnique({
+          where: { id: data.seanceId },
+          select: { title: true },
+        });
+        seanceName = seance?.title || '';
+      } catch (error) {
+        console.log('Impossible de récupérer le nom de la séance:', error);
+      }
+    }
 
     const emojiLabels: Record<string, string> = {
       '😊': 'Satisfait',
@@ -29,11 +52,30 @@ export class FeedbackFormateurService {
         emoji: data.emoji,
         emojiLabel: emojiLabels[data.emoji] || '',
         commentaire: data.commentaire || '',
-        formateurId: data.formateurId, // <-- bien utiliser formateurId
-        seanceId: data.seanceId,       // <-- bien utiliser seanceId
+        formateurId: data.formateurId,
+        seanceId: data.seanceId,
       },
     });
     console.log('FeedbackFormateur créé:', created);
+
+    // Envoyer l'email de notification à l'étudiant
+    if (etudiant?.email && formateur?.name) {
+      try {
+        await this.mailService.sendFeedbackEmail(
+          etudiant.email,
+          etudiant.name || 'Étudiant',
+          formateur.name || 'Formateur',
+          data.emoji,
+          emojiLabels[data.emoji] || '',
+          data.commentaire || '',
+          seanceName
+        );
+        console.log(`Email de feedback envoyé avec succès à ${etudiant.email}`);
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi de l\'email de feedback:', error);
+        // Ne pas faire échouer la création du feedback si l'email échoue
+      }
+    }
     return created;
   }
 
