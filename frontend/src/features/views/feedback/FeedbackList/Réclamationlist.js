@@ -209,7 +209,6 @@ const ReclamationList = () => {
       <Box
         sx={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -229,14 +228,13 @@ const ReclamationList = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         py: 4,
       }}
     >
       <Container maxWidth="xl">
         <Stack spacing={4}>
           {/* Header */}
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, background: "rgba(255,255,255,0.9)" }}>
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
@@ -279,8 +277,7 @@ const ReclamationList = () => {
                     sx={{
                       borderRadius: 3,
                       transition: "all 0.3s ease",
-                      "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-                      background: "rgba(255,255,255,0.9)",
+                      "&:hover": { transform: "translateY(-4px)", boxShadow: 4 }
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
@@ -305,7 +302,7 @@ const ReclamationList = () => {
           </Grid>
 
           {/* Filters */}
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, background: "rgba(255,255,255,0.9)" }}>
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
             <Grid container spacing={3} alignItems="center">
               <Grid item xs={12} md={8}>
                 <TextField
@@ -369,8 +366,7 @@ const ReclamationList = () => {
                       borderLeft: 4,
                       borderLeftColor: "primary.main",
                       transition: "all 0.3s ease",
-                      "&:hover": { transform: "translateY(-2px)", boxShadow: 4 },
-                      background: "rgba(255,255,255,0.95)",
+                      "&:hover": { transform: "translateY(-2px)", boxShadow: 4 }
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
@@ -522,7 +518,7 @@ const ReclamationList = () => {
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
                     {t("reclamation.description")}
                   </Typography>
-                  <Paper variant="outlined" sx={{ p: 3, bgcolor: "grey.50", borderRadius: 2 }}>
+                  <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
                     <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
                       {selectedReclamation.description}
                     </Typography>
@@ -540,7 +536,7 @@ const ReclamationList = () => {
                     </Typography>
                     <Paper
                       variant="outlined"
-                      sx={{ p: 3, bgcolor: "success.50", borderColor: "success.200", borderRadius: 2 }}
+                      sx={{ p: 3, borderColor: "success.200", borderRadius: 2 }}
                     >
                       <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
                         {selectedReclamation.response}

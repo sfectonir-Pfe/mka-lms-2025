@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import RoleGate from "../../../pages/auth/RoleGate";
 const ProgramList = () => {
   const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
@@ -84,7 +85,7 @@ const ProgramList = () => {
   {t('programs.viewProgram')}
 </Button>
 
-
+          <RoleGate roles={['CreateurDeFormation','Admin']}>
           <Button
             variant="outlined"
             color="error"
@@ -94,6 +95,7 @@ const ProgramList = () => {
           >
             {t('common.delete')}
           </Button>
+          </RoleGate>
         </>
       ),
     },
@@ -105,6 +107,7 @@ const ProgramList = () => {
         <Typography variant="h5">{t('programs.programList')}</Typography>
 
         <Box>
+        <RoleGate roles={['CreateurDeFormation','Admin']}>
           <Button
             variant="contained"
             onClick={() => navigate("/programs/add")}
@@ -112,6 +115,7 @@ const ProgramList = () => {
           >
             ➕ {t('programs.addProgram')}
           </Button>
+          </RoleGate>
           <Button
             variant="outlined"
             startIcon={<VisibilityIcon />}
@@ -119,7 +123,7 @@ const ProgramList = () => {
           >
             {t('programs.viewPrograms')}
           </Button>
-        </Box>
+          </Box>
       </Grid>
 
 

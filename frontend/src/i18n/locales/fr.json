@@ -918,6 +918,7 @@
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce programme ?"
   },
   "sidebar": {
+    "menu": "Menu",
     "home": "Accueil",
     "users": "Utilisateurs",
     "modules": "Modules",

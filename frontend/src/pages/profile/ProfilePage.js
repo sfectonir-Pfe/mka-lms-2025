@@ -189,7 +189,6 @@ useEffect(() => {
           p: 4,
           borderRadius: 4,
           textAlign: 'center',
-          background: 'linear-gradient(45deg, #f8f9fa 30%, #e9ecef 90%)'
         }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
             {t('profile.profileError')}
@@ -223,7 +222,6 @@ useEffect(() => {
       <Paper elevation={4} sx={{
         p: 6,
         borderRadius: 6,
-        background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)'
       }}>
         {/* Header Section */}
         <Box sx={{
@@ -234,9 +232,7 @@ useEffect(() => {
         }}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            color: '#1976d2'
           }}>
             {t('profile.userProfile')}
           </Typography>
@@ -423,7 +419,6 @@ useEffect(() => {
           sx={{
             p: 2,
             borderRadius: 2,
-            background: "#f5faff",
             display: "flex",
             alignItems: "center",
             gap: 2,

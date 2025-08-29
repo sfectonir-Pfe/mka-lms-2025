@@ -501,6 +501,31 @@ export class Session2Service {
     },
   });
 }
-
+// new add
+async getSessionsForUser(userId: number) {
+  return this.prisma.userSession2.findMany({
+    where: { userId },
+    include: {
+      session2: {
+        include: {
+          program: true,
+          session2Modules: {
+            include: {
+              module: true,
+              courses: {
+                include: {
+                  course: true,
+                  contenus: {
+                    include: { contenu: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+}
 
 }

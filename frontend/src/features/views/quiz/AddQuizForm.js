@@ -343,7 +343,6 @@ const AddQuizForm = ({
         alignItems="center"
         position="sticky"
         bottom={0}
-        bgcolor="white"
         py={2}
         px={1}
         borderTop={"1px solid #ccc"}

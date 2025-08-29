@@ -294,7 +294,6 @@ const AnimerSeanceView = () => {
                       ml: 1,
                       borderRadius: 2,
                       overflow: "hidden",
-                      bgcolor: "#fafafa",
                       "&:before": { display: "none" },
                     }}
                   >
@@ -432,7 +431,6 @@ const AnimerSeanceView = () => {
           borderRadius: 3,
           overflow: "hidden",
           border: "1px solid #e5e7eb",
-          bgcolor: "#fff",
         }}
       >
         <Box
@@ -442,7 +440,6 @@ const AnimerSeanceView = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            bgcolor: "#f8fafc",
             borderBottom: "1px solid #e5e7eb",
           }}
         >
@@ -461,7 +458,6 @@ const AnimerSeanceView = () => {
 
         <Box
           sx={{
-            background: "linear-gradient(180deg,#fafafa, #f3f4f6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -484,7 +480,6 @@ const AnimerSeanceView = () => {
           mb: 2,
           borderRadius: 3,
           border: "1px solid #e5e7eb",
-          bgcolor: "#fff",
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2}>
@@ -531,8 +526,8 @@ const AnimerSeanceView = () => {
               mb: 0.5,
               minHeight: 44,
             },
-            "& .Mui-selected": { bgcolor: "#eef2ff" },
-            "& .MuiTabs-indicator": { left: 0, width: 3, bgcolor: "#6366f1" },
+            "& .Mui-selected": { opacity: 0.8 },
+            "& .MuiTabs-indicator": { left: 0, width: 3 },
           }}
         >
           <Tab icon={<DescriptionIcon />} iconPosition="start" label={t("seances.sessionAdditions")} />
@@ -603,7 +598,7 @@ const AnimerSeanceView = () => {
                     <Paper
                       key={vid.id}
                       variant="outlined"
-                      sx={{ width: 220, p: 1, borderRadius: 2, bgcolor: "#fafafa" }}
+                      sx={{ width: 220, p: 1, borderRadius: 2 }}
                     >
                       <ReactPlayer url={vid.fileUrl} controls width="100%" height={120} />
                     </Paper>
@@ -741,7 +736,7 @@ const AnimerSeanceView = () => {
             </Box>
           </Stack>
         </DialogTitle>
-        <DialogContent dividers sx={{ bgcolor: "#f8fafc", maxHeight: 500 }}>
+        <DialogContent dividers sx={{ maxHeight: 500 }}>
           {/* body omitted intentionally */}
         </DialogContent>
       </Dialog>
@@ -757,7 +752,7 @@ const AnimerSeanceView = () => {
             zIndex: 2000,
             width: "100vw",
             height: "100vh",
-            background: "rgba(0,0,0,0.88)",
+            background: "rgba(0,0,0,0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

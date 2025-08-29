@@ -15,7 +15,9 @@ import { useTranslation } from "react-i18next";
 
 
 import { useParams } from "react-router-dom";
-import { Eye, EyeOff, PlusCircle } from "lucide-react"; // Or any icons you prefer
+import { Eye, EyeOff, PlusCircle } from "lucide-react";
+import RoleGate from "../../../pages/auth/RoleGate";
+ // Or any icons you prefer
 
 const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   const { sessionId } = useParams();
@@ -74,7 +76,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   return (
     <Box p={2} width="100%">
       <Box display="flex" flexDirection="column" alignItems="center">
-
+      <RoleGate roles={['CreateurDeFormation','Admin']}>
       <Button
       
         variant={showAddBlock ? "outlined" : "contained"}
@@ -85,7 +87,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
       >
         {showAddBlock ? t("addSeance.hideForm") : t("addSeance.createNewSession")}
       </Button>
-
+      </RoleGate>
       <Collapse in={showAddBlock}>
         <Box>
           <Typography variant="h5" gutterBottom>

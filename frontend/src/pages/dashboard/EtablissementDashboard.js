@@ -117,7 +117,7 @@ export default function EtablissementDashboardPage() {
 
   return (
     <Box p={3}>
-      <Typography variant="h4" fontWeight={700} mb={4} color="#3d5afe">
+      <Typography variant="h4" fontWeight={700} mb={4} color="primary.main">
         🏫 Tableau de bord Établissement
       </Typography>
 
@@ -141,45 +141,45 @@ export default function EtablissementDashboardPage() {
       {/* Statistiques */}
       <Grid container spacing={4} mb={3} maxWidth={1440} margin="auto">
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 3, bgcolor: "#e3f2fd" }}>
+          <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#1976d2">
+                <Typography variant="h3" fontWeight={700} color="primary.main">
                   {filteredStudents.length}
                 </Typography>
-                <GroupIcon sx={{ color: "#1976d2", fontSize: 44 }} />
+                <GroupIcon sx={{ color: "primary.main", fontSize: 44 }} />
               </Stack>
-              <Typography mt={2} color="#1565c0" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 Étudiants inscrits
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 3, bgcolor: "#f3e5f5" }}>
+          <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#8e24aa">
+                <Typography variant="h3" fontWeight={700} color="secondary.main">
                   {sessions.length - 1}
                 </Typography>
-                <SchoolIcon sx={{ color: "#8e24aa", fontSize: 44 }} />
+                <SchoolIcon sx={{ color: "secondary.main", fontSize: 44 }} />
               </Stack>
-              <Typography mt={2} color="#6a1b9a" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 Sessions actives
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <Card sx={{ borderRadius: 3, bgcolor: "#fffde7" }}>
+          <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#fbc02d">
+                <Typography variant="h3" fontWeight={700} color="warning.main">
                   {topStudents.length}
                 </Typography>
-                <EmojiEventsIcon sx={{ color: "#fbc02d", fontSize: 44 }} />
+                <EmojiEventsIcon sx={{ color: "warning.main", fontSize: 44 }} />
               </Stack>
-              <Typography mt={2} color="#f9a825" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 Top étudiants
               </Typography>
             </CardContent>
@@ -190,7 +190,7 @@ export default function EtablissementDashboardPage() {
       {/* Liste étudiants */}
       <Card sx={{ borderRadius: 3, mt: 2, maxWidth: 1200, mx: "auto" }}>
         <CardContent>
-          <Typography variant="h6" mb={2}>
+          <Typography variant="h6" mb={2} color="primary.main" fontWeight={700}>
             Liste des étudiants ({filteredStudents.length})
           </Typography>
           {filteredStudents.length === 0 ? (
@@ -263,7 +263,7 @@ export default function EtablissementDashboardPage() {
       {/* Top étudiants par note */}
       <Card sx={{ borderRadius: 3, mt: 4, maxWidth: 700, mx: "auto" }}>
         <CardContent>
-          <Typography variant="h6" mb={2}>
+          <Typography variant="h6" mb={2} color="primary.main" fontWeight={700}>
             <EmojiEventsIcon color="warning" /> Top étudiants (par note moyenne)
           </Typography>
           {topStudents.length === 0 ? (

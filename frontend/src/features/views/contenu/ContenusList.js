@@ -5,7 +5,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-
+import RoleGate from "../../../pages/auth/RoleGate";
 
 const ContenusList = () => {
   const { t } = useTranslation();
@@ -75,6 +75,7 @@ const ContenusList = () => {
       if (isQuiz) {
         return (
           <Stack direction="row" spacing={1}>
+            <RoleGate roles={['CreateurDeFormation','Admin']}>
             <Button
               variant="outlined"
               size="small"
@@ -83,14 +84,17 @@ const ContenusList = () => {
             >
               {t('content.takeQuiz')}
             </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              color="secondary"
-              onClick={() => navigate(`/quizzes/edit/${params.row.id}`)}
-            >
-              {t('common.edit')}
-            </Button>
+            </RoleGate>
+            <RoleGate roles={['CreateurDeFormation','Admin']}>
+              <Button
+                variant="outlined"
+                size="small"
+                color="secondary"
+                onClick={() => navigate(`/quizzes/edit/${params.row.id}`)}
+              >
+                {t('common.edit')}
+              </Button>
+            </RoleGate>
           </Stack>
         );
       } else {
@@ -116,6 +120,7 @@ const ContenusList = () => {
     headerName: t('content.actions'),
     flex: 1,
     renderCell: (params) => (
+      <RoleGate roles={['CreateurDeFormation','Admin']}>
       <Button
         variant="outlined"
         color="error"
@@ -124,6 +129,7 @@ const ContenusList = () => {
       >
         {t('common.delete')}
       </Button>
+      </RoleGate>
     ),
   },
 ];
@@ -133,9 +139,11 @@ const ContenusList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('content.contentList')}</Typography>
+        <RoleGate roles={['CreateurDeFormation','Admin']}>
         <Button variant="contained" onClick={() => navigate("/contenus/add")}>
           ➕ {t('content.addContent')}
         </Button>
+        </RoleGate>
       </Grid>
 
       <Box sx={{ height: 500 }}>

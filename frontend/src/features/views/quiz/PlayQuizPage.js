@@ -153,7 +153,7 @@ const PlayQuizPage = () => {
    <Typography
   variant="subtitle1"
   sx={{
-    backgroundColor: timeLeft <= 30 ? "#ffe6e6" : "#e3f2fd",
+    // backgroundColor: timeLeft <= 30 ? "#ffe6e6" : "#e3f2fd",
     color: timeLeft <= 30 ? "#d32f2f" : "#1976d2",
     px: 2,
     py: 1,
@@ -206,7 +206,7 @@ const PlayQuizPage = () => {
     p: 4,
     mb: 4,
     borderRadius: 3,
-    backgroundColor: "#fafafa",
+    // backgroundColor: "#fafafa",
     borderLeft: "5px solid #1976d2",
   }}
 >
@@ -256,14 +256,14 @@ const PlayQuizPage = () => {
               )
             }
             sx={{
-              backgroundColor:
-                answers[q.id] === choice.id.toString() ? "#e3f2fd" : "transparent",
+              // backgroundColor:
+                // answers[q.id] === choice.id.toString() ? "#e3f2fd" : "transparent",
               borderRadius: 2,
               px: 2,
               my: 1,
               transition: "0.2s",
               "&:hover": {
-                backgroundColor: "#f0f7ff",
+                // backgroundColor: "#f0f7ff",
               },
             }}
           />

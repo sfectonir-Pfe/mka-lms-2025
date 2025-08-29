@@ -364,8 +364,7 @@ const EditProfilePage = () => {
     <Container maxWidth="md" sx={{ py: 6 }}>
       <Paper elevation={4} sx={{
         p: 6,
-        borderRadius: 6,
-        background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)'
+        borderRadius: 6
       }}>
         {/* Header */}
         <Box sx={{
@@ -376,9 +375,7 @@ const EditProfilePage = () => {
         }}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            color: '#1976d2'
           }}>
             {t('profile.editProfile')}
           </Typography>

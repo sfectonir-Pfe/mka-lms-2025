@@ -4,7 +4,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-
+import RoleGate from "../../../pages/auth/RoleGate";
 
 const CourseList = () => {
   const { t } = useTranslation();
@@ -54,7 +54,7 @@ const CourseList = () => {
   headerName: t('courses.actions'),
   flex: 1,
   renderCell: (params) => (
-    <>
+    <><RoleGate roles={['CreateurDeFormation','Admin']}>
       <Button
         variant="outlined"
         color="error"
@@ -63,6 +63,7 @@ const CourseList = () => {
       >
         {t('common.delete')}
       </Button>
+      </RoleGate>
     </>
   ),
 }
@@ -72,9 +73,11 @@ const CourseList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('courses.courseList')}</Typography>
-        <Button variant="contained" onClick={() => navigate("/courses/add")}>
-          ➕ {t('courses.addCourse')}
-        </Button>
+        <RoleGate roles={['CreateurDeFormation','Admin']}>
+          <Button variant="contained" onClick={() => navigate("/courses/add")}>
+            ➕ {t('courses.addCourse')}
+          </Button>
+        </RoleGate>
       </Grid>
 
       <Box sx={{ height: 400 }}>

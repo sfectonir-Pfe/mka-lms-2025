@@ -97,6 +97,10 @@ import "react-toastify/dist/ReactToastify.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
+import Forbidden403 from './pages/error/Forbidden403';
+import { RoleProtectedRoute } from './pages/auth/guards';
+
+
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -308,6 +312,8 @@ function AppContent() {
             {/* <Route path="/test-feedback" element={<TestFeedback />} /> */}
             {/* <Route path="/test-average-rating" element={<TestAverageRating />} /> */}
             <Route path="*" element={<NotFound />} />
+            <Route path="/403" element={<Forbidden403 />} />
+
           </Routes>
         </BrowserRouter>
       )}

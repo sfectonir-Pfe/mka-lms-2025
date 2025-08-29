@@ -901,6 +901,7 @@
     "confirmDelete": "Are you sure you want to delete this program?"
   },
   "sidebar": {
+    "menu": "Menu",
     "home": "Home",
     "users": "Users",
     "modules": "Modules",

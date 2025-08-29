@@ -4,6 +4,7 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 
 const ModuleList = () => {
@@ -68,6 +69,7 @@ const ModuleList = () => {
   flex: 1,
   renderCell: (params) => (
     <>
+    <RoleGate roles={['CreateurDeFormation','Admin']}>
       <Button
         variant="outlined"
         color="error"
@@ -76,6 +78,7 @@ const ModuleList = () => {
       >
         {t('common.delete')}
       </Button>
+    </RoleGate>
     </>
   ),
 }
@@ -85,9 +88,11 @@ const ModuleList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('modules.moduleList')}</Typography>
+        <RoleGate roles={['CreateurDeFormation','Admin']}>
         <Button variant="contained" onClick={() => navigate("/module/add")}>
   ➕ {t('modules.addModule')}
 </Button>
+</RoleGate>
 
       </Grid>
 

@@ -90,6 +90,12 @@ api.interceptors.response.use(
         // no-op
       }
     }
+    if (status === 403) {
+      const isForbiddenRoute = window.location.pathname.startsWith('/403');
+      if (!isForbiddenRoute) {
+        window.location.replace('/403');
+      }
+    }
     return Promise.reject(error);
   }
 );
