@@ -28,7 +28,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { sideBarData } from "../components/constants/sideBarData";
+import { getSidebarData } from "../components/constants/sideBarData";
 import ScrollToTopButton from "../components/constants/ScrollToTopButton";
 import LanguageSelectorWithFlags from "../i18n/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
@@ -494,7 +494,7 @@ export default function Main({ setUser, user }) {
         <Divider />
 
         <List sx={{ px: 1 }}>
-          {sideBarData.map((elem, index) => {
+          {getSidebarData().map((elem, index) => {
             const item = (
               <Link to={elem.path} key={index} style={{ all: "unset" }}>
                 <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
@@ -553,7 +553,8 @@ export default function Main({ setUser, user }) {
         sx={{
           flexGrow: 1,
           p: 3,
-          backgroundColor: muiTheme.palette.background.default,
+          // backgroundColor: muiTheme.palette.background.default,
+          backgroundColor: "#698aad",
           minHeight: "100vh",
           overflow: "auto",
           height: "100vh",

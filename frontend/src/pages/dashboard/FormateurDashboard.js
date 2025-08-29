@@ -43,15 +43,6 @@ function ModernCard({ children, ...props }) {
     <Paper
       sx={{
         borderRadius: 3,
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
-        },
         ...props.sx
       }}
       {...props}
@@ -62,7 +53,7 @@ function ModernCard({ children, ...props }) {
 }
 
 // --- ModernStatCard ---
-function ModernStatCard({ icon, value, label, gradient, extra }) {
+function ModernStatCard({ icon, value, label, extra }) {
   return (
     <ModernCard>
       <CardContent sx={{ p: 3 }}>
@@ -72,8 +63,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
               sx={{ 
                 width: 60, 
                 height: 60, 
-                background: gradient,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+                bgcolor: 'primary.main'
               }}
             >
               {icon}
@@ -82,12 +72,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
               <Typography 
                 variant="h4" 
                 fontWeight={700} 
-                sx={{ 
-                  background: gradient,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
+                color="primary.main"
               >
                 {value}
               </Typography>
@@ -97,7 +82,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
             <Typography 
               variant="h6" 
               fontWeight={600} 
-              color={PRIMARY_BLUE}
+              color="primary.main"
               mb={1}
             >
               {label}
@@ -155,18 +140,7 @@ export default function FormateurDashboardPage() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.02" fill-rule="evenodd"%3E%3Cpath d="m0 40l40-40h-40z"/%3E%3C/g%3E%3C/svg%3E")',
-        }
+        minHeight: "100vh"
       }}
     >
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
@@ -175,38 +149,27 @@ export default function FormateurDashboardPage() {
           sx={{ 
             textAlign: 'center',
             mb: 6,
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
             borderRadius: 4,
-            p: 4,
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            p: 4
           }}
         >
           <Typography 
             variant="h3" 
             fontWeight={700} 
-            color="white" 
+            color="primary.main" 
             mb={1}
-            sx={{
-              background: 'linear-gradient(45deg, #fff, #e0e7ff)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
           >
             Tableau de Bord Formateur
           </Typography>
           <Typography 
             variant="h6" 
             sx={{ 
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'text.secondary',
               fontWeight: 400,
               letterSpacing: 0.5
             }}
           >
-            Vue d'ensemble de vos sessions et activité d’enseignement
+            Vue d'ensemble de vos sessions et activité d'enseignement
           </Typography>
         </Box>
 
@@ -217,7 +180,6 @@ export default function FormateurDashboardPage() {
               icon={<GroupIcon />}
               value={totalSessions}
               label="Sessions créées"
-              gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
@@ -225,7 +187,6 @@ export default function FormateurDashboardPage() {
               icon={<EventAvailableIcon />}
               value={totalActiveSessions}
               label="Sessions actives"
-              gradient="linear-gradient(135deg, #43a047 0%, #60a5fa 100%)"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
@@ -233,7 +194,6 @@ export default function FormateurDashboardPage() {
               icon={<StarIcon />}
               value={feedbacks?.totalFeedbacks || 0}
               label="Feedbacks reçus"
-              gradient="linear-gradient(135deg, #ff9800 0%, #ffc107 100%)"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
@@ -241,7 +201,6 @@ export default function FormateurDashboardPage() {
               icon={<ShowChartIcon />}
               value={feedbacks?.generalAverage ? `${feedbacks.generalAverage}/5` : "N/A"}
               label="Note moyenne générale"
-              gradient="linear-gradient(135deg, #9c27b0 0%, #e1bee7 100%)"
               extra={
                 feedbacks?.generalAverage && (
                   <Typography variant="caption" color="text.secondary">
@@ -261,7 +220,7 @@ export default function FormateurDashboardPage() {
           mb: 4,
         }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={700} mb={2} color={PRIMARY_BLUE}>
+            <Typography variant="h6" fontWeight={700} mb={2} color="primary.main">
               📚 Sessions créées
             </Typography>
             {loading ? (
@@ -358,7 +317,7 @@ export default function FormateurDashboardPage() {
                   </Box>
                 ) : feedbacks?.feedbacksBySeance?.length > 0 ? (
                   <Box>
-                    <Typography variant="h6" mb={2} color={PRIMARY_BLUE}>
+                    <Typography variant="h6" mb={2} color="primary.main">
                       📊 Détail par séance
                     </Typography>
                     <List dense>
@@ -374,7 +333,7 @@ export default function FormateurDashboardPage() {
                         >
                           <ListItemText
                             primary={
-                              <Typography fontWeight={600} color={PRIMARY_BLUE}>
+                              <Typography fontWeight={600} color="primary.main">
                                 {seance.seanceTitle}
                               </Typography>
                             }
@@ -632,7 +591,7 @@ export default function FormateurDashboardPage() {
                           </Typography>
                           {formateur.rewards?.length > 0 && (
                             <Box mt={1}>
-                              <Typography variant="caption" fontWeight={600} color={PRIMARY_BLUE}>
+                              <Typography variant="caption" fontWeight={600} color="primary.main">
                                 🎁 Récompenses:
                               </Typography>
                               {formateur.rewards.map((reward, idx) => (

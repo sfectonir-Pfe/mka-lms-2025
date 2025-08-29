@@ -57,7 +57,7 @@ export default function EtudiantDashboardPage() {
 
   return (
     <Box p={3}>
-      <Typography variant="h4" fontWeight={700} mb={4} color="#2980b9">
+      <Typography variant="h4" fontWeight={700} mb={4} color="primary.main">
         👨‍🎓 Tableau de bord Étudiant
       </Typography>
 
@@ -71,127 +71,99 @@ export default function EtudiantDashboardPage() {
         >
           {/* Total Sessions */}
           <Grid item xs={12} sm={6} md={3}>
-            <Box
+            <Card
               sx={{
-                background: "linear-gradient(135deg, #e3edfc 60%, #d7e9fa 100%)",
-                boxShadow: "0 6px 32px 0 rgba(30,136,229,.10)",
                 borderRadius: 3,
                 p: 4,
                 minHeight: 140,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                transition: "all .18s",
-                "&:hover": {
-                  transform: "translateY(-4px) scale(1.03)",
-                  boxShadow: "0 12px 38px 0 rgba(30,136,229,.13)",
-                },
+                justifyContent: "center"
               }}
             >
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#2196f3">
+                <Typography variant="h3" fontWeight={700} color="primary.main">
                   {stats.total}
                 </Typography>
-                <GroupIcon sx={{ color: "#2196f3", fontSize: 48 }} />
+                <GroupIcon sx={{ color: "primary.main", fontSize: 48 }} />
               </Stack>
-              <Typography mt={2} color="#3b5998" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 Sessions rejointes
               </Typography>
-            </Box>
+            </Card>
           </Grid>
           {/* Terminées */}
           <Grid item xs={12} sm={6} md={3}>
-            <Box
+            <Card
               sx={{
-                background: "linear-gradient(135deg, #fdeaea 60%, #fad5d5 100%)",
-                boxShadow: "0 6px 32px 0 rgba(244,67,54,.10)",
                 borderRadius: 3,
                 p: 4,
                 minHeight: 140,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                transition: "all .18s",
-                "&:hover": {
-                  transform: "translateY(-4px) scale(1.03)",
-                  boxShadow: "0 12px 38px 0 rgba(244,67,54,.13)",
-                },
+                justifyContent: "center"
               }}
             >
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#e53935">
+                <Typography variant="h3" fontWeight={700} color="error.main">
                   {stats.terminee}
                 </Typography>
-                <EventBusyIcon sx={{ color: "#e53935", fontSize: 48 }} />
+                <EventBusyIcon sx={{ color: "error.main", fontSize: 48 }} />
               </Stack>
-              <Typography mt={2} color="#b71c1c" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 Terminées
               </Typography>
-            </Box>
+            </Card>
           </Grid>
           {/* En cours */}
           <Grid item xs={12} sm={6} md={3}>
-            <Box
+            <Card
               sx={{
-                background: "linear-gradient(135deg, #e7faed 60%, #d5f5e3 100%)",
-                boxShadow: "0 6px 32px 0 rgba(76,175,80,.10)",
                 borderRadius: 3,
                 p: 4,
                 minHeight: 140,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                transition: "all .18s",
-                "&:hover": {
-                  transform: "translateY(-4px) scale(1.03)",
-                  boxShadow: "0 12px 38px 0 rgba(76,175,80,.13)",
-                },
+                justifyContent: "center"
               }}
             >
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#4caf50">
+                <Typography variant="h3" fontWeight={700} color="success.main">
                   {stats.encours}
                 </Typography>
-                <EventAvailableIcon sx={{ color: "#4caf50", fontSize: 48 }} />
+                <EventAvailableIcon sx={{ color: "success.main", fontSize: 48 }} />
               </Stack>
-              <Typography mt={2} color="#388e3c" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 En cours
               </Typography>
-            </Box>
+            </Card>
           </Grid>
           {/* À venir */}
           <Grid item xs={12} sm={6} md={3}>
-            <Box
+            <Card
               sx={{
-                background: "linear-gradient(135deg, #f4eafd 60%, #edd5fa 100%)",
-                boxShadow: "0 6px 32px 0 rgba(156,39,176,.10)",
                 borderRadius: 3,
                 p: 4,
                 minHeight: 140,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                transition: "all .18s",
-                "&:hover": {
-                  transform: "translateY(-4px) scale(1.03)",
-                  boxShadow: "0 12px 38px 0 rgba(156,39,176,.13)",
-                },
+                justifyContent: "center"
               }}
             >
               <Stack direction="row" alignItems="center" spacing={2}>
-                <Typography variant="h3" fontWeight={700} color="#9c27b0">
+                <Typography variant="h3" fontWeight={700} color="secondary.main">
                   {stats.avenir}
                 </Typography>
-                <HourglassBottomIcon sx={{ color: "#9c27b0", fontSize: 48 }} />
+                <HourglassBottomIcon sx={{ color: "secondary.main", fontSize: 48 }} />
               </Stack>
-              <Typography mt={2} color="#7b1fa2" fontWeight={500} fontSize={18}>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
                 À venir
               </Typography>
-            </Box>
+            </Card>
           </Grid>
         </Grid>
       </Box>
@@ -199,7 +171,7 @@ export default function EtudiantDashboardPage() {
       {/* SESSION LIST */}
       <Card sx={{ borderRadius: 3, mt: 2, maxWidth: 900, mx: "auto" }}>
         <CardContent>
-          <Typography variant="h6" mb={2}>
+          <Typography variant="h6" mb={2} color="primary.main" fontWeight={700}>
             📚 Liste des sessions rejointes
           </Typography>
           {loading ? (

@@ -12,7 +12,148 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import { getCurrentRole } from '../../pages/auth/token';
 
+// Base sidebar items that all authenticated users can see
+const baseSidebarItems = [
+  { text: "sidebar.home", icon: <MdSpaceDashboard />, path: "/" },
+];
+
+// Role-specific sidebar items
+const roleBasedItems = {
+  admin: [
+    { text: "sidebar.users", icon: <FaUsers />, path: "users" },
+    { text: "sidebar.modules", icon: <BiBookBookmark />, path: "module" },
+    { text: "sidebar.courses", icon: <FaBook />, path: "courses" },
+    { text: "sidebar.contents", icon: <FaFileAlt />, path: "contenus" },
+    { 
+      text: "sidebar.programs", 
+      icon: <FaGraduationCap />, 
+      path: "/programs",
+      children: [
+        { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+      ]
+    },
+    { 
+      text: "sidebar.sessions", 
+      icon: <CalendarMonthIcon />, 
+      path: "/sessions",
+      children: [
+        { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+      ]
+    },
+    { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+    { text: "sidebar.RéclamationList", icon: <MdFeedback />, path: "/Réclamationlist" },
+  ],
+  
+  createurdeformation: [
+    { text: "sidebar.modules", icon: <BiBookBookmark />, path: "module" },
+    { text: "sidebar.courses", icon: <FaBook />, path: "courses" },
+    { text: "sidebar.contents", icon: <FaFileAlt />, path: "contenus" },
+    { 
+      text: "sidebar.programs", 
+      icon: <FaGraduationCap />, 
+      path: "/programs",
+      children: [
+        { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+      ]
+    },
+    { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+    
+  ],
+  
+  formateur: [
+   
+    { 
+      text: "sidebar.sessions", 
+      icon: <CalendarMonthIcon />, 
+      path: "/sessions",
+      children: [
+        { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+      ]
+    },
+    { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+  ],
+  
+  // apprenant: [
+  //   { 
+  //     text: "sidebar.programs", 
+  //     icon: <FaGraduationCap />, 
+  //     path: "/programs",
+  //     children: [
+  //       { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+  //     ]
+  //   },
+  //   { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+  // ],
+
+  // 
+
+  etudiant: [
+    
+    
+    { 
+      text: "sidebar.sessions", 
+      icon: <CalendarMonthIcon />, 
+      path: "/sessions",
+      children: [
+        { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+      ]
+    },
+    { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+  ],
+
+  etablissement: [
+    { 
+      text: "sidebar.sessions", 
+      icon: <CalendarMonthIcon />, 
+      path: "/sessions",
+      children: [
+        { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+      ]
+    },
+    { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
+  ],
+
+  // institution: [
+  //   { text: "sidebar.users", icon: <FaUsers />, path: "users" },
+  //   { text: "sidebar.modules", icon: <BiBookBookmark />, path: "module" },
+  //   { text: "sidebar.courses", icon: <FaBook />, path: "courses" },
+  //   { 
+  //     text: "sidebar.programs", 
+  //     icon: <FaGraduationCap />, 
+  //     path: "/programs",
+  //     children: [
+  //       { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
+  //     ]
+  //   },
+  //   { 
+  //     text: "sidebar.sessions", 
+  //     icon: <CalendarMonthIcon />, 
+  //     path: "/sessions",
+  //     children: [
+  //       { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+  //     ]
+  //   },
+  //   { text: "sidebar.RéclamationList", icon: <MdFeedback />, path: "/Réclamationlist" },
+  // ],
+};
+
+// Function to get sidebar data based on current user role
+export function getSidebarData() {
+  const currentRole = getCurrentRole();
+  
+  if (!currentRole) {
+    return baseSidebarItems; // Return minimal items if no role
+  }
+  
+  const normalizedRole = currentRole.toLowerCase();
+  const roleItems = roleBasedItems[normalizedRole] || [];
+  
+  return [...baseSidebarItems, ...roleItems];
+}
+
+// Legacy export for backward compatibility (returns all items)
 export const sideBarData = [
   { text: "sidebar.home", icon: <MdSpaceDashboard />, path: "/" },
   { text: "sidebar.users", icon: <FaUsers />, path: "users" },
@@ -27,9 +168,6 @@ export const sideBarData = [
     { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
   ]
 },
-  
-  
-
   { 
     text: "sidebar.sessions", 
     icon: <CalendarMonthIcon />, 
@@ -40,17 +178,4 @@ export const sideBarData = [
   },
   { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
   { text: "sidebar.RéclamationList", icon: <MdFeedback />, path: "/Réclamationlist" },
-//  {text: "Séances", icon: <DesktopMacIcon />, path: "/formateur/seances" },
-
-
-
-
-  // { text: "Vue Programmes", icon: <LibraryBooksIcon />, path: "/programs/overview" }
-  // { text: "Modules (Test)", icon: <FaBookOpen />, path: "/programs/1/modules" }, // temp path with test ID
-  // { text: "Courses (Test)", icon: <FaFolderOpen />, path: "/modules/1/courses" }, // temp path with test ID
-  // { text: "Contenus (Test)", icon: <FaFolderOpen />, path: "/courses/1/contenus" }, // temp path with test ID
-  // { text: "Admin View", icon: <PiPathBold />, path: "programs" },
-  // { text: "Feedback", icon: <MdFeedback />, path: "feedback" },
-  // { text: "Student View", icon: <MdSpaceDashboard />, path: "student" }
-// dropdown button
 ];

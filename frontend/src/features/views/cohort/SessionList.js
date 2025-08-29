@@ -28,6 +28,7 @@ import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
+import { getCurrentRole } from '../../../pages/auth/token';
 
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
@@ -42,22 +43,33 @@ const SessionList = () => {
   const [selectedSession, setSelectedSession] = useState(null);
   const { t, ready } = useTranslation();
   const navigate = useNavigate();
+  
+  // Check user permissions
+  const currentRole = getCurrentRole()?.toLowerCase();
+  const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
 
   const fetchSessions = async () => {
     try {
       const res = await api.get("/session2");
       setSessions(res.data);
+      
+      // Only fetch users if user has admin/creator permissions
+      const currentRole = getCurrentRole()?.toLowerCase();
+      const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+      
       const usersMap = {};
-      await Promise.all(
-        res.data.map(async (session) => {
-          try {
-            const resp = await api.get(`/session2/${session.id}/users`);
-            usersMap[session.id] = resp.data || [];
-          } catch {
-            usersMap[session.id] = [];
-          }
-        })
-      );
+      if (canManageUsers) {
+        await Promise.all(
+          res.data.map(async (session) => {
+            try {
+              const resp = await api.get(`/session2/${session.id}/users`);
+              usersMap[session.id] = resp.data || [];
+            } catch {
+              usersMap[session.id] = [];
+            }
+          })
+        );
+      }
       setAssignedUsersMap(usersMap);
     } catch {
       toast.error(t("sessions.loadError"));
@@ -268,7 +280,7 @@ const SessionList = () => {
   // Show loading state if i18n is not ready
   if (!ready) {
     return (
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
           Chargement des traductions...
         </Typography>
@@ -277,7 +289,7 @@ const SessionList = () => {
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+    <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
       
 
       <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -297,7 +309,6 @@ const SessionList = () => {
               mt: 4,
               p: 3,
               borderRadius: 3,
-              backgroundColor: "#ffffff",
               border: "1px solid #e0e0e0",
               display: "flex",
               flexDirection: "row",
@@ -353,34 +364,38 @@ const SessionList = () => {
                     }
                     sx={{ fontWeight: 700, textTransform: "capitalize" }}
                   />
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
-                    <Select
-                      labelId={`status-label-${session.id}`}
-                      value={session.status}
-                      label={t("sessions.status")}
-                      onChange={e => handleStatusChange(session.id, e.target.value)}
-                    >
-                      <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
-                      <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
-                      <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
-                      <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
-                    </Select>
-                  </FormControl>
+                  {canManageUsers && (
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
+                      <Select
+                        labelId={`status-label-${session.id}`}
+                        value={session.status}
+                        label={t("sessions.status")}
+                        onChange={e => handleStatusChange(session.id, e.target.value)}
+                      >
+                        <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
+                        <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
+                        <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
+                        <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
                 </Stack>
               </Stack>
 
               {!sidebarOpen[session.id] && (
                 <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDelete(session.id)}
-                  >
-                    {t("sessions.delete")}
-                  </Button>
+                  {canManageUsers && (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(session.id)}
+                    >
+                      {t("sessions.delete")}
+                    </Button>
+                  )}
                   <Button
                     variant="contained"
                     color="primary"
@@ -390,15 +405,17 @@ const SessionList = () => {
                   >
                     {t("sessions.join")}
                   </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    startIcon={<PersonAddAlt1Icon />}
-                    onClick={() => handleToggleSidebar(session.id)}
-                  >
-                    {t("sessions.addUser")}
-                  </Button>
+                  {canManageUsers && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      startIcon={<PersonAddAlt1Icon />}
+                      onClick={() => handleToggleSidebar(session.id)}
+                    >
+                      {t("sessions.addUser")}
+                    </Button>
+                  )}
                   <Button
                     variant="outlined"
                     color="secondary"
@@ -539,13 +556,12 @@ const SessionList = () => {
             </Box>
 
             {/* Sidebar for Users */}
-            {sidebarOpen[session.id] && (
+            {canManageUsers && sidebarOpen[session.id] && (
               <Paper
                 elevation={4}
                 sx={{
                   minWidth: 350,
                   maxWidth: 400,
-                  bgcolor: "#f8fbff",
                   borderRadius: 4,
                   p: 3,
                   display: "flex",
@@ -574,7 +590,6 @@ const SessionList = () => {
                   alignItems="center"
                   gap={1}
                   mb={3}
-                  bgcolor="#eaf0f9"
                   borderRadius={2}
                   p={1.5}
                 >
@@ -586,13 +601,13 @@ const SessionList = () => {
                     onFocus={() => setShowAddUserId(session.id)}
                     onChange={(e) => setUserEmail(e.target.value)}
                     variant="outlined"
-                    sx={{ flex: 1, bgcolor: "#fff", borderRadius: 2 }}
+                    sx={{ flex: 1, borderRadius: 2 }}
                   />
                   <IconButton
                     color="primary"
                     disabled={addLoading}
                     onClick={() => handleAddUser(session.id)}
-                    sx={{ bgcolor: "#1976d2", color: "#fff", "&:hover": { bgcolor: "#1565c0" } }}
+                    sx={{ color: "#fff", "&:hover": { opacity: 0.8 } }}
                   >
                     <PersonAddAlt1Icon />
                   </IconButton>
@@ -612,13 +627,12 @@ const SessionList = () => {
                         alignItems="center"
                         gap={2}
                         p={2}
-                        bgcolor="#fff"
                         borderRadius={2}
                         sx={{
                           boxShadow: "0 2px 8px rgba(25,118,210,.04)",
                           cursor: "pointer",
                           transition: "background .15s",
-                          "&:hover": { background: "#f0f6ff" }
+                          "&:hover": { opacity: 0.8 }
                         }}
                         onClick={() => navigate(`/ProfilePage/${user.id}`)}
                       >
@@ -626,7 +640,6 @@ const SessionList = () => {
                           src={user.profilePic || undefined}
                           sx={{
                             width: 38, height: 38, fontWeight: 700, fontSize: 16,
-                            bgcolor: user.profilePic ? "transparent" : "#B5C7D3",
                           }}
                         >
                           {!user.profilePic && user.name ? user.name[0].toUpperCase() : null}
@@ -674,7 +687,6 @@ const SessionList = () => {
             sx={{
               borderRadius: 4,
               overflow: "hidden",
-              bgcolor: "#ffffff",
               border: "2px solid #1976d2",
               boxShadow: 3,
               mb: 3,
@@ -684,7 +696,6 @@ const SessionList = () => {
           >
             <Box
               sx={{
-                background: "linear-gradient(90deg, #1976d2, #42a5f5)",
                 color: "#fff",
                 p: 3,
                 textAlign: "center"
@@ -703,7 +714,6 @@ const SessionList = () => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  backgroundColor: "#e3f2fd",
                   p: 2
                 }}
               >
