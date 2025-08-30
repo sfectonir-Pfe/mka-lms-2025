@@ -503,7 +503,7 @@ export class Session2Service {
 }
 // new add
 async getSessionsForUser(userId: number) {
-  return this.prisma.userSession2.findMany({
+  const userSessions = await this.prisma.userSession2.findMany({
     where: { userId },
     include: {
       session2: {
@@ -526,6 +526,53 @@ async getSessionsForUser(userId: number) {
       }
     }
   });
+
+  // Add feedback information to each session
+  const sessionsWithFeedback = await Promise.all(
+    userSessions.map(async (userSession) => {
+      const session = userSession.session2;
+      const feedbacks = await this.prisma.sessionFeedback.findMany({
+        where: { sessionId: session.id },
+        select: { rating: true, comments: true },
+      });
+
+      let totalScore = 0;
+      let validScores = 0;
+
+      feedbacks.forEach(fb => {
+        let ratingsData = null;
+        try {
+          if (fb.comments) {
+            const parsedComments = JSON.parse(fb.comments);
+            ratingsData = parsedComments.ratings;
+          }
+        } catch (error) {
+          console.error('Error parsing comments for ratings:', error);
+        }
+        
+        const score = this.calculateWeightedScore(ratingsData);
+        if (score > 0) {
+          totalScore += score;
+          validScores++;
+        }
+      });
+
+      const averageRating = validScores > 0
+        ? Math.round((totalScore / validScores) * 10) / 10
+        : null;
+
+      return {
+        ...userSession,
+        session2: {
+          ...session,
+          averageRating,
+          feedbackCount: feedbacks.length,
+        }
+      };
+    })
+  );
+
+  return sessionsWithFeedback;
 }
 
 }

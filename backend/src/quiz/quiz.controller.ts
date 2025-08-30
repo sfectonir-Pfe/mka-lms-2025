@@ -17,7 +17,7 @@ import { Roles } from '../auth/roles.decorator';
 @Controller('quizzes')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}
-  @Roles('CreateurDeFormation','Admin')
+  @Roles('CreateurDeFormation','Admin','formateur')
   @Post()
   create(@Body() body: any) {
     return this.quizService.create(body);
@@ -40,7 +40,7 @@ export class QuizController {
     return this.quizService.getQuizWithQuestions(Number(contenuId));
   }
 
-  @Roles('CreateurDeFormation','Admin')
+  @Roles('CreateurDeFormation','Admin','formateur')
   @Patch('by-contenu/:contenuId')
   updateByContenuId(
     @Param('contenuId') contenuId: string,
@@ -74,13 +74,13 @@ export class QuizController {
   }
 // ---- Submit & results (by quizId) ----
   
-  @Roles('CreateurDeFormation','Admin',)
+  @Roles('CreateurDeFormation','Admin','formateur',)
   @Post(':id/submit')
   submitQuiz(@Param('id') quizId: string, @Body() body: any) {
     return this.quizService.submitQuiz(Number(quizId), body);
   }
 
-  @Roles('CreateurDeFormation','Admin')
+  @Roles('CreateurDeFormation','Admin','formateur','establishment')
   @Get(':id/user-answers')
   getUsersByQuiz(@Param('id') quizId: string) {
     return this.quizService.getUsersByQuiz(Number(quizId));
@@ -93,14 +93,14 @@ export class QuizController {
     return this.quizService.submitByContenu(Number(contenuId), body);
   }
 
-  @Roles('CreateurDeFormation','Admin','etudiant','formateur')
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur','establishment')
   @Get('by-contenu/:contenuId/user-answers')
   getUsersByContenu(@Param('contenuId') contenuId: string) {
     return this.quizService.getUsersByContenu(Number(contenuId));
   }
 
   // ---- History by user ----
-  @Roles('CreateurDeFormation','Admin')
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur','establishment')
   @Get('user/:userId')
   getQuizzesByUser(@Param('userId') userId: string) {
     return this.quizService.getQuizzesByUser(Number(userId));

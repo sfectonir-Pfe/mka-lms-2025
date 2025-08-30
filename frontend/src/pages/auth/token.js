@@ -53,6 +53,12 @@ export function getToken() {
     return payload?.role ?? null;
   }
   
+  export function getCurrentUserId() {
+    const payload = getPayload();
+    // backend signs { sub, email, role }
+    return payload?.sub ?? null;
+  }
+  
   export function isAuthenticated() {
     const token = getToken();
     if (!token) return false;

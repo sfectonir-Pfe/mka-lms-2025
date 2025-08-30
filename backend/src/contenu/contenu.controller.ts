@@ -87,7 +87,7 @@ export class ContenusController {
     return newContenu;
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
   @Get()
   findAll() {
     return this.contenusService.findAll();
@@ -99,7 +99,7 @@ export class ContenusController {
     return this.contenusService.remove(+id);
   }
  
-  @Roles('CreateurDeFormation', 'Admin')
+  @Roles('CreateurDeFormation', 'Admin','formateur')
 @Patch(':id/publish')
 updatePublishStatus(@Param('id') id: string, @Body() body: { published: boolean }) {
   return this.contenusService.updatePublishStatus(+id, body.published);

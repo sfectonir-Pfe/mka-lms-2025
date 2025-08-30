@@ -23,10 +23,6 @@ import ShowChartIcon from "@mui/icons-material/ShowChart";
 import PieChartOutlineIcon from "@mui/icons-material/PieChartOutline";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import ReportIcon from "@mui/icons-material/Report";
-import PriorityHighIcon from "@mui/icons-material/PriorityHigh";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import PendingIcon from "@mui/icons-material/Pending";
  
 import api from "../../api/axiosInstance";
 import ReclamationList from "../../features/views/feedback/FeedbackList/Réclamationlist";
@@ -76,7 +72,6 @@ export default function AdminDashboard() {
   const [monthlyRegs, setMonthlyRegs] = useState([]);
   const [sessionStatusStats, setSessionStatusStats] = useState({});
   const [topRatedSessions, setTopRatedSessions] = useState([]);
-  const [reclamationStats, setReclamationStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [chartTypeSessions, setChartTypeSessions] = useState("bar");
   const [chartTypeRegs, setChartTypeRegs] = useState("bar");
@@ -97,7 +92,6 @@ export default function AdminDashboard() {
       api.get(`/dashboard/monthly-registrations`),
       api.get(`/dashboard/session-status-stats`),
       api.get(`/dashboard/top-rated-sessions`),
-      api.get(`/dashboard/reclamation-stats`)
     ]).then(
       ([
         statsRes,
@@ -106,7 +100,6 @@ export default function AdminDashboard() {
         monthlyRegsRes,
         sessionStatusRes,
         topRatedSessionsRes,
-        reclamationStatsRes
       ]) => {
         setStats(statsRes.data);
         setTopSessions(sessionsRes.data);
@@ -114,7 +107,6 @@ export default function AdminDashboard() {
         setMonthlyRegs(monthlyRegsRes.data);
         setSessionStatusStats(sessionStatusRes.data);
         setTopRatedSessions(topRatedSessionsRes.data);
-        setReclamationStats(reclamationStatsRes.data);
       }
     ).finally(() => setLoading(false));
   }, []);
@@ -354,52 +346,6 @@ export default function AdminDashboard() {
           </Grid>
         </Grid>
 
-        {/* RÉCLAMATIONS SECTION */}
-        <Grid container spacing={3} mb={5}>
-          {/* Statistiques des réclamations */}
-          <Grid item xs={12} lg={6}>
-            <ModernCard>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                  <Avatar sx={{ 
-                    bgcolor: ACCENT_COLORS[4], 
-                    width: 48, 
-                    height: 48,
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
-                  }}>
-                    <ReportIcon />
-                  </Avatar>
-                  <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
-                    Statistiques Réclamations
-                  </Typography>
-                </Stack>
-                <Stack spacing={2}>
-                  <ReclamationStatItem 
-                    icon={<PendingIcon />}
-                    label="En attente"
-                    value={reclamationStats?.enAttente || 0}
-                    color="#f59e0b"
-                    total={reclamationStats?.total || 0}
-                  />
-                  <ReclamationStatItem 
-                    icon={<PriorityHighIcon />}
-                    label="En cours"
-                    value={reclamationStats?.enCours || 0}
-                    color="#3b82f6"
-                    total={reclamationStats?.total || 0}
-                  />
-                  <ReclamationStatItem 
-                    icon={<CheckCircleIcon />}
-                    label="Résolues"
-                    value={reclamationStats?.resolu || 0}
-                    color="#10b981"
-                    total={reclamationStats?.total || 0}
-                  />
-                </Stack>
-              </CardContent>
-            </ModernCard>
-          </Grid>
-        </Grid>
 
         {/* CHARTS SECTION */}
         <Grid container spacing={3}>
@@ -948,49 +894,4 @@ function TopFormateurItem({ formateur, rank }) {
   );
 }
 
-// Reclamation Stat Item Component
-function ReclamationStatItem({ icon, label, value, color, total }) {
-  const percentage = total ? ((value / total) * 100).toFixed(1) : 0;
-  
-  return (
-    <Box>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: color, fontSize: 14 }}>
-            {icon}
-          </Avatar>
-          <Typography fontWeight={500} color={BLUE_GRAY}>
-            {label}
-          </Typography>
-        </Stack>
-        <Stack alignItems="flex-end">
-          <Typography fontWeight={700} color={color}>
-            {value}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {percentage}%
-          </Typography>
-        </Stack>
-      </Stack>
-      <Box 
-        sx={{ 
-          height: 6, 
-          bgcolor: '#f1f5f9', 
-          borderRadius: 3,
-          overflow: 'hidden'
-        }}
-      >
-        <Box 
-          sx={{ 
-            height: '100%', 
-            width: `${percentage}%`, 
-            background: `linear-gradient(90deg, ${color}, ${color}90)`,
-            borderRadius: 3,
-            transition: 'width 1s ease'
-          }} 
-        />
-      </Box>
-    </Box>
-  );
-}
 

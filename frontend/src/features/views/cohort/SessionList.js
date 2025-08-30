@@ -28,8 +28,8 @@ import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
-import { getCurrentRole } from '../../../pages/auth/token';
-
+import { getCurrentRole, getCurrentUserId } from '../../../pages/auth/token';
+import RoleGate from '../../../pages/auth/RoleGate';
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
@@ -46,21 +46,38 @@ const SessionList = () => {
   
   // Check user permissions
   const currentRole = getCurrentRole()?.toLowerCase();
-  const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+  const canManageUsers = ['admin',].includes(currentRole);
 
   const fetchSessions = async () => {
     try {
-      const res = await api.get("/session2");
-      setSessions(res.data);
+      const currentRole = getCurrentRole()?.toLowerCase();
+      const currentUserId = getCurrentUserId();
+      
+      let sessionsData = [];
+      
+      // Role-based session fetching
+      if (['formateur', 'etudiant'].includes(currentRole)) {
+        // For formateurs and etudiants, only fetch sessions they're assigned to
+        if (currentUserId) {
+          const res = await api.get(`/session2/my-sessions/${currentUserId}`);
+          // Transform the response to match the expected format
+          sessionsData = res.data.map(userSession => userSession.session2);
+        }
+      } else {
+        // For admin, createurdeformation, and etablissement, fetch all sessions
+        const res = await api.get("/session2");
+        sessionsData = res.data;
+      }
+      
+      setSessions(sessionsData);
       
       // Only fetch users if user has admin/creator permissions
-      const currentRole = getCurrentRole()?.toLowerCase();
       const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
       
       const usersMap = {};
       if (canManageUsers) {
         await Promise.all(
-          res.data.map(async (session) => {
+          sessionsData.map(async (session) => {
             try {
               const resp = await api.get(`/session2/${session.id}/users`);
               usersMap[session.id] = resp.data || [];
@@ -403,7 +420,7 @@ const SessionList = () => {
                     startIcon={<RocketLaunchIcon />}
                     onClick={() => navigate(`/sessions/${session.id}/seances`)}
                   >
-                    {t("sessions.join")}
+                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la séance'}
                   </Button>
                   {canManageUsers && (
                     <Button
@@ -416,14 +433,16 @@ const SessionList = () => {
                       {t("sessions.addUser")}
                     </Button>
                   )}
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    onClick={() => handleShare(session)}
-                  >
-                    📤 {t("sessions.share")}
-                  </Button>
+                  <RoleGate roles={["admin"]}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      size="small"
+                      onClick={() => handleShare(session)}
+                    >
+                      📤 {t("sessions.share")}
+                    </Button>
+                  </RoleGate>
                   {session.status === "COMPLETED" && (
                     <Button
                       variant="contained"
@@ -443,6 +462,7 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
+                  <RoleGate roles={["admin"]}>
                   <Button
                     variant="outlined"
                     color="primary"
@@ -451,6 +471,7 @@ const SessionList = () => {
                   >
                     📊 {t("sessions.feedbackList")}
                   </Button>
+                  </RoleGate>
                 </Stack>
               )}
 
@@ -675,7 +696,9 @@ const SessionList = () => {
       {/* Share Modal */}
       <Dialog open={shareModal.open} onClose={() => setShareModal({ open: false, session: null })} maxWidth="md" fullWidth>
         <DialogTitle>
+          
           📤 {t("sessions.shareSession")}
+          
           <IconButton onClick={() => setShareModal({ open: false, session: null })} sx={{ position: 'absolute', right: 8, top: 8 }}>
             <Close />
           </IconButton>

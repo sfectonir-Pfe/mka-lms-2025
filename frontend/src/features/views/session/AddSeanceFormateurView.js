@@ -76,7 +76,7 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   return (
     <Box p={2} width="100%">
       <Box display="flex" flexDirection="column" alignItems="center">
-      <RoleGate roles={['CreateurDeFormation','Admin']}>
+      <RoleGate roles={['formateur',]}>
       <Button
       
         variant={showAddBlock ? "outlined" : "contained"}

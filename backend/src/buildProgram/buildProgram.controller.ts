@@ -35,7 +35,7 @@ async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
 }
 
  
-@Roles('createurdeformation', 'admin', 'etudiant','formateur' )
+@Roles('createurdeformation', 'admin', 'etudiant','formateur','establishment' )
   @Get()
   findAll() {
     return this.buildProgramService.findAll();
@@ -55,7 +55,7 @@ async update(
 ) {
   return this.buildProgramService.update(+id, body, file);
 }
-@Roles('createurdeformation', 'admin', 'etudiant','formateur' )
+@Roles('createurdeformation', 'admin', 'etudiant','formateur','establishment' )
 @Get('program/:programId')
 getByProgram(@Param('programId') programId: string) {
   return this.buildProgramService.findByProgramId(+programId);
