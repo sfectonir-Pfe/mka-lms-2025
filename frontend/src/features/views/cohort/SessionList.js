@@ -413,6 +413,7 @@ const SessionList = () => {
                       {t("sessions.delete")}
                     </Button>
                   )}
+                  <RoleGate roles={["admin","formateur","etudiant"]}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -420,8 +421,9 @@ const SessionList = () => {
                     startIcon={<RocketLaunchIcon />}
                     onClick={() => navigate(`/sessions/${session.id}/seances`)}
                   >
-                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la séance'}
+                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la session'}
                   </Button>
+                  </RoleGate>
                   {canManageUsers && (
                     <Button
                       variant="contained"
@@ -453,6 +455,7 @@ const SessionList = () => {
                       🏅 {t("sessions.attestation")}
                     </Button>
                   )}
+                  <RoleGate roles={["admin","etudiant"]}>
                   <Button
                     variant="contained"
                     color="info"
@@ -462,7 +465,8 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
-                  <RoleGate roles={["admin"]}>
+                  </RoleGate>
+                  <RoleGate roles={["admin","formateur"]}>
                   <Button
                     variant="outlined"
                     color="primary"
@@ -475,35 +479,6 @@ const SessionList = () => {
                 </Stack>
               )}
 
-              {/* Add User Section */}
-              {showAddUserId === session.id && (
-                <Box mt={2} mb={2} display="flex" gap={1} alignItems="center">
-                  <TextField
-                    type="email"
-                    placeholder={t("sessions.userEmailPlaceholder")}
-                    value={userEmail}
-                    onChange={e => setUserEmail(e.target.value)}
-                    size="small"
-                    sx={{ minWidth: 220 }}
-                  />
-                  <Button
-                    variant="contained"
-                    size="small"
-                    color="secondary"
-                    onClick={() => handleAddUser(session.id)}
-                    disabled={addLoading}
-                  >
-                    {addLoading ? t("sessions.adding") : t("sessions.add")}
-                  </Button>
-                  <Button
-                    variant="text"
-                    size="small"
-                    onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
-                  >
-                    {t("sessions.cancel")}
-                  </Button>
-                </Box>
-              )}
 
               <Typography variant="body2" mb={0.5}>
                 📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>

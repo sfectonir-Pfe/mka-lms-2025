@@ -16,8 +16,10 @@ export class ModulesService {
     // 1. Create the module as usual
     const module = await this.prisma.module.create({ data: dto });
 
-    // 2. Fetch ALL users
-    const users = await this.prisma.user.findMany();
+    // 2. Fetch only admin users
+    const users = await this.prisma.user.findMany({
+      where: { role: 'Admin' }
+    });
 
     // 3. For each user, create notification and emit socket event
     for (const user of users) {
@@ -25,10 +27,8 @@ export class ModulesService {
     userId: user.id,
     type: 'info',
     message: `Nouveau module ajouté: ${module.name} (${new Date().toLocaleDateString()})`,
-    link: null,
   });
-  // Real-time emit
-  this.notificationGateway.sendRealTimeNotification(user.id, notification);
+  // createNotification already sends real-time notification
 }
 
     return module;

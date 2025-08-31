@@ -308,7 +308,7 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
       className="form-control"
       value={etablissement2Id}
       onChange={(e) => setEtablissement2Id(e.target.value)}
-      placeholder="ex: Lycée Ibn Khaldoun"
+      placeholder="ex: TUNIR"
       required
     />
   </div>

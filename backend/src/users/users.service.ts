@@ -572,6 +572,7 @@ if (
 
       const updateData: {
         name?: string
+        role?: Role
         phone?: string
         location?: string
         about?: string
@@ -583,6 +584,11 @@ if (
         phone: updateUserDto.phone,
         location: updateUserDto.location,
         about: updateUserDto.about,
+      }
+
+      // Add role to update data if provided
+      if (updateUserDto.role !== undefined) {
+        updateData.role = updateUserDto.role;
       }
 
       if (updateUserDto.skills !== undefined) {

@@ -58,6 +58,14 @@ const roleBasedItems = {
         { text: "sidebar.programsOverview", icon: <LibraryBooksIcon />, path: "/programs/overview" }
       ]
     },
+    { 
+      text: "sidebar.sessions", 
+      icon: <CalendarMonthIcon />, 
+      path: "/sessions",
+      children: [
+        { text: "sidebar.assignableSessions", icon: <CalendarMonthIcon />, path: "/sessions/assignable" }
+      ]
+    },
     { text: "sidebar.Réclamation", icon: <MdFeedback />, path: "/Réclamation" },
     
   ],

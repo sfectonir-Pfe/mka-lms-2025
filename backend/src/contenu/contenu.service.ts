@@ -15,6 +15,7 @@ export class ContenusService {
   ) {}
 
   async create(data: CreateContenuDto) {
+    console.log('[ContenuService] CREATE METHOD CALLED with data:', data);
     const { courseIds, ...contenuData } = data;
 
     const created = await this.prisma.contenu.create({
@@ -30,16 +31,39 @@ export class ContenusService {
       });
     }
 
-    // 🔔 Notify all users
-    const users = await this.prisma.user.findMany();
-    for (const user of users) {
-      const notification = await this.notificationService.createNotification({
-        userId: user.id,
-        type: 'info',
-        message: `Nouveau contenu ajouté : ${created.title} (${new Date().toLocaleDateString()})`,
-        link: null,
+    // 🔔 Notify only admin users
+    try {
+      console.log('[ContenuService] Starting notification process for contenu creation');
+      
+      // First, let's check all users to see what roles exist
+      const allUsers = await this.prisma.user.findMany({
+        select: { id: true, email: true, role: true }
       });
-      this.notificationGateway.sendRealTimeNotification(user.id, notification);
+      console.log('[ContenuService] All users in database:', allUsers);
+      
+      const users = await this.prisma.user.findMany({
+        where: { role: 'Admin' }
+      });
+      
+      console.log(`[ContenuService] Found ${users.length} admin users for notification:`, users);
+      
+      if (users.length === 0) {
+        console.warn('[ContenuService] No admin users found! Check user roles in database.');
+        return created;
+      }
+      
+      for (const user of users) {
+        console.log(`[ContenuService] Creating notification for admin user ${user.id} (${user.email})`);
+        const notification = await this.notificationService.createNotification({
+          userId: user.id,
+          type: 'info',
+          message: `Nouveau contenu ajouté : ${created.title} (${new Date().toLocaleDateString()})`,
+        });
+        console.log(`[ContenuService] Notification created:`, notification.id);
+        // Remove duplicate real-time notification - createNotification already sends it
+      }
+    } catch (error) {
+      console.error('[ContenuService] Error creating notifications:', error);
     }
 
     return created;
