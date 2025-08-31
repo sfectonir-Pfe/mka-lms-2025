@@ -318,7 +318,7 @@ const SessionList = () => {
     return (
       <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
-          Chargement des traductions...
+          {t("common.loadingTranslations")}
         </Typography>
       </Paper>
     );
@@ -815,7 +815,7 @@ const SessionList = () => {
               <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={styles.info}>{t("sessions.facebook")}</Button>
               <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={styles.info}>{t("sessions.twitter")}</Button>
               <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={styles.info}>{t("sessions.linkedin")}</Button>
-              <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText} sx={styles.secondary}>📋 {t("sessions.copyText")}</Button>
+              <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText} sx={{ ...styles.secondary, color: 'white', borderColor: 'white', '& .MuiSvgIcon-root': { color: 'white' } }}>📋 {t("sessions.hide")}</Button>
               <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={styles.success}>🖼️ {t("sessions.downloadImage")}</Button>
             </Stack>
         </DialogContent>

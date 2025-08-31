@@ -283,25 +283,14 @@ const FeedbackList = () => {
             }
           }}
           sx={{
-            background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-            color: 'white',
-            fontWeight: 'bold',
             borderRadius: 2,
-            textTransform: 'none',
-            minWidth: 'auto',
-            px: 2,
-            py: 1,
-            fontSize: '0.8rem',
-            boxShadow: '0 3px 5px 2px rgba(102, 126, 234, .3)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
-              boxShadow: '0 4px 8px 3px rgba(102, 126, 234, .4)',
-              transform: 'translateY(-1px)',
-            },
-            transition: 'all 0.3s ease-in-out',
+            background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+            boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+            transition: 'transform 0.15s ease',
+            '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
           }}
         >
-          📋 {t('seances.showMore')}
+          {t('sessions.fullFeedback')}
         </Button>
       ),
     },
