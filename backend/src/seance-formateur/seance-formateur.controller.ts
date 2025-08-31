@@ -15,6 +15,7 @@ import { SeanceFormateurService } from './seance-formateur.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from '../auth/roles.decorator';
 
 const allowedExtensions = ['.jpg', '.jpeg', '.png', '.mp4'];
 
@@ -34,37 +35,44 @@ const storage = diskStorage({
 export class SeanceFormateurController {
   constructor(private readonly service: SeanceFormateurService) {}
 
+  @Roles('formateur','Admin')
   @Post()
   async create(@Body() body: any, @Req() req: any) {
     const formateurId = req.user?.id || body.formateurId;
     return this.service.create(body, formateurId);
   }
 
+  @Roles('formateur','Admin','etudiant')
   @Get()
   async findAll() {
     return this.service.findAll();
   }
 
+  @Roles('Admin','formateur')
   @Get('debug/all')
   async debugAll() {
     return this.service.findAll();
   }
 
+  @Roles('formateur','Admin','etudiant')
   @Get('formateur/:id')
   async findByFormateur(@Param('id') id: string) {
     return this.service.findByFormateur(+id);
   }
 
+  @Roles('formateur','Admin','etudiant')
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.service.findOne(+id);
   }
 
+  @Roles('Admin','formateur')
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
 
+  @Roles('formateur','Admin')
   @Post(':id/upload-media')
   @UseInterceptors(FileInterceptor('file', { storage }))
   async uploadMediaToSeance(
@@ -81,21 +89,26 @@ export class SeanceFormateurController {
     });
   }
 
-  
+  @Roles('formateur','Admin')  
   @Delete('media/:id')
   async removeMedia(@Param('id') id: string) {
     return this.service.removeMedia(+id);
   }
 
+  @Roles('formateur','Admin','etudiant')
   @Get('details/:session2Id')
   async getSessionDetails(@Param('session2Id') id: string) {
     return this.service.getSession2Details(+id);
   }
   // seance-formateur.controller.ts
+  
+  @Roles('formateur','Admin','etudiant')
 @Get(':id/media')
 async getMedia(@Param('id') id: string) {
   return this.service.getMediaForSeance(+id);
 }
+
+@Roles('formateur','Admin','etudiant')
 @Get('session/:session2Id')
 async findBySession2(@Param('session2Id') id: string) {
   return this.service.findBySession2(+id);

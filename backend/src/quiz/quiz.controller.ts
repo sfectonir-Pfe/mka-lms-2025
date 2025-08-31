@@ -12,31 +12,35 @@ import { QuizService } from './quiz.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('quizzes')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}
-
+  @Roles('CreateurDeFormation','Admin','formateur')
   @Post()
   create(@Body() body: any) {
     return this.quizService.create(body);
   }
 
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur')
   @Get()
   findAll() {
     return this.quizService.findAll();
   }
-
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.quizService.findOne(Number(id));
   }
 
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur')
   @Get('by-contenu/:contenuId')
   getQuizByContenu(@Param('contenuId') contenuId: string) {
     return this.quizService.getQuizWithQuestions(Number(contenuId));
   }
 
+  @Roles('CreateurDeFormation','Admin','formateur')
   @Patch('by-contenu/:contenuId')
   updateByContenuId(
     @Param('contenuId') contenuId: string,
@@ -46,6 +50,7 @@ export class QuizController {
   }
 
   // Image upload for question/choice media
+  @Roles('CreateurDeFormation','Admin')
   @Post('upload-question-image')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -68,28 +73,34 @@ export class QuizController {
     return { imageUrl: `${base}/uploads/${file.filename}` };
   }
 // ---- Submit & results (by quizId) ----
+  
+  @Roles('CreateurDeFormation','Admin','formateur',)
   @Post(':id/submit')
   submitQuiz(@Param('id') quizId: string, @Body() body: any) {
     return this.quizService.submitQuiz(Number(quizId), body);
   }
 
+  @Roles('CreateurDeFormation','Admin','formateur','establishment')
   @Get(':id/user-answers')
   getUsersByQuiz(@Param('id') quizId: string) {
     return this.quizService.getUsersByQuiz(Number(quizId));
   }
 
   // ---- Submit & results (by contenuId) ----
+  @Roles('CreateurDeFormation','Admin')
   @Post('by-contenu/:contenuId/submit')
   submitByContenu(@Param('contenuId') contenuId: string, @Body() body: any) {
     return this.quizService.submitByContenu(Number(contenuId), body);
   }
 
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur','establishment')
   @Get('by-contenu/:contenuId/user-answers')
   getUsersByContenu(@Param('contenuId') contenuId: string) {
     return this.quizService.getUsersByContenu(Number(contenuId));
   }
 
   // ---- History by user ----
+  @Roles('CreateurDeFormation','Admin','etudiant','formateur','establishment')
   @Get('user/:userId')
   getQuizzesByUser(@Param('userId') userId: string) {
     return this.quizService.getQuizzesByUser(Number(userId));

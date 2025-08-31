@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 
 const ModuleList = () => {
@@ -46,24 +47,26 @@ const ModuleList = () => {
   };
 
   const columns = [
-    { valueGetter: (value) => {
-      return "M-"+value
+    {
+      valueGetter: (value) => {
+        return "M-" + value
+      },
+      field: "id", headerName: t('table.id'), width: 80
     },
-     field: "id", headerName: t('table.id'), width: 80 },
     { field: "name", headerName: t('modules.moduleName'), flex: 1 },
     { field: "periodUnit", headerName: t('modules.period'), width: 120 },
     { field: "duration", headerName: t('modules.duration'), width: 100 },
-    { 
-      field: "programmeAssocie", 
-      headerName: t('common.associatedProgram'), 
+    {
+      field: "programmeAssocie",
+      headerName: t('common.associatedProgram'),
       width: 200,
       renderCell: (params) => {
         // Check buildProgramModules for associated programs (from built programs)
         const buildPrograms = params.row.buildProgramModules?.map(bpm => bpm.buildProgram?.program?.name).filter(Boolean) || [];
-        
+
         // Check programs for direct program associations
         const directPrograms = params.row.programs?.map(pm => pm.program?.name).filter(Boolean) || [];
-        
+
         if (buildPrograms.length > 0) {
           return buildPrograms.join(', ');
         } else if (directPrograms.length > 0) {
@@ -74,45 +77,49 @@ const ModuleList = () => {
       }
     },
     {
-  field: "actions",
-  headerName: t('modules.actions'),
-  flex: 1,
-  renderCell: (params) => (
-    <>
-      <Button
-        variant="contained"
-        color="error"
-        size="small"
-        onClick={() => confirmDelete(params.row)}
-        sx={{
-          borderRadius: 2,
-          background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
-          boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
-          transition: 'transform 0.15s ease',
-          '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
-        }}
-      >
-        {t('common.delete')}
-      </Button>
-    </>
-  ),
-}
+      field: "actions",
+      headerName: t('modules.actions'),
+      flex: 1,
+      renderCell: (params) => (
+        <>
+          <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={() => confirmDelete(params.row)}
+              sx={{
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+                boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+                transition: 'transform 0.15s ease',
+                '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+              }}
+            >
+              {t('common.delete')}
+            </Button>
+          </RoleGate>
+        </>
+      ),
+    }
   ];
 
   return (
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('modules.moduleList')}</Typography>
-        <Button variant="contained" onClick={() => navigate("/module/add")}
-          sx={{
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-            boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
-            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' }
-          }}
-        >
-  ➕ {t('modules.addModule')}
-</Button>
+        <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+          <Button variant="contained" onClick={() => navigate("/module/add")}
+            sx={{
+              borderRadius: 3,
+              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+              boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+              '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' }
+            }}
+          >
+            ➕ {t('modules.addModule')}
+          </Button>
+        </RoleGate>
 
       </Grid>
 

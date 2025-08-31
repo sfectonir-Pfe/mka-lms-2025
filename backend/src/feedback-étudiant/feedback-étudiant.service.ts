@@ -498,31 +498,13 @@ if (existingFeedback) {
       
       console.log('👥 Étudiants filtrés (sans étudiant courant):', filteredStudents);
 
-      // Questions prédéfinies pour les feedbacks entre étudiants
+      // Une seule question générale puisqu'on stocke un feedback par paire
       const questions = [
         {
           id: 1,
-          text: 'Comment évaluez-vous la collaboration de cet étudiant dans le groupe ?',
-          type: 'collaboration',
-          category: 'collaboration'
-        },
-        {
-          id: 2,
-          text: 'Comment évaluez-vous la communication de cet étudiant ?',
-          type: 'communication', 
-          category: 'communication'
-        },
-        {
-          id: 3,
-          text: 'Comment évaluez-vous la participation de cet étudiant aux activités ?',
-          type: 'participation',
-          category: 'participation'
-        },
-        {
-          id: 4,
-          text: 'Comment évaluez-vous la qualité du travail de cet étudiant ?',
-          type: 'qualite_travail',
-          category: 'qualite_travail'
+          text: 'Comment évaluez-vous cet étudiant dans le groupe ?',
+          type: 'general',
+          category: 'general'
         }
       ];
 
@@ -535,7 +517,6 @@ if (existingFeedback) {
         select: {
           fromStudentId: true,
           toStudentId: true,
-          category: true,
           rating: true
         }
       });
@@ -544,13 +525,11 @@ if (existingFeedback) {
       const questionsWithFeedbacks = questions.map(question => ({
         ...question,
         groupStudents: filteredStudents,
-        feedbacks: existingFeedbacks
-          .filter(f => f.category === question.category)
-          .map(f => ({
-            studentId: f.fromStudentId,
-            targetStudentId: f.toStudentId,
-            reaction: this.mapRatingToReaction(f.rating)
-          }))
+        feedbacks: existingFeedbacks.map(f => ({
+          studentId: f.fromStudentId,
+          targetStudentId: f.toStudentId,
+          reaction: this.mapRatingToReaction(f.rating)
+        }))
       }));
 
       return questionsWithFeedbacks;
@@ -587,16 +566,8 @@ if (existingFeedback) {
       const rating = this.mapReactionToRating(reaction);
       console.log('📝 Rating calculé:', rating, 'pour reaction:', reaction);
       
-      // Mapper questionId vers category et créer une clé unique
-      const categoryMapping = {
-        1: 'collaboration',
-        2: 'communication', 
-        3: 'participation',
-        4: 'qualite_travail'
-      };
-      
-      const category = categoryMapping[questionId] || questionId;
-
+      // Utiliser une catégorie générale puisqu'on ne stocke qu'un feedback par paire
+      const category = 'general';
       
       // Utiliser upsert pour créer ou mettre à jour
       console.log('🔄 Upsert feedback avec:', {
@@ -604,7 +575,7 @@ if (existingFeedback) {
         toStudentId: targetStudentId,
         groupId,
         rating,
-        category: category
+        category
       });
       
       let createdOrUpdatedFeedback;
@@ -722,7 +693,7 @@ if (existingFeedback) {
 
   async getStudentFeedbacksByGroup(groupId: string, studentId: number) {
     try {
-      return await this.prisma.studentFeedback.findMany({
+      const feedbacks = await this.prisma.studentFeedback.findMany({
         where: {
           groupId,
           fromStudentId: studentId
@@ -732,9 +703,69 @@ if (existingFeedback) {
         },
         orderBy: { createdAt: 'desc' }
       });
+
+      // Transform feedbacks to include reaction mapping for frontend compatibility
+      return feedbacks.map(feedback => ({
+        ...feedback,
+        reaction: this.mapRatingToReaction(feedback.rating),
+        questionId: this.mapCategoryToQuestionId(feedback.category),
+        targetStudentId: feedback.toStudentId
+      }));
     } catch (error) {
       console.error('Erreur getStudentFeedbacksByGroup:', error);
       return [];
+    }
+  }
+
+  private mapCategoryToQuestionId(category: string): number {
+    const mapping = {
+      'collaboration': 1,
+      'communication': 2,
+      'participation': 3,
+      'qualite_travail': 4
+    };
+    return mapping[category] || 1;
+  }
+
+  async getStudentRatingSummary(groupId: string) {
+    try {
+      const feedbacks = await this.prisma.studentFeedback.findMany({
+        where: { groupId },
+        include: {
+          toStudent: { select: { id: true, name: true, email: true } }
+        }
+      });
+
+      const studentRatings = {};
+      
+      feedbacks.forEach(feedback => {
+        const studentId = feedback.toStudentId;
+        if (!studentRatings[studentId]) {
+          studentRatings[studentId] = {
+            student: feedback.toStudent,
+            totalPoints: 0,
+            feedbackCount: 0,
+            maxPossiblePoints: 0
+          };
+        }
+        
+        studentRatings[studentId].totalPoints += feedback.rating;
+        studentRatings[studentId].feedbackCount += 1;
+        studentRatings[studentId].maxPossiblePoints += 5; // Max 5 points per feedback
+      });
+
+      // Calculate ratings for each student
+      Object.keys(studentRatings).forEach(studentId => {
+        const data = studentRatings[studentId];
+        data.rating = data.maxPossiblePoints > 0 
+          ? parseFloat(((data.totalPoints / data.maxPossiblePoints) * 5).toFixed(1))
+          : 0;
+      });
+
+      return studentRatings;
+    } catch (error) {
+      console.error('Erreur getStudentRatingSummary:', error);
+      return {};
     }
   }
 

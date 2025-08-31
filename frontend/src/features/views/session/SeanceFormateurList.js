@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { toast } from "react-toastify";
+import { getCurrentRole } from '../../../pages/auth/token';
+import RoleGate from '../../../pages/auth/RoleGate';
+
 import {
   Box,
   Typography,
@@ -19,6 +22,9 @@ import api from "../../../api/axiosInstance";
 
 const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSelectedSeance, setFeedbackOpen }) => {
   const { t } = useTranslation();
+  const currentRole = getCurrentRole()?.toLowerCase();
+  const [expandedId, setExpandedId] = useState(null);
+  const [details, setDetails] = useState({});
   const [feedbackAverages, setFeedbackAverages] = useState({});
   const [deleteDialog, setDeleteDialog] = useState({ open: false, seanceId: null, seanceTitle: '' });
 
@@ -104,7 +110,7 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
                   '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' }
                 }}
               >
-                {t('seances.animateSession')}
+                {currentRole === 'formateur' ? 'Animer la séance' : 'Rejoindre la séance'}
               </Button>
 
               {fetchSeances && (
@@ -141,6 +147,7 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
                   💬 {t('seances.feedback')}
                 </Button>
               )}
+              <RoleGate roles={['admin', 'formateur']}>
               <Button
                 variant="contained"
                 color="error"
@@ -154,6 +161,7 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
               >
                 {t('common.delete')}
               </Button>
+              </RoleGate>
             </Box>
           </Paper>
         ))

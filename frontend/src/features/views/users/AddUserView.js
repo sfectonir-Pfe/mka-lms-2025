@@ -1,9 +1,34 @@
 import { useState, useEffect, useRef } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import {
+  Box,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Alert,
+  Stack,
+  InputAdornment,
+  IconButton,
+  Collapse,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+} from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import SearchIcon from '@mui/icons-material/Search';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 const AddUserView = () => {
   const { t } = useTranslation();
@@ -17,8 +42,53 @@ const AddUserView = () => {
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const dropdownRef = useRef(null);
-const [etabs, setEtabs] = useState([]);
-const [etablissement2Id, setEtablissement2Id] = useState('');
+  const [etabs, setEtabs] = useState([]);
+  const [etablissement2Id, setEtablissement2Id] = useState('');
+
+  // New: session selection
+  const [sessions, setSessions] = useState([]);
+  const [selectedSessions, setSelectedSessions] = useState([]);
+
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,10 +103,6 @@ const [etablissement2Id, setEtablissement2Id] = useState('');
     };
   }, []);
 
-  // New: session selection
-  const [sessions, setSessions] = useState([]);
-  const [selectedSessions, setSelectedSessions] = useState([]);
-
   useEffect(() => {
     // Fetch sessions on mount
     api
@@ -44,12 +110,13 @@ const [etablissement2Id, setEtablissement2Id] = useState('');
       .then(res => setSessions(res.data))
       .catch(() => setSessions([]));
   }, []);
-useEffect(() => {
-  api
-    .get("/etablissement2")
-    .then(res => setEtabs(res.data))
-    .catch(() => setEtabs([]));
-}, []);
+
+  useEffect(() => {
+    api
+      .get("/etablissement2")
+      .then(res => setEtabs(res.data))
+      .catch(() => setEtabs([]));
+  }, []);
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -57,67 +124,65 @@ useEffect(() => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setErrorMessage("");
+    e.preventDefault();
+    setErrorMessage("");
 
-  if (!validateEmail(email)) {
-    const msg = t('users.invalidEmail');
-    setErrorMessage(msg);
-    toast.error(msg);
-    return;
-  }
-
-  setLoading(true);
-
-  const payload = {
-  email,
-  phone: countryCode + phone,
-  role,
-  session2Ids: selectedSessions.map((id) => Number(id)),
-};
-
-if (role === "Etudiant" && etablissement2Id) {
-  payload.etablissement2Id = Number(etablissement2Id);
-}
-
-if (role === "Etablissement" && etablissement2Id.trim()) {
-  // here etablissement2Id is used as the text name
-  payload.etablissement2Name = etablissement2Id.trim();
-}
-
-
-  try {
-    await api.post("/users", payload); // <--- NOW using correct payload
-    toast.success(t('users.createSuccess'));
-    setTimeout(() => navigate("/users"), 600);
-  } catch (error) {
-    console.error(error);
-    if (
-      error.response &&
-      error.response.status === 409 &&
-      error.response.data.message.includes("Email invalide")
-    ) {
-      const msg = t('users.emailInvalidOrUndeliverable');
+    if (!validateEmail(email)) {
+      const msg = t('users.invalidEmail');
       setErrorMessage(msg);
       toast.error(msg);
-    } else if (
-      error.response &&
-      error.response.status === 409 &&
-      error.response.data.message.includes("existe déjà")
-    ) {
-      const msg = t('users.userAlreadyExists');
-      setErrorMessage(msg);
-      toast.error(msg);
-    } else {
-      const msg = t('users.createError');
-      setErrorMessage(msg);
-      toast.error(msg);
+      return;
     }
-  } finally {
-    setLoading(false);
-  }
-};
 
+    setLoading(true);
+
+    const payload = {
+      email,
+      phone: countryCode + phone,
+      role,
+      session2Ids: selectedSessions.map((id) => Number(id)),
+    };
+
+    if (role === "Etudiant" && etablissement2Id) {
+      payload.etablissement2Id = Number(etablissement2Id);
+    }
+
+    if (role === "Etablissement" && etablissement2Id.trim()) {
+      // here etablissement2Id is used as the text name
+      payload.etablissement2Name = etablissement2Id.trim();
+    }
+
+    try {
+      await api.post("/users", payload);
+      toast.success(t('users.createSuccess'));
+      setTimeout(() => navigate("/users"), 600);
+    } catch (error) {
+      console.error(error);
+      if (
+        error.response &&
+        error.response.status === 409 &&
+        error.response.data.message.includes("Email invalide")
+      ) {
+        const msg = t('users.emailInvalidOrUndeliverable');
+        setErrorMessage(msg);
+        toast.error(msg);
+      } else if (
+        error.response &&
+        error.response.status === 409 &&
+        error.response.data.message.includes("existe déjà")
+      ) {
+        const msg = t('users.userAlreadyExists');
+        setErrorMessage(msg);
+        toast.error(msg);
+      } else {
+        const msg = t('users.createError');
+        setErrorMessage(msg);
+        toast.error(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const countries = [
     { code: "+33", nameKey: "france", flagCode: "fr" },
@@ -188,198 +253,252 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
   ];
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">{t('users.addUser')}</h2>
-      <form onSubmit={handleSubmit} className="p-4 shadow rounded bg-light">
-        <div className="mb-3">
-          <label className="form-label">{t('common.email')} :</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            placeholder={t('users.emailPlaceholder')}
-          />
-        </div>
+    <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 3 }}>
+        👤 {t('users.addUser')}
+      </Typography>
+      
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label={t('common.email')}
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              placeholder={t('users.emailPlaceholder')}
+              variant="outlined"
+            />
 
-        <div className="mb-3">
-          <label className="form-label">{t('profile.phone')} :</label>
-          <div className="input-group">
-            <div className="dropdown" style={{ position: 'relative' }} ref={dropdownRef}>
-              <button
-                type="button"
-                className="btn btn-outline-secondary dropdown-toggle"
-                style={{ minWidth: '140px', textAlign: 'left' }}
-                onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-              >
-                <img 
-                  src={`https://flagcdn.com/20x15/${selectedCountry.flagCode}.png`} 
-                  alt={t(`countries.${selectedCountry.nameKey}`)} 
-                  style={{ marginRight: '8px' }}
-                /> 
-                {selectedCountry.code}
-              </button>
-              {showCountryDropdown && (
-                <div className="dropdown-menu show" style={{ 
-                  position: 'absolute', 
-                  top: '100%', 
-                  left: 0, 
-                  zIndex: 1000,
-                  maxHeight: '300px',
-                  overflowY: 'auto',
-                  width: '300px'
-                }}>
-                  <div className="p-2">
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      placeholder={t('common.search')}
-                      value={countrySearch}
-                      onChange={(e) => setCountrySearch(e.target.value)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                  {filteredCountries.map((country) => (
-                    <button
-                      key={country.code}
-                      type="button"
-                      className="dropdown-item"
-                      onClick={() => {
-                        setCountryCode(country.code);
-                        setShowCountryDropdown(false);
-                        setCountrySearch('');
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                {t('profile.phone')} :
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Box sx={{ position: 'relative' }} ref={dropdownRef}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                    sx={{ 
+                      minWidth: 140, 
+                      justifyContent: 'space-between',
+                      borderColor: 'grey.300'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img 
+                        src={`https://flagcdn.com/20x15/${selectedCountry.flagCode}.png`} 
+                        alt={t(`countries.${selectedCountry.nameKey}`)} 
+                      /> 
+                      {selectedCountry.code}
+                    </Box>
+                    {showCountryDropdown ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  </Button>
+                  
+                  <Collapse in={showCountryDropdown}>
+                    <Paper 
+                      elevation={8} 
+                      sx={{ 
+                        position: 'absolute', 
+                        top: '100%', 
+                        left: 0, 
+                        zIndex: 1000,
+                        maxHeight: 300,
+                        overflowY: 'auto',
+                        width: 300,
+                        mt: 1
                       }}
                     >
-                      <img 
-                        src={`https://flagcdn.com/20x15/${country.flagCode}.png`} 
-                        alt={t(`countries.${country.nameKey}`)} 
-                        style={{ marginRight: '8px' }}
-                      /> 
-                      {country.code} - {t(`countries.${country.nameKey}`)}
-                    </button>
+                      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder={t('common.search')}
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <SearchIcon />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Box>
+                      <List sx={{ p: 0 }}>
+                        {filteredCountries.map((country) => (
+                          <ListItem
+                            key={country.code}
+                            button
+                            onClick={() => {
+                              setCountryCode(country.code);
+                              setShowCountryDropdown(false);
+                              setCountrySearch('');
+                            }}
+                            sx={{ 
+                              '&:hover': { bgcolor: 'action.hover' },
+                              py: 1
+                            }}
+                          >
+                            <ListItemIcon sx={{ minWidth: 40 }}>
+                              <img 
+                                src={`https://flagcdn.com/20x15/${country.flagCode}.png`} 
+                                alt={t(`countries.${country.nameKey}`)} 
+                              />
+                            </ListItemIcon>
+                            <ListItemText 
+                              primary={`${country.code} - ${t(`countries.${country.nameKey}`)}`}
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Paper>
+                  </Collapse>
+                </Box>
+                
+                <TextField
+                  fullWidth
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={t('users.phonePlaceholder')}
+                  required
+                  variant="outlined"
+                />
+              </Box>
+            </Box>
+
+            <FormControl fullWidth>
+              <InputLabel>{t('profile.role')}</InputLabel>
+              <Select
+                value={role}
+                onChange={e => {
+                  setRole(e.target.value);
+                  setEtablissement2Id('');
+                }}
+                label={t('profile.role')}
+              >
+                {roleOptions.map((r) => (
+                  <MenuItem key={r.value} value={r.value}>
+                    {t('role.' + r.key)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {role === "Etudiant" && (
+              <FormControl fullWidth>
+                <InputLabel>{t('users.chooseEstablishment')}</InputLabel>
+                <Select
+                  value={etablissement2Id}
+                  onChange={(e) => setEtablissement2Id(e.target.value)}
+                  label={t('users.chooseEstablishment')}
+                  required
+                >
+                  <MenuItem value="">
+                    <em>-- {t('common.select')} --</em>
+                  </MenuItem>
+                  {etabs.map((e) => (
+                    <MenuItem key={e.id} value={e.id}>
+                      {e.name || `${t('users.establishment')} ${e.id}`}
+                    </MenuItem>
                   ))}
-                </div>
-              )}
-            </div>
-            <input
-              type="tel"
-              className="form-control"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder={t('users.phonePlaceholder')}
-              required
-            />
-          </div>
-        </div>
+                </Select>
+              </FormControl>
+            )}
 
-        <div className="mb-3">
-          <label className="form-label">{t('profile.role')} :</label>
-          <select
-  className="form-select"
-  value={role}
-  onChange={e => {
-    setRole(e.target.value);
-    setEtablissement2Id(''); // reset
-  }}
->
-            {roleOptions.map((r) => (
-              <option key={r.value} value={r.value}>
-                {t('role.' + r.key)}
-              </option>
-            ))}
-          </select>
-        </div>
-{role === "Etudiant" && (
-  <div className="mb-3">
-    <label className="form-label">{t('users.chooseEstablishment')} :</label>
-    <select
-      className="form-select"
-      value={etablissement2Id}
-      onChange={(e) => setEtablissement2Id(e.target.value)}
-      required
-    >
-      <option value="">-- {t('common.select')} --</option>
-      {etabs.map((e) => (
-        <option key={e.id} value={e.id}>
-          {e.name || `${t('users.establishment')} ${e.id}`}
-        </option>
-      ))}
-    </select>
-  </div>
-)}
+            {role === "Etablissement" && (
+              <TextField
+                fullWidth
+                label={t('users.newEstablishmentName')}
+                type="text"
+                value={etablissement2Id}
+                onChange={(e) => setEtablissement2Id(e.target.value)}
+                placeholder="ex: Lycée Ibn Khaldoun"
+                required
+                variant="outlined"
+              />
+            )}
 
-{role === "Etablissement" && (
-  <div className="mb-3">
-    <label className="form-label">{t('users.newEstablishmentName')} :</label>
-    <input
-      type="text"
-      className="form-control"
-      value={etablissement2Id}
-      onChange={(e) => setEtablissement2Id(e.target.value)}
-      placeholder="ex: Lycée Ibn Khaldoun"
-      required
-    />
-  </div>
-)}
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                {t('users.assignSessions')} :
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  maxHeight: 200, 
+                  overflowY: "auto", 
+                  p: 2 
+                }}
+              >
+                {sessions.length === 0 ? (
+                  <Typography color="text.secondary" variant="body2">
+                    {t('users.noSessionsAvailable')}
+                  </Typography>
+                ) : (
+                  <FormGroup>
+                    {sessions.map((s) => (
+                      <FormControlLabel
+                        key={s.id}
+                        control={
+                          <Checkbox
+                            checked={selectedSessions.includes(String(s.id))}
+                            onChange={e => {
+                              const id = String(s.id);
+                              setSelectedSessions(selectedSessions =>
+                                e.target.checked
+                                  ? [...selectedSessions, id]
+                                  : selectedSessions.filter(val => val !== id)
+                              );
+                            }}
+                          />
+                        }
+                        label={s.name || `Session ${s.id}`}
+                      />
+                    ))}
+                  </FormGroup>
+                )}
+              </Paper>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                {t('users.selectMultipleSessions')}
+              </Typography>
+            </Box>
 
+            {errorMessage && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
 
-        <div className="mb-3">
-  <label className="form-label">{t('users.assignSessions')} :</label>
-  <div style={{ maxHeight: 140, overflowY: "auto", border: "1px solid #eee", borderRadius: 4, padding: 8, background: "#fafbfc" }}>
-    {sessions.length === 0 && (
-      <div className="text-muted">{t('users.noSessionsAvailable')}</div>
-    )}
-    {sessions.map((s) => (
-      <div key={s.id} className="form-check">
-        <input
-          className="form-check-input"
-          type="checkbox"
-          id={`session-${s.id}`}
-          value={s.id}
-          checked={selectedSessions.includes(String(s.id))}
-          onChange={e => {
-            const id = String(s.id);
-            setSelectedSessions(selectedSessions =>
-              e.target.checked
-                ? [...selectedSessions, id]
-                : selectedSessions.filter(val => val !== id)
-            );
-          }}
-        />
-        <label className="form-check-label" htmlFor={`session-${s.id}`}>
-          {s.name || `Session ${s.id}`}
-        </label>
-      </div>
-    ))}
-  </div>
-  <div className="form-text">
-    <small>{t('users.selectMultipleSessions')}</small>
-  </div>
-</div>
+            <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={styles.success}
+                fullWidth
+              >
+                {loading ? t('users.creating') : `✅ ${t('users.addUser')}`}
+              </Button>
 
-
-        {errorMessage && (
-          <div className="alert alert-danger mt-3">{errorMessage}</div>
-        )}
-
-        <button
-          type="submit"
-          className="btn btn-primary w-100"
-          disabled={loading}
-        >
-          {loading ? t('users.creating') : t('users.addUser')}
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-danger w-100 mt-2"
-          onClick={() => navigate(-1)}
-        >
-          {t('common.cancel')}
-        </button>
-      </form>
-    </div>
+              <Button
+                type="button"
+                variant="contained"
+                onClick={() => navigate(-1)}
+                sx={styles.danger}
+                fullWidth
+              >
+                ❌ {t('common.cancel')}
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      </Paper>
+    </Box>
   );
 };
 

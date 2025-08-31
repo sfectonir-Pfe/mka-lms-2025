@@ -29,7 +29,8 @@ import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
-
+import { getCurrentRole, getCurrentUserId } from '../../../pages/auth/token';
+import RoleGate from '../../../pages/auth/RoleGate';
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
@@ -44,6 +45,10 @@ const SessionList = () => {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, sessionId: null });
   const { t, ready } = useTranslation();
   const navigate = useNavigate();
+  
+  // Check user permissions
+  const currentRole = getCurrentRole()?.toLowerCase();
+  const canManageUsers = ['admin',].includes(currentRole);
 
   const styles = {
     primary: {
@@ -88,19 +93,43 @@ const SessionList = () => {
 
   const fetchSessions = async () => {
     try {
-      const res = await api.get("/session2");
-      setSessions(res.data);
+      const currentRole = getCurrentRole()?.toLowerCase();
+      const currentUserId = getCurrentUserId();
+      
+      let sessionsData = [];
+      
+      // Role-based session fetching
+      if (['formateur', 'etudiant'].includes(currentRole)) {
+        // For formateurs and etudiants, only fetch sessions they're assigned to
+        if (currentUserId) {
+          const res = await api.get(`/session2/my-sessions/${currentUserId}`);
+          // Transform the response to match the expected format
+          sessionsData = res.data.map(userSession => userSession.session2);
+        }
+      } else {
+        // For admin, createurdeformation, and etablissement, fetch all sessions
+        const res = await api.get("/session2");
+        sessionsData = res.data;
+      }
+      
+      setSessions(sessionsData);
+      
+      // Only fetch users if user has admin/creator permissions
+      const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+      
       const usersMap = {};
-      await Promise.all(
-        res.data.map(async (session) => {
-          try {
-            const resp = await api.get(`/session2/${session.id}/users`);
-            usersMap[session.id] = resp.data || [];
-          } catch {
-            usersMap[session.id] = [];
-          }
-        })
-      );
+      if (canManageUsers) {
+        await Promise.all(
+          sessionsData.map(async (session) => {
+            try {
+              const resp = await api.get(`/session2/${session.id}/users`);
+              usersMap[session.id] = resp.data || [];
+            } catch {
+              usersMap[session.id] = [];
+            }
+          })
+        );
+      }
       setAssignedUsersMap(usersMap);
     } catch {
       toast.error(t("sessions.loadError"));
@@ -316,7 +345,7 @@ const SessionList = () => {
   // Show loading state if i18n is not ready
   if (!ready) {
     return (
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
           {t("common.loadingTranslations")}
         </Typography>
@@ -325,7 +354,7 @@ const SessionList = () => {
   }
 
   return (
-    <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+    <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
       
 
       <Typography variant="h5" fontWeight="bold" gutterBottom>
@@ -345,7 +374,6 @@ const SessionList = () => {
               mt: 4,
               p: 3,
               borderRadius: 3,
-              backgroundColor: "#ffffff",
               border: "1px solid #e0e0e0",
               display: "flex",
               flexDirection: "row",
@@ -401,26 +429,29 @@ const SessionList = () => {
                     }
                     sx={{ fontWeight: 700, textTransform: "capitalize" }}
                   />
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
-                    <Select
-                      labelId={`status-label-${session.id}`}
-                      value={session.status}
-                      label={t("sessions.status")}
-                      onChange={e => handleStatusChange(session.id, e.target.value)}
-                    >
-                      <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
-                      <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
-                      <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
-                      <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
-                    </Select>
-                  </FormControl>
+                  {canManageUsers && (
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
+                      <Select
+                        labelId={`status-label-${session.id}`}
+                        value={session.status}
+                        label={t("sessions.status")}
+                        onChange={e => handleStatusChange(session.id, e.target.value)}
+                      >
+                        <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
+                        <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
+                        <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
+                        <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
                 </Stack>
               </Stack>
 
               {!sidebarOpen[session.id] && (
                 <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <Button
+                  {canManageUsers && (
+                    <Button
                     variant="outlined"
                     size="small"
                     startIcon={<DeleteIcon sx={{ color: 'white' }} />}
@@ -429,6 +460,7 @@ const SessionList = () => {
                   >
                     {t("sessions.delete")}
                   </Button>
+                  )}
                   <Button
                     variant="contained"
                     size="small"
@@ -436,25 +468,29 @@ const SessionList = () => {
                     onClick={() => navigate(`/sessions/${session.id}/seances`)}
                     sx={styles.primary}
                   >
-                    {t("sessions.join")}
+                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la séance'}
                   </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<PersonAddAlt1Icon />}
-                    onClick={() => handleToggleSidebar(session.id)}
-                    sx={styles.primary}
-                  >
-                    {t("sessions.addUser")}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleShare(session)}
-                    sx={{ ...styles.secondary, color: 'white', borderColor: 'white' }}
-                  >
-                    📤 {t("sessions.share")}
-                  </Button>
+                  {canManageUsers && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      startIcon={<PersonAddAlt1Icon />}
+                      onClick={() => handleToggleSidebar(session.id)}
+                    >
+                      {t("sessions.addUser")}
+                    </Button>
+                  )}
+                  <RoleGate roles={["admin"]}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      size="small"
+                      onClick={() => handleShare(session)}
+                    >
+                      📤 {t("sessions.share")}
+                    </Button>
+                  </RoleGate>
                   {session.status === "COMPLETED" && (
                     <Button
                       variant="contained"
@@ -474,6 +510,7 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
+                  <RoleGate roles={["admin"]}>
                   <Button
                     variant="outlined"
                     size="small"
@@ -482,6 +519,7 @@ const SessionList = () => {
                   >
                     📊 {t("sessions.feedbackList")}
                   </Button>
+                  </RoleGate>
                 </Stack>
               )}
 
@@ -588,13 +626,12 @@ const SessionList = () => {
             </Box>
 
             {/* Sidebar for Users */}
-            {sidebarOpen[session.id] && (
+            {canManageUsers && sidebarOpen[session.id] && (
               <Paper
                 elevation={4}
                 sx={{
                   minWidth: 350,
                   maxWidth: 400,
-                  bgcolor: "#f8fbff",
                   borderRadius: 4,
                   p: 3,
                   display: "flex",
@@ -622,7 +659,6 @@ const SessionList = () => {
                   alignItems="center"
                   gap={1}
                   mb={3}
-                  bgcolor="#eaf0f9"
                   borderRadius={2}
                   p={1.5}
                 >
@@ -634,7 +670,7 @@ const SessionList = () => {
                     onFocus={() => setShowAddUserId(session.id)}
                     onChange={(e) => setUserEmail(e.target.value)}
                     variant="outlined"
-                    sx={{ flex: 1, bgcolor: "#fff", borderRadius: 2 }}
+                    sx={{ flex: 1, borderRadius: 2 }}
                   />
                   <IconButton
                     disabled={addLoading}
@@ -659,13 +695,12 @@ const SessionList = () => {
                         alignItems="center"
                         gap={2}
                         p={2}
-                        bgcolor="#fff"
                         borderRadius={2}
                         sx={{
                           boxShadow: "0 2px 8px rgba(25,118,210,.04)",
                           cursor: "pointer",
                           transition: "background .15s",
-                          "&:hover": { background: "#f0f6ff" }
+                          "&:hover": { opacity: 0.8 }
                         }}
                         onClick={() => navigate(`/ProfilePage/${user.id}`)}
                       >
@@ -673,7 +708,6 @@ const SessionList = () => {
                           src={user.profilePic || undefined}
                           sx={{
                             width: 38, height: 38, fontWeight: 700, fontSize: 16,
-                            bgcolor: user.profilePic ? "transparent" : "#B5C7D3",
                           }}
                         >
                           {!user.profilePic && user.name ? user.name[0].toUpperCase() : null}
@@ -709,6 +743,7 @@ const SessionList = () => {
       {/* Share Modal */}
       <Dialog open={shareModal.open} onClose={() => setShareModal({ open: false, session: null })} maxWidth="md" fullWidth>
         <DialogTitle>
+          
           📤 {t("sessions.shareSession")}
           <IconButton onClick={() => setShareModal({ open: false, session: null })} sx={{ position: 'absolute', right: 8, top: 8, ...styles.danger }}>
             <Close sx={{ color: 'white' }} />
@@ -721,7 +756,6 @@ const SessionList = () => {
             sx={{
               borderRadius: 4,
               overflow: "hidden",
-              bgcolor: "#ffffff",
               border: "2px solid #1976d2",
               boxShadow: 3,
               mb: 3,
@@ -731,7 +765,6 @@ const SessionList = () => {
           >
             <Box
               sx={{
-                background: "linear-gradient(90deg, #1976d2, #42a5f5)",
                 color: "#fff",
                 p: 3,
                 textAlign: "center"
@@ -750,7 +783,6 @@ const SessionList = () => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  backgroundColor: "#e3f2fd",
                   p: 2
                 }}
               >
