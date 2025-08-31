@@ -49,11 +49,11 @@ const EmojiRating = ({ rating, onRatingChange, label }) => {
               cursor: "pointer",
               padding: "8px",
               borderRadius: "50%",
-              backgroundColor: rating === index + 1 ? "#e3f2fd" : "transparent",
+              backgroundColor: "transparent",
               border: rating === index + 1 ? "2px solid #1976d2" : "2px solid transparent",
               transition: "all 0.2s",
               "&:hover": {
-                backgroundColor: "#f5f5f5",
+                // backgroundColor: "#f5f5f5",
                 transform: "scale(1.1)",
               },
             }}
@@ -242,7 +242,7 @@ export default function AddSeanceFeedback({ seanceId }) {
                 </Box>
               </Box>
 
-              <Box sx={{ p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+              <Box sx={{ p: 2, borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   {t('seanceFeedbackForm.guide.tip')}
                 </Typography>
@@ -532,7 +532,7 @@ export default function AddSeanceFeedback({ seanceId }) {
 
   if (isSubmitted) {
     return (
-      <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <div className="container-fluid py-4" style={{ minHeight: "100vh" }}>
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <Card className="shadow-lg" sx={{ mt: 8, textAlign: "center" }}>
@@ -555,7 +555,7 @@ export default function AddSeanceFeedback({ seanceId }) {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+    <div className="container-fluid py-4" style={{ minHeight: "100vh" }}>
       <div className="row justify-content-center">
         <div className="col-lg-10 col-xl-8">
           <Box sx={{ mb: 4, textAlign: "center" }}>

@@ -543,7 +543,7 @@ const FeedbackList = () => {
                 <>
                   {/* Évaluation moyenne */}
                   {averageRating > 0 && (
-                    <Card sx={{ mb: 3, bgcolor: 'primary.main', color: 'white' }}>
+                    <Card sx={{ mb: 3, color: 'primary.main' }}>
                       <CardContent sx={{ textAlign: 'center' }}>
                         <Typography variant="h6" gutterBottom>
                           📊 {t('seances.averageEvaluation')}
@@ -628,7 +628,7 @@ const FeedbackList = () => {
                     section.answers.length > 0 && (
                       <Card key={idx} sx={{ mb: 3 }}>
                         <CardHeader
-                          sx={{ bgcolor: section.color, color: 'white' }}
+                          sx={{ color: section.color }}
                           title={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <Typography sx={{ fontSize: '1.2rem' }}>{section.emoji}</Typography>
@@ -643,7 +643,7 @@ const FeedbackList = () => {
                               let value = isNumeric ? Number(qa.answer) : null;
                               return (
                                 <Grid item xs={12} sm={isNumeric ? 6 : 12} key={qidx}>
-                                  <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                                  <Box sx={{ p: 2, borderRadius: 1 }}>
                                     <Typography variant="body2" fontWeight="600" gutterBottom>
                                       {qa.key ? t(`seances.feedbackQuestions.${qa.key}`) : qa.question}
                                     </Typography>
@@ -680,7 +680,7 @@ const FeedbackList = () => {
                   {otherAnswers.length > 0 && (
                     <Card sx={{ mb: 3 }}>
                       <CardHeader
-                        sx={{ bgcolor: 'grey.600', color: 'white' }}
+                        sx={{ color: 'grey.600' }}
                         title={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography sx={{ fontSize: '1.2rem' }}>📝</Typography>
@@ -695,7 +695,7 @@ const FeedbackList = () => {
                             let value = isNumeric ? Number(qa.answer) : null;
                             return (
                               <Grid item xs={12} sm={isNumeric ? 6 : 12} key={qidx}>
-                                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                                <Box sx={{ p: 2, borderRadius: 1 }}>
                                   <Typography variant="body2" fontWeight="600" gutterBottom>
                                     {qa.key ? t(`seances.feedbackQuestions.${qa.key}`) : qa.question}
                                   </Typography>

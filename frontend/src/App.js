@@ -15,7 +15,6 @@ import NotFound from "./pages/error/NotFoundPage";
 import HomePage from "./pages/home/HomePage";
 import Réclamation from "./features/views/feedback/feedbackForm/Réclamation";
 import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamationlist";
-import StudentLandingPage from "./pages/session/StudentLandingPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 
@@ -96,6 +95,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+
+import Forbidden403 from './pages/error/Forbidden403';
+import { RoleProtectedRoute } from './pages/auth/guards';
+
 
 
 function AppContent() {
@@ -280,7 +283,6 @@ function AppContent() {
 
 
                 {/* Student */}
-                <Route path="student" element={<StudentLandingPage />} />
                 <Route path="Réclamation" element={<Réclamation />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
@@ -308,6 +310,8 @@ function AppContent() {
             {/* <Route path="/test-feedback" element={<TestFeedback />} /> */}
             {/* <Route path="/test-average-rating" element={<TestAverageRating />} /> */}
             <Route path="*" element={<NotFound />} />
+            <Route path="/403" element={<Forbidden403 />} />
+
           </Routes>
         </BrowserRouter>
       )}

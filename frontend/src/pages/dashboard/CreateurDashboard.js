@@ -79,7 +79,6 @@ const StatusChip = ({ status }) => {
       label={info.label}
       sx={{
         ml: 1,
-        background: info.color + "18",
         color: info.color,
         fontWeight: 600,
         borderRadius: "1rem",
@@ -143,13 +142,10 @@ export default function CreateurDashboard() {
         display="flex" 
         alignItems="center" 
         justifyContent="center"
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}
       >
         <Box textAlign="center">
-          <CircularProgress size={64} sx={{ color: '#fff', mb: 2 }} />
-          <Typography color="white" variant="h6">Chargement du tableau de bord...</Typography>
+          <CircularProgress size={64} sx={{ color: 'primary.main', mb: 2 }} />
+          <Typography color="text.primary" variant="h6">Chargement du tableau de bord...</Typography>
         </Box>
       </Box>
     );
@@ -168,17 +164,6 @@ export default function CreateurDashboard() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.02" fill-rule="evenodd"%3E%3Cpath d="m0 40l40-40h-40z"/%3E%3C/g%3E%3C/svg%3E")',
-        }
       }}
     >
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
@@ -187,33 +172,22 @@ export default function CreateurDashboard() {
           sx={{ 
             textAlign: 'center',
             mb: 6,
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
             borderRadius: 4,
             p: 4,
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}
         >
           <Typography 
             variant="h3" 
             fontWeight={700} 
-            color="white" 
+            color="primary.main" 
             mb={1}
-            sx={{
-              background: 'linear-gradient(45deg, #fff, #e0e7ff)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
           >
             Tableau de Bord Créateur
           </Typography>
           <Typography 
             variant="h6" 
             sx={{ 
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'text.secondary',
               fontWeight: 400,
               letterSpacing: 0.5
             }}
@@ -303,8 +277,7 @@ export default function CreateurDashboard() {
                     <Avatar sx={{ 
                       bgcolor: PRIMARY_BLUE, 
                       width: 40, 
-                      height: 40,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      height: 40
                     }}>
                       <ShowChartIcon />
                     </Avatar>
@@ -389,8 +362,7 @@ export default function CreateurDashboard() {
                     <Avatar sx={{ 
                       bgcolor: ACCENT_COLORS[1], 
                       width: 40, 
-                      height: 40,
-                      background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+                      height: 40
                     }}>
                       <ShowChartIcon />
                     </Avatar>
@@ -511,8 +483,7 @@ export default function CreateurDashboard() {
                   <Avatar sx={{ 
                     bgcolor: '#f59e0b', 
                     width: 40, 
-                    height: 40,
-                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                    height: 40
                   }}>
                     <StarIcon />
                   </Avatar>
@@ -542,10 +513,6 @@ function ModernCard({ children, ...props }) {
     <Card
       sx={{
         borderRadius: 3,
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
@@ -620,7 +587,6 @@ function TopSessionItem({ session, rank }) {
       sx={{
         p: 2,
         borderRadius: 2,
-        background: rank === 0 ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' : '#f8fafc',
         border: rank === 0 ? '2px solid #fbbf24' : '1px solid #e2e8f0',
         transition: 'all 0.3s ease',
         '&:hover': {
@@ -693,7 +659,6 @@ function TopProgramItem({ program, rank }) {
         p: 2,
         mb: 2,
         borderRadius: 2,
-        background: rank === 0 ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)' : '#f8fafc',
         border: rank === 0 ? '2px solid #fbbf24' : '1px solid #e2e8f0',
         transition: 'all 0.3s ease',
         '&:hover': {
@@ -766,7 +731,6 @@ function SessionFeedbackItem({ feedback }) {
         p: 2,
         mb: 2,
         borderRadius: 2,
-        background: '#f8fafc',
         border: '1px solid #e2e8f0',
         transition: 'all 0.3s ease',
         '&:hover': {

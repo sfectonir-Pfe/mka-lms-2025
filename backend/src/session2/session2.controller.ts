@@ -7,6 +7,7 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { Session2Service } from './session2.service';
 import { PrismaService } from 'nestjs-prisma';
+import { Roles } from '../auth/roles.decorator';
 
 const storage = diskStorage({
   destination: './uploads/sessions',
@@ -23,6 +24,7 @@ export class Session2Controller {
     private readonly prisma: PrismaService
   ) {}
 
+  @Roles('formateur','admin')
   @Post()
   @UseInterceptors(FileInterceptor('image', { storage }))
   async create(
@@ -41,11 +43,13 @@ export class Session2Controller {
     }
   }
 
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get()
   findAll() {
     return this.service.findAll();
   }
 
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur')
   @Get('simple')
   findAllSimple() {
     return this.prisma.session2.findMany({
@@ -53,11 +57,13 @@ export class Session2Controller {
     });
   }
 
+  @Roles('admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
   }
 
+  @Roles('formateur', 'admin')
   @Post(':session2Id/add-user')
   async addUserToSession(
     @Param('session2Id') session2Id: string,
@@ -66,11 +72,13 @@ export class Session2Controller {
     return this.service.addUserToSession(Number(session2Id), email);
   }
 
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get(':session2Id/users')
   async getSessionUsers(@Param('session2Id') session2Id: string) {
     return this.service.getUsersForSession(Number(session2Id));
   }
 
+  @Roles('formateur', 'admin')
   @Delete(':session2Id/remove-user/:userId')
   async removeUserFromSession(
     @Param('session2Id') session2Id: string,
@@ -79,6 +87,7 @@ export class Session2Controller {
     return this.service.removeUserFromSession(Number(session2Id), Number(userId));
   }
 
+  @Roles( 'admin')
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -87,28 +96,29 @@ export class Session2Controller {
     return this.service.updateStatus(Number(id), status);
   }
 
-  @Get(':id')
-  async getSessionById(@Param('id') id: string) {
-    return this.service.getSessionById(Number(id));
-  }
-
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get('session/:sessionId/with-feedback')
   async getSeancesWithFeedback(@Param('sessionId') sessionId: string) {
     return this.service.findSeancesWithAvgFeedback(Number(sessionId));
   }
 
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get(':id/average-feedback')
   async getAverageFeedback(@Param('id') id: string) {
     return this.service.getAverageSessionFeedback(Number(id));
   }
+
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get(':id')
-findOne(@Param('id') id: string) {
-  return this.prisma.session2.findUnique({
-    where: { id: Number(id) },
-    include: {
-      program: true, // ✅ you MUST include this
-    },
-  });
+  async getSessionById(@Param('id') id: string) {
+    return this.service.getSessionById(Number(id));
+  }
+
+  // new add 
+@Roles('etudiant','formateur','etablissement', 'admin')
+@Get('my-sessions/:userId')
+async getMySessionsOnly(@Param('userId') userId: string) {
+  return this.service.getSessionsForUser(Number(userId));
 }
 
 }

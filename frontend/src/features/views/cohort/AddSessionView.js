@@ -12,6 +12,7 @@ import {
 import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 const AddSessionView = () => {
   const { t } = useTranslation();
@@ -89,94 +90,99 @@ const AddSessionView = () => {
 
 
   return (
-    <Paper sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        ➕ {t("sessions.addSession")}
-      </Typography>
+    <RoleGate 
+      roles={['Admin',]}
+      
+    >
+      <Paper sx={{ p: 4 }}>
+        <Typography variant="h5" gutterBottom>
+          ➕ {t("sessions.addSession")}
+        </Typography>
 
-      <Stack spacing={2} mt={2}>
-        <TextField
-          select
-          label={t("sessions.publishedProgram")}
-          fullWidth
-          value={selectedProgramId}
-          onChange={handleProgramSelect}
-        >
-          {programs.map((p) => (
-            <MenuItem key={p.id} value={p.id}>
-              {p.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-  label={t("sessions.sessionName")}
-  fullWidth
-  value={sessionName}
-  onChange={(e) => setSessionName(e.target.value)}
-/>
-
-
-        <TextField
-          type="date"
-          label={t("sessions.startDate")}
-          InputLabelProps={{ shrink: true }}
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-
-        <TextField
-          type="date"
-          label={t("sessions.endDate")}
-          InputLabelProps={{ shrink: true }}
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
-
-        <Button variant="outlined" component="label">
-          📷 {t("sessions.uploadImage")}
-          <input
-            hidden
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
-        </Button>
-
-        {image && (
-          <Typography variant="body2" color="text.secondary">
-            {t("sessions.selectedImage")} : {image.name}
-          </Typography>
-        )}
-
-        {structure && (
-          <>
-            <Divider />
-            <Typography variant="subtitle1">🧱 {t("sessions.programPreview")}</Typography>
-            {structure.modules.map((mod) => (
-              <Box key={mod.id} mt={1}>
-                <Typography fontWeight="bold">📦 {mod.module.name}</Typography>
-                {(mod.courses || []).map((c) => (
-                  <Box key={c.id} ml={2}>
-                    <Typography variant="body2">📘 {c.course.title}</Typography>
-                    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
-                      {(c.contenus || []).map((ct) => (
-                        <Typography key={ct.id} variant="caption" color="text.secondary">
-                          📄 {ct.contenu.title}
-                        </Typography>
-                      ))}
-                    </Stack>
-                  </Box>
-                ))}
-              </Box>
+        <Stack spacing={2} mt={2}>
+          <TextField
+            select
+            label={t("sessions.publishedProgram")}
+            fullWidth
+            value={selectedProgramId}
+            onChange={handleProgramSelect}
+          >
+            {programs.map((p) => (
+              <MenuItem key={p.id} value={p.id}>
+                {p.name}
+              </MenuItem>
             ))}
-          </>
-        )}
+          </TextField>
+          <TextField
+    label={t("sessions.sessionName")}
+    fullWidth
+    value={sessionName}
+    onChange={(e) => setSessionName(e.target.value)}
+  />
 
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
-          📤 {t("sessions.saveSession")}
-        </Button>
-      </Stack>
-    </Paper>
+
+          <TextField
+            type="date"
+            label={t("sessions.startDate")}
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+
+          <TextField
+            type="date"
+            label={t("sessions.endDate")}
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+
+          <Button variant="outlined" component="label">
+            📷 {t("sessions.uploadImage")}
+            <input
+              hidden
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+          </Button>
+
+          {image && (
+            <Typography variant="body2" color="text.secondary">
+              {t("sessions.selectedImage")} : {image.name}
+            </Typography>
+          )}
+
+          {structure && (
+            <>
+              <Divider />
+              <Typography variant="subtitle1">🧱 {t("sessions.programPreview")}</Typography>
+              {structure.modules.map((mod) => (
+                <Box key={mod.id} mt={1}>
+                  <Typography fontWeight="bold">📦 {mod.module.name}</Typography>
+                  {(mod.courses || []).map((c) => (
+                    <Box key={c.id} ml={2}>
+                      <Typography variant="body2">📘 {c.course.title}</Typography>
+                      <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                        {(c.contenus || []).map((ct) => (
+                          <Typography key={ct.id} variant="caption" color="text.secondary">
+                            📄 {ct.contenu.title}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </Box>
+                  ))}
+                </Box>
+              ))}
+            </>
+          )}
+
+          <Button variant="contained" color="primary" onClick={handleSubmit}>
+            📤 {t("sessions.saveSession")}
+          </Button>
+        </Stack>
+      </Paper>
+    </RoleGate>
   );
 };
 

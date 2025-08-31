@@ -181,7 +181,7 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
   return (
     <div className="container mt-5">
       <h2 className="mb-4">{t('users.addUser')}</h2>
-      <form onSubmit={handleSubmit} className="p-4 shadow rounded bg-light">
+      <form onSubmit={handleSubmit} className="p-4 shadow rounded">
         <div className="mb-3">
           <label className="form-label">{t('common.email')} :</label>
           <input
@@ -317,7 +317,7 @@ if (role === "Etablissement" && etablissement2Id.trim()) {
 
         <div className="mb-3">
   <label className="form-label">{t('users.assignSessions')} :</label>
-  <div style={{ maxHeight: 140, overflowY: "auto", border: "1px solid #eee", borderRadius: 4, padding: 8, background: "#fafbfc" }}>
+  <div style={{ maxHeight: 140, overflowY: "auto", border: "1px solid #eee", borderRadius: 4, padding: 8 }}>
     {sessions.length === 0 && (
       <div className="text-muted">{t('users.noSessionsAvailable')}</div>
     )}

@@ -43,15 +43,6 @@ function ModernCard({ children, ...props }) {
     <Paper
       sx={{
         borderRadius: 3,
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
-        },
         ...props.sx
       }}
       {...props}
@@ -62,7 +53,7 @@ function ModernCard({ children, ...props }) {
 }
 
 // --- ModernStatCard ---
-function ModernStatCard({ icon, value, label, gradient, extra }) {
+function ModernStatCard({ icon, value, label, extra }) {
   return (
     <ModernCard>
       <CardContent sx={{ p: 3 }}>
@@ -72,8 +63,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
               sx={{ 
                 width: 60, 
                 height: 60, 
-                background: gradient,
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)'
+                bgcolor: 'primary.main'
               }}
             >
               {icon}
@@ -82,12 +72,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
               <Typography 
                 variant="h4" 
                 fontWeight={700} 
-                sx={{ 
-                  background: gradient,
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
+                color="primary.main"
               >
                 {value}
               </Typography>
@@ -97,7 +82,7 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
             <Typography 
               variant="h6" 
               fontWeight={600} 
-              color={PRIMARY_BLUE}
+              color="primary.main"
               mb={1}
             >
               {label}
@@ -112,6 +97,8 @@ function ModernStatCard({ icon, value, label, gradient, extra }) {
 
 export default function FormateurDashboardPage() {
   const [sessions, setSessions] = useState([]);
+  const [feedbacks, setFeedbacks] = useState(null);
+  const [topFormateurs, setTopFormateurs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const totalSessions = sessions.length;
@@ -121,34 +108,39 @@ export default function FormateurDashboardPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetchSessions();
+    Promise.all([
+      fetchSessions(),
+      fetchFeedbacks(),
+      fetchTopFormateurs()
+    ]).finally(() => setLoading(false));
     // eslint-disable-next-line
   }, []);
 
   function fetchSessions() {
-    setLoading(true);
-    fetch(`${API_BASE}/dashboard-formateur/sessions`)
+    return fetch(`${API_BASE}/dashboard-formateur/sessions`)
       .then((res) => res.json())
       .then((data) => setSessions(Array.isArray(data) ? data : []))
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false));
+      .catch(() => setSessions([]));
+  }
+
+  function fetchFeedbacks() {
+    return fetch(`${API_BASE}/dashboard-formateur/feedbacks`)
+      .then((res) => res.json())
+      .then((data) => setFeedbacks(data))
+      .catch(() => setFeedbacks(null));
+  }
+
+  function fetchTopFormateurs() {
+    return fetch(`${API_BASE}/dashboard-formateur/top-formateurs`)
+      .then((res) => res.json())
+      .then((data) => setTopFormateurs(Array.isArray(data) ? data : []))
+      .catch(() => setTopFormateurs([]));
   }
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.02" fill-rule="evenodd"%3E%3Cpath d="m0 40l40-40h-40z"/%3E%3C/g%3E%3C/svg%3E")',
-        }
+        minHeight: "100vh"
       }}
     >
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
@@ -157,38 +149,27 @@ export default function FormateurDashboardPage() {
           sx={{ 
             textAlign: 'center',
             mb: 6,
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
             borderRadius: 4,
-            p: 4,
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            p: 4
           }}
         >
           <Typography 
             variant="h3" 
             fontWeight={700} 
-            color="white" 
+            color="primary.main" 
             mb={1}
-            sx={{
-              background: 'linear-gradient(45deg, #fff, #e0e7ff)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
           >
             Tableau de Bord Formateur
           </Typography>
           <Typography 
             variant="h6" 
             sx={{ 
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'text.secondary',
               fontWeight: 400,
               letterSpacing: 0.5
             }}
           >
-            Vue d'ensemble de vos sessions et activité d’enseignement
+            Vue d'ensemble de vos sessions et activité d'enseignement
           </Typography>
         </Box>
 
@@ -199,7 +180,6 @@ export default function FormateurDashboardPage() {
               icon={<GroupIcon />}
               value={totalSessions}
               label="Sessions créées"
-              gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
@@ -207,23 +187,27 @@ export default function FormateurDashboardPage() {
               icon={<EventAvailableIcon />}
               value={totalActiveSessions}
               label="Sessions actives"
-              gradient="linear-gradient(135deg, #43a047 0%, #60a5fa 100%)"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <ModernStatCard
-              icon={<EventBusyIcon />}
-              value={totalInactiveSessions}
-              label="Sessions inactives"
-              gradient="linear-gradient(135deg, #e53935 0%, #fad5d5 100%)"
+              icon={<StarIcon />}
+              value={feedbacks?.totalFeedbacks || 0}
+              label="Feedbacks reçus"
             />
           </Grid>
           <Grid item xs={12} sm={6} lg={3}>
             <ModernStatCard
               icon={<ShowChartIcon />}
-              value={tauxActivite}
-              label="Taux d'activité"
-              gradient="linear-gradient(135deg, #9c27b0 0%, #e1bee7 100%)"
+              value={feedbacks?.generalAverage ? `${feedbacks.generalAverage}/5` : "N/A"}
+              label="Note moyenne générale"
+              extra={
+                feedbacks?.generalAverage && (
+                  <Typography variant="caption" color="text.secondary">
+                    ⭐ Moyenne de toutes les séances
+                  </Typography>
+                )
+              }
             />
           </Grid>
         </Grid>
@@ -236,7 +220,7 @@ export default function FormateurDashboardPage() {
           mb: 4,
         }}>
           <CardContent>
-            <Typography variant="h6" fontWeight={700} mb={2} color={PRIMARY_BLUE}>
+            <Typography variant="h6" fontWeight={700} mb={2} color="primary.main">
               📚 Sessions créées
             </Typography>
             {loading ? (
@@ -268,14 +252,26 @@ export default function FormateurDashboardPage() {
                         </Typography>
                       }
                       secondary={
-                        <span>
-                          <PeopleAltIcon sx={{ fontSize: 18, mb: "-3px", color: "#90caf9" }} /> {session.totalUsers} participant(s) &nbsp;|&nbsp;
-                          {session.status === "ACTIVE" ? (
-                            <span style={{ color: "#27ae60" }}>Active</span>
-                          ) : (
-                            <span style={{ color: "#eb5757" }}>Inactive</span>
+                        <Box>
+                          <Box sx={{ mb: 1 }}>
+                            <PeopleAltIcon sx={{ fontSize: 18, mb: "-3px", color: "#90caf9" }} /> {session.totalUsers} participant(s) &nbsp;|&nbsp;
+                            {session.status === "ACTIVE" ? (
+                              <span style={{ color: "#27ae60" }}>Active</span>
+                            ) : (
+                              <span style={{ color: "#eb5757" }}>Inactive</span>
+                            )}
+                            &nbsp;|&nbsp; {session.seances?.length || 0} séances
+                          </Box>
+                          {session.seances && session.seances.length > 0 && (
+                            <Box sx={{ ml: 2 }}>
+                              {session.seances.map((seance, seanceIndex) => (
+                                <Typography key={seanceIndex} variant="caption" display="block" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                  📚 {seance.title} - {new Date(seance.startTime).toLocaleDateString()}
+                                </Typography>
+                              ))}
+                            </Box>
                           )}
-                        </span>
+                        </Box>
                       }
                     />
                     <Chip
@@ -302,72 +298,327 @@ export default function FormateurDashboardPage() {
           </CardContent>
         </ModernCard>
 
-        {/* FEEDBACK + TOP 3 FORMATEURS (Placeholders) */}
-        <Grid container spacing={3}>
-          {/* Global Feedback */}
-          <Grid item xs={12} md={4}>
+        {/* FEEDBACK SECTIONS */}
+        <Grid container spacing={3} mb={4}>
+          {/* Student Feedback Details */}
+          <Grid item xs={12} md={8}>
             <ModernCard>
               <CardContent>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <FeedbackIcon color="primary" />
-                  <Typography fontWeight={700} fontSize={18}>
-                    Ma feedback globale
-                  </Typography>
-                </Stack>
-                <Divider sx={{ my: 1 }} />
-                <Typography fontSize={16} color="text.secondary">
-                  <b>Bientôt</b> — Feedback des autres formateurs
-                </Typography>
-                <Typography fontSize={13} mt={1} color="#888">
-                  (Ajouter feedback collaboratif plus tard)
-                </Typography>
-              </CardContent>
-            </ModernCard>
-          </Grid>
-          {/* Student Feedback */}
-          <Grid item xs={12} md={4}>
-            <ModernCard>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack direction="row" alignItems="center" spacing={1} mb={2}>
                   <StarIcon color="warning" />
                   <Typography fontWeight={700} fontSize={18}>
-                    Feedback étudiants
+                    Mes feedbacks par les étudiants
                   </Typography>
                 </Stack>
-                <Divider sx={{ my: 1 }} />
-                <Typography fontSize={16} color="text.secondary">
-                  <b>Bientôt</b> — Feedback séance par séance
-                </Typography>
-                <Typography fontSize={13} mt={1} color="#888">
-                  (Ajouter feedback étudiant plus tard)
-                </Typography>
+                <Divider sx={{ my: 2 }} />
+                {loading ? (
+                  <Box textAlign="center" py={3}>
+                    <CircularProgress size={40} />
+                  </Box>
+                ) : feedbacks?.feedbacksBySeance?.length > 0 ? (
+                  <Box>
+                    <Typography variant="h6" mb={2} color="primary.main">
+                      📊 Détail par séance
+                    </Typography>
+                    <List dense>
+                      {feedbacks.feedbacksBySeance.map((seance, index) => (
+                        <ListItem
+                          key={index}
+                          sx={{
+                            borderRadius: 2,
+                            mb: 1,
+                            bgcolor: '#f8f9ff',
+                            border: '1px solid #e3f2fd'
+                          }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography fontWeight={600} color="primary.main">
+                                {seance.seanceTitle}
+                              </Typography>
+                            }
+                            secondary={
+                              <Stack direction="row" spacing={2} mt={0.5}>
+                                <Chip
+                                  size="small"
+                                  label={`${seance.totalFeedbacks} feedback(s)`}
+                                  color="primary"
+                                  variant="outlined"
+                                />
+                                <Chip
+                                  size="small"
+                                  label={`${seance.averageRating}/5 ⭐`}
+                                  color="warning"
+                                  variant="filled"
+                                />
+                              </Stack>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+                ) : (
+                  <Typography color="text.secondary" textAlign="center" py={3}>
+                    Aucun feedback reçu pour le moment
+                  </Typography>
+                )}
               </CardContent>
             </ModernCard>
           </Grid>
-          {/* Top 3 Formateurs */}
+          
+          {/* Mes Feedbacks Formateur */}
           <Grid item xs={12} md={4}>
             <ModernCard>
               <CardContent>
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <EmojiEventsIcon color="secondary" />
+                <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                  <FeedbackIcon color="primary" />
                   <Typography fontWeight={700} fontSize={18}>
-                    Top 3 formateurs
+                    👨‍🏫 Mes Feedbacks
                   </Typography>
                 </Stack>
-                <Divider sx={{ my: 1 }} />
-                <Typography fontSize={16} color="text.secondary">
-                  <b>Bientôt</b> — Classement, feedback, cadeaux reçus…
-                </Typography>
-                <Stack direction="row" alignItems="center" spacing={1} mt={2}>
-                  <CardGiftcardIcon color="action" />
-                  <Typography fontSize={13} color="#888">
-                    (Classement à venir)
+                <Divider sx={{ my: 2 }} />
+                {loading ? (
+                  <Box textAlign="center" py={3}>
+                    <CircularProgress size={30} />
+                  </Box>
+                ) : feedbacks?.recentFeedbacks?.length > 0 ? (
+                  <List dense>
+                    {feedbacks.recentFeedbacks.map((feedback, index) => {
+                      const emojiMap = {
+                        1: '😞', 2: '😐', 3: '🙂', 4: '😊', 5: '🤩'
+                      };
+                      const ratingLabels = {
+                        1: 'Très mauvais', 2: 'Mauvais', 3: 'Moyen', 4: 'Bon', 5: 'Excellent'
+                      };
+                      
+                      // Calculate average trainer rating for display
+                      const trainerRatings = [
+                        feedback.trainerRating,
+                        feedback.trainerClarity,
+                        feedback.trainerAvailability,
+                        feedback.trainerPedagogy,
+                        feedback.trainerInteraction
+                      ].filter(r => r > 0);
+                      
+                      const avgRating = trainerRatings.length > 0 
+                        ? Math.round(trainerRatings.reduce((a, b) => a + b, 0) / trainerRatings.length)
+                        : 3;
+                      
+                      return (
+                        <ListItem key={index} sx={{ px: 0, py: 1 }}>
+                          <ListItemText
+                            primary={
+                              <Stack direction="row" alignItems="center" spacing={1}>
+                                <Typography variant="h6">{emojiMap[avgRating]}</Typography>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {feedback.user?.name || 'Étudiant'}
+                                </Typography>
+                              </Stack>
+                            }
+                            secondary={
+                              <Stack spacing={0.5}>
+                                <Typography variant="caption" color="text.secondary">
+                                  {ratingLabels[avgRating]} • {new Date(feedback.createdAt).toLocaleDateString()}
+                                </Typography>
+                                {feedback.trainerComments && (
+                                  <Typography variant="caption" sx={{ fontStyle: 'italic', color: 'text.primary' }}>
+                                    "{feedback.trainerComments}"
+                                  </Typography>
+                                )}
+                              </Stack>
+                            }
+                          />
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                ) : (
+                  <Typography color="text.secondary" variant="body2" textAlign="center">
+                    Aucun feedback reçu
                   </Typography>
-                </Stack>
+                )}
               </CardContent>
             </ModernCard>
           </Grid>
         </Grid>
+
+        {/* TOP 3 SEANCES */}
+        <ModernCard sx={{ mb: 4 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={1} mb={3}>
+              <EmojiEventsIcon color="secondary" />
+              <Typography fontWeight={700} fontSize={20}>
+                🏆 Top 3 Séances les mieux notées
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
+            {loading ? (
+              <Box textAlign="center" py={4}>
+                <CircularProgress />
+              </Box>
+            ) : feedbacks?.topSeances?.length > 0 ? (
+              <Grid container spacing={3}>
+                {feedbacks.topSeances.map((seance, index) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  const colors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+                  return (
+                    <Grid item xs={12} md={4} key={seance.seanceId}>
+                      <Paper
+                        sx={{
+                          p: 3,
+                          textAlign: 'center',
+                          background: `linear-gradient(135deg, ${colors[index]}20 0%, ${colors[index]}10 100%)`,
+                          border: `2px solid ${colors[index]}40`,
+                          borderRadius: 3
+                        }}
+                      >
+                        <Typography variant="h3" mb={1}>
+                          {medals[index]}
+                        </Typography>
+                        <Avatar
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            mx: 'auto',
+                            mb: 2,
+                            bgcolor: colors[index],
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          📚
+                        </Avatar>
+                        <Typography variant="h6" fontWeight={700} mb={1}>
+                          {seance.seanceTitle}
+                        </Typography>
+                        <Stack spacing={1} alignItems="center">
+                          <Chip
+                            label={`${seance.averageRating}/5 ⭐`}
+                            color="warning"
+                            size="small"
+                            variant="filled"
+                          />
+                          <Chip
+                            label={`${seance.totalFeedbacks} feedback(s)`}
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                          />
+                          {seance.startTime && (
+                            <Typography variant="caption" color="text.secondary">
+                              📅 {new Date(seance.startTime).toLocaleDateString()}
+                            </Typography>
+                          )}
+                        </Stack>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            ) : (
+              <Typography color="text.secondary" textAlign="center" py={4}>
+                Aucune séance avec feedback disponible pour le moment
+              </Typography>
+            )}
+          </CardContent>
+        </ModernCard>
+
+        {/* TOP 3 FORMATEURS */}
+        <ModernCard sx={{ mb: 4 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={1} mb={3}>
+              <EmojiEventsIcon color="secondary" />
+              <Typography fontWeight={700} fontSize={20}>
+                🏆 Top 3 Formateurs
+              </Typography>
+            </Stack>
+            <Divider sx={{ mb: 3 }} />
+            {loading ? (
+              <Box textAlign="center" py={4}>
+                <CircularProgress />
+              </Box>
+            ) : topFormateurs.length > 0 ? (
+              <Grid container spacing={3}>
+                {topFormateurs.map((formateur, index) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  const colors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+                  return (
+                    <Grid item xs={12} md={4} key={formateur.id}>
+                      <Paper
+                        sx={{
+                          p: 3,
+                          textAlign: 'center',
+                          background: `linear-gradient(135deg, ${colors[index]}20 0%, ${colors[index]}10 100%)`,
+                          border: `2px solid ${colors[index]}40`,
+                          borderRadius: 3
+                        }}
+                      >
+                        <Typography variant="h3" mb={1}>
+                          {medals[index]}
+                        </Typography>
+                        <Avatar
+                          sx={{
+                            width: 60,
+                            height: 60,
+                            mx: 'auto',
+                            mb: 2,
+                            bgcolor: colors[index],
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {formateur.name?.charAt(0)?.toUpperCase() || '?'}
+                        </Avatar>
+                        <Typography variant="h6" fontWeight={700} mb={1}>
+                          {formateur.name}
+                        </Typography>
+                        <Stack spacing={1} alignItems="center">
+                          <Chip
+                            label={`${formateur.averageRating}/5 ⭐`}
+                            color="warning"
+                            size="small"
+                            variant="filled"
+                          />
+                          <Chip
+                            label={`${formateur.feedbackPoints} pts`}
+                            color="primary"
+                            size="small"
+                            variant="outlined"
+                          />
+                          <Typography variant="caption" color="text.secondary">
+                            {formateur.totalFeedbacks} feedback(s)
+                          </Typography>
+                          {formateur.rewards?.length > 0 && (
+                            <Box mt={1}>
+                              <Typography variant="caption" fontWeight={600} color="primary.main">
+                                🎁 Récompenses:
+                              </Typography>
+                              {formateur.rewards.map((reward, idx) => (
+                                <Chip
+                                  key={idx}
+                                  label={reward}
+                                  size="small"
+                                  variant="outlined"
+                                  color="secondary"
+                                  sx={{ mt: 0.5, mx: 0.25, fontSize: '0.7rem' }}
+                                />
+                              ))}
+                            </Box>
+                          )}
+                        </Stack>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            ) : (
+              <Typography color="text.secondary" textAlign="center" py={4}>
+                Aucun classement disponible pour le moment
+              </Typography>
+            )}
+          </CardContent>
+        </ModernCard>
       </Container>
     </Box>
   );

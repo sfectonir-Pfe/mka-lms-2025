@@ -13,6 +13,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { PrismaService } from 'nestjs-prisma';
+import { Roles } from '../auth/roles.decorator';
 
 const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.mp4', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
 
@@ -36,6 +37,7 @@ export class ContenusController {
     private readonly prisma: PrismaService // ✅ Injected properly
   ) {}
 
+  @Roles('CreateurDeFormation', 'Admin')
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))
   async uploadFile(
@@ -85,16 +87,19 @@ export class ContenusController {
     return newContenu;
   }
 
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
   @Get()
   findAll() {
     return this.contenusService.findAll();
   }
 
+  @Roles('CreateurDeFormation', 'Admin')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.contenusService.remove(+id);
   }
  
+  @Roles('CreateurDeFormation', 'Admin','formateur')
 @Patch(':id/publish')
 updatePublishStatus(@Param('id') id: string, @Body() body: { published: boolean }) {
   return this.contenusService.updatePublishStatus(+id, body.published);
