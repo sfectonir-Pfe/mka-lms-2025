@@ -153,8 +153,41 @@ export class FeedbackÉtudiantController {
     return await this.feedbackÉtudiantService.getEmojiSummary(groupId);
   }
 
-  @Get('ratings/summary/:groupId')
-  async getStudentRatingSummary(@Param('groupId') groupId: string) {
-    return await this.feedbackÉtudiantService.getStudentRatingSummary(groupId);
+  @Post('send-feedback-email')
+  async sendFeedbackEmail(
+    @Body() data: { 
+      fromStudentId: number; 
+      toStudentId: number; 
+      questionId: number;
+      questionText: string;
+      reaction: string;
+      groupId: string; 
+      seanceId: string;
+    }
+  ) {
+    return await this.feedbackÉtudiantService.sendFeedbackEmail(
+      data.fromStudentId,
+      data.toStudentId,
+      data.questionId,
+      data.questionText,
+      data.reaction,
+      data.groupId,
+      data.seanceId
+    );
   }
+
+  @Post('send-feedback-summary-email')
+  async sendFeedbackSummaryEmail(
+    @Body() data: { fromStudentId: number; toStudentId: number; groupId: string }
+  ) {
+    return await this.feedbackÉtudiantService.sendFeedbackSummaryEmail(
+      data.fromStudentId,
+      data.toStudentId,
+      data.groupId
+    );
+  }
+
+
+
+
 }

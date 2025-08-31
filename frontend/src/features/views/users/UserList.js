@@ -23,8 +23,6 @@ import {
   Chip,
   Avatar,
   CircularProgress,
-  Alert,
-  Snackbar,
   Card,
   CardContent,
   alpha,
@@ -44,6 +42,7 @@ import {
   Security,
   Analytics,
 } from "@mui/icons-material"
+import { toast } from "react-toastify"
 
 export default function UserList() {
   const { t } = useTranslation()
@@ -54,11 +53,6 @@ export default function UserList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null })
   const [toggleDialog, setToggleDialog] = useState({ open: false, user: null })
-  const [notification, setNotification] = useState({ open: false, message: "", severity: "info" })
-
-  const showNotification = (message, severity = "info") => {
-    setNotification({ open: true, message, severity })
-  }
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -69,7 +63,7 @@ export default function UserList() {
       setUsers(response.data)
     } catch (error) {
       console.error("❌ Fetch error:", error)
-      showNotification(t('users.loadError'), "error")
+      toast.error(t('users.loadError'))
       setUsers([])
     } finally {
       setLoading(false)
@@ -88,11 +82,11 @@ export default function UserList() {
       console.log("🗑️ Deleting user:", deleteDialog.user.id)
       await api.delete(`/users/${deleteDialog.user.id}`)
       setUsers(users.filter((u) => u.id !== deleteDialog.user.id))
-      showNotification(t('users.deleteSuccess'), "success")
+      toast.success(t('users.deleteSuccess'))
       console.log("✅ User deleted successfully")
     } catch (error) {
       console.error("❌ Delete error:", error)
-      showNotification(t('users.deleteError'), "error")
+      toast.error(t('users.deleteError'))
     } finally {
       setActionLoading(false)
       setDeleteDialog({ open: false, user: null })
@@ -194,7 +188,7 @@ export default function UserList() {
         // Mettre à jour l'état local
         setUsers((prevUsers) => prevUsers.map((u) => (u.id === user.id ? { ...u, isActive: newStatus } : u)))
 
-        showNotification(t('users.statusUpdateSuccess'), "success")
+        toast.success(t('users.statusUpdateSuccess'))
         console.log("🎉 Status toggle completed successfully")
 
         // Rafraîchir la liste après un délai pour vérifier la synchronisation
@@ -206,7 +200,7 @@ export default function UserList() {
     } catch (error) {
       console.error("💥 Unexpected error:", error)
 
-      showNotification(t('users.statusUpdateError'), "error")
+      toast.error(t('users.statusUpdateError'))
 
       // Log détaillé pour le debugging
       console.error("🔍 Error debugging info:", {
@@ -270,17 +264,6 @@ export default function UserList() {
   return (
     <Box sx={{ py: 4 }}>
       <Container maxWidth="xl">
-        <Snackbar
-          open={notification.open}
-          autoHideDuration={6000}
-          onClose={() => setNotification({ ...notification, open: false })}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert severity={notification.severity} sx={{ borderRadius: 2 }}>
-            {notification.message}
-          </Alert>
-        </Snackbar>
-
         {/* Header */}
         <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Box>

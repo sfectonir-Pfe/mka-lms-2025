@@ -142,7 +142,7 @@ const AnimerSeanceView = () => {
           setProgramDetails(detailRes.data);
         }
       } catch (err) {
-        console.error("❌ Erreur chargement séance :", err);
+        console.error("❌ " + t("seances.loadError"), err);
       }
     };
     fetchSeance();
@@ -288,7 +288,7 @@ const AnimerSeanceView = () => {
     } catch (error) {
       // Revert on error
       setProgramVisibleToStudents(!programVisibleToStudents);
-      console.error('Error updating program visibility:', error);
+      console.error(t('seances.programVisibilityError'), error);
     }
   };
 
@@ -393,6 +393,15 @@ const AnimerSeanceView = () => {
                                             startIcon={<PlayArrowIcon />}
                                             disabled={!cn?.published}
                                             onClick={() => navigate(`/seances/${seanceId}/quiz/${cn.id}`)}
+                                            sx={{
+                                              borderRadius: 2,
+                                              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+                                              boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                                              '&:hover': { 
+                                                transform: 'translateY(-1px)', 
+                                                boxShadow: '0 8px 20px rgba(25,118,210,0.4)' 
+                                              }
+                                            }}
                                           >
                                             {t("seances.open")}
                                           </Button>
@@ -412,6 +421,16 @@ const AnimerSeanceView = () => {
                                                 ? cn.fileUrl
                                                 : `${cn.fileUrl.startsWith("/") ? "" : "/"}${cn.fileUrl}`;
                                               window.open(url, "_blank");
+                                            }}
+                                            sx={{
+                                              borderRadius: 2,
+                                              border: "2px solid",
+                                              borderImage: "linear-gradient(135deg, #1976d2, #42a5f5) 1",
+                                              '&:hover': { 
+                                                transform: 'translateY(-1px)',
+                                                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                                                color: 'white'
+                                              }
                                             }}
                                           >
                                             {t("seances.open")}
@@ -516,7 +535,21 @@ const AnimerSeanceView = () => {
             color="primary"
           />
           <ButtonGroup variant="outlined" size="small">
-            <Button startIcon={<ZoomInMapIcon />} onClick={() => setShowContenus(!showContenus)}>
+            <Button 
+              startIcon={<ZoomInMapIcon />} 
+              onClick={() => setShowContenus(!showContenus)}
+              sx={{
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #0288d1, #29b6f6)",
+                boxShadow: "0 4px 12px rgba(2, 136, 209, 0.3)",
+                color: 'white',
+                border: 'none',
+                '&:hover': { 
+                  transform: 'translateY(-1px)', 
+                  boxShadow: '0 8px 20px rgba(2,136,209,0.4)' 
+                }
+              }}
+            >
               {showContenus ? t("seances.hideHierarchy") : t("seances.showHierarchy")}
             </Button>
             <Button
@@ -524,6 +557,21 @@ const AnimerSeanceView = () => {
               onClick={() => setShowFeedbackTab((v) => !v)}
               variant={showFeedbackTab ? "outlined" : "contained"}
               color="secondary"
+              sx={{
+                borderRadius: 2,
+                background: showFeedbackTab 
+                  ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
+                  : "linear-gradient(135deg, #7b1fa2, #ab47bc)",
+                boxShadow: showFeedbackTab 
+                  ? "0 4px 12px rgba(123, 31, 162, 0.3)"
+                  : "0 4px 12px rgba(123, 31, 162, 0.3)",
+                color: 'white',
+                border: 'none',
+                '&:hover': { 
+                  transform: 'translateY(-1px)', 
+                  boxShadow: '0 8px 20px rgba(123,31,162,0.4)' 
+                }
+              }}
             >
               {showFeedbackTab ? t("seances.hideFeedback") : t("seances.showFeedback")}
             </Button>
@@ -596,7 +644,7 @@ const AnimerSeanceView = () => {
                   onClick={handleToggleProgramVisibility}
                   sx={{ justifyContent: "flex-start", textTransform: "none", py: 1, mb: 1 }}
                 >
-                  {programVisibleToStudents ? "🔓 Programme visible aux étudiants" : "🔒 Afficher le programme aux étudiants"}
+                  {programVisibleToStudents ? t("seances.programVisibleToStudents") : t("seances.showProgramToStudents")}
                 </Button>
               </RoleGate>
               
@@ -820,7 +868,7 @@ const AnimerSeanceView = () => {
               
               <Box mb={3}>
                 <Typography variant="h6" fontWeight={600} mb={2}>
-                  🧪 {t("seances.quizComing") || "Quiz"}
+                  🧪 {t("seances.quizComing")}
                 </Typography>
                 <QuizList sessionId={seance?.session2?.id} />
               </Box>
@@ -878,6 +926,15 @@ const AnimerSeanceView = () => {
                               startIcon={<PlayArrowIcon />}
                               disabled={!q.published}
                               onClick={() => navigate(`/seances/${seanceId}/quiz/${q.contenuId}`)}
+                              sx={{
+                                borderRadius: 2,
+                                background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+                                boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                                '&:hover': { 
+                                  transform: 'translateY(-1px)', 
+                                  boxShadow: '0 8px 20px rgba(25,118,210,0.4)' 
+                                }
+                              }}
                             >
                               {t("seances.open")}
                             </Button>
@@ -901,7 +958,7 @@ const AnimerSeanceView = () => {
           {tab === 4 && (
             <Box>
               <Typography variant="h6" mb={2}>
-                {t("seances.feedbackFormateur") || "Feedback Formateur"}
+                {t("seances.feedbackFormateur")}
               </Typography>
               <FeedbackFormateur seanceId={seanceId} />
             </Box>

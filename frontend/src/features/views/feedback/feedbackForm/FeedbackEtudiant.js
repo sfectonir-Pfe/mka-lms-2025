@@ -152,19 +152,21 @@ export default function FeedbackEtudiant() {
         );
         console.log('🔍 Feedbacks received from backend:', givenRes.data);
         const given = Array.isArray(givenRes.data) ? givenRes.data : [];
-        const mappedFeedbacks = given.map((f) => {
-          const mapped = {
-            questionId: f.questionId || mapCategoryToQuestionId(f.category),
-            targetStudentId: f.targetStudentId || f.toStudentId,
-            reaction: f.reaction || mapRatingToReaction(f.rating),
-            toStudent: f.toStudent,
-          };
-          console.log('🔄 Mapping feedback:', f, '→', mapped);
-          return mapped;
-        });
-        
-        setCompletedFeedbacks(mappedFeedbacks);
-        console.log('✅ Completed feedbacks set:', mappedFeedbacks.length, 'items');
+        const categoryToQuestionId = {
+          collaboration: 1,
+          communication: 2,
+          participation: 3,
+          qualite_travail: 4,
+        };
+        const ratingToReaction = { 5: "excellent", 4: "very_good", 3: "good", 2: "average", 1: "poor" };
+        setCompletedFeedbacks(
+          given.map((f) => ({
+            questionId: f.questionId || categoryToQuestionId[f.category] || f.category,
+            targetStudentId: f.targetStudentId || f.toStudentId || f.toStudent?.id,
+            reaction: f.reaction || ratingToReaction[f.rating],
+            toStudent: f.toStudent || (f.toStudentId ? { id: f.toStudentId } : undefined),
+          }))
+        );
       } catch (err) {
         console.error("Erreur chargement données:", err);
       } finally {
@@ -185,14 +187,16 @@ export default function FeedbackEtudiant() {
       const q = questions[currentQuestionIndex];
       if (!q) return;
 
-      await api.post(`/feedback-etudiant/feedbacks`, {
-        questionId: q.id,
-        studentId: currentUserId,
-        targetStudentId: selectedStudent.id,
-        reaction,
-        groupId: currentGroup.id,
-        seanceId,
-      });
+              await api.post(`/feedback-etudiant/feedbacks`, {
+          questionId: q.id,
+          studentId: currentUserId,
+          targetStudentId: selectedStudent.id,
+          reaction,
+          groupId: currentGroup.id,
+          seanceId,
+        });
+
+        // L'email sera envoyé à la fin de l'évaluation complète
 
       setCompletedFeedbacks((prev) => {
         const idx = prev.findIndex(
@@ -231,8 +235,46 @@ export default function FeedbackEtudiant() {
     if (currentQuestionIndex > 0) setCurrentQuestionIndex((p) => p - 1);
   };
 
-  const handleNextStudent = () => {
+  const handleNextStudent = async () => {
     if (!selectedStudent) return;
+    
+    // Envoyer l'email récapitulatif avec tous les feedbacks
+    try {
+      const user = JSON.parse(localStorage.getItem("user")) || JSON.parse(sessionStorage.getItem("user")) || { id: 3 };
+      const currentUserId = user.id;
+      
+      console.log('🔍 handleNextStudent appelé avec:', {
+        currentUserId,
+        selectedStudentId: selectedStudent.id,
+        groupId: currentGroup.id,
+        completedFeedbacksCount: completedFeedbacks.length
+      });
+      
+      // Récupérer tous les feedbacks donnés à cet étudiant
+      const allFeedbacksForStudent = completedFeedbacks.filter(
+        f => f.targetStudentId === selectedStudent.id
+      );
+      
+      console.log('📊 Feedbacks trouvés pour cet étudiant:', allFeedbacksForStudent);
+      
+      if (allFeedbacksForStudent.length > 0) {
+        console.log('📧 Envoi de l\'email récapitulatif...');
+        
+        const response = await api.post('/feedback-etudiant/send-feedback-summary-email', {
+          fromStudentId: currentUserId,
+          toStudentId: selectedStudent.id,
+          groupId: currentGroup.id
+        });
+        
+        console.log('✅ Email récapitulatif envoyé avec succès:', response);
+      } else {
+        console.log('⚠️ Aucun feedback trouvé pour cet étudiant');
+      }
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi de l\'email récapitulatif:', error);
+      // Ne pas bloquer la navigation si l'email ne peut pas être envoyé
+    }
+    
     const idx = studentsToEvaluate.findIndex((s) => s.id === selectedStudent.id);
     setShowSummary(false);
     setCurrentQuestionIndex(0);
