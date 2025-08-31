@@ -587,7 +587,7 @@ model StudentFeedback {
   group         StudentGroup @relation("GroupFeedbacks", fields: [groupId], references: [id], onDelete: Cascade)
   toStudent     User         @relation("StudentFeedbackTo", fields: [toStudentId], references: [id], onDelete: Cascade)
 
-  @@unique([fromStudentId, toStudentId, groupId])
+  @@unique([fromStudentId, toStudentId, groupId, category])
 }
 
 model ProgramChatMessage {
