@@ -42,10 +42,16 @@ const ACCENT_COLORS = [
   "#06b6d4"  // Cyan
 ];
 
+
 export default function EtudiantDashboardPage() {
   const userId = JSON.parse(localStorage.getItem("user"))?.id || 1;
 
-  const [totalSessions, setTotalSessions] = useState(0);
+  const [sessionStats, setSessionStats] = useState({
+    total: 0,
+    terminee: 0,
+    encours: 0,
+    avenir: 0
+  });
   const [sessions, setSessions] = useState([]);
   const [feedbackReceived, setFeedbackReceived] = useState({
     fromStudents: [],
@@ -57,29 +63,41 @@ export default function EtudiantDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      api.get(`/dashboard-etudiant/joined-sessions?userId=${userId}`),
-      api.get(`/dashboard-etudiant/feedback-received?userId=${userId}`),
-      api.get(`/dashboard-etudiant/top-students`),
-    ])
-      .then(([listRes, feedbackRes, topStudentsRes]) => {
-        console.log("joined sessions:", listRes.data);
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      try {
+        // Fetch all available endpoints
+        const [sessionsRes, statsRes, feedbackRes, topStudentsRes] = await Promise.all([
+          api.get(`/dashboard-etudiant/joined-sessions?userId=${userId}`),
+          api.get(`/dashboard-etudiant/joined-sessions/stats?userId=${userId}`),
+          api.get(`/dashboard-etudiant/feedback-received?userId=${userId}`),
+          api.get(`/dashboard-etudiant/top-students`)
+        ]);
+        
+        console.log("joined sessions:", sessionsRes.data);
+        console.log("session stats:", statsRes.data);
         console.log("feedback received:", feedbackRes.data);
         console.log("top students:", topStudentsRes.data);
-        setSessions(listRes.data);
-        setTotalSessions(listRes.data.length);
+        
+        setSessions(sessionsRes.data);
+        setSessionStats(statsRes.data);
         setFeedbackReceived(feedbackRes.data);
         setTopStudents(topStudentsRes.data);
-      })
-      .catch((error) => {
+        
+      } catch (error) {
         console.error("Dashboard data fetch error:", error);
         setSessions([]);
-        setTotalSessions(0);
+        setSessionStats({ total: 0, terminee: 0, encours: 0, avenir: 0 });
         setFeedbackReceived({ fromStudents: [], fromFormateurs: [], averageRating: 0, totalCount: 0 });
         setTopStudents([]);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (userId) {
+      fetchDashboardData();
+    }
   }, [userId]);
 
   if (loading) {
@@ -135,125 +153,205 @@ export default function EtudiantDashboardPage() {
           <Grid item xs={12} sm={6} lg={4}>
             <ModernStatCard
               icon={<GroupIcon />}
-              value={totalSessions}
+              value={sessionStats.total}
               label="Sessions rejointes"
               gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
             />
           </Grid>
         </Grid>
 
-        {/* FEEDBACK AND PERFORMANCE SECTION */}
-        <Grid container spacing={3} mb={5}>
-          {/* Feedback Received */}
-          <Grid item xs={12} lg={6}>
-            <ModernCard>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                  <Avatar sx={{ 
-                    bgcolor: ACCENT_COLORS[4], 
-                    width: 48, 
-                    height: 48,
-                    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
-                  }}>
-                    <FeedbackIcon />
-                  </Avatar>
-                  <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
-                    Feedback Reçu
-                  </Typography>
-                </Stack>
-                
-                {/* Average Rating */}
-                <Box mb={3} textAlign="center">
-                  <Typography variant="h4" fontWeight={700} color={ACCENT_COLORS[1]} mb={1}>
-                    {feedbackReceived.averageRating.toFixed(1)}
-                  </Typography>
-                  <Rating 
-                    value={feedbackReceived.averageRating} 
-                    readOnly 
-                    precision={0.1}
-                    size="large"
-                  />
-                  <Typography variant="body2" color="text.secondary" mt={1}>
-                    Basé sur {feedbackReceived.totalCount} évaluations
-                  </Typography>
-                </Box>
+        {/* FEEDBACK RECEIVED SECTION - FULL WIDTH */}
+        <ModernCard sx={{ mb: 5 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2} mb={3}>
+              <Avatar sx={{ 
+                bgcolor: ACCENT_COLORS[4], 
+                width: 48, 
+                height: 48,
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)'
+              }}>
+                <FeedbackIcon />
+              </Avatar>
+              <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
+                Feedback Reçu
+              </Typography>
+            </Stack>
+            <Typography variant="body2" color="text.secondary" mb={3}>
+              Évaluations et commentaires reçus
+            </Typography>
 
-                <Divider sx={{ mb: 3 }} />
+            {/* Average Rating Display */}
+            <Box textAlign="center" mb={4}>
+              <Typography variant="h4" fontWeight={700} color={PRIMARY_BLUE} mb={1}>
+                {feedbackReceived.averageRating}/5
+              </Typography>
+              <Rating 
+                value={feedbackReceived.averageRating} 
+                readOnly 
+                precision={0.1}
+                size="large"
+              />
+              <Typography variant="body2" color="text.secondary" mt={1}>
+                Basé sur {feedbackReceived.totalCount} évaluations
+              </Typography>
+            </Box>
 
-                {/* From Students */}
-                <Box mb={3}>
-                  <Typography variant="subtitle1" fontWeight={600} mb={2} color={ACCENT_COLORS[0]}>
+            <Grid container spacing={4}>
+              {/* From Students */}
+              <Grid item xs={12} md={6}>
+                <Box>
+                  <Typography variant="h6" fontWeight={600} mb={3} color={ACCENT_COLORS[0]}>
                     👥 Par les autres étudiants ({feedbackReceived.fromStudents.length})
                   </Typography>
                   {feedbackReceived.fromStudents.length > 0 ? (
                     <Stack spacing={2}>
-                      {feedbackReceived.fromStudents.slice(0, 3).map((feedback, idx) => (
-                        <FeedbackItem key={idx} feedback={feedback} />
+                      {feedbackReceived.fromStudents.map((feedback, idx) => (
+                        <Paper 
+                          key={idx}
+                          elevation={1} 
+                          sx={{ 
+                            p: 3, 
+                            borderLeft: `4px solid ${ACCENT_COLORS[0]}`,
+                            backgroundColor: 'rgba(59, 130, 246, 0.02)',
+                            borderRadius: 2
+                          }}
+                        >
+                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                            <Typography variant="body1" fontWeight={600}>
+                              👥 Étudiant
+                            </Typography>
+                            <Rating value={feedback.rating || 0} readOnly size="small" />
+                          </Stack>
+                          {feedback.comment && feedback.comment.trim() !== '' && feedback.comment !== 'null' && (
+                            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 2 }}>
+                              "{feedback.comment}"
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(feedback.createdAt).toLocaleDateString('fr-FR')}
+                          </Typography>
+                        </Paper>
                       ))}
                     </Stack>
                   ) : (
-                    <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+                    <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
                       Aucun feedback d'étudiants pour le moment
                     </Typography>
                   )}
                 </Box>
+              </Grid>
 
-                {/* From Formateurs */}
+              {/* From Formateurs */}
+              <Grid item xs={12} md={6}>
                 <Box>
-                  <Typography variant="subtitle1" fontWeight={600} mb={2} color={ACCENT_COLORS[2]}>
+                  <Typography variant="h6" fontWeight={600} mb={3} color={ACCENT_COLORS[2]}>
                     🎓 Par les formateurs ({feedbackReceived.fromFormateurs.length})
                   </Typography>
                   {feedbackReceived.fromFormateurs.length > 0 ? (
                     <Stack spacing={2}>
-                      {feedbackReceived.fromFormateurs.slice(0, 3).map((feedback, idx) => (
-                        <FeedbackItem key={idx} feedback={feedback} isFromFormateur />
+                      {feedbackReceived.fromFormateurs.map((feedback, idx) => (
+                        <Paper 
+                          key={idx}
+                          elevation={1} 
+                          sx={{ 
+                            p: 3, 
+                            borderLeft: `4px solid ${ACCENT_COLORS[2]}`,
+                            backgroundColor: 'rgba(96, 165, 250, 0.02)',
+                            borderRadius: 2
+                          }}
+                        >
+                          <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                            <Typography variant="body1" fontWeight={600}>
+                              🎓 Formateur
+                            </Typography>
+                            <Rating value={feedback.rating || 0} readOnly size="small" />
+                          </Stack>
+                          {feedback.comment && feedback.comment.trim() !== '' && feedback.comment !== 'null' && (
+                            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', mb: 2 }}>
+                              "{feedback.comment}"
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(feedback.createdAt).toLocaleDateString('fr-FR')}
+                          </Typography>
+                        </Paper>
                       ))}
                     </Stack>
                   ) : (
-                    <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+                    <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
                       Aucun feedback de formateurs pour le moment
                     </Typography>
                   )}
                 </Box>
-              </CardContent>
-            </ModernCard>
-          </Grid>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </ModernCard>
 
-          {/* Top 3 Students */}
-          <Grid item xs={12} lg={6}>
-            <ModernCard>
-              <CardContent>
-                <Stack direction="row" alignItems="center" spacing={2} mb={3}>
-                  <Avatar sx={{ 
-                    bgcolor: ACCENT_COLORS[1], 
-                    width: 48, 
-                    height: 48,
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)'
-                  }}>
-                    <EmojiEventsIcon />
-                  </Avatar>
-                  <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
-                    Top 3 Étudiants
-                  </Typography>
-                </Stack>
-                <Typography variant="body2" color="text.secondary" mb={3}>
-                  Classement basé sur les évaluations reçues
-                </Typography>
-                <Stack spacing={2}>
-                  {topStudents.length > 0 ? (
-                    topStudents.map((student, idx) => (
-                      <TopStudentItem key={student.id} student={student} rank={idx} />
-                    ))
-                  ) : (
-                    <Typography color="text.secondary" textAlign="center" py={2}>
-                      Classement bientôt disponible
-                    </Typography>
-                  )}
-                </Stack>
-              </CardContent>
-            </ModernCard>
-          </Grid>
-        </Grid>
+        {/* TOP 3 STUDENTS SECTION - FULL WIDTH */}
+        <ModernCard sx={{ mb: 5 }}>
+          <CardContent>
+            <Stack direction="row" alignItems="center" spacing={2} mb={3}>
+              <Avatar sx={{ 
+                bgcolor: ACCENT_COLORS[5], 
+                width: 48, 
+                height: 48,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)'
+              }}>
+                <EmojiEventsIcon />
+              </Avatar>
+              <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE}>
+                Top 3 Étudiants
+              </Typography>
+            </Stack>
+            <Typography variant="body2" color="text.secondary" mb={4}>
+              Classement basé sur les évaluations reçues
+            </Typography>
+            {topStudents.length > 0 ? (
+              <Grid container spacing={3}>
+                {topStudents.map((student, idx) => (
+                  <Grid item xs={12} md={4} key={student.id}>
+                    <Paper 
+                      elevation={2} 
+                      sx={{ 
+                        p: 3, 
+                        textAlign: 'center',
+                        background: idx === 0 ? 'linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%)' 
+                                  : idx === 1 ? 'linear-gradient(135deg, #f3f4f6 0%, #9ca3af 100%)'
+                                  : 'linear-gradient(135deg, #fef2f2 0%, #f87171 100%)',
+                        border: `2px solid ${idx === 0 ? '#fbbf24' : idx === 1 ? '#9ca3af' : '#f87171'}`,
+                        borderRadius: 3,
+                        transition: 'transform 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
+                        }
+                      }}
+                    >
+                      <Typography variant="h2" sx={{ mb: 2 }}>
+                        {idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}
+                      </Typography>
+                      <Typography variant="h6" fontWeight={700} mb={1}>
+                        {student.name}
+                      </Typography>
+                      <Rating value={student.averageRating} readOnly precision={0.1} sx={{ mb: 1 }} />
+                      <Typography variant="h5" fontWeight={600} color="primary" mb={1}>
+                        {student.averageRating}/5
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {student.feedbackCount} évaluation(s)
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            ) : (
+              <Typography variant="body2" color="text.secondary" textAlign="center" py={4}>
+                Aucun classement disponible pour le moment
+              </Typography>
+            )}
+          </CardContent>
+        </ModernCard>
 
         {/* SESSION LIST */}
         <ModernCard>
@@ -298,24 +396,13 @@ export default function EtudiantDashboardPage() {
                         </Stack>
                       }
                     />
-                    <Chip
-                      label={session.statut}
-                      color={
-                        session.statut === "terminée"
-                          ? "error"
-                          : session.statut === "en cours"
-                          ? "success"
-                          : "secondary"
-                      }
-                      size="small"
-                      sx={{ fontWeight: 600 }}
-                    />
                   </ListItem>
                 ))}
               </List>
             )}
           </CardContent>
         </ModernCard>
+
       </Container>
     </Box>
   );
@@ -385,47 +472,6 @@ function ModernStatCard({ icon, value, label, gradient }) {
         </Stack>
       </CardContent>
     </ModernCard>
-  );
-}
-
-// Feedback Item Component
-function FeedbackItem({ feedback, isFromFormateur = false }) {
-  return (
-    <Paper
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        background: isFromFormateur ? '#f0f9ff' : '#fefce8',
-        border: `1px solid ${isFromFormateur ? '#0ea5e9' : '#eab308'}20`,
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={2} mb={1}>
-        <Avatar
-          sx={{
-            width: 32,
-            height: 32,
-            bgcolor: isFromFormateur ? ACCENT_COLORS[2] : ACCENT_COLORS[0],
-            fontSize: 14
-          }}
-        >
-          {feedback.authorName ? feedback.authorName[0].toUpperCase() : '?'}
-        </Avatar>
-        <Box flex={1}>
-          <Typography variant="subtitle2" fontWeight={600}>
-            {feedback.authorName || 'Anonyme'}
-          </Typography>
-          <Rating value={feedback.rating} readOnly size="small" />
-        </Box>
-        <Typography variant="caption" color="text.secondary">
-          {feedback.sessionName}
-        </Typography>
-      </Stack>
-      {feedback.comment && (
-        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-          "{feedback.comment}"
-        </Typography>
-      )}
-    </Paper>
   );
 }
 

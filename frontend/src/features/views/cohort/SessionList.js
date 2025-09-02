@@ -526,8 +526,8 @@ const SessionList = () => {
                   </RoleGate>
                 </Stack>
               )}
-
-              {/* Add User Section */}
+{/* 
+              Add User Section
               {showAddUserId === session.id && (
                 <Box mt={2} mb={2} display="flex" gap={1} alignItems="center">
                   <TextField
@@ -556,7 +556,7 @@ const SessionList = () => {
                     {t("sessions.cancel")}
                   </Button>
                 </Box>
-              )}
+              )} */}
 
               <Typography variant="body2" mb={0.5}>
                 📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>
