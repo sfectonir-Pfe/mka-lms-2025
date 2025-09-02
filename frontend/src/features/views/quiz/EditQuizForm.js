@@ -31,6 +31,33 @@ const EditQuizForm = () => {
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(5);
   const [questions, setQuestions] = useState([]);
 
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
+
   // Charger le quiz existant
   useEffect(() => {
     const loadQuiz = async () => {
@@ -297,6 +324,8 @@ const EditQuizForm = () => {
                   <Stack key={cIndex} direction="row" spacing={1} alignItems="center" mb={1}>
                     <Button
                       variant={choice.isCorrect ? "contained" : "outlined"}
+                      color="success"
+                      sx={choice.isCorrect ? styles.success : styles.rounded}
                       onClick={() => updateChoiceCorrect(qIndex, cIndex)}
                       size="small"
                     >
@@ -310,7 +339,8 @@ const EditQuizForm = () => {
                     />
                     {question.type === "IMAGE_CHOICE" && (
                       <Button
-                        variant="outlined"
+                        variant="contained"
+                        sx={styles.primary}
                         onClick={() => updateChoiceImage(qIndex, cIndex)}
                         size="small"
                       >
@@ -329,10 +359,10 @@ const EditQuizForm = () => {
                   </Stack>
                 ))}
                 <Button
-                  variant="outlined"
+                  variant="contained"
+                  sx={{ mt: 1, ...styles.primary }}
                   onClick={() => addChoice(qIndex)}
                   size="small"
-                  sx={{ mt: 1 }}
                 >
                   + {t('quiz.addChoice')}
                 </Button>
@@ -341,7 +371,8 @@ const EditQuizForm = () => {
 
             {question.type !== "IMAGE_CHOICE" && (
               <Button
-                variant="outlined"
+                variant="contained"
+                sx={styles.primary}
                 onClick={() => handleImageUpload(qIndex)}
                 size="small"
               >
@@ -353,17 +384,17 @@ const EditQuizForm = () => {
       ))}
 
       <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
-        <Button variant="contained" onClick={addQuestion}>
+        <Button variant="contained" onClick={addQuestion} sx={styles.primary}>
           + {t('quiz.addQuestion')}
         </Button>
-        <Button variant="outlined" onClick={() => navigate("/contenus")}>
+        <Button variant="contained" color="error" onClick={() => navigate("/contenus")} sx={styles.danger}>
           {t('common.cancel')}
         </Button>
       </Stack>
 
       <Button
         variant="contained"
-        color="primary"
+        sx={styles.primary}
         onClick={handleSubmit}
         disabled={questions.length === 0}
         size="large"

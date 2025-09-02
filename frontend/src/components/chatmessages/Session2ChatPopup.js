@@ -8,7 +8,7 @@ import EmojiPicker from "emoji-picker-react";
 import io from "socket.io-client";
 import api from "../../api/axiosInstance";
 
-const SOCKET_URL = "http://localhost:8000";
+const SOCKET_URL = process.env.REACT_APP_API_BASE;
 
 export default function UnifiedSessionChatPopup({ user }) {
   // --- NEW: Program chat state ---
@@ -21,20 +21,16 @@ export default function UnifiedSessionChatPopup({ user }) {
   const [generalChatMessages, setGeneralChatMessages] = useState([]);
   const generalSocketRef = useRef(null);
 
-  // Tabs: "program" | "session" | "seance" | "general"
+  // Tabs: "program" | "session" | "general"
   const [selectedTab, setSelectedTab] = useState("session");
 
   // Session2 data
   const [session2s, setSession2s] = useState([]);
   const [session2Id, setSession2Id] = useState(null);
 
-  // Seance data
-  const [seances, setSeances] = useState([]);
-  const [seanceId, setSeanceId] = useState(null);
 
   // Chat states
   const [sessionChatMessages, setSessionChatMessages] = useState([]);
-  const [seanceChatMessages, setSeanceChatMessages] = useState([]);
 
   const [newMsg, setNewMsg] = useState("");
   const [newFile, setNewFile] = useState(null);
@@ -44,18 +40,24 @@ export default function UnifiedSessionChatPopup({ user }) {
   const chatBottomRef = useRef();
   const fileInputRef = useRef();
   const sessionSocketRef = useRef(null);
-  const seanceSocketRef = useRef(null);
 
   // UI popup
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (chatBottomRef.current) chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [programChatMessages, sessionChatMessages, seanceChatMessages, generalChatMessages, selectedTab, open]);
+  }, [programChatMessages, sessionChatMessages, generalChatMessages, selectedTab, open]);
 
   // --- General chat socket (unchanged) ---
   useEffect(() => {
     if (generalSocketRef.current) generalSocketRef.current.disconnect();
-    const s = io(`${SOCKET_URL}/general-chat`, { transports: ["websocket"] });
+    const s = io(`${SOCKET_URL}/general-chat`, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     generalSocketRef.current = s;
     s.emit("fetchGeneralMessages");
     s.on("generalMessages", msgs => setGeneralChatMessages(msgs));
@@ -112,30 +114,14 @@ export default function UnifiedSessionChatPopup({ user }) {
     })();
   }, [user?.id]);
 
-  // --- Fetch seances for current session2 ---
-  useEffect(() => {
-    if (!session2Id) {
-      setSeances([]); setSeanceId(null);
-      return;
-    }
-    api.get(`/seance-formateur/session/${session2Id}`)
-      .then(res => {
-        setSeances(res.data);
-        setSeanceId(res.data[0]?.id ?? null);
-      });
-  }, [session2Id]);
 
-  // --- Fetch messages for session & seance (unchanged) ---
+  // --- Fetch messages for session ---
   useEffect(() => {
     if (session2Id) {
       api.get(`/session2-chat-messages/${session2Id}`)
         .then(res => setSessionChatMessages(res.data));
     }
-    if (seanceId) {
-      api.get(`/chat-messages/${seanceId}`)
-        .then(res => setSeanceChatMessages(res.data));
-    }
-  }, [session2Id, seanceId]);
+  }, [session2Id]);
 
   // --- Fetch programs (real names) for the user ---
   useEffect(() => {
@@ -169,7 +155,14 @@ export default function UnifiedSessionChatPopup({ user }) {
       sessionSocketRef.current.emit("leaveSession2", { session2Id: Number(session2Id) });
       sessionSocketRef.current.disconnect();
     }
-    const s = io(SOCKET_URL, { transports: ["websocket"] });
+    const s = io(SOCKET_URL, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     sessionSocketRef.current = s;
     s.emit("joinSession2", { session2Id: Number(session2Id) });
     s.on("newSession2Message", msg => setSessionChatMessages(prev => [...prev, msg]));
@@ -181,24 +174,6 @@ export default function UnifiedSessionChatPopup({ user }) {
     };
   }, [session2Id]);
 
-  // --- Seance chat socket (unchanged) ---
-  useEffect(() => {
-    if (!seanceId) return;
-    if (seanceSocketRef.current) {
-      seanceSocketRef.current.emit("leaveSeance", { seanceId: Number(seanceId) });
-      seanceSocketRef.current.disconnect();
-    }
-    const s = io(SOCKET_URL, { transports: ["websocket"] });
-    seanceSocketRef.current = s;
-    s.emit("joinSeance", { seanceId: Number(seanceId) });
-    s.on("newSeanceMessage", msg => setSeanceChatMessages(prev => [...prev, msg]));
-    s.on("deleteSeanceMessage", payload => setSeanceChatMessages(prev => prev.filter(m => m.id !== payload.id)));
-    s.on("clearSeanceMessages", () => setSeanceChatMessages([]));
-    return () => {
-      s.emit("leaveSeance", { seanceId: Number(seanceId) });
-      s.disconnect();
-    };
-  }, [seanceId]);
 
   // --- NEW: Program chat socket ---
   useEffect(() => {
@@ -207,7 +182,14 @@ export default function UnifiedSessionChatPopup({ user }) {
       programSocketRef.current.emit("leaveProgram", { programId: Number(programId) });
       programSocketRef.current.disconnect();
     }
-    const s = io(`${SOCKET_URL}/program-chat`, { transports: ["websocket"] });
+    const s = io(`${SOCKET_URL}/program-chat`, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
     programSocketRef.current = s;
     s.emit("joinProgram", { programId: Number(programId), userId: user?.id }); // userId optional (no security now)
     s.on("newProgramMessage", msg => setProgramChatMessages(prev => [...prev, msg]));
@@ -223,12 +205,12 @@ export default function UnifiedSessionChatPopup({ user }) {
   // Scroll bottom on lists update
   useEffect(() => {
     if (chatBottomRef.current) chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [programChatMessages, sessionChatMessages, seanceChatMessages, selectedTab, open]);
+  }, [programChatMessages, sessionChatMessages, selectedTab, open]);
 
   // Reset input on target change
   useEffect(() => {
     setNewMsg(""); setNewFile(null); setShowEmoji(false);
-  }, [selectedTab, session2Id, seanceId, programId]);
+  }, [selectedTab, session2Id, programId]);
 
   // Emoji
   const handleEmoji = (e) => {
@@ -241,7 +223,6 @@ export default function UnifiedSessionChatPopup({ user }) {
     let socket;
     if (selectedTab === "program") socket = programSocketRef.current;
     else if (selectedTab === "session") socket = sessionSocketRef.current;
-    else if (selectedTab === "seance") socket = seanceSocketRef.current;
     else if (selectedTab === "general") socket = generalSocketRef.current;
     if (!socket) return;
 
@@ -256,9 +237,6 @@ export default function UnifiedSessionChatPopup({ user }) {
       } else if (selectedTab === "session") {
         formData.append("session2Id", session2Id);
         uploadUrl = "/session2-chat-messages/upload-chat";
-      } else if (selectedTab === "seance") {
-        formData.append("seanceId", seanceId);
-        uploadUrl = "/chat-messages/upload-chat";
       } else if (selectedTab === "program") {
         formData.append("programId", programId);
         formData.append("senderId", user.id);
@@ -282,13 +260,6 @@ export default function UnifiedSessionChatPopup({ user }) {
             content: fileData.fileUrl,
             type: fileData.fileType || "file",
             session2Id: Number(session2Id),
-            senderId: user.id,
-          });
-        } else if (selectedTab === "seance") {
-          socket.emit("sendSeanceMessage", {
-            content: fileData.fileUrl,
-            type: fileData.fileType || "file",
-            seanceId: Number(seanceId),
             senderId: user.id,
           });
         } else if (selectedTab === "program") {
@@ -317,10 +288,6 @@ export default function UnifiedSessionChatPopup({ user }) {
         socket.emit("sendSession2Message", {
           content: newMsg, type: "text", session2Id: Number(session2Id), senderId: user.id,
         });
-      } else if (selectedTab === "seance") {
-        socket.emit("sendSeanceMessage", {
-          content: newMsg, type: "text", seanceId: Number(seanceId), senderId: user.id,
-        });
       } else if (selectedTab === "program") {
         socket.emit("sendProgramMessage", {
           content: newMsg, type: "text", programId: Number(programId), senderId: user.id,
@@ -337,11 +304,6 @@ export default function UnifiedSessionChatPopup({ user }) {
         data: { userId: user.id }
       });
       setSessionChatMessages(prev => prev.filter(m => m.id !== msgId));
-    } else if (selectedTab === "seance") {
-      await api.delete(`/chat-messages/${msgId}`, {
-        data: { userId: user.id }
-      });
-      setSeanceChatMessages(prev => prev.filter(m => m.id !== msgId));
     } else if (selectedTab === "general") {
       await api.delete(`/general-chat-messages/${msgId}`, {
         data: { userId: user.id }
@@ -406,15 +368,6 @@ export default function UnifiedSessionChatPopup({ user }) {
               Session Chat
             </Button>
             <Button
-              variant={selectedTab === "seance" ? "contained" : "text"}
-              onClick={() => setSelectedTab("seance")}
-              color="primary" size="small"
-              disabled={!seanceId}
-              sx={{ borderRadius: 3, fontWeight: 600, boxShadow: selectedTab === "seance" ? 3 : 0, mx: 1, px: 2 }}
-            >
-              Séance Chat
-            </Button>
-            <Button
               variant={selectedTab === "general" ? "contained" : "text"}
               onClick={() => setSelectedTab("general")}
               color="secondary" size="small"
@@ -440,7 +393,7 @@ export default function UnifiedSessionChatPopup({ user }) {
           )}
 
           {/* Session selector */}
-          {session2s.length > 1 && (
+          {selectedTab === "session" && session2s.length > 1 && (
             <Box bgcolor="#f6f6fc" px={2} py={1.5}>
               <select
                 value={session2Id ?? ""}
@@ -454,20 +407,6 @@ export default function UnifiedSessionChatPopup({ user }) {
             </Box>
           )}
 
-          {/* Seance selector */}
-          {selectedTab === "seance" && seances.length > 1 && (
-            <Box bgcolor="#f6f6fc" px={2} py={1.5}>
-              <select
-                value={seanceId ?? ""}
-                onChange={e => setSeanceId(Number(e.target.value))}
-                style={{ width: "100%", padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc", fontWeight: 500 }}
-              >
-                {seances.map(s => (
-                  <option value={s.id} key={s.id}>{s.title || `Séance ${s.id}`}</option>
-                ))}
-              </select>
-            </Box>
-          )}
 
           {/* Chat Messages */}
           <Box
@@ -482,7 +421,6 @@ export default function UnifiedSessionChatPopup({ user }) {
               {(
                 selectedTab === "program" ? programChatMessages :
                 selectedTab === "session" ? sessionChatMessages :
-                selectedTab === "seance" ? seanceChatMessages :
                 generalChatMessages
               ).map((msg, i) => (
                 <Box
@@ -579,8 +517,7 @@ export default function UnifiedSessionChatPopup({ user }) {
               variant="contained"
               color={
                 selectedTab === "program" ? "success" :
-                selectedTab === "session" ? "error" :
-                selectedTab === "seance" ? "primary" : "secondary"
+                selectedTab === "session" ? "error" : "secondary"
               }
               disabled={!newMsg.trim() && !newFile}
               sx={{ px: 2, fontWeight: 600 }}

@@ -15,7 +15,9 @@ import { useTranslation } from "react-i18next";
 
 
 import { useParams } from "react-router-dom";
-import { Eye, EyeOff, PlusCircle } from "lucide-react"; // Or any icons you prefer
+import { Eye, EyeOff, PlusCircle } from "lucide-react";
+import RoleGate from "../../../pages/auth/RoleGate";
+ // Or any icons you prefer
 
 const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   const { sessionId } = useParams();
@@ -74,18 +76,33 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
   return (
     <Box p={2} width="100%">
       <Box display="flex" flexDirection="column" alignItems="center">
-
+      <RoleGate roles={['formateur',]}>
       <Button
       
         variant={showAddBlock ? "outlined" : "contained"}
         color="primary"
         startIcon={showAddBlock ? <EyeOff size={18} /> : <PlusCircle size={18} />}
         onClick={() => setShowAddBlock((prev) => !prev)}
-        sx={{ mb: 2 }}
+        sx={{ 
+          mb: 2,
+          borderRadius: 3,
+          background: showAddBlock 
+            ? "linear-gradient(135deg, #ff9800, #ffb74d)"
+            : "linear-gradient(135deg, #1976d2, #42a5f5)",
+          boxShadow: showAddBlock 
+            ? "0 6px 18px rgba(255, 152, 0, 0.25)"
+            : "0 8px 24px rgba(25, 118, 210, 0.3)",
+          '&:hover': { 
+            transform: 'translateY(-2px)', 
+            boxShadow: showAddBlock 
+              ? '0 10px 24px rgba(255, 152, 0, 0.35)'
+              : '0 12px 32px rgba(25,118,210,0.4)'
+          }
+        }}
       >
         {showAddBlock ? t("addSeance.hideForm") : t("addSeance.createNewSession")}
       </Button>
-
+      </RoleGate>
       <Collapse in={showAddBlock}>
         <Box>
           <Typography variant="h5" gutterBottom>
@@ -164,6 +181,15 @@ const AddSeanceFormateurView = ({ onSeanceCreated }) => {
               color="primary"
               fullWidth
               onClick={handleSubmit}
+              sx={{
+                borderRadius: 3,
+                background: "linear-gradient(135deg, #388e3c, #66bb6a)",
+                boxShadow: "0 8px 24px rgba(56, 142, 60, 0.3)",
+                '&:hover': { 
+                  transform: 'translateY(-2px)', 
+                  boxShadow: '0 12px 32px rgba(56,142,60,0.4)' 
+                }
+              }}
             >
               {t("addSeance.createSessionButton")}
             </Button>

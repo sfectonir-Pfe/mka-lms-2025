@@ -10,6 +10,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
+import { toast } from "react-toastify";
 
 const AddContenusView = () => {
   const { t } = useTranslation();
@@ -24,8 +25,14 @@ const AddContenusView = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title) return alert(t('content.titleRequired'));
-    if (type !== "Quiz" && !file) return alert(t('content.fileRequired'));
+    if (!title) {
+      toast.error(t('content.titleRequired'));
+      return;
+    }
+    if (type !== "Quiz" && !file) {
+      toast.error(t('content.fileRequired'));
+      return;
+    }
 
     const formData = new FormData();
     formData.append("title", title);
@@ -42,14 +49,15 @@ const AddContenusView = () => {
       });
 
       const newContenu = res.data;
+      toast.success(t('content.addSuccess'));
       if (type === "Quiz") {
-        navigate(`/quizzes/create/${newContenu.id}`);
+        setTimeout(() => navigate(`/quizzes/create/${newContenu.id}`), 500);
       } else {
-        navigate("/contenus");
+        setTimeout(() => navigate("/contenus"), 500);
       }
     } catch (err) {
       console.error("❌ Erreur ajout contenu :", err);
-      alert(t('content.saveError'));
+      toast.error(t('content.saveError'));
     }
   };
 
@@ -101,10 +109,10 @@ const AddContenusView = () => {
           </TextField>
 
           <Button
-            variant="outlined"
+            variant="contained"
             component="label"
             fullWidth
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, borderRadius: 3, background: 'linear-gradient(135deg, #1976d2, #42a5f5)', boxShadow: '0 8px 24px rgba(25,118,210,0.3)', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' } }}
           >
             📎 {t('content.chooseFile')} {fileType && `(${fileType})`}
             <input
@@ -144,10 +152,29 @@ const AddContenusView = () => {
       )}
 
       <Box mt={3} display="flex" justifyContent="space-between">
-        <Button variant="outlined" color="error" onClick={() => navigate("/contenus")}>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => navigate("/contenus")}
+          sx={{
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+            boxShadow: '0 8px 24px rgba(211,47,47,0.3)',
+            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(211,47,47,0.4)' }
+          }}
+        >
           {t('common.cancel')}
         </Button>
-        <Button type="submit" variant="contained">
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+            boxShadow: '0 8px 24px rgba(25,118,210,0.3)',
+            '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 12px 32px rgba(25,118,210,0.4)' }
+          }}
+        >
           {t('common.save')}
         </Button>
       </Box>

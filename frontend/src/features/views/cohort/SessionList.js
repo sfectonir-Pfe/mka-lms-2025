@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   MenuItem,
   Select,
   FormControl,
@@ -23,11 +24,13 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { Close, Facebook, Twitter, LinkedIn, ContentCopy, Feedback, Download } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AddSessionFeedback from '../../../features/views/feedback/feedbackForm/AddSessionFeedback';
-
+import { getCurrentRole, getCurrentUserId } from '../../../pages/auth/token';
+import RoleGate from '../../../pages/auth/RoleGate';
 const SessionList = () => {
   const [showAddUserId, setShowAddUserId] = useState(null);
   const [userEmail, setUserEmail] = useState("");
@@ -39,24 +42,94 @@ const SessionList = () => {
   const [shareText, setShareText] = useState('');
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
-  const { t } = useTranslation();
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, sessionId: null });
+  const { t, ready } = useTranslation();
   const navigate = useNavigate();
+  
+  // Check user permissions
+  const currentRole = getCurrentRole()?.toLowerCase();
+  const canManageUsers = ['admin',].includes(currentRole);
+
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
 
   const fetchSessions = async () => {
     try {
-      const res = await api.get("/session2");
-      setSessions(res.data);
+      const currentRole = getCurrentRole()?.toLowerCase();
+      const currentUserId = getCurrentUserId();
+      
+      let sessionsData = [];
+      
+      // Role-based session fetching
+      if (['formateur', 'etudiant'].includes(currentRole)) {
+        // For formateurs and etudiants, only fetch sessions they're assigned to
+        if (currentUserId) {
+          const res = await api.get(`/session2/my-sessions/${currentUserId}`);
+          // Transform the response to match the expected format
+          sessionsData = res.data.map(userSession => userSession.session2);
+        }
+      } else {
+        // For admin, createurdeformation, and etablissement, fetch all sessions
+        const res = await api.get("/session2");
+        sessionsData = res.data;
+      }
+      
+      setSessions(sessionsData);
+      
+      // Only fetch users if user has admin/creator permissions
+      const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+      
       const usersMap = {};
-      await Promise.all(
-        res.data.map(async (session) => {
-          try {
-            const resp = await api.get(`/session2/${session.id}/users`);
-            usersMap[session.id] = resp.data || [];
-          } catch {
-            usersMap[session.id] = [];
-          }
-        })
-      );
+      if (canManageUsers) {
+        await Promise.all(
+          sessionsData.map(async (session) => {
+            try {
+              const resp = await api.get(`/session2/${session.id}/users`);
+              usersMap[session.id] = resp.data || [];
+            } catch {
+              usersMap[session.id] = [];
+            }
+          })
+        );
+      }
       setAssignedUsersMap(usersMap);
     } catch {
       toast.error(t("sessions.loadError"));
@@ -68,10 +141,15 @@ const SessionList = () => {
   }, []);
 
   const handleDelete = async (id) => {
+    setDeleteDialog({ open: true, sessionId: id });
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await api.delete(`/session2/${id}`);
+      await api.delete(`/session2/${deleteDialog.sessionId}`);
       toast.success(t("sessions.deleteSuccess"));
       fetchSessions();
+      setDeleteDialog({ open: false, sessionId: null });
     } catch {
       toast.error(t("sessions.deleteError"));
     }
@@ -132,7 +210,7 @@ const SessionList = () => {
   };
 
   const handleShare = (session) => {
-    const text = `🌟 ${t("sessions.newSessionAvailable")} 🌟\n\n🎯 ${session.name}\n\n📚 ${t("sessions.program")}: ${session.program?.name || t("sessions.program")}\n📅 ${t("sessions.period")}: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? `🎓 ${t("sessions.includedModules")}:\n` + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 ${t("sessions.uniqueOpportunity")}\n\n💡 ${t("sessions.registerNow")}\n\n#Formation #Éducation #DéveloppementProfessionnel #Apprentissage #Compétences #LMS #Success`;
+    const text = `🌟 ${t("sessions.newSessionAvailable")} 🌟\n\n🎯 ${session.name}\n\n📚 ${t("sessions.program")}: ${session.program?.name || t("sessions.program")}\n📅 ${t("sessions.period")}: ${session.startDate?.slice(0, 10)} ➜ ${session.endDate?.slice(0, 10)}\n\n${session.session2Modules?.length > 0 ? `🎓 ${t("sessions.includedModules")}:\n` + session.session2Modules.map(mod => `✅ ${mod.module?.name}`).join('\n') + '\n\n' : ''}🚀 ${t("sessions.uniqueOpportunity")}\n\n💡 ${t("sessions.registerNow")}\n\n${t("sessions.hashtags")}`;
     setShareText(text);
     setShareModal({ open: true, session });
   };
@@ -264,8 +342,21 @@ const SessionList = () => {
     setOpenFeedbackDialog(true);
   };
 
+  // Show loading state if i18n is not ready
+  if (!ready) {
+    return (
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          {t("common.loadingTranslations")}
+        </Typography>
+      </Paper>
+    );
+  }
+
   return (
-    <Paper elevation={3} sx={{ p: 4, borderRadius: 4, backgroundColor: "#fefefe" }}>
+    <Paper elevation={3} sx={{ p: 4, borderRadius: 4 }}>
+      
+
       <Typography variant="h5" fontWeight="bold" gutterBottom>
         📋 {t('sessions.sessionList')}
       </Typography>
@@ -283,7 +374,6 @@ const SessionList = () => {
               mt: 4,
               p: 3,
               borderRadius: 3,
-              backgroundColor: "#ffffff",
               border: "1px solid #e0e0e0",
               display: "flex",
               flexDirection: "row",
@@ -321,7 +411,13 @@ const SessionList = () => {
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Chip
-                    label={session.status}
+                    label={
+                      session.status === "ACTIVE" ? t("sessions.active") :
+                      session.status === "INACTIVE" ? t("sessions.inactive") :
+                      session.status === "COMPLETED" ? t("sessions.completed") :
+                      session.status === "ARCHIVED" ? t("sessions.archived") :
+                      session.status
+                    }
                     color={
                       session.status === "ACTIVE"
                         ? "success"
@@ -333,77 +429,97 @@ const SessionList = () => {
                     }
                     sx={{ fontWeight: 700, textTransform: "capitalize" }}
                   />
-                  <FormControl size="small" sx={{ minWidth: 120 }}>
-                    <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
-                    <Select
-                      labelId={`status-label-${session.id}`}
-                      value={session.status}
-                      label={t("sessions.status")}
-                      onChange={e => handleStatusChange(session.id, e.target.value)}
-                    >
-                      <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
-                      <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
-                      <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
-                      <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
-                    </Select>
-                  </FormControl>
+                  {canManageUsers && (
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
+                      <Select
+                        labelId={`status-label-${session.id}`}
+                        value={session.status}
+                        label={t("sessions.status")}
+                        onChange={e => handleStatusChange(session.id, e.target.value)}
+                      >
+                        <MenuItem value="ACTIVE">{t("sessions.active")}</MenuItem>
+                        <MenuItem value="INACTIVE">{t("sessions.inactive")}</MenuItem>
+                        <MenuItem value="COMPLETED">{t("sessions.completed")}</MenuItem>
+                        <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
                 </Stack>
               </Stack>
 
               {!sidebarOpen[session.id] && (
                 <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  <Button
+                  {canManageUsers && (
+                    <Button
                     variant="outlined"
-                    color="error"
                     size="small"
-                    startIcon={<DeleteIcon />}
+                    startIcon={<DeleteIcon sx={{ color: 'white' }} />}
                     onClick={() => handleDelete(session.id)}
+                    sx={{ ...styles.danger, color: 'white', borderColor: 'white' }}
                   >
                     {t("sessions.delete")}
                   </Button>
+                  )}
                   <Button
                     variant="contained"
-                    color="primary"
                     size="small"
                     startIcon={<RocketLaunchIcon />}
                     onClick={() => navigate(`/sessions/${session.id}/seances`)}
+                    sx={styles.primary}
                   >
-                    {t("sessions.join")}
+                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la séance'}
                   </Button>
+                  {canManageUsers && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      startIcon={<PersonAddAlt1Icon />}
+                      onClick={() => handleToggleSidebar(session.id)}
+                    >
+                      {t("sessions.addUser")}
+                    </Button>
+                  )}
+                  <RoleGate roles={["admin"]}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      size="small"
+                      onClick={() => handleShare(session)}
+                    >
+                      📤 {t("sessions.share")}
+                    </Button>
+                  </RoleGate>
+                  {session.status === "COMPLETED" && (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => navigate(`/sessions/${session.id}/attestation`)}
+                      sx={styles.success}
+                    >
+                      🏅 {t("sessions.attestation")}
+                    </Button>
+                  )}
                   <Button
                     variant="contained"
-                    color="primary"
-                    size="small"
-                    startIcon={<PersonAddAlt1Icon />}
-                    onClick={() => handleToggleSidebar(session.id)}
-                  >
-                    {t("sessions.addUser")}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    onClick={() => handleShare(session)}
-                  >
-                    📤 {t("sessions.share")}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="info"
                     size="small"
                     startIcon={<Feedback />}
                     onClick={() => openFeedbackForm(session)}
+                    sx={styles.info}
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
+                  <RoleGate roles={["admin"]}>
                   <Button
                     variant="outlined"
-                    color="primary"
                     size="small"
                     onClick={() => navigate(`/sessions/${session.id}/feedbacklist`)}
+                    sx={{ ...styles.primary, color: 'white', borderColor: 'white' }}
                   >
                     📊 {t("sessions.feedbackList")}
                   </Button>
+                  </RoleGate>
                 </Stack>
               )}
 
@@ -421,9 +537,9 @@ const SessionList = () => {
                   <Button
                     variant="contained"
                     size="small"
-                    color="secondary"
                     onClick={() => handleAddUser(session.id)}
                     disabled={addLoading}
+                    sx={styles.success}
                   >
                     {addLoading ? t("sessions.adding") : t("sessions.add")}
                   </Button>
@@ -431,6 +547,7 @@ const SessionList = () => {
                     variant="text"
                     size="small"
                     onClick={() => { setShowAddUserId(null); setUserEmail(""); }}
+                    sx={styles.secondary}
                   >
                     {t("sessions.cancel")}
                   </Button>
@@ -448,7 +565,7 @@ const SessionList = () => {
               {/* Average Feedback Rating */}
               <Box mt={1} display="flex" alignItems="center" gap={1}>
                 <Typography variant="body2" fontWeight="bold">
-                  ⭐ Average Rating:
+                  ⭐ {t("sessions.averageRating")}:
                 </Typography>
                 {session.averageRating ? (
                   <>
@@ -456,12 +573,12 @@ const SessionList = () => {
                       {session.averageRating.toFixed(1)}/5
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      ({session.feedbackCount} {session.feedbackCount === 1 ? 'feedback' : 'feedbacks'})
+                      ({session.feedbackCount} {session.feedbackCount === 1 ? t("sessions.feedback") : t("sessions.feedbacks")})
                     </Typography>
                   </>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    No feedback yet
+                    {t("sessions.noFeedbackYet")}
                   </Typography>
                 )}
               </Box>
@@ -509,13 +626,12 @@ const SessionList = () => {
             </Box>
 
             {/* Sidebar for Users */}
-            {sidebarOpen[session.id] && (
+            {canManageUsers && sidebarOpen[session.id] && (
               <Paper
                 elevation={4}
                 sx={{
                   minWidth: 350,
                   maxWidth: 400,
-                  bgcolor: "#f8fbff",
                   borderRadius: 4,
                   p: 3,
                   display: "flex",
@@ -530,9 +646,8 @@ const SessionList = () => {
                   </Typography>
                   <Button
                     variant="text"
-                    color="primary"
                     onClick={() => handleToggleSidebar(session.id)}
-                    sx={{ fontWeight: 600, fontSize: 14, textTransform: "none" }}
+                    sx={{ fontWeight: 600, fontSize: 14, textTransform: "none", ...styles.primary }}
                   >
                     {t("sessions.hide")}
                   </Button>
@@ -544,7 +659,6 @@ const SessionList = () => {
                   alignItems="center"
                   gap={1}
                   mb={3}
-                  bgcolor="#eaf0f9"
                   borderRadius={2}
                   p={1.5}
                 >
@@ -556,13 +670,12 @@ const SessionList = () => {
                     onFocus={() => setShowAddUserId(session.id)}
                     onChange={(e) => setUserEmail(e.target.value)}
                     variant="outlined"
-                    sx={{ flex: 1, bgcolor: "#fff", borderRadius: 2 }}
+                    sx={{ flex: 1, borderRadius: 2 }}
                   />
                   <IconButton
-                    color="primary"
                     disabled={addLoading}
                     onClick={() => handleAddUser(session.id)}
-                    sx={{ bgcolor: "#1976d2", color: "#fff", "&:hover": { bgcolor: "#1565c0" } }}
+                    sx={{ ...styles.primary, color: "#fff" }}
                   >
                     <PersonAddAlt1Icon />
                   </IconButton>
@@ -582,13 +695,12 @@ const SessionList = () => {
                         alignItems="center"
                         gap={2}
                         p={2}
-                        bgcolor="#fff"
                         borderRadius={2}
                         sx={{
                           boxShadow: "0 2px 8px rgba(25,118,210,.04)",
                           cursor: "pointer",
                           transition: "background .15s",
-                          "&:hover": { background: "#f0f6ff" }
+                          "&:hover": { opacity: 0.8 }
                         }}
                         onClick={() => navigate(`/ProfilePage/${user.id}`)}
                       >
@@ -596,7 +708,6 @@ const SessionList = () => {
                           src={user.profilePic || undefined}
                           sx={{
                             width: 38, height: 38, fontWeight: 700, fontSize: 16,
-                            bgcolor: user.profilePic ? "transparent" : "#B5C7D3",
                           }}
                         >
                           {!user.profilePic && user.name ? user.name[0].toUpperCase() : null}
@@ -611,13 +722,13 @@ const SessionList = () => {
                         </Box>
                         <IconButton
                           size="small"
-                          color="error"
                           onClick={e => {
                             e.stopPropagation();
                             handleRemoveUser(session.id, user.id);
                           }}
+                          sx={styles.danger}
                         >
-                          <DeleteIcon fontSize="small" />
+                          <DeleteIcon fontSize="small" sx={{ color: 'white' }} />
                         </IconButton>
                       </Box>
                     ))
@@ -632,9 +743,10 @@ const SessionList = () => {
       {/* Share Modal */}
       <Dialog open={shareModal.open} onClose={() => setShareModal({ open: false, session: null })} maxWidth="md" fullWidth>
         <DialogTitle>
+          
           📤 {t("sessions.shareSession")}
-          <IconButton onClick={() => setShareModal({ open: false, session: null })} sx={{ position: 'absolute', right: 8, top: 8 }}>
-            <Close />
+          <IconButton onClick={() => setShareModal({ open: false, session: null })} sx={{ position: 'absolute', right: 8, top: 8, ...styles.danger }}>
+            <Close sx={{ color: 'white' }} />
           </IconButton>
         </DialogTitle>
         <DialogContent>
@@ -644,7 +756,6 @@ const SessionList = () => {
             sx={{
               borderRadius: 4,
               overflow: "hidden",
-              bgcolor: "#ffffff",
               border: "2px solid #1976d2",
               boxShadow: 3,
               mb: 3,
@@ -654,7 +765,6 @@ const SessionList = () => {
           >
             <Box
               sx={{
-                background: "linear-gradient(90deg, #1976d2, #42a5f5)",
                 color: "#fff",
                 p: 3,
                 textAlign: "center"
@@ -673,7 +783,6 @@ const SessionList = () => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  backgroundColor: "#e3f2fd",
                   p: 2
                 }}
               >
@@ -717,7 +826,7 @@ const SessionList = () => {
               )}
 
               <Typography fontSize={14} mt={3} color="text.secondary">
-                #Formation #Éducation #LMS #Apprentissage #Succès
+                {t("sessions.hashtagsShort")}
               </Typography>
             </Box>
           </Box>
@@ -734,13 +843,13 @@ const SessionList = () => {
             sx={{ mb: 3 }}
           />
 
-          <Stack direction="row" spacing={2} flexWrap="wrap" gap={1} mb={2}>
-            <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={{ bgcolor: '#1877f2' }}>Facebook</Button>
-            <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={{ bgcolor: '#1da1f2' }}>Twitter</Button>
-            <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={{ bgcolor: '#0077b5' }}>LinkedIn</Button>
-            <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText}>📋 {t("sessions.copyText")}</Button>
-            <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={{ bgcolor: '#4caf50' }}>🖼️ {t("sessions.downloadImage")}</Button>
-          </Stack>
+                      <Stack direction="row" spacing={2} flexWrap="wrap" gap={1} mb={2}>
+              <Button variant="contained" startIcon={<Facebook />} onClick={() => handleSocialShare('facebook')} sx={styles.info}>{t("sessions.facebook")}</Button>
+              <Button variant="contained" startIcon={<Twitter />} onClick={() => handleSocialShare('twitter')} sx={styles.info}>{t("sessions.twitter")}</Button>
+              <Button variant="contained" startIcon={<LinkedIn />} onClick={() => handleSocialShare('linkedin')} sx={styles.info}>{t("sessions.linkedin")}</Button>
+              <Button variant="outlined" startIcon={<ContentCopy />} onClick={handleCopyText} sx={{ ...styles.secondary, color: 'white', borderColor: 'white', '& .MuiSvgIcon-root': { color: 'white' } }}>📋 {t("sessions.hide")}</Button>
+              <Button variant="contained" startIcon={<Download />} onClick={handleDownloadPreview} sx={styles.success}>🖼️ {t("sessions.downloadImage")}</Button>
+            </Stack>
         </DialogContent>
       </Dialog>
 
@@ -750,6 +859,38 @@ const SessionList = () => {
         onClose={() => setOpenFeedbackDialog(false)}
         session={selectedSession}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onClose={() => setDeleteDialog({ open: false, sessionId: null })}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">{t("sessions.confirmDelete")}</DialogTitle>
+        <DialogContent>
+          <Typography id="delete-dialog-description">
+            {t("sessions.confirmDeleteDescription")}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+                     <Button onClick={() => setDeleteDialog({ open: false, sessionId: null })} sx={{ 
+             backgroundColor: 'white', 
+             color: '#666', 
+             border: '1px solid #ddd',
+             borderRadius: 2,
+             '&:hover': {
+               backgroundColor: '#f5f5f5',
+               borderColor: '#999'
+             }
+           }}>
+             {t("sessions.cancel")}
+           </Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained" sx={styles.danger}>
+            {t("sessions.delete")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };

@@ -16,7 +16,7 @@ import { PixelController } from './pixel.controller'; // ✅ Don't forget to cre
         },
       },
       defaults: {
-        from: '"Mon App" <votre.email@gmail.com>',
+        from: '"LMS Platform" <majdlabidi666@gmail.com>',
       },
     }),
   ],

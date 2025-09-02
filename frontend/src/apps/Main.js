@@ -1,5 +1,6 @@
 import * as React from "react";
-import { styled, useTheme, alpha } from "@mui/material/styles";
+import { styled, useTheme, alpha, ThemeProvider, createTheme } from "@mui/material/styles";
+import { useTheme as useCustomTheme } from "../context/ThemeContext";
 import {
   Box,
   CssBaseline,
@@ -27,7 +28,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { sideBarData } from "../components/constants/sideBarData";
+import { getSidebarData } from "../components/constants/sideBarData";
 import ScrollToTopButton from "../components/constants/ScrollToTopButton";
 import LanguageSelectorWithFlags from "../i18n/LanguageSelectorWithFlags";
 import { Tooltip } from "@mui/material";
@@ -36,6 +37,7 @@ import { useTranslation } from "react-i18next";
 import { secureLogout } from "../utils/authUtils";
 import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
 import NotificationCenter from "../components/notification/NotificationCenter";
+import ThemeToggle from "../components/constants/ThemeToggle";
 
 
 
@@ -127,10 +129,25 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 export default function Main({ setUser, user }) {
   const theme = useTheme();
+  const { darkMode } = useCustomTheme();
   const [open, setOpen] = React.useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+
+  // Create dynamic MUI theme based on dark mode
+  const muiTheme = React.useMemo(() => createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: '#1976d2',
+      },
+      background: {
+        default: darkMode ? '#121212' : '#f5f5f5',
+        paper: darkMode ? '#1e1e1e' : '#ffffff',
+      },
+    },
+  }), [darkMode]);
 
   // Log user object for debugging and ensure role is set correctly
   React.useEffect(() => {
@@ -324,9 +341,10 @@ export default function Main({ setUser, user }) {
 
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <AppBar position="fixed" open={open} isRTL={isRTL}>
+    <ThemeProvider theme={muiTheme}>
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+        <AppBar position="fixed" open={open} isRTL={isRTL}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
@@ -348,12 +366,11 @@ export default function Main({ setUser, user }) {
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <LanguageSelectorWithFlags />
-
-
+            <ThemeToggle />
             <NotificationCenter user={user} />
 
             <Typography variant="body1" noWrap>
-              {user?.name || "Utilisateur"} |{" "}
+              {user?.name || t('common.user')} |{" "}
               <span style={{ textTransform: "capitalize" }}>
                 {t('role.' + ((user?.role || 'user').toLowerCase()))}
               </span>
@@ -425,7 +442,7 @@ export default function Main({ setUser, user }) {
               >
                 <Box sx={{ px: 4, py: 4, textAlign: "center" }}>
                   <Typography variant="h5" fontWeight="bold" sx={{ mb: 1 }}>
-                    {user?.name || "Utilisateur"}
+                    {user?.name || t('common.user')}
                   </Typography>
                   <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
                     {user?.email}
@@ -477,7 +494,7 @@ export default function Main({ setUser, user }) {
         <Divider />
 
         <List sx={{ px: 1 }}>
-          {sideBarData.map((elem, index) => {
+          {getSidebarData().map((elem, index) => {
             const item = (
               <Link to={elem.path} key={index} style={{ all: "unset" }}>
                 <ListItem disablePadding sx={{ display: "block", mb: 0.5 }}>
@@ -536,16 +553,19 @@ export default function Main({ setUser, user }) {
         sx={{
           flexGrow: 1,
           p: 3,
-          backgroundColor: theme.palette.grey[50],
+          // backgroundColor: muiTheme.palette.background.default,
+          backgroundColor: "#698aad",
           minHeight: "100vh",
+          overflow: "auto",
+          height: "100vh",
         }}
       >
         <DrawerHeader />
         <Box
           sx={{
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: muiTheme.palette.background.paper,
             borderRadius: 2,
-            boxShadow: theme.shadows[1],
+            boxShadow: muiTheme.shadows[1],
             p: 3,
           }}
         >
@@ -556,5 +576,6 @@ export default function Main({ setUser, user }) {
 
       </Box>
     </Box >
+    </ThemeProvider>
   );
 }

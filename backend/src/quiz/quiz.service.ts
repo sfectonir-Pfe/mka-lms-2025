@@ -202,4 +202,180 @@ export class QuizService {
       });
     });
   }
+  // 🧠 User submits answers to a quiz
+// 🧠 User submits answers to a quiz (replaces any prior attempt by the same user)
+async submitQuiz(quizId: number, body: any) {
+  const { userId, answers } = body;
+
+  if (!userId || !Array.isArray(answers) || answers.length === 0) {
+    throw new BadRequestException('userId and non-empty answers are required');
+  }
+
+  // Load quiz + questions + choices
+  const quiz = await this.prisma.quiz.findUnique({
+    where: { id: quizId },
+    include: {
+      questions: {
+        include: { choices: true },
+      },
+    },
+  });
+  if (!quiz) throw new NotFoundException('Quiz not found');
+
+  const questionById = new Map<number, typeof quiz.questions[number]>();
+  quiz.questions.forEach((q) => questionById.set(q.id, q));
+
+  let totalScore = 0;
+  let correctCount = 0;
+
+  // Calculate the maximum possible
+  const totalPossible = quiz.questions.reduce((acc, q) => acc + (q.score ?? 1), 0);
+  const totalQuestions = quiz.questions.length;
+
+  // Build sanitized answers for persistence
+  const answersToCreate: {
+    questionId: number;
+    selectedId?: number | null;
+    textAnswer?: string | null;
+  }[] = [];
+
+  for (const raw of answers) {
+    const q = questionById.get(Number(raw.questionId));
+    if (!q) continue; // ignore answers to non-quiz questions
+
+    // Default computed: incorrect
+    let isCorrect = false;
+
+    if (q.type === 'FILL_BLANK') {
+      const correct = (q.correctText ?? '').trim().toLowerCase();
+      const userText = (raw.textAnswer ?? '').trim().toLowerCase();
+      isCorrect = correct.length > 0 && userText === correct;
+    } else {
+      // MCQ / IMAGE_CHOICE / TRUE_FALSE
+      const selected = q.choices.find((c) => c.id === Number(raw.selectedId));
+      isCorrect = !!selected?.isCorrect;
+    }
+
+    if (isCorrect) {
+      totalScore += q.score ?? 1;
+      correctCount += 1;
+    } else {
+      totalScore -= q.negativeMark ?? 0;
+    }
+
+    answersToCreate.push({
+      questionId: q.id,
+      selectedId: raw.selectedId ?? null,
+      textAnswer: raw.textAnswer ?? null,
+    });
+  }
+
+  // Optional: clamp to [0, totalPossible]
+  if (totalScore < 0) totalScore = 0;
+  if (totalScore > totalPossible) totalScore = totalPossible;
+
+  // Replace previous attempt for the same user/quiz (since schema has no unique constraint)
+  const result = await this.prisma.$transaction(async (tx) => {
+    await tx.answer.deleteMany({
+      where: {
+        userAnswer: { userId, quizId },
+      },
+    });
+    await tx.userAnswer.deleteMany({
+      where: { userId, quizId },
+    });
+
+    const created = await tx.userAnswer.create({
+      data: {
+        userId,
+        quizId,
+        score: totalScore,
+        answers: {
+          create: answersToCreate,
+        },
+      },
+      include: {
+        answers: true,
+      },
+    });
+
+    return created;
+  });
+
+  return {
+    message: 'Quiz submitted',
+    score: totalScore,
+    totalPossible,
+    correctCount,
+    totalQuestions,
+    submissionId: result.id,
+  };
+}
+
+// 👥 Get all users who submitted for a quiz (enriched with totalPossible)
+async getUsersByQuiz(quizId: number) {
+  // compute totalPossible once
+  const quiz = await this.prisma.quiz.findUnique({
+    where: { id: quizId },
+    include: { questions: { select: { score: true } } },
+  });
+  if (!quiz) throw new NotFoundException('Quiz not found');
+  const totalPossible =
+    quiz.questions.reduce((sum, q) => sum + (q.score ?? 1), 0) || 0;
+
+  const rows = await this.prisma.userAnswer.findMany({
+    where: { quizId },
+    include: {
+      user: { select: { id: true, name: true, email: true, profilePic: true } },
+    },
+    orderBy: { submittedAt: 'desc' },
+  });
+
+  // add totalPossible to each row for the UI
+  return rows.map((r) => ({
+    id: r.id,
+    userId: r.userId,
+    quizId: r.quizId,
+    score: r.score,
+    submittedAt: r.submittedAt,
+    totalPossible,
+    user: r.user,
+  }));
+}
+
+// 📚 Get all quizzes a user submitted (unchanged except small tidy)
+async getQuizzesByUser(userId: number) {
+  return this.prisma.userAnswer.findMany({
+    where: { userId },
+    include: {
+      quiz: {
+        include: {
+          contenu: { select: { title: true } },
+        },
+      },
+    },
+    orderBy: { submittedAt: 'desc' },
+  });
+}// Submit answers when you only know contenuId
+async submitByContenu(contenuId: number, body: any) {
+  const quiz = await this.prisma.quiz.findUnique({
+    where: { contenuId },
+    select: { id: true },
+  });
+  if (!quiz) throw new NotFoundException('Quiz not found for this contenu');
+
+  return this.submitQuiz(quiz.id, body);
+}
+
+// Get user submissions when you only know contenuId
+async getUsersByContenu(contenuId: number) {
+  const quiz = await this.prisma.quiz.findUnique({
+    where: { contenuId },
+    select: { id: true },
+  });
+  if (!quiz) throw new NotFoundException('Quiz not found for this contenu');
+
+  return this.getUsersByQuiz(quiz.id);
+}
+
 }

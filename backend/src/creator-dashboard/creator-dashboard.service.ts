@@ -103,20 +103,47 @@ export class CreatorDashboardService {
     return fullList;
   }
 
-  // 4. Feedback on each session (placeholder, will fill when feedback/rating system is ready)
+  // 4. Session feedback with average ratings
   async getSessionFeedback() {
-    // If you don't have feedback yet, just return null or a mock
-    // Later, you can join with a feedback table
     const sessions = await this.prisma.session2.findMany({
-      select: { id: true, name: true, program: { select: { name: true } } },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        program: {
+          select: {
+            name: true,
+          },
+        },
+        sessionFeedbacks: {
+          select: {
+            rating: true,
+          },
+        },
+        userSessions2: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
-    // Return sessions with feedback = null for now
-    return sessions.map((s) => ({
-      sessionId: s.id,
-      sessionName: s.name,
-      programName: s.program?.name,
-      feedback: null, // will implement later
-    }));
+
+    return sessions.map((session) => {
+      const feedbacks = session.sessionFeedbacks;
+      const averageRating = feedbacks.length > 0 
+        ? feedbacks.reduce((sum, fb) => sum + fb.rating, 0) / feedbacks.length
+        : null;
+      
+      return {
+        sessionId: session.id,
+        sessionName: session.name,
+        programName: session.program?.name,
+        status: session.status,
+        averageRating: averageRating ? Math.round(averageRating * 10) / 10 : null,
+        feedbackCount: feedbacks.length,
+        enrolledUsers: session.userSessions2.length,
+      };
+    });
   }
   // Get sessions status count per month (last 12 months)
 async getMonthlySessionStatus() {
@@ -167,6 +194,45 @@ async getMonthlyProgramPublish() {
     });
   }
   return results;
+}
+
+// Get top 3 programs by rating (calculated from session feedbacks)
+async getTopPrograms() {
+  const programs = await this.prisma.program.findMany({
+    select: {
+      id: true,
+      name: true,
+      sessions2: {
+        select: {
+          sessionFeedbacks: {
+            select: {
+              rating: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Calculate average rating for each program
+  const programsWithRatings = programs.map(program => {
+    const allFeedbacks = program.sessions2.flatMap(session => session.sessionFeedbacks);
+    const averageRating = allFeedbacks.length > 0 
+      ? allFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / allFeedbacks.length
+      : 0;
+    
+    return {
+      programId: program.id,
+      programName: program.name,
+      rating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      feedbackCount: allFeedbacks.length,
+    };
+  })
+  .filter(program => program.rating > 0) // Only include programs with ratings
+  .sort((a, b) => b.rating - a.rating) // Sort by rating descending
+  .slice(0, 3); // Take top 3
+
+  return programsWithRatings;
 }
 
 

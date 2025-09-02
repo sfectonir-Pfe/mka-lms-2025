@@ -4,10 +4,14 @@ import { UpdateFeedbackÉtudiantDto } from './dto/update-feedback-étudiant.dto'
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class FeedbackÉtudiantService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService
+  ) {}
 
   // Méthodes pour les feedbacks entre étudiants
   async createStudentFeedback(fromStudentId: number, createFeedbackDto: CreateFeedbackÉtudiantDto) {
@@ -47,7 +51,7 @@ if (existingFeedback) {
 }
 
 
-      return await this.prisma.studentFeedback.create({
+      const createdFeedback = await this.prisma.studentFeedback.create({
         data: {
           fromStudentId,
           toStudentId: createFeedbackDto.toStudentId,
@@ -59,10 +63,14 @@ if (existingFeedback) {
         },
         include: {
           fromStudent: { select: { id: true, name: true } },
-          toStudent: { select: { id: true, name: true } },
+          toStudent: { select: { id: true, name: true, email: true } },
           group: { select: { id: true, name: true } }
         }
       });
+
+
+
+      return createdFeedback;
     } catch (error) {
       console.error('Erreur création feedback:', error);
       throw error;
@@ -490,31 +498,13 @@ if (existingFeedback) {
       
       console.log('👥 Étudiants filtrés (sans étudiant courant):', filteredStudents);
 
-      // Questions prédéfinies pour les feedbacks entre étudiants
+      // Une seule question générale puisqu'on stocke un feedback par paire
       const questions = [
         {
           id: 1,
-          text: 'Comment évaluez-vous la collaboration de cet étudiant dans le groupe ?',
-          type: 'collaboration',
-          category: 'collaboration'
-        },
-        {
-          id: 2,
-          text: 'Comment évaluez-vous la communication de cet étudiant ?',
-          type: 'communication', 
-          category: 'communication'
-        },
-        {
-          id: 3,
-          text: 'Comment évaluez-vous la participation de cet étudiant aux activités ?',
-          type: 'participation',
-          category: 'participation'
-        },
-        {
-          id: 4,
-          text: 'Comment évaluez-vous la qualité du travail de cet étudiant ?',
-          type: 'qualite_travail',
-          category: 'qualite_travail'
+          text: 'Comment évaluez-vous cet étudiant dans le groupe ?',
+          type: 'general',
+          category: 'general'
         }
       ];
 
@@ -527,7 +517,6 @@ if (existingFeedback) {
         select: {
           fromStudentId: true,
           toStudentId: true,
-          category: true,
           rating: true
         }
       });
@@ -536,13 +525,11 @@ if (existingFeedback) {
       const questionsWithFeedbacks = questions.map(question => ({
         ...question,
         groupStudents: filteredStudents,
-        feedbacks: existingFeedbacks
-          .filter(f => f.category === question.category)
-          .map(f => ({
-            studentId: f.fromStudentId,
-            targetStudentId: f.toStudentId,
-            reaction: this.mapRatingToReaction(f.rating)
-          }))
+        feedbacks: existingFeedbacks.map(f => ({
+          studentId: f.fromStudentId,
+          targetStudentId: f.toStudentId,
+          reaction: this.mapRatingToReaction(f.rating)
+        }))
       }));
 
       return questionsWithFeedbacks;
@@ -579,16 +566,8 @@ if (existingFeedback) {
       const rating = this.mapReactionToRating(reaction);
       console.log('📝 Rating calculé:', rating, 'pour reaction:', reaction);
       
-      // Mapper questionId vers category et créer une clé unique
-      const categoryMapping = {
-        1: 'collaboration',
-        2: 'communication', 
-        3: 'participation',
-        4: 'qualite_travail'
-      };
-      
-      const category = categoryMapping[questionId] || questionId;
-
+      // Utiliser une catégorie générale puisqu'on ne stocke qu'un feedback par paire
+      const category = 'general';
       
       // Utiliser upsert pour créer ou mettre à jour
       console.log('🔄 Upsert feedback avec:', {
@@ -596,12 +575,14 @@ if (existingFeedback) {
         toStudentId: targetStudentId,
         groupId,
         rating,
-        category: category
+        category
       });
+      
+      let createdOrUpdatedFeedback;
       
       try {
         // Essayer de créer un nouveau feedback
-        return await this.prisma.studentFeedback.create({
+        createdOrUpdatedFeedback = await this.prisma.studentFeedback.create({
           data: {
             fromStudentId: studentId,
             toStudentId: targetStudentId,
@@ -610,33 +591,48 @@ if (existingFeedback) {
             comment: `Emoji: ${reaction}`,
             category: category,
             isAnonymous: false
+          },
+          include: {
+            fromStudent: { select: { id: true, name: true } },
+            toStudent: { select: { id: true, name: true, email: true } },
+            group: { select: { id: true, name: true } }
           }
         });
       } catch (error) {
-        // Si erreur de contrainte unique, mettre à jour l'existant
+        // Si erreur de contrainte unique, mettre à jour l'existant (par catégorie)
         if (error.code === 'P2002') {
           const existingFeedback = await this.prisma.studentFeedback.findFirst({
             where: {
               fromStudentId: studentId,
               toStudentId: targetStudentId,
-              groupId
+              groupId,
+              category: category
             }
           });
-          
+
           if (existingFeedback) {
-            return await this.prisma.studentFeedback.update({
+            createdOrUpdatedFeedback = await this.prisma.studentFeedback.update({
               where: { id: existingFeedback.id },
               data: {
                 rating,
                 comment: `Emoji: ${reaction}`,
-                category: category,
                 updatedAt: new Date()
+              },
+              include: {
+                fromStudent: { select: { id: true, name: true } },
+                toStudent: { select: { id: true, name: true, email: true } },
+                group: { select: { id: true, name: true } }
               }
             });
           }
+        } else {
+          throw error;
         }
-        throw error;
       }
+
+
+
+      return createdOrUpdatedFeedback;
     } catch (error) {
       console.error('❌ Erreur submitFeedback:', error);
       throw error;
@@ -697,7 +693,7 @@ if (existingFeedback) {
 
   async getStudentFeedbacksByGroup(groupId: string, studentId: number) {
     try {
-      return await this.prisma.studentFeedback.findMany({
+      const feedbacks = await this.prisma.studentFeedback.findMany({
         where: {
           groupId,
           fromStudentId: studentId
@@ -707,9 +703,69 @@ if (existingFeedback) {
         },
         orderBy: { createdAt: 'desc' }
       });
+
+      // Transform feedbacks to include reaction mapping for frontend compatibility
+      return feedbacks.map(feedback => ({
+        ...feedback,
+        reaction: this.mapRatingToReaction(feedback.rating),
+        questionId: this.mapCategoryToQuestionId(feedback.category),
+        targetStudentId: feedback.toStudentId
+      }));
     } catch (error) {
       console.error('Erreur getStudentFeedbacksByGroup:', error);
       return [];
+    }
+  }
+
+  private mapCategoryToQuestionId(category: string): number {
+    const mapping = {
+      'collaboration': 1,
+      'communication': 2,
+      'participation': 3,
+      'qualite_travail': 4
+    };
+    return mapping[category] || 1;
+  }
+
+  async getStudentRatingSummary(groupId: string) {
+    try {
+      const feedbacks = await this.prisma.studentFeedback.findMany({
+        where: { groupId },
+        include: {
+          toStudent: { select: { id: true, name: true, email: true } }
+        }
+      });
+
+      const studentRatings = {};
+      
+      feedbacks.forEach(feedback => {
+        const studentId = feedback.toStudentId;
+        if (!studentRatings[studentId]) {
+          studentRatings[studentId] = {
+            student: feedback.toStudent,
+            totalPoints: 0,
+            feedbackCount: 0,
+            maxPossiblePoints: 0
+          };
+        }
+        
+        studentRatings[studentId].totalPoints += feedback.rating;
+        studentRatings[studentId].feedbackCount += 1;
+        studentRatings[studentId].maxPossiblePoints += 5; // Max 5 points per feedback
+      });
+
+      // Calculate ratings for each student
+      Object.keys(studentRatings).forEach(studentId => {
+        const data = studentRatings[studentId];
+        data.rating = data.maxPossiblePoints > 0 
+          ? parseFloat(((data.totalPoints / data.maxPossiblePoints) * 5).toFixed(1))
+          : 0;
+      });
+
+      return studentRatings;
+    } catch (error) {
+      console.error('Erreur getStudentRatingSummary:', error);
+      return {};
     }
   }
 
@@ -750,7 +806,130 @@ if (existingFeedback) {
     }
   }
 
+  /**
+   * Envoie un email de feedback individuel immédiatement après chaque feedback
+   * Cette méthode est appelée à chaque fois qu'un étudiant donne un feedback
+   */
+  async sendFeedbackEmail(
+    fromStudentId: number, 
+    toStudentId: number, 
+    questionId: number,
+    questionText: string,
+    reaction: string,
+    groupId: string,
+    seanceId: string
+  ) {
+    try {
+      // Récupérer les informations des étudiants et du groupe
+      const [fromStudent, toStudent, group] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: fromStudentId },
+          select: { id: true, name: true, email: true }
+        }),
+        this.prisma.user.findUnique({
+          where: { id: toStudentId },
+          select: { id: true, name: true, email: true }
+        }),
+        this.prisma.studentGroup.findUnique({
+          where: { id: groupId },
+          select: { id: true, name: true }
+        })
+      ]);
 
+      if (!fromStudent || !toStudent || !group) {
+        throw new Error('Informations des étudiants ou du groupe non trouvées');
+      }
+
+      if (!toStudent.email) {
+        throw new Error('Email de l\'étudiant destinataire non trouvé');
+      }
+
+      // Envoyer l'email de feedback individuel
+      await this.mailService.sendStudentFeedbackEmail(
+        toStudent.email,
+        toStudent.name || 'Étudiant',
+        group.name,
+        fromStudent.name || 'Un étudiant',
+        questionText,
+        reaction,
+        seanceId
+      );
+
+      console.log(`✅ Email de feedback envoyé à ${toStudent.email} pour la question: ${questionText}`);
+      
+      return {
+        success: true,
+        message: `Email de feedback envoyé avec succès`,
+        recipientEmail: toStudent.email,
+        questionText,
+        reaction
+      };
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi de l\'email de feedback:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Envoie un email récapitulatif avec tous les feedbacks d'un étudiant vers un autre
+   * Cette méthode est appelée à la fin de l'évaluation complète
+   */
+  async sendFeedbackSummaryEmail(fromStudentId: number, toStudentId: number, groupId: string) {
+    try {
+      console.log(`🔍 Début sendFeedbackSummaryEmail: fromStudentId=${fromStudentId}, toStudentId=${toStudentId}, groupId=${groupId}`);
+      
+      // Récupérer tous les feedbacks de cet étudiant vers cet autre étudiant dans ce groupe
+      const allFeedbacks = await this.prisma.studentFeedback.findMany({
+        where: {
+          fromStudentId,
+          toStudentId,
+          groupId
+        },
+        include: {
+          fromStudent: { select: { id: true, name: true } },
+          toStudent: { select: { id: true, name: true, email: true } },
+          group: { select: { id: true, name: true } }
+        },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      console.log(`📊 Feedbacks trouvés: ${allFeedbacks.length}`, allFeedbacks);
+
+      if (allFeedbacks.length === 0) {
+        throw new Error('Aucun feedback trouvé');
+      }
+
+      if (!allFeedbacks[0].toStudent?.email) {
+        throw new Error('Email de l\'étudiant destinataire non trouvé');
+      }
+
+      console.log(`📧 Envoi email à: ${allFeedbacks[0].toStudent.email}`);
+      console.log(`👤 Étudiant destinataire: ${allFeedbacks[0].toStudent.name}`);
+      console.log(`👥 Groupe: ${allFeedbacks[0].group.name}`);
+
+      // Envoyer l'email récapitulatif
+      const emailResult = await this.mailService.sendStudentFeedbackSummaryEmail(
+        allFeedbacks[0].toStudent.email,
+        allFeedbacks[0].toStudent.name || 'Étudiant',
+        allFeedbacks[0].group.name,
+        allFeedbacks,
+        allFeedbacks[0].fromStudent.name || 'Un étudiant'
+      );
+
+      console.log(`✅ Email récapitulatif envoyé avec succès:`, emailResult);
+      
+      return {
+        success: true,
+        message: `Email récapitulatif envoyé avec succès`,
+        feedbackCount: allFeedbacks.length,
+        recipientEmail: allFeedbacks[0].toStudent.email
+      };
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi de l\'email récapitulatif:', error);
+      throw error;
+    }
+  }
 
 
 }
+
