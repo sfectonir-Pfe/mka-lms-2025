@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './i18n';
 import { getStoredUser } from "./utils/authUtils";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import ThemeToggle from "./components/constants/ThemeToggle";
 
 // Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -13,8 +15,6 @@ import NotFound from "./pages/error/NotFoundPage";
 import HomePage from "./pages/home/HomePage";
 import Réclamation from "./features/views/feedback/feedbackForm/Réclamation";
 import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamationlist";
-import StudentLandingPage from "./pages/session/StudentLandingPage";
-import StudentProgramPage from "./pages/session/StudentProgramPage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
 
@@ -64,6 +64,7 @@ import AnimerSeanceView from "./features/views/session/AnimerSeanceView";
 import Chatbot from './components/Chatbot';
 // import TestChatPage from "./pages/TestChatPage";
 import WhiteboardPage from "./pages/session/WhiteboardPage";
+import Attestation from "./features/views/cohort/attestation";
 
 //Dashboards
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
@@ -75,8 +76,10 @@ import EtudiantDashboard from "./pages/dashboard/EtudiantDashboard";
 // feedbacks
 import JitsiRoom from "./features/views/session/JitsiRoom";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
-import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList';
-
+import SessionFeedbackList from './features/views/feedback/FeedbackList/SessionFeedbackList/SessionFeedbackList';
+import ScoreReveal from './features/views/quiz/ScoreReveal';
+import QuizScores from './features/views/quiz/QuizScores';
+import QuizList from './features/views/quiz/QuizList';
 
 
 
@@ -91,14 +94,26 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-import { FaRegMoon } from "react-icons/fa";
-import { GoSun } from "react-icons/go";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
+import Forbidden403 from './pages/error/Forbidden403';
+import { RoleProtectedRoute } from './pages/auth/guards';
 
 
-function App() {
+
+function AppContent() {
   const [user, setUser] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { darkMode } = useTheme();
+
+  // Apply dark mode class to document
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
 
 
@@ -188,10 +203,8 @@ function App() {
   return (
     <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
-      <div className="d-flex justify-content-end">
-        <button className="btn btn-light d-flex align-items-center" onClick={() => setDarkMode(!darkMode)}>
-          {darkMode ? <GoSun /> : <FaRegMoon />}
-        </button>
+      <div className="d-flex justify-content-end p-2">
+        <ThemeToggle />
       </div>
       {user && <Chatbot />}
 
@@ -223,6 +236,7 @@ function App() {
 
                 <Route path="/programs/overview" element={<BuildProgramOverviewPage />} />
 
+                <Route path="/quizzes" element={<QuizList />} />
                 <Route path="/quizzes/create/:contenuId" element={<AddQuizForm />} />
                 <Route path="/quizzes/play/:contenuId" element={<PlayQuizPage />} />
                 <Route path="/seances/:seanceId/quiz/:contenuId" element={<PlayQuizPage />} />
@@ -237,7 +251,7 @@ function App() {
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/seances-formateur/add" element={<AddSeanceFormateurView />} />
                 <Route path="/seances-formateur" element={<SeanceFormateurList />} />
-
+<Route path="/quiz/scores/:quizId" element={<QuizScores />} />
                 <Route path="/formateur/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/seances" element={<SeanceFormateurPage />} />
                 <Route path="/sessions/:sessionId/feedbacklist" element={<SessionFeedbackList />} />
@@ -248,6 +262,8 @@ function App() {
                 <Route path="/jitsi" element={<JitsiRoom roomName="majd-room" />} />
                 {/* <Route path="/test-chat" element={<TestChatPage />} /> */}
                 <Route path="/whiteboard/:seanceId" element={<WhiteboardPage />} />
+                <Route path="/student/program/:programId/attestation" element={<Attestation />} />
+                <Route path="/sessions/:sessionId/attestation" element={<Attestation />} />
 
                 {/* //dashboard */}
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -267,8 +283,6 @@ function App() {
 
 
                 {/* Student */}
-                <Route path="student" element={<StudentLandingPage />} />
-                <Route path="student/program/:programId" element={<StudentProgramPage />} />
                 <Route path="Réclamation" element={<Réclamation />} />
                 <Route path="/EditProfile/:id" element={<EditProfilePage />} />
                 <Route path="/ProfilePage/:id" element={<ProfilePage />} />
@@ -296,10 +310,20 @@ function App() {
             {/* <Route path="/test-feedback" element={<TestFeedback />} /> */}
             {/* <Route path="/test-average-rating" element={<TestAverageRating />} /> */}
             <Route path="*" element={<NotFound />} />
+            <Route path="/403" element={<Forbidden403 />} />
+
           </Routes>
         </BrowserRouter>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

@@ -25,7 +25,7 @@ const SeanceFormateurPage = () => {
       setSeances(res.data);
     } catch (err) {
       console.error('Error fetching seances:', err);
-      alert('Erreur lors du chargement des séances. Veuillez réessayer.');
+      alert(t('seances.loadError', 'Erreur lors du chargement des séances. Veuillez réessayer.'));
     }
   };
 
@@ -85,9 +85,11 @@ const SeanceFormateurPage = () => {
   const handleRetour = () => setSelectedSeance(null);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Confirmer la suppression de cette séance ?")) {
+    try {
       await api.delete(`/seance-formateur/${id}`);
       fetchSeances();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
     }
   };
 
@@ -123,13 +125,13 @@ const SeanceFormateurPage = () => {
               }}
             >
               <Typography variant="h6" color="primary" gutterBottom>
-                Note Moyenne Globale
+                {t('seances.averageRating')}
               </Typography>
               <Typography variant="h4" color="secondary" fontWeight="bold">
                 {averageRating} / 5
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Basée sur {totalFeedbacks} avis
+                {t('seances.basedOnReviews', { count: totalFeedbacks })}
               </Typography>
             </Box>
           )}
@@ -146,7 +148,7 @@ const SeanceFormateurPage = () => {
               }}
             >
               <Typography variant="h6" color="textSecondary">
-                Pas encore de notes
+                {t('seances.noRating')}
               </Typography>
             </Box>
           )}

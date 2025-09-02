@@ -11,7 +11,14 @@ export const useSocketConnection = (validSeanceId, setActions) => {
       return
     }
 
-    const s = io(SOCKET_URL, { transports: ["websocket"] })
+    const s = io(SOCKET_URL, { 
+      transports: ["websocket", "polling"],
+      timeout: 20000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    })
     setSocket(s)
 
     s.on("connect", () => console.log("✅ Socket.io connected"))

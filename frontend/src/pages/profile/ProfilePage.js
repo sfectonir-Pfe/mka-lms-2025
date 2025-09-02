@@ -189,7 +189,6 @@ useEffect(() => {
           p: 4,
           borderRadius: 4,
           textAlign: 'center',
-          background: 'linear-gradient(45deg, #f8f9fa 30%, #e9ecef 90%)'
         }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
             {t('profile.profileError')}
@@ -223,7 +222,6 @@ useEffect(() => {
       <Paper elevation={4} sx={{
         p: 6,
         borderRadius: 6,
-        background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)'
       }}>
         {/* Header Section */}
         <Box sx={{
@@ -234,9 +232,7 @@ useEffect(() => {
         }}>
           <Typography variant="h4" sx={{
             fontWeight: 700,
-            background: 'linear-gradient(45deg, #1976d2 30%, #2196f3 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            color: '#1976d2'
           }}>
             {t('profile.userProfile')}
           </Typography>
@@ -408,12 +404,12 @@ useEffect(() => {
 <Box sx={{ mt: 4 }}>
   <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
     <WorkIcon color="primary" sx={{ mr: 1, mb: '-5px' }} />
-    Sessions
+    {t('profile.sessions')}
   </Typography>
   {sessionsLoading ? (
     <CircularProgress />
   ) : sessions.length === 0 ? (
-    <Typography color="text.secondary">This user is not assigned to any session.</Typography>
+    <Typography color="text.secondary">{t('profile.noSessionsAssigned')}</Typography>
   ) : (
     <Stack spacing={2}>
       {sessions.map((us) => (
@@ -423,7 +419,6 @@ useEffect(() => {
           sx={{
             p: 2,
             borderRadius: 2,
-            background: "#f5faff",
             display: "flex",
             alignItems: "center",
             gap: 2,
@@ -435,11 +430,11 @@ useEffect(() => {
               {us.session2.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Programme: {us.session2.program?.name || "Non spécifié"}
+              {t('profile.program')}: {us.session2.program?.name || t('profile.notSpecified')}
             </Typography>
             {us.session2.startDate && us.session2.endDate && (
               <Typography variant="body2" color="text.secondary">
-                Du {new Date(us.session2.startDate).toLocaleDateString()} au {new Date(us.session2.endDate).toLocaleDateString()}
+                {t('profile.from')} {new Date(us.session2.startDate).toLocaleDateString()} {t('profile.to')} {new Date(us.session2.endDate).toLocaleDateString()}
               </Typography>
             )}
           </Box>

@@ -41,89 +41,89 @@ const HelpDialog = ({ open, onClose }) => {
   const tools = [
     {
       icon: PenIcon,
-      name: "Pen",
-      description: "Dessiner librement sur le tableau blanc",
-      shortcut: "Cliquez et glissez pour dessiner",
+      name: t('whiteboard.tools.pen', 'Pen'),
+      description: t('whiteboard.helpDialog.descriptions.drawFree', 'Dessiner librement sur le tableau blanc'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.drawFree', 'Cliquez et glissez pour dessiner'),
     },
     {
       icon: TextIcon,
-      name: "Text",
-      description: "Ajouter du texte au tableau blanc",
-      shortcut: "Cliquez où vous voulez placer le texte",
+      name: t('whiteboard.tools.text', 'Text'),
+      description: t('whiteboard.helpDialog.descriptions.addText', 'Ajouter du texte au tableau blanc'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.addText', 'Cliquez où vous voulez placer le texte'),
     },
     {
       icon: RectangleIcon,
-      name: "Rectangle",
-      description: "Dessiner des rectangles",
-      shortcut: "Cliquez et glissez pour créer un rectangle",
+      name: t('whiteboard.tools.rectangle', 'Rectangle'),
+      description: t('whiteboard.helpDialog.descriptions.drawRectangles', 'Dessiner des rectangles'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.drawRectangle', 'Cliquez et glissez pour créer un rectangle'),
     },
     {
       icon: CircleIcon,
-      name: "Circle",
-      description: "Dessiner des cercles",
-      shortcut: "Cliquez et glissez pour créer un cercle",
+      name: t('whiteboard.tools.circle', 'Circle'),
+      description: t('whiteboard.helpDialog.descriptions.drawCircles', 'Dessiner des cercles'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.drawCircle', 'Cliquez et glissez pour créer un cercle'),
     },
     {
       icon: ArrowIcon,
-      name: "Arrow",
-      description: "Dessiner des flèches",
-      shortcut: "Cliquez et glissez pour créer une flèche",
+      name: t('whiteboard.tools.arrow', 'Arrow'),
+      description: t('whiteboard.helpDialog.descriptions.drawArrows', 'Dessiner des flèches'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.drawArrow', 'Cliquez et glissez pour créer une flèche'),
     },
     {
       icon: TableIcon,
-      name: "Table",
-      description: "Créer des tableaux",
-      shortcut: "Cliquez et glissez, puis configurez les cellules",
+      name: t('whiteboard.tools.table', 'Table'),
+      description: t('whiteboard.helpDialog.descriptions.createTables', 'Créer des tableaux'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.createTable', 'Cliquez et glissez, puis configurez les cellules'),
     },
     {
       icon: PanIcon,
-      name: "Pan",
-      description: "Déplacer la vue du tableau blanc",
-      shortcut: "Cliquez et glissez pour naviguer",
+      name: t('whiteboard.tools.pan', 'Pan'),
+      description: t('whiteboard.helpDialog.descriptions.panView', 'Déplacer la vue du tableau blanc'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.panView', 'Cliquez et glissez pour naviguer'),
     },
     {
       icon: SelectIcon,
-      name: "Select",
-      description: "Sélectionner et modifier des éléments",
-      shortcut: "Cliquez sur un élément pour le sélectionner",
+      name: t('whiteboard.tools.select', 'Select'),
+      description: t('whiteboard.helpDialog.descriptions.selectEdit', 'Sélectionner et modifier des éléments'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.selectItem', "Cliquez sur un élément pour le sélectionner"),
     },
   ]
 
   const actions = [
     {
       icon: UndoIcon,
-      name: "Undo",
-      description: "Annuler la dernière action",
-      shortcut: "Ctrl+Z",
+      name: t('whiteboard.tools.undo', 'Undo'),
+      description: t('whiteboard.helpDialog.descriptions.undo', 'Annuler la dernière action'),
+      shortcut: 'Ctrl+Z',
     },
     {
       icon: RedoIcon,
-      name: "Redo",
-      description: "Rétablir une action annulée",
-      shortcut: "Ctrl+Y",
+      name: t('whiteboard.tools.redo', 'Redo'),
+      description: t('whiteboard.helpDialog.descriptions.redo', 'Rétablir une action annulée'),
+      shortcut: 'Ctrl+Y',
     },
     {
       icon: DeleteIcon,
-      name: "Delete",
-      description: "Supprimer les éléments sélectionnés",
-      shortcut: "Delete",
+      name: t('whiteboard.actions.deleteSelected', 'Delete Selected'),
+      description: t('whiteboard.helpDialog.descriptions.deleteSelected', 'Supprimer les éléments sélectionnés'),
+      shortcut: 'Delete',
     },
     {
       icon: ClearIcon,
-      name: "Clear All",
-      description: "Effacer tout le tableau blanc",
-      shortcut: "Bouton dans la toolbar",
+      name: t('whiteboard.actions.clearAll', 'Clear All'),
+      description: t('whiteboard.helpDialog.descriptions.clearAll', 'Effacer tout le tableau blanc'),
+      shortcut: t('whiteboard.helpDialog.shortcutHints.clearAllButton', 'Bouton dans la toolbar'),
     },
   ]
 
   const shortcuts = [
-    { key: "Ctrl+Z", action: "Annuler" },
-    { key: "Ctrl+Y", action: "Rétablir" },
-    { key: "Delete", action: "Supprimer la sélection" },
-    { key: "Ctrl+A", action: "Sélectionner tout" },
-    { key: "Molette souris", action: "Zoom avant/arrière" },
-    { key: "Clic droit + glisser", action: "Déplacer la vue" },
-    { key: "Double-clic", action: "Éditer le texte" },
+    { key: 'Ctrl+Z', action: t('whiteboard.helpDialog.shortcutLabels.undo', 'Annuler') },
+    { key: 'Ctrl+Y', action: t('whiteboard.helpDialog.shortcutLabels.redo', 'Rétablir') },
+    { key: 'Delete', action: t('whiteboard.helpDialog.shortcutLabels.deleteSelection', 'Supprimer la sélection') },
+    { key: 'Ctrl+A', action: t('whiteboard.helpDialog.shortcutLabels.selectAll', 'Sélectionner tout') },
+    { key: t('whiteboard.helpDialog.shortcutLabels.mouseWheel', 'Molette souris'), action: t('whiteboard.helpDialog.shortcutLabels.zoom', 'Zoom avant/arrière') },
+    { key: t('whiteboard.helpDialog.shortcutLabels.rightClickDrag', 'Clic droit + glisser'), action: t('whiteboard.helpDialog.shortcutLabels.pan', 'Déplacer la vue') },
+    { key: t('whiteboard.helpDialog.shortcutLabels.doubleClick', 'Double-clic'), action: t('whiteboard.helpDialog.shortcutLabels.editText', 'Éditer le texte') },
   ]
 
   return (
@@ -150,7 +150,7 @@ const HelpDialog = ({ open, onClose }) => {
       >
         <HelpIcon />
         <Typography variant="h6" component="div">
-          Guide d'utilisation du Tableau Blanc
+          {t('whiteboard.helpDialog.title', "Guide d'utilisation du Tableau Blanc")}
         </Typography>
       </DialogTitle>
 
@@ -160,7 +160,7 @@ const HelpDialog = ({ open, onClose }) => {
           <Box>
             <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <PenIcon />
-              Outils de dessin
+              {t('whiteboard.helpDialog.drawingTools', 'Outils de dessin')}
             </Typography>
             <List dense>
               {tools.map((tool, index) => (
@@ -196,7 +196,7 @@ const HelpDialog = ({ open, onClose }) => {
           <Box>
             <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <KeyboardIcon />
-              Actions principales
+              {t('whiteboard.helpDialog.mainActions', 'Actions principales')}
             </Typography>
             <List dense>
               {actions.map((action, index) => (
@@ -232,7 +232,7 @@ const HelpDialog = ({ open, onClose }) => {
           <Box>
             <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <MouseIcon />
-              Raccourcis clavier et souris
+              {t('whiteboard.helpDialog.shortcuts', 'Raccourcis clavier et souris')}
             </Typography>
             <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 1 }}>
               {shortcuts.map((shortcut) => (
@@ -263,23 +263,23 @@ const HelpDialog = ({ open, onClose }) => {
           {/* Conseils d'utilisation */}
           <Box>
             <Typography variant="h6" gutterBottom>
-              Conseils d'utilisation
+              {t('whiteboard.helpDialog.tipsTitle', "Conseils d'utilisation")}
             </Typography>
             <Box component="ul" sx={{ pl: 2 }}>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Utilisez l'outil Pan pour naviguer dans de grands tableaux blancs
+                {t('whiteboard.helpDialog.tips.usePan', "Utilisez l'outil Pan pour naviguer dans de grands tableaux blancs")}
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Double-cliquez sur un texte pour le modifier
+                {t('whiteboard.helpDialog.tips.doubleClickToEdit', 'Double-cliquez sur un texte pour le modifier')}
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Sélectionnez plusieurs éléments en maintenant Ctrl enfoncé
+                {t('whiteboard.helpDialog.tips.multiSelectCtrl', 'Sélectionnez plusieurs éléments en maintenant Ctrl enfoncé')}
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Utilisez la molette de la souris pour zoomer et dézoomer
+                {t('whiteboard.helpDialog.tips.mouseWheelZoom', 'Utilisez la molette de la souris pour zoomer et dézoomer')}
               </Typography>
               <Typography component="li" variant="body2" sx={{ mb: 1 }}>
-                Les tableaux peuvent être configurés avec différentes tailles de cellules
+                {t('whiteboard.helpDialog.tips.tableCellSizes', 'Les tableaux peuvent être configurés avec différentes tailles de cellules')}
               </Typography>
             </Box>
           </Box>
@@ -288,7 +288,7 @@ const HelpDialog = ({ open, onClose }) => {
 
       <DialogActions sx={{ p: 3, pt: 0 }}>
         <Button onClick={onClose} variant="contained" color="primary">
-          Compris !
+          {t('common.close', 'Fermer')}
         </Button>
       </DialogActions>
     </Dialog>

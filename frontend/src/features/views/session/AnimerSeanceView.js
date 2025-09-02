@@ -53,9 +53,11 @@ import FeedbackFormateur from "../feedback/feedbackForm/FeedbackFormateur";
 import FeedbackEtudiant from "../feedback/feedbackForm/FeedbackEtudiant";
 import SeanceFeedbackList from "../../../features/views/feedback/FeedbackList/seancefeedbacklist";
 import Regroupement from "./Regroupement";
+import QuizList from "../../../features/views/quiz/QuizList";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 const AnimerSeanceView = () => {
-  const { t } = useTranslation("seances");
+  const { t } = useTranslation();
   const { id: seanceId } = useParams();
   const navigate = useNavigate();
 
@@ -73,6 +75,7 @@ const AnimerSeanceView = () => {
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
   const [quizMetaByContenu, setQuizMetaByContenu] = useState({}); // {contenuId: {timeLimit, questions: []}}
+  const [programVisibleToStudents, setProgramVisibleToStudents] = useState(false);
 
   // --- helpers ---
   const getSessionQuizzes = () => {
@@ -139,7 +142,7 @@ const AnimerSeanceView = () => {
           setProgramDetails(detailRes.data);
         }
       } catch (err) {
-        console.error("❌ Erreur chargement séance :", err);
+        console.error("❌ " + t("seances.loadError"), err);
       }
     };
     fetchSeance();
@@ -194,6 +197,14 @@ const AnimerSeanceView = () => {
     reloadFeedbacks();
   }, [seanceId]);
 
+  // Fetch program visibility state from backend
+  useEffect(() => {
+    if (!seanceId) return;
+    api.get(`/seance-formateur/${seanceId}/program-visibility`)
+      .then(res => setProgramVisibleToStudents(res.data.visible))
+      .catch(() => {});
+  }, [seanceId]);
+
   // --- actions ---
   const handleTabChange = (_e, newValue) => setTab(newValue);
 
@@ -216,7 +227,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "IMAGE");
       setSessionImages((prev) => [...prev, media]);
     } catch {
-      alert(t("uploadImageError"));
+      alert(t("seances.uploadImageError"));
     }
   };
 
@@ -227,7 +238,7 @@ const AnimerSeanceView = () => {
       const media = await uploadMedia(file, "VIDEO");
       setSessionVideos((prev) => [...prev, media]);
     } catch {
-      alert(t("uploadVideoError"));
+      alert(t("seances.uploadVideoError"));
     }
   };
 
@@ -260,18 +271,35 @@ const AnimerSeanceView = () => {
       );
       setProgramDetails(detailRes.data);
     } catch {
-      alert(t("statusChangeError"));
+      alert(t("seances.statusChangeError"));
+    }
+  };
+
+  const handleToggleProgramVisibility = async () => {
+    if (!seanceId) return;
+    try {
+      const newVisibility = !programVisibleToStudents;
+      // Optimistic UI update
+      setProgramVisibleToStudents(newVisibility);
+      
+      await api.post(`/seance-formateur/${seanceId}/program-visibility`, {
+        visible: newVisibility
+      });
+    } catch (error) {
+      // Revert on error
+      setProgramVisibleToStudents(!programVisibleToStudents);
+      console.error(t('seances.programVisibilityError'), error);
     }
   };
 
   // --- UI: hierarchy (accordion, cards) ---
   const renderProgramHierarchy = () => {
-    if (!programDetails) return <Typography>{t("loadingProgram")}</Typography>;
+    if (!programDetails) return <Typography>{t("seances.loadingProgram")}</Typography>;
 
     return (
       <Box>
         <Typography variant="h6" mb={1}>
-          📘 <strong>{t("program")} : {programDetails.program.title}</strong>
+          📘 <strong>{t("seances.program")} : {programDetails.program.title}</strong>
         </Typography>
 
         <Box mt={2}>
@@ -293,7 +321,6 @@ const AnimerSeanceView = () => {
                       ml: 1,
                       borderRadius: 2,
                       overflow: "hidden",
-                      bgcolor: "#fafafa",
                       "&:before": { display: "none" },
                     }}
                   >
@@ -343,13 +370,13 @@ const AnimerSeanceView = () => {
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" noWrap>
                                       {isQuiz
-                                        ? `Questions: ${meta?.questions?.length ?? "—"} · Time: ${meta?.timeLimit ? `${meta.timeLimit} min` : "—"}`
-                                        : (cn?.fileType || "File")}
+                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash")}`
+                            : (cn?.fileType || t("seances.file"))}
                                     </Typography>
                                   </Box>
 
                                   <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Tooltip title={cn?.published ? t("unpublish") : t("publish")}>
+                                    <Tooltip title={cn?.published ? t("seances.unpublish") : t("seances.publish")}>
                                       <Switch
                                         size="small"
                                         checked={!!cn?.published}
@@ -358,7 +385,7 @@ const AnimerSeanceView = () => {
                                     </Tooltip>
 
                                     {isQuiz ? (
-                                      <Tooltip title={cn?.published ? t("open") : t("publishFirst")}>
+                                      <Tooltip title={cn?.published ? t("seances.open") : t("seances.publishFirst")}>
                                         <span>
                                           <Button
                                             size="small"
@@ -366,13 +393,22 @@ const AnimerSeanceView = () => {
                                             startIcon={<PlayArrowIcon />}
                                             disabled={!cn?.published}
                                             onClick={() => navigate(`/seances/${seanceId}/quiz/${cn.id}`)}
+                                            sx={{
+                                              borderRadius: 2,
+                                              background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+                                              boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                                              '&:hover': { 
+                                                transform: 'translateY(-1px)', 
+                                                boxShadow: '0 8px 20px rgba(25,118,210,0.4)' 
+                                              }
+                                            }}
                                           >
-                                            {t("open")}
+                                            {t("seances.open")}
                                           </Button>
                                         </span>
                                       </Tooltip>
                                     ) : (
-                                      <Tooltip title={t("open")}>
+                                      <Tooltip title={t("seances.open")}>
                                         <span>
                                           <Button
                                             size="small"
@@ -386,8 +422,18 @@ const AnimerSeanceView = () => {
                                                 : `${cn.fileUrl.startsWith("/") ? "" : "/"}${cn.fileUrl}`;
                                               window.open(url, "_blank");
                                             }}
+                                            sx={{
+                                              borderRadius: 2,
+                                              border: "2px solid",
+                                              borderImage: "linear-gradient(135deg, #1976d2, #42a5f5) 1",
+                                              '&:hover': { 
+                                                transform: 'translateY(-1px)',
+                                                background: 'linear-gradient(135deg, #1976d2, #42a5f5)',
+                                                color: 'white'
+                                              }
+                                            }}
                                           >
-                                            {t("open")}
+                                            {t("seances.open")}
                                           </Button>
                                         </span>
                                       </Tooltip>
@@ -431,7 +477,6 @@ const AnimerSeanceView = () => {
           borderRadius: 3,
           overflow: "hidden",
           border: "1px solid #e5e7eb",
-          bgcolor: "#fff",
         }}
       >
         <Box
@@ -441,14 +486,13 @@ const AnimerSeanceView = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            bgcolor: "#f8fafc",
             borderBottom: "1px solid #e5e7eb",
           }}
         >
           <Stack direction="row" spacing={1.25} alignItems="center">
-            <Chip size="small" color="primary" label="LIVE" />
+            <Chip size="small" color="primary" label={t("seances.live")} />
             <Typography variant="subtitle1" fontWeight={700}>
-              {seance.title || t("jitsiMeeting")}
+              {seance.title || t("seances.jitsiMeeting")}
             </Typography>
           </Stack>
           {seance?.startTime && (
@@ -460,17 +504,16 @@ const AnimerSeanceView = () => {
 
         <Box
           sx={{
-            background: "linear-gradient(180deg,#fafafa, #f3f4f6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
           <iframe
-            src={`https://localhost:8443/${seance.title || "default-room"}`}
+            src={`https://localhost:8443/${seance.title || t("seances.defaultRoom")}`}
             allow="camera; microphone; fullscreen; display-capture"
             style={{ width: "100%", height: "68vh", border: "none" }}
-            title={t("jitsiMeeting")}
+            title={t("seances.jitsiMeeting")}
           />
         </Box>
       </Paper>
@@ -483,151 +526,363 @@ const AnimerSeanceView = () => {
           mb: 2,
           borderRadius: 3,
           border: "1px solid #e5e7eb",
-          bgcolor: "#fff",
         }}
       >
         <Stack direction="row" alignItems="center" spacing={2}>
           <Chip
             variant="outlined"
-            label={`${t("program")} : ${programDetails?.program?.title || ""}`}
+            label={`${t("seances.program")} : ${programDetails?.program?.title || ""}`}
             color="primary"
           />
           <ButtonGroup variant="outlined" size="small">
-            <Button startIcon={<ZoomInMapIcon />} onClick={() => setShowContenus(!showContenus)}>
-              {showContenus ? t("hideHierarchy") : t("showHierarchy")}
+            <Button 
+              startIcon={<ZoomInMapIcon />} 
+              onClick={() => setShowContenus(!showContenus)}
+              sx={{
+                borderRadius: 2,
+                background: "linear-gradient(135deg, #0288d1, #29b6f6)",
+                boxShadow: "0 4px 12px rgba(2, 136, 209, 0.3)",
+                color: 'white',
+                border: 'none',
+                '&:hover': { 
+                  transform: 'translateY(-1px)', 
+                  boxShadow: '0 8px 20px rgba(2,136,209,0.4)' 
+                }
+              }}
+            >
+              {showContenus ? t("seances.hideHierarchy") : t("seances.showHierarchy")}
             </Button>
             <Button
               startIcon={<FeedbackIcon />}
               onClick={() => setShowFeedbackTab((v) => !v)}
               variant={showFeedbackTab ? "outlined" : "contained"}
               color="secondary"
+              sx={{
+                borderRadius: 2,
+                background: showFeedbackTab 
+                  ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
+                  : "linear-gradient(135deg, #7b1fa2, #ab47bc)",
+                boxShadow: showFeedbackTab 
+                  ? "0 4px 12px rgba(123, 31, 162, 0.3)"
+                  : "0 4px 12px rgba(123, 31, 162, 0.3)",
+                color: 'white',
+                border: 'none',
+                '&:hover': { 
+                  transform: 'translateY(-1px)', 
+                  boxShadow: '0 8px 20px rgba(123,31,162,0.4)' 
+                }
+              }}
             >
-              {showFeedbackTab ? t("hideFeedback") : t("showFeedback")}
+              {showFeedbackTab ? t("seances.hideFeedback") : t("seances.showFeedback")}
             </Button>
           </ButtonGroup>
         </Stack>
 
         <Collapse in={showContenus}>
           <Divider sx={{ my: 2 }} />
-          {renderProgramHierarchy()}
+          <RoleGate roles={['formateur', 'admin', 'createurdeformation']} fallback={
+            programVisibleToStudents ? renderProgramHierarchy() : (
+              <Box sx={{ p: 3, textAlign: "center", bgcolor: "#f5f5f5", borderRadius: 2 }}>
+                <Typography color="text.secondary">
+                  🔒 {t("seances.programNotVisible")}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" mt={1}>
+                  {t("seances.waitForFormateur")}
+                </Typography>
+              </Box>
+            )
+          }>
+            {renderProgramHierarchy()}
+          </RoleGate>
         </Collapse>
       </Paper>
 
-      {/* Tabs */}
-      <Box display="flex" mt={2}>
-        <Tabs
-          orientation="vertical"
-          value={tab}
-          onChange={handleTabChange}
+      {/* Sidebar */}
+      <Box display="flex" mt={2} gap={2}>
+        {/* Sidebar Navigation */}
+        <Paper
+          elevation={0}
           sx={{
-            minWidth: 220,
-            borderRight: "1px solid #e5e7eb",
-            "& .MuiTab-root": {
-              alignItems: "flex-start",
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: 1,
-              mb: 0.5,
-              minHeight: 44,
-            },
-            "& .Mui-selected": { bgcolor: "#eef2ff" },
-            "& .MuiTabs-indicator": { left: 0, width: 3, bgcolor: "#6366f1" },
+            minWidth: 280,
+            maxWidth: 280,
+            borderRadius: 2,
+            border: "1px solid #e5e7eb",
+            overflow: "hidden",
           }}
         >
-          <Tab icon={<DescriptionIcon />} iconPosition="start" label={t("sessionAdditions")} />
-          <Tab icon={<QuizIcon />} iconPosition="start" label={t("quizComing")} />
-          <Tab
-            icon={<InsertDriveFileIcon />}
-            iconPosition="start"
-            label={t("whiteboard")}
-            onClick={() => navigate(`/whiteboard/${seanceId}`)}
-          />
-          <Tab icon={<GroupIcon />} iconPosition="start" label="Regroupement" />
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackFormateur") || "Feedback Formateur"} />
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label="Feedback Étudiant" />
-          {showFeedbackTab && <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedback")} />}
-          <Tab icon={<FeedbackIcon />} iconPosition="start" label={t("feedbackList")} />
-        </Tabs>
-
-        <Box flex={1} pl={3}>
-          {/* Tab 0: images/videos */}
-          {tab === 0 && (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={1} mt={0.5} mb={1}>
-                <Typography variant="h6">{t("sessionImages")}</Typography>
-                <Tooltip title={t("uploadImage") || "Upload image"}>
-                  <IconButton color="primary" component="label" size="small">
-                    <AddPhotoAlternateIcon />
-                    <input type="file" accept="image/*" hidden onChange={handleAddImage} />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-
-              {sessionImages.length ? (
-                <ImageList variant="masonry" cols={4} gap={8}>
-                  {sessionImages.map((img) => (
-                    <ImageListItem
-                      key={img.id}
-                      onClick={() => setZoomedImage(img.fileUrl)}
-                      sx={{ cursor: "zoom-in" }}
-                    >
-                      <img
-                        src={img.fileUrl}
-                        alt=""
-                        style={{ width: "100%", borderRadius: 8, boxShadow: "0 1px 6px #bbb" }}
-                        loading="lazy"
-                      />
-                    </ImageListItem>
-                  ))}
-                </ImageList>
-              ) : (
-                <Typography color="text.secondary" sx={{ mb: 2 }}>
-                  {t("noImages") || "No images yet."}
+          <Box sx={{ p: 2, borderBottom: "1px solid #e5e7eb", bgcolor: "#f8fafc" }}>
+            <Typography variant="h6" fontWeight={700} color="primary">
+              🎛️ {t("seances.sessionTools")}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ p: 1 }}>
+            <Stack spacing={0.5}>
+              {/* Media & Resources */}
+              <Typography variant="overline" sx={{ px: 1, py: 0.5, fontWeight: 700, color: "text.secondary" }}>
+                📁 {t("seances.mediaResources")}
+              </Typography>
+              <Button
+                fullWidth
+                variant={tab === 0 ? "contained" : "text"}
+                startIcon={<DescriptionIcon />}
+                onClick={() => setTab(0)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.sessionAdditions")}
+              </Button>
+              
+              {/* Program Control */}
+              <RoleGate roles={['formateur']}>
+                <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                  📚 {t("seances.programControl")}
                 </Typography>
+                <Button
+                  fullWidth
+                  variant={programVisibleToStudents ? "contained" : "outlined"}
+                  color={programVisibleToStudents ? "success" : "primary"}
+                  onClick={handleToggleProgramVisibility}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1, mb: 1 }}
+                >
+                  {programVisibleToStudents ? t("seances.programVisibleToStudents") : t("seances.showProgramToStudents")}
+                </Button>
+              </RoleGate>
+              
+              {/* Learning Tools */}
+              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                🎓 {t("seances.learningTools")}
+              </Typography>
+              <Button
+                fullWidth
+                variant={tab === 1 ? "contained" : "text"}
+                startIcon={<QuizIcon />}
+                onClick={() => setTab(1)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.quizComing")}
+              </Button>
+              <Button
+                fullWidth
+                variant="text"
+                startIcon={<InsertDriveFileIcon />}
+                onClick={() => navigate(`/whiteboard/${seanceId}`)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.whiteboard")}
+              </Button>
+              
+              {/* Collaboration */}
+              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                👥 {t("seances.collaboration")}
+              </Typography>
+              <Button
+                fullWidth
+                variant={tab === 3 ? "contained" : "text"}
+                startIcon={<GroupIcon />}
+                onClick={() => setTab(3)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.regroupement")}
+              </Button>
+              
+              {/* Feedback */}
+              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                💬 {t("seances.feedbackSection")}
+              </Typography>
+              <Button
+                fullWidth
+                variant={tab === 4 ? "contained" : "text"}
+                startIcon={<FeedbackIcon />}
+                onClick={() => setTab(4)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.feedbackFormateur")}
+              </Button>
+              <Button
+                fullWidth
+                variant={tab === 5 ? "contained" : "text"}
+                startIcon={<FeedbackIcon />}
+                onClick={() => setTab(5)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.feedbackEtudiant")}
+              </Button>
+              {showFeedbackTab && (
+                <Button
+                  fullWidth
+                  variant={tab === 6 ? "contained" : "text"}
+                  startIcon={<FeedbackIcon />}
+                  onClick={() => setTab(6)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.feedback")}
+                </Button>
               )}
+              <Button
+                fullWidth
+                variant={tab === (showFeedbackTab ? 7 : 6) ? "contained" : "text"}
+                startIcon={<FeedbackIcon />}
+                onClick={() => setTab(showFeedbackTab ? 7 : 6)}
+                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+              >
+                {t("seances.feedbackList")}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
 
-              <Stack direction="row" alignItems="center" spacing={1} mt={3} mb={1}>
-                <Typography variant="h6">{t("sessionVideos")}</Typography>
-                <Tooltip title={t("uploadVideo") || "Upload video"}>
-                  <IconButton color="primary" component="label" size="small">
-                    <MovieIcon />
-                    <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
-
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {sessionVideos.length ? (
-                  sessionVideos.map((vid) => (
-                    <Paper
-                      key={vid.id}
-                      variant="outlined"
-                      sx={{ width: 220, p: 1, borderRadius: 2, bgcolor: "#fafafa" }}
-                    >
-                      <ReactPlayer url={vid.fileUrl} controls width="100%" height={120} />
-                    </Paper>
-                  ))
-                ) : (
-                  <Typography color="text.secondary">
-                    {t("noVideos") || "No videos yet."}
+        {/* Main Content Area */}
+        <Box flex={1}>
+          {/* Tab 0: Media & Resources */}
+          {tab === 0 && (
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e5e7eb" }}>
+              <Typography variant="h5" fontWeight={700} mb={3} color="primary">
+                📁 {t("seances.mediaResources")}
+              </Typography>
+              
+              {/* Images Section */}
+              <Box mb={4}>
+                <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                  <Typography variant="h6" fontWeight={600}>
+                    🖼️ {t("seances.sessionImages")}
                   </Typography>
+                  <Tooltip title={t("seances.uploadImage")}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      component="label"
+                      startIcon={<AddPhotoAlternateIcon />}
+                    >
+                      {t("seances.addImage")}
+                      <input type="file" accept="image/*" hidden onChange={handleAddImage} />
+                    </Button>
+                  </Tooltip>
+                </Stack>
+
+                {sessionImages.length ? (
+                  <ImageList variant="masonry" cols={3} gap={12}>
+                    {sessionImages.map((img) => (
+                      <ImageListItem
+                        key={img.id}
+                        onClick={() => setZoomedImage(img.fileUrl)}
+                        sx={{ 
+                          cursor: "zoom-in",
+                          borderRadius: 2,
+                          overflow: "hidden",
+                          "&:hover": { transform: "scale(1.02)", transition: "transform 0.2s" }
+                        }}
+                      >
+                        <img
+                          src={img.fileUrl}
+                          alt=""
+                          style={{ width: "100%", borderRadius: 8, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}
+                          loading="lazy"
+                        />
+                      </ImageListItem>
+                    ))}
+                  </ImageList>
+                ) : (
+                  <Box
+                    sx={{
+                      p: 3,
+                      border: "2px dashed #e0e0e0",
+                      borderRadius: 2,
+                      textAlign: "center",
+                      bgcolor: "#fafafa"
+                    }}
+                  >
+                    <Typography color="text.secondary">
+                      {t("seances.noImages")}
+                    </Typography>
+                  </Box>
                 )}
-              </Stack>
-            </Box>
+              </Box>
+
+              {/* Videos Section */}
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                  <Typography variant="h6" fontWeight={600}>
+                    🎥 {t("seances.sessionVideos")}
+                  </Typography>
+                  <Tooltip title={t("seances.uploadVideo")}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      component="label"
+                      startIcon={<MovieIcon />}
+                    >
+                      {t("seances.addVideo")}
+                      <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
+                    </Button>
+                  </Tooltip>
+                </Stack>
+
+                {sessionVideos.length ? (
+                  <Grid container spacing={2}>
+                    {sessionVideos.map((vid) => (
+                      <Grid item xs={12} sm={6} md={4} key={vid.id}>
+                        <Paper
+                          variant="outlined"
+                          sx={{ 
+                            p: 1.5, 
+                            borderRadius: 2,
+                            "&:hover": { boxShadow: 3 }
+                          }}
+                        >
+                          <ReactPlayer 
+                            url={vid.fileUrl} 
+                            controls 
+                            width="100%" 
+                            height={140}
+                            style={{ borderRadius: 8 }}
+                          />
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Box
+                    sx={{
+                      p: 3,
+                      border: "2px dashed #e0e0e0",
+                      borderRadius: 2,
+                      textAlign: "center",
+                      bgcolor: "#fafafa"
+                    }}
+                  >
+                    <Typography color="text.secondary">
+                      {t("seances.noVideos")}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Paper>
           )}
 
-          {/* Tab 1: quizzes */}
+          {/* Tab 1: Learning Tools */}
           {tab === 1 && (
-            <Box>
-              <Typography variant="h6" mb={2}>🧪 {t("quizComing") || "Quizzes (session)"}</Typography>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 2, border: "1px solid #e5e7eb" }}>
+              <Typography variant="h5" fontWeight={700} mb={3} color="primary">
+                🎓 {t("seances.learningTools")}
+              </Typography>
+              
+              <Box mb={3}>
+                <Typography variant="h6" fontWeight={600} mb={2}>
+                  🧪 {t("seances.quizComing")}
+                </Typography>
+                <QuizList sessionId={seance?.session2?.id} />
+              </Box>
+              
+              
               {getSessionQuizzes().length === 0 ? (
-                <Typography color="text.secondary">No quizzes linked to this session yet.</Typography>
+                <Typography color="text.secondary">{t("seances.noQuizzesLinked")}</Typography>
+                
               ) : (
                 <Stack spacing={1.25}>
                   {getSessionQuizzes().map((q) => {
                     const meta = quizMetaByContenu[q.contenuId];
-                    const qCount = meta?.questions?.length ?? "—";
-                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} min` : "—";
+                    const qCount = meta?.questions?.length ?? t("seances.dash");
+                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash");
 
                     return (
                       <Paper
@@ -648,22 +903,22 @@ const AnimerSeanceView = () => {
                           <Box>
                             <Typography fontWeight={700}>{q.title}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {t("course") || "Course"}: {q.courseTitle || "—"}
+                              {t("seances.course")}: {q.courseTitle || t("seances.dash")}
                             </Typography>
                           </Box>
                         </Stack>
 
                         <Chip
-                          label={q.published ? "Published" : "Draft"}
+                          label={q.published ? t("seances.published") : t("seances.draft")}
                           color={q.published ? "success" : "default"}
                           size="small"
                           variant={q.published ? "filled" : "outlined"}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {t("questions") || "Questions"}: <b>{qCount}</b> · {t("time") || "Time"}: <b>{timeStr}</b>
+                          {t("seances.questions")}: <b>{qCount}</b> · {t("seances.time")}: <b>{timeStr}</b>
                         </Typography>
 
-                        <Tooltip title={q.published ? t("open") : t("publishFirst")}>
+                        <Tooltip title={q.published ? t("seances.open") : t("seances.publishFirst")}>
                           <span>
                             <Button
                               variant="contained"
@@ -671,8 +926,17 @@ const AnimerSeanceView = () => {
                               startIcon={<PlayArrowIcon />}
                               disabled={!q.published}
                               onClick={() => navigate(`/seances/${seanceId}/quiz/${q.contenuId}`)}
+                              sx={{
+                                borderRadius: 2,
+                                background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+                                boxShadow: "0 4px 12px rgba(25, 118, 210, 0.3)",
+                                '&:hover': { 
+                                  transform: 'translateY(-1px)', 
+                                  boxShadow: '0 8px 20px rgba(25,118,210,0.4)' 
+                                }
+                              }}
                             >
-                              {t("open")}
+                              {t("seances.open")}
                             </Button>
                           </span>
                         </Tooltip>
@@ -681,7 +945,7 @@ const AnimerSeanceView = () => {
                   })}
                 </Stack>
               )}
-            </Box>
+            </Paper>
           )}
 
           {/* Tab 2: whiteboard (navigates on click) */}
@@ -694,7 +958,7 @@ const AnimerSeanceView = () => {
           {tab === 4 && (
             <Box>
               <Typography variant="h6" mb={2}>
-                {t("feedbackFormateur") || "Feedback Formateur"}
+                {t("seances.feedbackFormateur")}
               </Typography>
               <FeedbackFormateur seanceId={seanceId} />
             </Box>
@@ -703,7 +967,7 @@ const AnimerSeanceView = () => {
           {/* Tab 5: Feedback Étudiant */}
           {tab === 5 && (
             <Box>
-              <Typography variant="h6" mb={2}>Feedback Étudiant</Typography>
+              <Typography variant="h6" mb={2}>{t("seances.feedbackEtudiant")}</Typography>
               <FeedbackEtudiant seanceId={seanceId} />
             </Box>
           )}
@@ -712,7 +976,7 @@ const AnimerSeanceView = () => {
           {showFeedbackTab && tab === 6 && (
             <Box>
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t("sessionFeedback")}</Typography>
+                <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
               </Stack>
               <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
             </Box>
@@ -729,14 +993,14 @@ const AnimerSeanceView = () => {
           <Stack direction="row" alignItems="center" spacing={2}>
             <FeedbackIcon color="primary" />
             <Box>
-              {t("feedbackFrom")} <b>{selectedFeedback?.studentName}</b>
+              {t("seances.feedbackFrom")} <b>{selectedFeedback?.studentName}</b>
               <Typography variant="body2" color="text.secondary">
                 {selectedFeedback?.studentEmail}
               </Typography>
             </Box>
           </Stack>
         </DialogTitle>
-        <DialogContent dividers sx={{ bgcolor: "#f8fafc", maxHeight: 500 }}>
+        <DialogContent dividers sx={{ maxHeight: 500 }}>
           {/* body omitted intentionally */}
         </DialogContent>
       </Dialog>
@@ -752,7 +1016,7 @@ const AnimerSeanceView = () => {
             zIndex: 2000,
             width: "100vw",
             height: "100vh",
-            background: "rgba(0,0,0,0.88)",
+            background: "rgba(0,0,0,0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -772,3 +1036,5 @@ const AnimerSeanceView = () => {
 };
 
 export default AnimerSeanceView;
+
+

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   Button,
   Card,
@@ -24,8 +25,15 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import api from "../../../../api/axiosInstance";
 
 const EmojiRating = ({ rating, onRatingChange, label }) => {
+  const { t } = useTranslation()
   const emojis = ["😞", "😐", "🙂", "😊", "🤩"]
-  const labels = ["Très mauvais", "Mauvais", "Moyen", "Bon", "Excellent"]
+  const labels = [
+    t('seanceFeedbackForm.ratings.veryBad'),
+    t('seanceFeedbackForm.ratings.bad'),
+    t('seanceFeedbackForm.ratings.average'),
+    t('seanceFeedbackForm.ratings.good'),
+    t('seanceFeedbackForm.ratings.excellent')
+  ]
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -41,11 +49,11 @@ const EmojiRating = ({ rating, onRatingChange, label }) => {
               cursor: "pointer",
               padding: "8px",
               borderRadius: "50%",
-              backgroundColor: rating === index + 1 ? "#e3f2fd" : "transparent",
+              backgroundColor: "transparent",
               border: rating === index + 1 ? "2px solid #1976d2" : "2px solid transparent",
               transition: "all 0.2s",
               "&:hover": {
-                backgroundColor: "#f5f5f5",
+                // backgroundColor: "#f5f5f5",
                 transform: "scale(1.1)",
               },
             }}
@@ -64,6 +72,7 @@ const EmojiRating = ({ rating, onRatingChange, label }) => {
 }
 
 export default function AddSeanceFeedback({ seanceId }) {
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const [feedback, setFeedback] = useState({
     sessionRating: 0,
@@ -90,13 +99,18 @@ export default function AddSeanceFeedback({ seanceId }) {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [showStepError, setShowStepError] = useState(false)
 
-  // Gestionnaires optimisés pour éviter les re-rendus
   const handleTextChange = (field) => (event) => {
     const value = event.target.value
     setFeedback(prev => ({ ...prev, [field]: value }))
   }
 
-  const steps = ["Guide des Emojis", "Déroulement de la Séance", "Évaluation du Formateur", "Évaluation de l'Équipe", "Recommandations"]
+  const steps = [
+    t('seanceFeedbackForm.steps.guide'),
+    t('seanceFeedbackForm.steps.sessionFlow'),
+    t('seanceFeedbackForm.steps.trainerEval'),
+    t('seanceFeedbackForm.steps.teamEval'),
+    t('seanceFeedbackForm.steps.recommendations')
+  ]
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -107,13 +121,12 @@ export default function AddSeanceFeedback({ seanceId }) {
     setShowStepError(false)
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      // Exclure tout champ 'id' du feedback
       const { id, ...feedbackData } = feedback;
       await api.post("/feedback/seance", {
         ...feedbackData,
         seanceId: Number(seanceId),
         userId: user?.id,
-        improvementAreas: feedback.improvementAreas.join(", ") // backend attend string
+        improvementAreas: feedback.improvementAreas.join(", ")
       });
       setIsSubmitted(true)
     } catch (err) {
@@ -148,7 +161,7 @@ export default function AddSeanceFeedback({ seanceId }) {
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return true // Guide des emojis - étape informative
+        return true
       case 1:
         return (
           feedback.sessionRating > 0 &&
@@ -166,9 +179,9 @@ export default function AddSeanceFeedback({ seanceId }) {
           feedback.trainerInteraction > 0
         )
       case 3:
-        return true // Étape optionnelle
+        return true
       case 4:
-        return feedback.wouldRecommend !== "" // Seule la recommandation est obligatoire
+        return feedback.wouldRecommend !== ""
       default:
         return true
     }
@@ -182,56 +195,56 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardHeader>
               <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Recommend color="primary" />
-                Guide des Emojis et Commentaires
+                {t('seanceFeedbackForm.guide.title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Voici la signification des emojis utilisés dans ce formulaire
+                {t('seanceFeedbackForm.guide.desc')}
               </Typography>
             </CardHeader>
             <CardContent>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-                  🎯 Signification des Emojis d'Évaluation
+                  {t('seanceFeedbackForm.guide.ratingsTitle')}
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography sx={{ fontSize: "2rem" }}>😞</Typography>
-                    <Typography><strong>Très mauvais</strong> - Performance très insatisfaisante</Typography>
+                    <Typography><strong>{t('seanceFeedbackForm.ratings.veryBad')}</strong></Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography sx={{ fontSize: "2rem" }}>😐</Typography>
-                    <Typography><strong>Mauvais</strong> - Performance en dessous des attentes</Typography>
+                    <Typography><strong>{t('seanceFeedbackForm.ratings.bad')}</strong></Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography sx={{ fontSize: "2rem" }}>🙂</Typography>
-                    <Typography><strong>Moyen</strong> - Performance acceptable</Typography>
+                    <Typography><strong>{t('seanceFeedbackForm.ratings.average')}</strong></Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography sx={{ fontSize: "2rem" }}>😊</Typography>
-                    <Typography><strong>Bon</strong> - Performance satisfaisante</Typography>
+                    <Typography><strong>{t('seanceFeedbackForm.ratings.good')}</strong></Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Typography sx={{ fontSize: "2rem" }}>🤩</Typography>
-                    <Typography><strong>Excellent</strong> - Performance exceptionnelle</Typography>
+                    <Typography><strong>{t('seanceFeedbackForm.ratings.excellent')}</strong></Typography>
                   </Box>
                 </Box>
               </Box>
-              
+
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-                  ⏰ Autres Symboles Utilisés
+                  {t('seanceFeedbackForm.guide.otherSymbolsTitle')}
                 </Typography>
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                  <Typography>⏰ <strong>Trop courte</strong> - La durée était insuffisante</Typography>
-                  <Typography>✅ <strong>Adéquate</strong> - La durée était parfaite</Typography>
-                  <Typography>⏳ <strong>Trop longue</strong> - La durée était excessive</Typography>
-                  <Typography>💬 <strong>Commentaires</strong> - Zone de texte libre</Typography>
+                  <Typography>{t('seanceFeedbackForm.guide.durationShort')}</Typography>
+                  <Typography>{t('seanceFeedbackForm.guide.durationAdequate')}</Typography>
+                  <Typography>{t('seanceFeedbackForm.guide.durationLong')}</Typography>
+                  <Typography>{t('seanceFeedbackForm.guide.comments')}</Typography>
                 </Box>
               </Box>
-              
-              <Box sx={{ p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+
+              <Box sx={{ p: 2, borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary">
-                  💡 <strong>Conseil :</strong> Prenez le temps de réfléchir à chaque critère avant de donner votre évaluation. Vos retours sont précieux pour améliorer la qualité des formations.
+                  {t('seanceFeedbackForm.guide.tip')}
                 </Typography>
               </Box>
             </CardContent>
@@ -244,10 +257,10 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardHeader>
               <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <MenuBook color="primary" />
-                Évaluation du Déroulement de la Séance
+                {t('seanceFeedbackForm.sessionFlow.title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Comment évaluez-vous le contenu et l'organisation de la séance ?
+                {t('seanceFeedbackForm.sessionFlow.subtitle')}
               </Typography>
             </CardHeader>
             <CardContent>
@@ -256,44 +269,44 @@ export default function AddSeanceFeedback({ seanceId }) {
                   <EmojiRating
                     rating={feedback.sessionRating}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, sessionRating: rating }))}
-                    label="Note globale de la séance"
+                    label={t('seanceFeedbackForm.sessionFlow.sessionRating')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.contentQuality}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, contentQuality: rating }))}
-                    label="Qualité du contenu"
+                    label={t('seanceFeedbackForm.sessionFlow.contentQuality')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.sessionOrganization}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, sessionOrganization: rating }))}
-                    label="Organisation de la séance"
+                    label={t('seanceFeedbackForm.sessionFlow.sessionOrganization')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.objectivesAchieved}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, objectivesAchieved: rating }))}
-                    label="Objectifs atteints"
+                    label={t('seanceFeedbackForm.sessionFlow.objectivesAchieved')}
                   />
                 </div>
               </div>
 
               <FormControl component="fieldset" sx={{ mt: 3, mb: 3 }}>
                 <FormLabel component="legend" sx={{ fontWeight: "bold" }}>
-                  Durée de la séance
+                  {t('seanceFeedbackForm.sessionFlow.duration')}
                 </FormLabel>
                 <RadioGroup
                   value={feedback.sessionDuration}
                   onChange={(e) => setFeedback((prev) => ({ ...prev, sessionDuration: e.target.value }))}
                   row
                 >
-                  <FormControlLabel value="trop-courte" control={<Radio />} label="⏰ Trop courte" />
-                  <FormControlLabel value="adequate" control={<Radio />} label="✅ Adéquate" />
-                  <FormControlLabel value="trop-longue" control={<Radio />} label="⏳ Trop longue" />
+                  <FormControlLabel value="trop-courte" control={<Radio />} label={t('seanceFeedbackForm.sessionFlow.durationShort')} />
+                  <FormControlLabel value="adequate" control={<Radio />} label={t('seanceFeedbackForm.sessionFlow.durationAdequate')} />
+                  <FormControlLabel value="trop-longue" control={<Radio />} label={t('seanceFeedbackForm.sessionFlow.durationLong')} />
                 </RadioGroup>
               </FormControl>
 
@@ -301,10 +314,10 @@ export default function AddSeanceFeedback({ seanceId }) {
                 fullWidth
                 multiline
                 rows={4}
-                label="💬 Commentaires sur la séance (optionnel)"
+                label={t('seanceFeedbackForm.sessionFlow.commentsLabel')}
                 value={feedback.sessionComments}
                 onChange={handleTextChange('sessionComments')}
-                placeholder="Partagez vos impressions sur le déroulement de la séance..."
+                placeholder={t('seanceFeedbackForm.sessionFlow.commentsPlaceholder')}
                 variant="outlined"
                 sx={{ mt: 2 }}
               />
@@ -318,10 +331,10 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardHeader>
               <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Person color="primary" />
-                Évaluation du Formateur
+                {t('seanceFeedbackForm.trainerEval.title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Comment évaluez-vous les compétences et l'approche du formateur ?
+                {t('seanceFeedbackForm.trainerEval.subtitle')}
               </Typography>
             </CardHeader>
             <CardContent>
@@ -330,28 +343,28 @@ export default function AddSeanceFeedback({ seanceId }) {
                   <EmojiRating
                     rating={feedback.trainerRating}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, trainerRating: rating }))}
-                    label="Note globale du formateur"
+                    label={t('seanceFeedbackForm.trainerEval.trainerRating')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.trainerClarity}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, trainerClarity: rating }))}
-                    label="Clarté des explications"
+                    label={t('seanceFeedbackForm.trainerEval.trainerClarity')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.trainerPedagogy}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, trainerPedagogy: rating }))}
-                    label="Approche pédagogique"
+                    label={t('seanceFeedbackForm.trainerEval.trainerPedagogy')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.trainerAvailability}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, trainerAvailability: rating }))}
-                    label="Disponibilité et écoute"
+                    label={t('seanceFeedbackForm.trainerEval.trainerAvailability')}
                   />
                 </div>
               </div>
@@ -359,17 +372,17 @@ export default function AddSeanceFeedback({ seanceId }) {
               <EmojiRating
                 rating={feedback.trainerInteraction}
                 onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, trainerInteraction: rating }))}
-                label="Interaction avec les étudiants"
+                label={t('seanceFeedbackForm.trainerEval.trainerInteraction')}
               />
 
               <TextField
                 fullWidth
                 multiline
                 rows={4}
-                label="💬 Commentaires sur le formateur (optionnel)"
+                label={t('seanceFeedbackForm.trainerEval.commentsLabel')}
                 value={feedback.trainerComments}
                 onChange={handleTextChange('trainerComments')}
-                placeholder="Partagez vos impressions sur le formateur..."
+                placeholder={t('seanceFeedbackForm.trainerEval.commentsPlaceholder')}
                 variant="outlined"
                 sx={{ mt: 3 }}
               />
@@ -383,10 +396,10 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardHeader>
               <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Group color="primary" />
-                Évaluation de l'Équipe d'Étudiants
+                {t('seanceFeedbackForm.teamEval.title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Comment évaluez-vous la collaboration et la participation de votre équipe ? (optionnel)
+                {t('seanceFeedbackForm.teamEval.subtitle')}
               </Typography>
             </CardHeader>
             <CardContent>
@@ -395,28 +408,28 @@ export default function AddSeanceFeedback({ seanceId }) {
                   <EmojiRating
                     rating={feedback.teamRating}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, teamRating: rating }))}
-                    label="Note globale de l'équipe"
+                    label={t('seanceFeedbackForm.teamEval.teamRating')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.teamCollaboration}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, teamCollaboration: rating }))}
-                    label="Esprit de collaboration"
+                    label={t('seanceFeedbackForm.teamEval.teamCollaboration')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.teamParticipation}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, teamParticipation: rating }))}
-                    label="Niveau de participation"
+                    label={t('seanceFeedbackForm.teamEval.teamParticipation')}
                   />
                 </div>
                 <div className="col-md-6">
                   <EmojiRating
                     rating={feedback.teamCommunication}
                     onRatingChange={(rating) => setFeedback((prev) => ({ ...prev, teamCommunication: rating }))}
-                    label="Qualité de la communication"
+                    label={t('seanceFeedbackForm.teamEval.teamCommunication')}
                   />
                 </div>
               </div>
@@ -425,10 +438,10 @@ export default function AddSeanceFeedback({ seanceId }) {
                 fullWidth
                 multiline
                 rows={4}
-                label="💬 Commentaires sur l'équipe (optionnel)"
+                label={t('seanceFeedbackForm.teamEval.commentsLabel')}
                 value={feedback.teamComments}
                 onChange={handleTextChange('teamComments')}
-                placeholder="Partagez vos impressions sur le travail d'équipe..."
+                placeholder={t('seanceFeedbackForm.teamEval.commentsPlaceholder')}
                 variant="outlined"
                 sx={{ mt: 3 }}
               />
@@ -442,42 +455,42 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardHeader>
               <Typography variant="h5" sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
                 <Recommend color="primary" />
-                Recommandations et Suggestions
+                {t('seanceFeedbackForm.recommendations.title')}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Aidez-nous à améliorer nos formations
+                {t('seanceFeedbackForm.recommendations.subtitle')}
               </Typography>
             </CardHeader>
             <CardContent>
               <FormControl component="fieldset" sx={{ mb: 3 }}>
                 <FormLabel component="legend" sx={{ fontWeight: "bold" }}>
-                  🤔 Recommanderiez-vous cette formation ? *
+                  {t('seanceFeedbackForm.recommendations.wouldRecommend')}
                 </FormLabel>
                 <RadioGroup
                   value={feedback.wouldRecommend}
                   onChange={(e) => setFeedback((prev) => ({ ...prev, wouldRecommend: e.target.value }))}
                 >
-                  <FormControlLabel value="oui" control={<Radio />} label="👍 Oui, certainement" />
-                  <FormControlLabel value="peut-etre" control={<Radio />} label="🤷 Peut-être" />
-                  <FormControlLabel value="non" control={<Radio />} label="👎 Non" />
+                  <FormControlLabel value="oui" control={<Radio />} label={t('seanceFeedbackForm.recommendations.optYes')} />
+                  <FormControlLabel value="peut-etre" control={<Radio />} label={t('seanceFeedbackForm.recommendations.optMaybe')} />
+                  <FormControlLabel value="non" control={<Radio />} label={t('seanceFeedbackForm.recommendations.optNo')} />
                 </RadioGroup>
               </FormControl>
 
               <FormControl component="fieldset" sx={{ mb: 3 }}>
                 <FormLabel component="legend" sx={{ fontWeight: "bold" }}>
-                  🔧 Domaines d'amélioration (plusieurs choix possibles)
+                  {t('seanceFeedbackForm.recommendations.improvementAreas')}
                 </FormLabel>
                 <FormGroup>
                   <div className="row">
                     {[
-                      "📚 Contenu du cours",
-                      "🎯 Méthodes pédagogiques",
-                      "📖 Support de cours",
-                      "💻 Exercices pratiques",
-                      "⏰ Gestion du temps",
-                      "🗣️ Interaction avec les étudiants",
-                      "🏢 Environnement de formation",
-                      "🔧 Outils techniques",
+                      t('seanceFeedbackForm.recommendations.areas.courseContent'),
+                      t('seanceFeedbackForm.recommendations.areas.pedagogy'),
+                      t('seanceFeedbackForm.recommendations.areas.materials'),
+                      t('seanceFeedbackForm.recommendations.areas.practices'),
+                      t('seanceFeedbackForm.recommendations.areas.time'),
+                      t('seanceFeedbackForm.recommendations.areas.interaction'),
+                      t('seanceFeedbackForm.recommendations.areas.environment'),
+                      t('seanceFeedbackForm.recommendations.areas.tools'),
                     ].map((area) => (
                       <div className="col-md-6" key={area}>
                         <FormControlLabel
@@ -499,10 +512,10 @@ export default function AddSeanceFeedback({ seanceId }) {
                 fullWidth
                 multiline
                 rows={4}
-                label="💡 Suggestions d'amélioration (optionnel)"
+                label={t('seanceFeedbackForm.recommendations.suggestionsLabel')}
                 value={feedback.suggestions}
                 onChange={handleTextChange('suggestions')}
-                placeholder="Quelles améliorations suggérez-vous pour les prochaines formations ?"
+                placeholder={t('seanceFeedbackForm.recommendations.suggestionsPlaceholder')}
                 variant="outlined"
                 sx={{ mt: 2 }}
               />
@@ -519,19 +532,19 @@ export default function AddSeanceFeedback({ seanceId }) {
 
   if (isSubmitted) {
     return (
-      <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <div className="container-fluid py-4" style={{ minHeight: "100vh" }}>
         <div className="row justify-content-center">
           <div className="col-lg-8">
             <Card className="shadow-lg" sx={{ mt: 8, textAlign: "center" }}>
               <CardContent>
                 <Typography variant="h3" sx={{ color: "#1976d2", fontWeight: "bold", mb: 2 }}>
-                  🎉 Merci pour votre feedback !
+                  {t('seanceFeedbackForm.success.title')}
                 </Typography>
                 <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
-                  Votre avis a bien été enregistré.
+                  {t('seanceFeedbackForm.success.subtitle')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Nous apprécions le temps que vous avez pris pour nous aider à améliorer nos formations.
+                  {t('seanceFeedbackForm.success.desc')}
                 </Typography>
               </CardContent>
             </Card>
@@ -542,18 +555,18 @@ export default function AddSeanceFeedback({ seanceId }) {
   }
 
   return (
-    <div className="container-fluid py-4" style={{ backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+    <div className="container-fluid py-4" style={{ minHeight: "100vh" }}>
       <div className="row justify-content-center">
         <div className="col-lg-10 col-xl-8">
           <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography variant="h3" gutterBottom sx={{ fontWeight: "bold", color: "#1976d2" }}>
-              📝 Formulaire de Feedback
+              {t('seanceFeedbackForm.title')}
             </Typography>
             <Typography variant="h5" color="text.secondary" gutterBottom>
-              Séance de Formation
+              {t('seanceFeedbackForm.subtitle')}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Votre avis nous aide à améliorer la qualité de nos formations
+              {t('seanceFeedbackForm.helper')}
             </Typography>
           </Box>
 
@@ -562,11 +575,11 @@ export default function AddSeanceFeedback({ seanceId }) {
             <CardContent>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="h6" gutterBottom>
-                  Étape {currentStep + 1} sur {steps.length}: {steps[currentStep]}
+                  {t('seanceFeedbackForm.progress.stepXofY', { current: currentStep + 1, total: steps.length, label: steps[currentStep] })}
                 </Typography>
                 <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  {Math.round(progress)}% complété
+                  {t('seanceFeedbackForm.progress.percentCompleted', { percent: Math.round(progress) })}
                 </Typography>
               </Box>
             </CardContent>
@@ -600,7 +613,7 @@ export default function AddSeanceFeedback({ seanceId }) {
                     startIcon={<NavigateBefore />}
                     size="large"
                   >
-                    Précédent
+                    {t('seanceFeedbackForm.buttons.prev')}
                   </Button>
 
                   <Typography variant="body2" color="text.secondary">
@@ -615,7 +628,7 @@ export default function AddSeanceFeedback({ seanceId }) {
                       size="large"
                       sx={{ minWidth: 150 }}
                     >
-                      Envoyer le Feedback
+                      {t('seanceFeedbackForm.buttons.submit')}
                     </Button>
                   ) : (
                     <Button
@@ -625,13 +638,13 @@ export default function AddSeanceFeedback({ seanceId }) {
                       size="large"
                       sx={{ minWidth: 150 }}
                     >
-                      Suivant
+                      {t('seanceFeedbackForm.buttons.next')}
                     </Button>
                   )}
                 </Box>
                 {showStepError && (
                   <Typography color="error" sx={{ mt: 2, textAlign: "center" }}>
-                    Veuillez remplir tous les champs obligatoires avant de continuer.
+                    {t('seanceFeedbackForm.errors.stepRequired')}
                   </Typography>
                 )}
               </CardContent>
@@ -669,7 +682,7 @@ export default function AddSeanceFeedback({ seanceId }) {
                 })
               }}
             >
-              🔄 Réinitialiser le formulaire
+              {t('seanceFeedbackForm.buttons.reset')}
             </Button>
           </Box>
         </div>

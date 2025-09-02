@@ -21,7 +21,7 @@ import { QuizModule } from './quiz/quiz.module';
 import { Session2Module } from './session2/session2.module';
 import { SeanceFormateurModule } from './seance-formateur/seance-formateur.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
-import { ChatMessagesModule } from './chat-messages/chat-messages.module';
+// import { ChatMessagesModule } from './chat-messages/chat-messages.module';
 import { WhiteboardModule } from './whiteboard/whiteboard.module';
 import { Session2ChatModule } from './session2-chat/session2-chat.module';
 import { GeneralChatMessageModule } from './general-chat-message/general-chat-message.module';
@@ -38,6 +38,8 @@ import {SessionFeedbackModule} from './session-feedback/session-feedback.module'
 import { RéclamationModule } from './réclamation/réclamation.module';
 import { FeedbackÉtudiantModule } from './feedback-étudiant/feedback-étudiant.module';
 import { ProgramChatModule } from './program-chat/program-chat.module';
+import { Etablissement2Module } from './etablissement2/etablissement2.module';
+import { DashboardEstablishmentModule } from './dashboard-establishment/dashboard-establishment.module';
 
 
 
@@ -48,7 +50,7 @@ import { ProgramChatModule } from './program-chat/program-chat.module';
 imports: [
   ConfigModule.forRoot({ isGlobal: true }),
   PrismaModule.forRoot({isGlobal:true}),
-  ChatMessagesModule, 
+  // ChatMessagesModule, 
   AuthModule, 
   UsersModule, 
   ProgramsModule, 
@@ -79,9 +81,8 @@ imports: [
     QuizModule,
     Session2Module,
     SeanceFormateurModule,
-    
     ChatbotModule,
-    ChatMessagesModule,
+    // ChatMessagesModule,
     WhiteboardModule,
     Session2ChatModule,
     GeneralChatMessageModule,
@@ -89,10 +90,11 @@ imports: [
     CreatorDashboardModule,
     FormateurDashboardModule,
     EtudiantDashboardModule,
-    S3Module,
     FeedbackFormateurModule,
     NotificationModule,
     ProgramChatModule,
+    Etablissement2Module,
+    DashboardEstablishmentModule,
   ],
   controllers: [AppController],
   providers: [

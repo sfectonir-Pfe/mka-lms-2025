@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Box, IconButton, Tooltip, Divider, Chip, Typography, useTheme } from "@mui/material"
 import {
   Create as PenIcon,
@@ -134,19 +135,20 @@ export default function ModernToolbar({
   panOffset,
 }) {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   const drawingTools = [
-    { tool: TOOLS.PEN, icon: PenIcon, label: "Pen Tool (P)", color: "primary" },
-    { tool: TOOLS.TEXT, icon: TextIcon, label: "Text Tool (T)", color: "secondary" },
-    { tool: TOOLS.RECTANGLE, icon: RectangleIcon, label: "Rectangle (R)", color: "success" },
-    { tool: TOOLS.CIRCLE, icon: CircleIcon, label: "Circle (C)", color: "info" },
-    { tool: TOOLS.ARROW, icon: ArrowIcon, label: "Arrow (A)", color: "warning" },
-    { tool: TOOLS.TABLE, icon: TableIcon, label: "Table (B)", color: "info" },
+    { tool: TOOLS.PEN, icon: PenIcon, label: `${t('whiteboard.tools.pen', 'Pen')} (P)`, color: "primary" },
+    { tool: TOOLS.TEXT, icon: TextIcon, label: `${t('whiteboard.tools.text', 'Text')} (T)`, color: "secondary" },
+    { tool: TOOLS.RECTANGLE, icon: RectangleIcon, label: `${t('whiteboard.tools.rectangle', 'Rectangle')} (R)`, color: "success" },
+    { tool: TOOLS.CIRCLE, icon: CircleIcon, label: `${t('whiteboard.tools.circle', 'Circle')} (C)`, color: "info" },
+    { tool: TOOLS.ARROW, icon: ArrowIcon, label: `${t('whiteboard.tools.arrow', 'Arrow')} (A)`, color: "warning" },
+    { tool: TOOLS.TABLE, icon: TableIcon, label: `${t('whiteboard.tools.table', 'Table')} (B)`, color: "info" },
   ]
 
   const utilityTools = [
-    { tool: TOOLS.SELECT, icon: SelectIcon, label: "Select (S)", color: "error" },
-    { tool: TOOLS.PAN, icon: PanIcon, label: "Pan Tool (G)", color: "default" },
+    { tool: TOOLS.SELECT, icon: SelectIcon, label: `${t('whiteboard.tools.select', 'Select')} (S)`, color: "error" },
+    { tool: TOOLS.PAN, icon: PanIcon, label: `${t('whiteboard.tools.pan', 'Pan')} (G)`, color: "default" },
   ]
 
   return (
@@ -154,7 +156,7 @@ export default function ModernToolbar({
       {/* Title */}
       <Box sx={{ textAlign: "center", mb: 2 }}>
         <Chip
-          label="Whiteboard Tools"
+          label={t('whiteboard.groups.toolsTitle', 'Whiteboard Tools')}
           color="primary"
           variant="outlined"
           sx={{ fontWeight: 600, fontSize: "0.9rem" }}
@@ -163,7 +165,7 @@ export default function ModernToolbar({
 
       {/* Drawing Tools */}
       <Box>
-        <Chip label="Drawing Tools" size="small" sx={{ mb: 2, width: "100%" }} />
+        <Chip label={t('whiteboard.groups.drawingTools', 'Drawing Tools')} size="small" sx={{ mb: 2, width: "100%" }} />
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1 }}>
           {drawingTools.map(({ tool: toolType, icon, label, color: toolColor }) => (
             <ToolButton
@@ -183,9 +185,9 @@ export default function ModernToolbar({
           <Box sx={{ mt: 2, p: 2, border: "1px solid rgba(0,0,0,0.1)", borderRadius: 2, backgroundColor: "rgba(25, 118, 210, 0.05)" }}>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                Table: {tableConfig.rows}×{tableConfig.columns}
+                {t('whiteboard.table.label', 'Table')}: {tableConfig.rows}×{tableConfig.columns}
               </Typography>
-              <Tooltip title="Configure Table" placement="top">
+              <Tooltip title={t('whiteboard.table.configure', 'Configure Table')} placement="top">
                 <IconButton
                   onClick={onTableConfig}
                   size="small"
@@ -225,7 +227,7 @@ export default function ModernToolbar({
 
       {/* Utility Tools */}
       <Box>
-        <Chip label="Utility Tools" size="small" sx={{ mb: 2, width: "100%" }} />
+        <Chip label={t('whiteboard.groups.utilityTools', 'Utility Tools')} size="small" sx={{ mb: 2, width: "100%" }} />
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1 }}>
           {utilityTools.map(({ tool: toolType, icon, label, color: toolColor }) => (
             <ToolButton
@@ -251,7 +253,7 @@ export default function ModernToolbar({
 
       {/* Color Picker */}
       <Box>
-        <Chip label="Colors" size="small" sx={{ mb: 2, width: "100%" }} />
+        <Chip label={t('whiteboard.groups.colors', 'Colors')} size="small" sx={{ mb: 2, width: "100%" }} />
         <ColorPicker color={color} setColor={setColor} />
       </Box>
 
@@ -259,33 +261,33 @@ export default function ModernToolbar({
 
       {/* Actions */}
       <Box>
-        <Chip label="Actions" size="small" sx={{ mb: 2, width: "100%" }} />
+        <Chip label={t('whiteboard.groups.actions', 'Actions')} size="small" sx={{ mb: 2, width: "100%" }} />
         <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 1 }}>
           <ActionButton
             onClick={onUndo}
             icon={UndoIcon}
-            label="Undo (Ctrl+Z)"
+            label={`${t('whiteboard.tools.undo', 'Undo')} (Ctrl+Z)`}
             color="primary"
             disabled={!canUndo}
           />
           <ActionButton
             onClick={onRedo}
             icon={RedoIcon}
-            label="Redo (Ctrl+Y)"
+            label={`${t('whiteboard.tools.redo', 'Redo')} (Ctrl+Y)`}
             color="primary"
             disabled={!canRedo}
           />
           <ActionButton
             onClick={onDelete}
             icon={DeleteIcon}
-            label="Delete Selected"
+            label={t('whiteboard.actions.deleteSelected', 'Delete Selected')}
             color="error"
             disabled={!hasSelection}
           />
           <ActionButton
             onClick={onClear}
             icon={ClearIcon}
-            label="Clear All"
+            label={t('whiteboard.actions.clearAll', 'Clear All')}
             color="error"
           />
         </Box>
@@ -294,7 +296,7 @@ export default function ModernToolbar({
       {/* Current Tool Indicator */}
       <Box sx={{ textAlign: "center", mt: "auto" }}>
         <Chip
-          label={`Current: ${tool}`}
+          label={`${t('whiteboard.status.current', 'Current')}: ${tool}`}
           color="primary"
           variant="filled"
           size="small"

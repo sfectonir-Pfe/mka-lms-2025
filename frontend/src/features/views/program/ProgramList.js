@@ -1,21 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import RoleGate from "../../../pages/auth/RoleGate";
 const ProgramList = () => {
   const { t } = useTranslation();
   const [programs, setPrograms] = useState([]);
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null, name: '' });
   const navigate = useNavigate();
+
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
 
   const fetchPrograms = async () => {
     try {
       const res = await api.get("/programs");
       setPrograms(res.data);
     } catch (err) {
-      console.error("Erreur chargement programmes", err);
+      console.error(t('programs.loadError'), err);
     }
   };
 
@@ -24,14 +68,25 @@ const ProgramList = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t('programs.confirmDelete'))) return;
+    const program = programs.find(p => p.id === id);
+    setDeleteDialog({ open: true, id, name: program?.name || 'Programme' });
+  };
 
+  const confirmDelete = async () => {
     try {
-      await api.delete(`/programs/${id}`);
-      setPrograms((prev) => prev.filter((p) => p.id !== id));
+      await api.delete(`/programs/${deleteDialog.id}`);
+      setPrograms((prev) => prev.filter((p) => p.id !== deleteDialog.id));
+      toast.success(t('programs.deleteSuccess'));
+      setDeleteDialog({ open: false, id: null, name: '' });
     } catch (err) {
-      console.error("Erreur suppression", err);
+      toast.error(t('programs.deleteError'));
+      console.error(err);
+      setDeleteDialog({ open: false, id: null, name: '' });
     }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setDeleteDialog({ open: false, id: null, name: '' });
   };
 
   const columns = [
@@ -76,24 +131,24 @@ const ProgramList = () => {
       renderCell: (params) => (
         <>
          <Button
-  variant="outlined"
-  color="info"
+  variant="contained"
   size="small"
+  sx={styles.info}
   onClick={() => navigate(`/programs/overview/${params.row.id}`)}
 >
   {t('programs.viewProgram')}
 </Button>
 
-
+          <RoleGate roles={['CreateurDeFormation','Admin']}>
           <Button
-            variant="outlined"
-            color="error"
+            variant="contained"
             size="small"
+            sx={{ ...styles.danger, ml: 1 }}
             onClick={() => handleDelete(params.row.id)}
-            style={{ marginLeft: "8px" }}
           >
             {t('common.delete')}
           </Button>
+          </RoleGate>
         </>
       ),
     },
@@ -105,6 +160,7 @@ const ProgramList = () => {
         <Typography variant="h5">{t('programs.programList')}</Typography>
 
         <Box>
+        <RoleGate roles={['CreateurDeFormation','Admin']}>
           <Button
             variant="contained"
             onClick={() => navigate("/programs/add")}
@@ -112,14 +168,16 @@ const ProgramList = () => {
           >
             ➕ {t('programs.addProgram')}
           </Button>
+          </RoleGate>
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<VisibilityIcon />}
+            sx={styles.secondary}
             onClick={() => navigate("/programs/overview")}
           >
             {t('programs.viewPrograms')}
           </Button>
-        </Box>
+          </Box>
       </Grid>
 
 
@@ -136,6 +194,21 @@ const ProgramList = () => {
           }}
         />
       </Box>
+
+      <Dialog open={deleteDialog.open} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>{t('programs.confirmDeleteTitle')}</DialogTitle>
+        <DialogContent>
+          {t('programs.confirmDeleteMessage', { name: deleteDialog.name })}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained" sx={styles.danger}>
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

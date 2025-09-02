@@ -23,8 +23,6 @@ import {
   Chip,
   Avatar,
   CircularProgress,
-  Alert,
-  Snackbar,
   Card,
   CardContent,
   alpha,
@@ -44,6 +42,7 @@ import {
   Security,
   Analytics,
 } from "@mui/icons-material"
+import { toast } from "react-toastify"
 
 export default function UserList() {
   const { t } = useTranslation()
@@ -54,11 +53,6 @@ export default function UserList() {
   const [searchTerm, setSearchTerm] = useState("")
   const [deleteDialog, setDeleteDialog] = useState({ open: false, user: null })
   const [toggleDialog, setToggleDialog] = useState({ open: false, user: null })
-  const [notification, setNotification] = useState({ open: false, message: "", severity: "info" })
-
-  const showNotification = (message, severity = "info") => {
-    setNotification({ open: true, message, severity })
-  }
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -69,7 +63,7 @@ export default function UserList() {
       setUsers(response.data)
     } catch (error) {
       console.error("❌ Fetch error:", error)
-      showNotification(t('users.loadError'), "error")
+      toast.error(t('users.loadError'))
       setUsers([])
     } finally {
       setLoading(false)
@@ -88,11 +82,11 @@ export default function UserList() {
       console.log("🗑️ Deleting user:", deleteDialog.user.id)
       await api.delete(`/users/${deleteDialog.user.id}`)
       setUsers(users.filter((u) => u.id !== deleteDialog.user.id))
-      showNotification(t('users.deleteSuccess'), "success")
+      toast.success(t('users.deleteSuccess'))
       console.log("✅ User deleted successfully")
     } catch (error) {
       console.error("❌ Delete error:", error)
-      showNotification(t('users.deleteError'), "error")
+      toast.error(t('users.deleteError'))
     } finally {
       setActionLoading(false)
       setDeleteDialog({ open: false, user: null })
@@ -194,7 +188,7 @@ export default function UserList() {
         // Mettre à jour l'état local
         setUsers((prevUsers) => prevUsers.map((u) => (u.id === user.id ? { ...u, isActive: newStatus } : u)))
 
-        showNotification(t('users.statusUpdateSuccess'), "success")
+        toast.success(t('users.statusUpdateSuccess'))
         console.log("🎉 Status toggle completed successfully")
 
         // Rafraîchir la liste après un délai pour vérifier la synchronisation
@@ -206,7 +200,7 @@ export default function UserList() {
     } catch (error) {
       console.error("💥 Unexpected error:", error)
 
-      showNotification(t('users.statusUpdateError'), "error")
+      toast.error(t('users.statusUpdateError'))
 
       // Log détaillé pour le debugging
       console.error("🔍 Error debugging info:", {
@@ -240,12 +234,10 @@ export default function UserList() {
     return "#388e3c" // Couleur verte
   }
 
-  const StatCard = ({ title, value, icon, color, gradient }) => (
+  const StatCard = ({ title, value, icon, color }) => (
     <Card
       sx={{
-        background: gradient,
         borderRadius: 3,
-        boxShadow: `0 8px 32px ${alpha(color, 0.2)}`,
         transition: "transform 0.2s ease",
         "&:hover": { transform: "translateY(-4px)" },
       }}
@@ -253,36 +245,25 @@ export default function UserList() {
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box>
-            <Typography variant="h3" sx={{ fontWeight: 700, color, mb: 1 }}>
+            <Typography variant="h3" sx={{ fontWeight: 700, color: "primary.main", mb: 1 }}>
               {value}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 500, color: "text.secondary" }}>
               {title}
             </Typography>
           </Box>
-          <Avatar sx={{ bgcolor: alpha(color, 0.1), color, width: 56, height: 56 }}>{icon}</Avatar>
+          <Avatar sx={{ color: "primary.main", width: 56, height: 56 }}>{icon}</Avatar>
         </Box>
       </CardContent>
     </Card>
   )
 
   // Test de connectivité au backend
-  
+
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", py: 4 }}>
+    <Box sx={{ py: 4 }}>
       <Container maxWidth="xl">
-        <Snackbar
-          open={notification.open}
-          autoHideDuration={6000}
-          onClose={() => setNotification({ ...notification, open: false })}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert severity={notification.severity} sx={{ borderRadius: 2 }}>
-            {notification.message}
-          </Alert>
-        </Snackbar>
-
         {/* Header */}
         <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Box>
@@ -290,10 +271,7 @@ export default function UserList() {
               variant="h3"
               sx={{
                 fontWeight: 800,
-                background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                color: "primary.main",
                 mb: 1,
               }}
             >
@@ -313,7 +291,6 @@ export default function UserList() {
               value={users.length}
               icon={<People fontSize="large" />}
               color="#1976d2"
-              gradient="linear-gradient(135deg, rgba(25, 118, 210, 0.1), rgba(25, 118, 210, 0.05))"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -322,7 +299,6 @@ export default function UserList() {
               value={activeUsers}
               icon={<TrendingUp fontSize="large" />}
               color="#388e3c"
-              gradient="linear-gradient(135deg, rgba(56, 142, 60, 0.1), rgba(56, 142, 60, 0.05))"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -331,7 +307,6 @@ export default function UserList() {
               value={users.length - activeUsers}
               icon={<Security fontSize="large" />}
               color="#d32f2f"
-              gradient="linear-gradient(135deg, rgba(211, 47, 47, 0.1), rgba(211, 47, 47, 0.05))"
             />
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
@@ -340,7 +315,6 @@ export default function UserList() {
               value={`${users.length > 0 ? Math.round((activeUsers / users.length) * 100) : 0}%`}
               icon={<Analytics fontSize="large" />}
               color="#7b1fa2"
-              gradient="linear-gradient(135deg, rgba(123, 31, 162, 0.1), rgba(123, 31, 162, 0.05))"
             />
           </Grid>
         </Grid>
@@ -354,7 +328,7 @@ export default function UserList() {
           }}
         >
           {/* Search & Actions */}
-          <Box sx={{ p: 3, bgcolor: "white", borderBottom: "1px solid", borderColor: "grey.200" }}>
+          <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "grey.200" }}>
             <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <TextField
@@ -368,24 +342,17 @@ export default function UserList() {
                     width: 400,
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 3,
-                      bgcolor: "grey.50",
                     },
                   }}
                 />
-                
+
               </Box>
               <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => (window.location.href = "/users/add")}
                 sx={{
-                  borderRadius: 3,
-                  background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-                  boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 12px 32px rgba(25, 118, 210, 0.4)",
-                  },
+                  borderRadius: 3
                 }}
               >
                 {t('users.addUser')}
@@ -420,10 +387,13 @@ export default function UserList() {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: "grey.50" }}>
+                  <TableRow>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.user')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.email')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.role')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.establishment')}
+</TableCell>
+
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('users.status')}</TableCell>
                     <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>{t('common.actions')}</TableCell>
                   </TableRow>
@@ -434,9 +404,9 @@ export default function UserList() {
                       key={user.id}
                       hover
                       sx={{
-                        "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.04) },
+                        "&:hover": { opacity: 0.8 },
                         transition: "background-color 0.2s ease",
-                        bgcolor: user.isActive ? "inherit" : alpha("#f5f5f5", 0.7),
+                        opacity: user.isActive ? 1 : 0.7,
                       }}
                     >
                       <TableCell>
@@ -475,6 +445,11 @@ export default function UserList() {
                         />
                       </TableCell>
                       <TableCell>
+  <Typography variant="body2">
+    {user.establishmentName || "—"}
+  </Typography>
+</TableCell>
+                      <TableCell>
                         <Chip
                           label={user.isActive ? t('users.active') : t('users.inactive')}
                           color={user.isActive ? "success" : "error"}
@@ -486,7 +461,7 @@ export default function UserList() {
                         <Box sx={{ display: "flex", gap: 0.5 }}>
                           <IconButton
                             size="small"
-                            sx={{ color: "info.main", "&:hover": { bgcolor: alpha("#0288d1", 0.1) } }}
+                            sx={{ color: "info.main" }}
                             onClick={() => {
                               sessionStorage.setItem("viewingUser", JSON.stringify(user))
                               window.location.href = `/ProfilePage/${user.id}`
@@ -496,7 +471,7 @@ export default function UserList() {
                           </IconButton>
                           <IconButton
                             size="small"
-                            sx={{ color: "primary.main", "&:hover": { bgcolor: alpha("#1976d2", 0.1) } }}
+                            sx={{ color: "primary.main" }}
                             onClick={() => {
                               sessionStorage.setItem("editingUser", JSON.stringify(user))
                               window.location.href = `/EditProfile/${user.email}`
@@ -510,7 +485,7 @@ export default function UserList() {
                             sx={{
                               color: user.isActive ? "warning.main" : "success.main",
                               "&:hover": {
-                                bgcolor: alpha(user.isActive ? "#ed6c02" : "#2e7d32", 0.1),
+                                opacity: 0.7,
                               },
                             }}
                             onClick={() => setToggleDialog({ open: true, user })}
@@ -520,7 +495,7 @@ export default function UserList() {
                           <IconButton
                             size="small"
                             disabled={actionLoading}
-                            sx={{ color: "error.main", "&:hover": { bgcolor: alpha("#d32f2f", 0.1) } }}
+                            sx={{ color: "error.main" }}
                             onClick={() => setDeleteDialog({ open: true, user })}
                           >
                             <Delete />
@@ -543,7 +518,7 @@ export default function UserList() {
         >
           <DialogTitle sx={{ pb: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Avatar sx={{ bgcolor: alpha("#d32f2f", 0.1), color: "error.main" }}>
+              <Avatar sx={{ color: "error.main" }}>
                 <Delete />
               </Avatar>
               <Typography variant="h6" fontWeight={600}>
@@ -589,7 +564,6 @@ export default function UserList() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Avatar
                 sx={{
-                  bgcolor: alpha(toggleDialog.user?.isActive ? "#ed6c02" : "#2e7d32", 0.1),
                   color: toggleDialog.user?.isActive ? "warning.main" : "success.main",
                 }}
               >

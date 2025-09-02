@@ -3,6 +3,7 @@ import { Box, Typography } from "@mui/material"
 import ModernCanvas from "./ModernCanvas"
 import TableControls from "./TableControls"
 import { TOOLS } from "../constants"
+import { useTranslation } from "react-i18next"
 
 const CanvasArea = ({
   canvasRef,
@@ -29,6 +30,7 @@ const CanvasArea = ({
   onResizeTable,
   onDragTable
 }) => {
+  const { t } = useTranslation()
   return (
     <Box sx={{ flex: 1, position: "relative" }} ref={canvasContainerRef} data-canvas-container>
       {/* Tool Status Indicator */}
@@ -74,7 +76,7 @@ const CanvasArea = ({
               letterSpacing: 0.5,
             }}
           >
-            {tool}
+            {t(`whiteboard.tools.${tool}`, tool)}
           </Typography>
         </Box>
       )}

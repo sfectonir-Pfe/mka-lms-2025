@@ -44,8 +44,10 @@ import {
   PendingActions as PendingIcon,
 } from "@mui/icons-material"
 import api from "../../../../api/axiosInstance";
+import { useTranslation } from "react-i18next";
 
 const ReclamationList = () => {
+  const { t } = useTranslation();
   const [reclamations, setReclamations] = useState([])
   const [filteredReclamations, setFilteredReclamations] = useState([])
   const [selectedReclamation, setSelectedReclamation] = useState(null)
@@ -87,7 +89,8 @@ const ReclamationList = () => {
           rec.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           rec.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
           rec.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          rec.category.toLowerCase().includes(searchTerm.toLowerCase()),
+          rec.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          getCategoryLabel(rec.category).toLowerCase().includes(searchTerm.toLowerCase()),
       )
     }
 
@@ -109,10 +112,10 @@ const ReclamationList = () => {
   }
 
   const STATUS_OPTIONS = [
-    { value: "EN_ATTENTE", label: "En Attente", icon: AccessTimeIcon, color: "warning" },
-    { value: "EN_COURS", label: "En Cours", icon: PendingIcon, color: "info" },
-    { value: "RESOLU", label: "Résolu", icon: CheckCircleIcon, color: "success" },
-    { value: "REJETE", label: "Rejeté", icon: CancelIcon, color: "error" },
+    { value: "EN_ATTENTE", label: t("reclamation.statuses.EN_ATTENTE"), icon: AccessTimeIcon, color: "warning" },
+    { value: "EN_COURS", label: t("reclamation.statuses.EN_COURS"), icon: PendingIcon, color: "info" },
+    { value: "RESOLU", label: t("reclamation.statuses.RESOLU"), icon: CheckCircleIcon, color: "success" },
+    { value: "REJETE", label: t("reclamation.statuses.REJETE"), icon: CancelIcon, color: "error" },
   ]
 
   const handleOpenStatusDialog = () => {
@@ -133,7 +136,7 @@ const ReclamationList = () => {
       setStatusDialogOpen(false)
     } catch (error) {
       console.error("❌ Error updating status:", error)
-      alert("Erreur lors de la mise à jour du statut")
+      alert(t("reclamation.statusUpdateError"))
     } finally {
       setIsUpdatingStatus(false)
     }
@@ -167,6 +170,25 @@ const ReclamationList = () => {
     }
   }
 
+  const getPriorityLabel = (priority) => {
+    if (!priority) return "";
+    const key = priority.toUpperCase();
+    return t(`reclamation.priorities.${key}`, priority);
+  }
+
+  const getStatusLabel = (status) => {
+    if (!status) return "";
+    const key = status.toUpperCase();
+    return t(`reclamation.statuses.${key}`, status);
+  }
+
+  const getCategoryLabel = (category) => {
+    if (!category) return "";
+    // Try to find translation for the category
+    const translation = t(`reclamation.categories.${category}`, category);
+    return translation !== category ? translation : category;
+  }
+
   const getStatusIcon = (status) => {
     const statusOption = STATUS_OPTIONS.find((opt) => opt.value === status)
     return statusOption ? statusOption.icon : WarningIcon
@@ -187,7 +209,6 @@ const ReclamationList = () => {
       <Box
         sx={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -196,7 +217,7 @@ const ReclamationList = () => {
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
           <Stack direction="row" spacing={2} alignItems="center">
             <RefreshIcon sx={{ animation: "spin 1s linear infinite" }} />
-            <Typography variant="h6">Chargement des réclamations...</Typography>
+            <Typography variant="h6">{t("reclamation.loading")}</Typography>
           </Stack>
         </Paper>
       </Box>
@@ -207,14 +228,13 @@ const ReclamationList = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
         py: 4,
       }}
     >
       <Container maxWidth="xl">
         <Stack spacing={4}>
           {/* Header */}
-          <Paper elevation={3} sx={{ p: 4, borderRadius: 3, background: "rgba(255,255,255,0.9)" }}>
+          <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
             <Stack
               direction={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
@@ -227,10 +247,10 @@ const ReclamationList = () => {
                 </Avatar>
                 <Box>
                   <Typography variant="h3" fontWeight="bold" color="primary.main">
-                    Réclamations
+                    {t("reclamation.title")}
                   </Typography>
                   <Typography variant="subtitle1" color="text.secondary">
-                    Gestion des réclamations clients
+                    {t("reclamation.subtitle")}
                   </Typography>
                 </Box>
               </Stack>
@@ -240,7 +260,7 @@ const ReclamationList = () => {
                 onClick={reloadReclamations}
                 sx={{ borderRadius: 2 }}
               >
-                Actualiser
+                {t("reclamation.refresh")}
               </Button>
             </Stack>
           </Paper>
@@ -257,8 +277,7 @@ const ReclamationList = () => {
                     sx={{
                       borderRadius: 3,
                       transition: "all 0.3s ease",
-                      "&:hover": { transform: "translateY(-4px)", boxShadow: 4 },
-                      background: "rgba(255,255,255,0.9)",
+                      "&:hover": { transform: "translateY(-4px)", boxShadow: 4 }
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
@@ -283,12 +302,12 @@ const ReclamationList = () => {
           </Grid>
 
           {/* Filters */}
-          <Paper elevation={2} sx={{ p: 3, borderRadius: 3, background: "rgba(255,255,255,0.9)" }}>
+          <Paper elevation={2} sx={{ p: 3, borderRadius: 3 }}>
             <Grid container spacing={3} alignItems="center">
               <Grid item xs={12} md={8}>
                 <TextField
                   fullWidth
-                  placeholder="Rechercher par nom, email, sujet ou catégorie..."
+                  placeholder={t("reclamation.searchPlaceholder")}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -303,15 +322,15 @@ const ReclamationList = () => {
               </Grid>
               <Grid item xs={12} md={4}>
                 <FormControl fullWidth>
-                  <InputLabel>Filtrer par statut</InputLabel>
+                  <InputLabel>{t("reclamation.filterByStatus")}</InputLabel>
                   <Select
                     value={statusFilter}
-                    label="Filtrer par statut"
+                    label={t("reclamation.filterByStatus")}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     startAdornment={<FilterIcon sx={{ mr: 1, color: "action.active" }} />}
                     sx={{ borderRadius: 2 }}
                   >
-                    <MenuItem value="all">Tous les statuts</MenuItem>
+                    <MenuItem value="all">{t("reclamation.allStatuses")}</MenuItem>
                     {STATUS_OPTIONS.map((status) => (
                       <MenuItem key={status.value} value={status.value}>
                         {status.label}
@@ -329,10 +348,10 @@ const ReclamationList = () => {
               <Paper elevation={2} sx={{ p: 6, textAlign: "center", borderRadius: 3 }}>
                 <ReportIcon sx={{ fontSize: 64, color: "text.secondary", mb: 2 }} />
                 <Typography variant="h5" fontWeight="bold" gutterBottom>
-                  Aucune réclamation trouvée
+                  {t("reclamation.noneFoundTitle")}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Aucune réclamation ne correspond à vos critères de recherche.
+                  {t("reclamation.noneFoundDesc")}
                 </Typography>
               </Paper>
             ) : (
@@ -347,8 +366,7 @@ const ReclamationList = () => {
                       borderLeft: 4,
                       borderLeftColor: "primary.main",
                       transition: "all 0.3s ease",
-                      "&:hover": { transform: "translateY(-2px)", boxShadow: 4 },
-                      background: "rgba(255,255,255,0.95)",
+                      "&:hover": { transform: "translateY(-2px)", boxShadow: 4 }
                     }}
                   >
                     <CardContent sx={{ p: 3 }}>
@@ -392,18 +410,18 @@ const ReclamationList = () => {
                             <Stack direction="row" spacing={1} flexWrap="wrap">
                               <Chip
                                 icon={<WarningIcon />}
-                                label={reclamation.priority}
+                                label={getPriorityLabel(reclamation.priority)}
                                 color={getPriorityColor(reclamation.priority)}
                                 size="small"
                                 variant="outlined"
                               />
                               <Chip
                                 icon={<StatusIcon />}
-                                label={reclamation.status}
+                                label={getStatusLabel(reclamation.status)}
                                 color={getStatusColor(reclamation.status)}
                                 size="small"
                               />
-                              <Chip label={reclamation.category} size="small" variant="outlined" />
+                              <Chip label={getCategoryLabel(reclamation.category)} size="small" variant="outlined" />
                             </Stack>
                           </Stack>
                         </Grid>
@@ -417,7 +435,7 @@ const ReclamationList = () => {
                               onClick={() => handleShowDetails(reclamation.id)}
                               sx={{ borderRadius: 2 }}
                             >
-                              Voir détails
+                              {t("reclamation.viewDetails")}
                             </Button>
                           </Stack>
                         </Grid>
@@ -453,7 +471,7 @@ const ReclamationList = () => {
             <DescriptionIcon fontSize="large" />
             <Box>
               <Typography variant="h5" fontWeight="bold">
-                Réclamation #{selectedReclamation?.id}
+                {t("reclamation.dialog.title", { id: selectedReclamation?.id })}
               </Typography>
               {selectedReclamation && (
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
@@ -474,16 +492,16 @@ const ReclamationList = () => {
               <Stack direction="row" spacing={2} flexWrap="wrap">
                 <Chip
                   icon={React.createElement(getStatusIcon(selectedReclamation.status))}
-                  label={selectedReclamation.status}
+                  label={getStatusLabel(selectedReclamation.status)}
                   color={getStatusColor(selectedReclamation.status)}
                 />
                 <Chip
                   icon={<WarningIcon />}
-                  label={selectedReclamation.priority}
+                  label={getPriorityLabel(selectedReclamation.priority)}
                   color={getPriorityColor(selectedReclamation.priority)}
                   variant="outlined"
                 />
-                <Chip label={selectedReclamation.category} variant="outlined" />
+                <Chip label={getCategoryLabel(selectedReclamation.category)} variant="outlined" />
               </Stack>
 
               <Divider />
@@ -492,15 +510,15 @@ const ReclamationList = () => {
               <Stack spacing={3}>
                 <Box>
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Sujet
+                    {t("reclamation.subject")}
                   </Typography>
                   <Typography variant="body1">{selectedReclamation.subject}</Typography>
                 </Box>
                 <Box>
                   <Typography variant="h6" fontWeight="bold" gutterBottom>
-                    Description
+                    {t("reclamation.description")}
                   </Typography>
-                  <Paper variant="outlined" sx={{ p: 3, bgcolor: "grey.50", borderRadius: 2 }}>
+                  <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
                     <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
                       {selectedReclamation.description}
                     </Typography>
@@ -514,11 +532,11 @@ const ReclamationList = () => {
                   <Divider />
                   <Box>
                     <Typography variant="h6" fontWeight="bold" gutterBottom color="success.main">
-                      Réponse
+                      {t("reclamation.response")}
                     </Typography>
                     <Paper
                       variant="outlined"
-                      sx={{ p: 3, bgcolor: "success.50", borderColor: "success.200", borderRadius: 2 }}
+                      sx={{ p: 3, borderColor: "success.200", borderRadius: 2 }}
                     >
                       <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
                         {selectedReclamation.response}
@@ -526,7 +544,7 @@ const ReclamationList = () => {
                       {selectedReclamation.responseDate && (
                         <Typography variant="caption" color="success.main" sx={{ mt: 2, display: "block" }}>
                           <CalendarIcon fontSize="small" sx={{ mr: 1, verticalAlign: "middle" }} />
-                          Répondu le: {formatDate(selectedReclamation.responseDate)}
+                          {t("reclamation.respondedOn", { date: formatDate(selectedReclamation.responseDate) })}
                         </Typography>
                       )}
                     </Paper>
@@ -542,7 +560,7 @@ const ReclamationList = () => {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <CalendarIcon fontSize="small" color="action" />
                     <Typography variant="body2" color="text.secondary">
-                      Créé le: {formatDate(selectedReclamation.createdAt)}
+                      {t("reclamation.createdOn", { date: formatDate(selectedReclamation.createdAt) })}
                     </Typography>
                   </Stack>
                 </Grid>
@@ -550,7 +568,7 @@ const ReclamationList = () => {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <AccessTimeIcon fontSize="small" color="action" />
                     <Typography variant="body2" color="text.secondary">
-                      Modifié le: {formatDate(selectedReclamation.updatedAt)}
+                      {t("reclamation.updatedOn", { date: formatDate(selectedReclamation.updatedAt) })}
                     </Typography>
                   </Stack>
                 </Grid>
@@ -562,11 +580,11 @@ const ReclamationList = () => {
         <DialogActions sx={{ p: 3 }}>
           {selectedReclamation && (
             <Button variant="outlined" onClick={handleOpenStatusDialog} startIcon={<WarningIcon />}>
-              Changer le statut
+              {t("reclamation.changeStatus")}
             </Button>
           )}
           <Button variant="contained" onClick={() => setDetailDialogOpen(false)}>
-            Fermer
+            {t("common.close")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -582,17 +600,17 @@ const ReclamationList = () => {
         <DialogTitle>
           <Stack direction="row" spacing={1} alignItems="center">
             <WarningIcon />
-            <Typography variant="h6">Changer le statut</Typography>
+            <Typography variant="h6">{t("reclamation.statusDialog.title")}</Typography>
           </Stack>
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Sélectionnez le nouveau statut pour cette réclamation.
+              {t("reclamation.statusDialog.help")}
             </Typography>
             <FormControl fullWidth>
-              <InputLabel>Nouveau statut</InputLabel>
-              <Select value={newStatus} label="Nouveau statut" onChange={(e) => setNewStatus(e.target.value)}>
+              <InputLabel>{t("reclamation.statusDialog.newStatus")}</InputLabel>
+              <Select value={newStatus} label={t("reclamation.statusDialog.newStatus")} onChange={(e) => setNewStatus(e.target.value)}>
                 {STATUS_OPTIONS.map((option) => {
                   const Icon = option.icon
                   return (
@@ -609,7 +627,7 @@ const ReclamationList = () => {
           </Stack>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setStatusDialogOpen(false)}>Annuler</Button>
+          <Button onClick={() => setStatusDialogOpen(false)}>{t("common.cancel")}</Button>
           <Button
             onClick={handleUpdateStatus}
             variant="contained"
@@ -618,7 +636,7 @@ const ReclamationList = () => {
               isUpdatingStatus ? <RefreshIcon sx={{ animation: "spin 1s linear infinite" }} /> : <CheckCircleIcon />
             }
           >
-            {isUpdatingStatus ? "En cours..." : "Mettre à jour"}
+            {isUpdatingStatus ? t("reclamation.statusDialog.updating") : t("reclamation.statusDialog.update")}
           </Button>
         </DialogActions>
       </Dialog>

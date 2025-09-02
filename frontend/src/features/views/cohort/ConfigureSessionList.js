@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import api from "../../../api/axiosInstance";
 
 
@@ -32,12 +33,53 @@ const ConfigureSessionList = () => {
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
+  const styles = {
+    primary: {
+      borderRadius: 3,
+      background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+      boxShadow: "0 8px 24px rgba(25, 118, 210, 0.3)",
+      '&:hover': {
+        transform: 'translateY(-2px)',
+        boxShadow: '0 12px 32px rgba(25,118,210,0.4)'
+      }
+    },
+    danger: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #d32f2f, #ef5350)',
+      boxShadow: '0 6px 18px rgba(211,47,47,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(211,47,47,0.35)' }
+    },
+    success: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #2e7d32, #66bb6a)',
+      boxShadow: '0 6px 18px rgba(46,125,50,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(46,125,50,0.35)' }
+    },
+    info: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #0288d1, #29b6f6)',
+      boxShadow: '0 6px 18px rgba(2,136,209,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(2,136,209,0.35)' }
+    },
+    secondary: {
+      borderRadius: 2,
+      background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+      boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+      transition: 'transform 0.15s ease',
+      '&:hover': { transform: 'translateY(-1px)', boxShadow: '0 10px 24px rgba(123,31,162,0.35)' }
+    },
+    rounded: { borderRadius: 2 }
+  };
+
   const fetchSessions = () => {
     api.get("/sessions")
       .then(res => setSessions(res.data))
       .catch(err => {
         console.error("Erreur chargement sessions", err);
-        alert(t('sessions.loadError'));
+        toast.error(t('sessions.loadError'));
       });
   };
 
@@ -50,9 +92,10 @@ const ConfigureSessionList = () => {
     try {
       await api.delete(`/sessions/${id}`);
       fetchSessions();
+      toast.success(t('sessions.deleteSuccess'));
     } catch (err) {
       console.error("Erreur suppression session", err);
-      alert(t('sessions.deleteError'));
+      toast.error(t('sessions.deleteError'));
     }
   };
 
@@ -143,11 +186,12 @@ const ConfigureSessionList = () => {
         size="small"
         startIcon={<VisibilityIcon />}
         onClick={() => handleViewDetails(s)}
+        sx={styles.info}
       >
         {t('sessions.detail')}
       </Button>
-      <IconButton color="error" onClick={() => handleDelete(s.id)}>
-        <DeleteIcon />
+      <IconButton onClick={() => handleDelete(s.id)} sx={styles.danger}>
+        <DeleteIcon sx={{ color: 'white' }} />
       </IconButton>
     </Box>
   </Box>
@@ -159,9 +203,9 @@ const ConfigureSessionList = () => {
       <Box textAlign="center" mt={4}>
         <Button
           variant="contained"
-          color="primary"
           size="large"
           onClick={() => navigate("/sessions/add")}
+          sx={styles.primary}
         >
           ➕ {t('sessions.newSession')}
         </Button>
@@ -208,7 +252,7 @@ const ConfigureSessionList = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDetail}>{t('common.close')}</Button>
+          <Button onClick={handleCloseDetail} sx={styles.secondary}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

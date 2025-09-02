@@ -23,7 +23,9 @@ import ShowChartIcon from "@mui/icons-material/ShowChart";
 import PieChartOutlineIcon from "@mui/icons-material/PieChartOutline";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+ 
 import api from "../../api/axiosInstance";
+import ReclamationList from "../../features/views/feedback/FeedbackList/Réclamationlist";
 import {
   BarChart,
   Bar,
@@ -69,6 +71,7 @@ export default function AdminDashboard() {
   const [topFormateurs, setTopFormateurs] = useState([]);
   const [monthlyRegs, setMonthlyRegs] = useState([]);
   const [sessionStatusStats, setSessionStatusStats] = useState({});
+  const [topRatedSessions, setTopRatedSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartTypeSessions, setChartTypeSessions] = useState("bar");
   const [chartTypeRegs, setChartTypeRegs] = useState("bar");
@@ -87,20 +90,23 @@ export default function AdminDashboard() {
       api.get(`/dashboard/top-sessions`),
       api.get(`/dashboard/top-formateurs`),
       api.get(`/dashboard/monthly-registrations`),
-      api.get(`/dashboard/session-status-stats`)
+      api.get(`/dashboard/session-status-stats`),
+      api.get(`/dashboard/top-rated-sessions`),
     ]).then(
       ([
         statsRes,
         sessionsRes,
         formateursRes,
         monthlyRegsRes,
-        sessionStatusRes
+        sessionStatusRes,
+        topRatedSessionsRes,
       ]) => {
         setStats(statsRes.data);
         setTopSessions(sessionsRes.data);
         setTopFormateurs(formateursRes.data);
         setMonthlyRegs(monthlyRegsRes.data);
         setSessionStatusStats(sessionStatusRes.data);
+        setTopRatedSessions(topRatedSessionsRes.data);
       }
     ).finally(() => setLoading(false));
   }, []);
@@ -112,13 +118,10 @@ export default function AdminDashboard() {
         display="flex" 
         alignItems="center" 
         justifyContent="center"
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}
       >
         <Box textAlign="center">
-          <CircularProgress size={64} sx={{ color: '#fff', mb: 2 }} />
-          <Typography color="white" variant="h6">Chargement du tableau de bord...</Typography>
+          <CircularProgress size={64} sx={{ color: 'primary.main', mb: 2 }} />
+          <Typography color="text.primary" variant="h6">Chargement du tableau de bord...</Typography>
         </Box>
       </Box>
     );
@@ -137,17 +140,6 @@ export default function AdminDashboard() {
     <Box 
       sx={{ 
         minHeight: "100vh",
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'url("data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="white" fill-opacity="0.02" fill-rule="evenodd"%3E%3Cpath d="m0 40l40-40h-40z"/%3E%3C/g%3E%3C/svg%3E")',
-        }
       }}
     >
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
@@ -156,33 +148,22 @@ export default function AdminDashboard() {
           sx={{ 
             textAlign: 'center',
             mb: 6,
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(20px)',
             borderRadius: 4,
             p: 4,
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
           }}
         >
           <Typography 
             variant="h3" 
             fontWeight={700} 
-            color="white" 
+            color="primary.main" 
             mb={1}
-            sx={{
-              background: 'linear-gradient(45deg, #fff, #e0e7ff)',
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
           >
             Tableau de Bord Admin
           </Typography>
           <Typography 
             variant="h6" 
             sx={{ 
-              color: 'rgba(255, 255, 255, 0.9)',
+              color: 'text.secondary',
               fontWeight: 400,
               letterSpacing: 0.5
             }}
@@ -364,6 +345,7 @@ export default function AdminDashboard() {
             </ModernCard>
           </Grid>
         </Grid>
+
 
         {/* CHARTS SECTION */}
         <Grid container spacing={3}>
@@ -568,6 +550,149 @@ export default function AdminDashboard() {
             </ModernCard>
           </Grid>
         </Grid>
+
+        {/* FEEDBACK SECTION */}
+        <Grid container spacing={3} mt={3}>
+          <Grid item xs={12} lg={6}>
+            <ModernCard>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE} mb={3}>
+                  Top Sessions par Note Moyenne
+                </Typography>
+                <Stack spacing={2}>
+                  {topRatedSessions.length > 0 ? (
+                    topRatedSessions.map((session, idx) => (
+                      <Box key={session.id}>
+                        <Typography variant="subtitle1" fontWeight={600} color={ACCENT_COLORS[0]}>
+                          {idx + 1}. {session.name} ({session.averageRating} ⭐)
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" mb={1}>
+                          {session.programName}
+                        </Typography>
+                        <Stack spacing={1}>
+                          {session.topSeances?.map((seance) => (
+                            <Box key={seance.id} sx={{ p: 1.5, borderRadius: 2 }}>
+                              <Typography variant="body2" fontWeight={500}>
+                                {seance.title}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Moyenne: {seance.averageRating ?? "N/A"} ⭐
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    ))
+                  ) : (
+                    <Box textAlign="center" py={4}>
+                      <Typography variant="body2" color="text.secondary">
+                        Aucune donnée de feedback disponible
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Les sessions apparaîtront ici une fois que les étudiants auront soumis leurs évaluations
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </CardContent>
+            </ModernCard>
+          </Grid>
+
+          <Grid item xs={12} lg={6}>
+            <ModernCard>
+              <CardContent>
+                <Typography variant="h6" fontWeight={600} color={PRIMARY_BLUE} mb={3}>
+                  Statistiques des Feedbacks
+                </Typography>
+                <Stack spacing={3}>
+                  {/* Feedback Overview */}
+                  <Box>
+                    <Typography variant="subtitle2" fontWeight={600} mb={2}>
+                      Vue d'ensemble
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Paper sx={{ p: 2, textAlign: 'center', bgcolor: ACCENT_COLORS[0] + '10' }}>
+                          <Typography variant="h4" fontWeight={700} color={ACCENT_COLORS[0]}>
+                            {stats?.totalSessions || 0}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Sessions Totales
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Paper sx={{ p: 2, textAlign: 'center', bgcolor: ACCENT_COLORS[1] + '10' }}>
+                          <Typography variant="h4" fontWeight={700} color={ACCENT_COLORS[1]}>
+                            {topRatedSessions.length}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Avec Feedback
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  {/* Rating Distribution */}
+                  <Box>
+                    <Typography variant="subtitle2" fontWeight={600} mb={2}>
+                      Distribution des Notes
+                    </Typography>
+                    <Stack spacing={1}>
+                      {[5, 4, 3, 2, 1].map((rating) => {
+                        const count = topRatedSessions.filter(s => 
+                          Math.floor(s.averageRating) === rating
+                        ).length;
+                        const percentage = topRatedSessions.length > 0 
+                          ? (count / topRatedSessions.length) * 100 
+                          : 0;
+                        
+                        return (
+                          <Box key={rating} display="flex" alignItems="center" gap={2}>
+                            <Typography variant="body2" minWidth={20}>
+                              {rating}⭐
+                            </Typography>
+                            <Box 
+                              flex={1} 
+                              height={8} 
+                              bgcolor="grey.200" 
+                              borderRadius={1}
+                              overflow="hidden"
+                            >
+                              <Box 
+                                height="100%" 
+                                bgcolor={ACCENT_COLORS[rating - 1]} 
+                                width={`${percentage}%`}
+                                transition="width 0.3s ease"
+                              />
+                            </Box>
+                            <Typography variant="caption" color="text.secondary" minWidth={40}>
+                              {count} ({percentage.toFixed(0)}%)
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  </Box>
+
+                 
+                      
+                        
+                       
+                   
+                </Stack>
+              </CardContent>
+            </ModernCard>
+          </Grid>
+        </Grid>
+
+        {/* RECLAMATIONS SECTION */}
+        <Grid container spacing={3} mt={3}>
+          <Grid item xs={12}>
+            <ReclamationList />
+          </Grid>
+        </Grid>
       </Container>
     </Box>
   );
@@ -579,10 +704,6 @@ function ModernCard({ children, ...props }) {
     <Card
       sx={{
         borderRadius: 3,
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
@@ -772,3 +893,5 @@ function TopFormateurItem({ formateur, rank }) {
     </Stack>
   );
 }
+
+
