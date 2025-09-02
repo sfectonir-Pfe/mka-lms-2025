@@ -19,7 +19,7 @@ services:
     restart: always
     networks:
       - lms-net
-      - meet.jitsi
+      # - meet.jitsi
 
 volumes:
   mka-lms-frontend-volume:
@@ -27,5 +27,5 @@ volumes:
 networks:
   lms-net:
     driver: bridge
-  meet.jitsi:
-    external: true
+  # meet.jitsi:
+  #   external: true
