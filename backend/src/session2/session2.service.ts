@@ -503,6 +503,11 @@ export class Session2Service {
 }
 // new add
 async getSessionsForUser(userId: number) {
+  console.log('Getting sessions for user:', userId);
+  
+
+  // Regular user (formateur/etudiant) - return their assigned sessions
+  console.log('Regular user, getting assigned sessions');
   const userSessions = await this.prisma.userSession2.findMany({
     where: { userId },
     include: {
@@ -527,6 +532,10 @@ async getSessionsForUser(userId: number) {
     }
   });
 
+  return this.addFeedbackToSessions(userSessions);
+}
+
+private async addFeedbackToSessions(userSessions: any[]) {
   // Add feedback information to each session
   const sessionsWithFeedback = await Promise.all(
     userSessions.map(async (userSession) => {

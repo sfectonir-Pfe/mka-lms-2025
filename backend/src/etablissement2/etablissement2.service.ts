@@ -15,4 +15,17 @@ export class Etablissement2Service {
   async findAll() {
     return this.prisma.etablissement2.findMany();
   }
+
+  async findByUserId(userId: number) {
+    // Find establishment where this user is a responsable
+    return this.prisma.etablissement2.findMany({
+      where: {
+        responsables: {
+          some: {
+            userId: userId
+          }
+        }
+      }
+    });
+  }
 }
