@@ -114,4 +114,16 @@ async findBySession2(@Param('session2Id') id: string) {
   return this.service.findBySession2(+id);
 }
 
+@Roles('formateur','Admin','etudiant','Etablissement')
+@Get(':id/program-visibility')
+async getProgramVisibility(@Param('id') id: string) {
+  return this.service.getProgramVisibility(+id);
+}
+
+@Roles('formateur','Admin')
+@Post(':id/program-visibility')
+async setProgramVisibility(@Param('id') id: string, @Body() body: { visible: boolean }) {
+  return this.service.setProgramVisibility(+id, body.visible);
+}
+
 }

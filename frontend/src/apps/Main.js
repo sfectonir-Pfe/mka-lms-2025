@@ -173,18 +173,26 @@ export default function Main({ setUser, user }) {
       console.log("Updated user role to Etudiant");
     }
 
-    // Récupérer les données utilisateur à jour, y compris la photo de profil
+    // Récupérer les données utilisateur à jour, y compris la photo de profil et le statut
     const fetchUserData = async () => {
       try {
         if (user.email) {
           const response = await api.get(`/users/email/${user.email}`);
           if (response.data) {
+            // Check if user is deactivated
+            if (response.data.isActive === false) {
+              console.log("🚫 User account is deactivated, redirecting...");
+              navigate('/account-status');
+              return;
+            }
+
             // Mettre à jour l'objet utilisateur avec les données à jour
             const updatedUser = {
               ...user,
               profilePic: response.data.profilePic || user.profilePic,
               name: response.data.name || user.name,
-              role: response.data.role || user.role
+              role: response.data.role || user.role,
+              isActive: response.data.isActive
             };
             
             // Mettre à jour le storage (localStorage ou sessionStorage selon où l'utilisateur est stocké)
@@ -198,12 +206,16 @@ export default function Main({ setUser, user }) {
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.log("🚫 Authentication error, redirecting to login...");
+          navigate('/login');
+        }
       }
     };
 
     fetchUserData();
   }
-}, [user, setUser]); // Ajout des dépendances manquantes
+}, [user, setUser, navigate]); // Ajout des dépendances manquantes
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);

@@ -297,19 +297,19 @@ model Answer {
 }
 
 model Session2 {
-  id              Int                   @id @default(autoincrement())
-  name            String
-  programId       Int
-  startDate       DateTime?
-  endDate         DateTime?
-  imageUrl        String?
-  createdAt       DateTime              @default(now())
-  status          Session2Status        @default(INACTIVE)
-  SeanceFormateur SeanceFormateur[]
-  program         Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
-  chatMessages    Session2ChatMessage[]
-  session2Modules Session2Module[]
-  userSessions2   UserSession2[]
+  id               Int                   @id @default(autoincrement())
+  name             String
+  programId        Int
+  startDate        DateTime?
+  endDate          DateTime?
+  imageUrl         String?
+  createdAt        DateTime              @default(now())
+  status           Session2Status        @default(INACTIVE)
+  SeanceFormateur  SeanceFormateur[]
+  program          Program               @relation(fields: [programId], references: [id], onDelete: Cascade)
+  chatMessages     Session2ChatMessage[]
+  session2Modules  Session2Module[]
+  userSessions2    UserSession2[]
   sessionFeedbacks SessionFeedback[]
 }
 
@@ -351,6 +351,7 @@ model SeanceFormateur {
   session2Id       Int
   createdAt        DateTime           @default(now())
   buildProgramId   Int?
+  programVisible   Boolean            @default(false)
   chatMessages     ChatMessage[]
   formateur        User               @relation(fields: [formateurId], references: [id], onDelete: Cascade)
   session2         Session2           @relation(fields: [session2Id], references: [id], onDelete: Cascade)
@@ -474,8 +475,8 @@ model SeanceFeedback {
   suggestions         String?
   wouldRecommend      String?
   improvementAreas    String?
-  createdAt           DateTime @default(now())
-  user                User?    @relation(fields: [userId], references: [id])
+  createdAt           DateTime        @default(now())
+  user                User?           @relation(fields: [userId], references: [id])
 }
 
 model FeedbackList {

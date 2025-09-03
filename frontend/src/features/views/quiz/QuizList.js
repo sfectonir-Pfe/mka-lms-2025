@@ -47,7 +47,7 @@ const QuizList = ({ sessionId }) => {
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{q.title || t('quiz.untitled', 'Sans titre')}</TableCell>
                 <TableCell>{q.contenu?.title || t('seances.dash', '—')}</TableCell>
-                <TableCell>{q.timeLimit ?? '∞'} {t('quiz.min', 'min')}</TableCell>
+                <TableCell>{q.timeLimit ? Math.floor(q.timeLimit / 60) : '∞'} {t('quiz.min', 'min')}</TableCell>
                 <TableCell>
 
                   <Button onClick={() => navigate(`/quiz/scores/${q.id}`)}>📊 {t('quiz.scores', 'Scores')}</Button>

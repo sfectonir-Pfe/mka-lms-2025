@@ -197,12 +197,23 @@ const AnimerSeanceView = () => {
     reloadFeedbacks();
   }, [seanceId]);
 
-  // Fetch program visibility state from backend
+  // Fetch program visibility state from backend with polling for real-time updates
   useEffect(() => {
     if (!seanceId) return;
-    api.get(`/seance-formateur/${seanceId}/program-visibility`)
-      .then(res => setProgramVisibleToStudents(res.data.visible))
-      .catch(() => {});
+    
+    const fetchVisibility = () => {
+      api.get(`/seance-formateur/${seanceId}/program-visibility`)
+        .then(res => setProgramVisibleToStudents(res.data.visible))
+        .catch(() => {});
+    };
+    
+    // Initial fetch
+    fetchVisibility();
+    
+    // Poll every 3 seconds for visibility changes
+    const interval = setInterval(fetchVisibility, 3000);
+    
+    return () => clearInterval(interval);
   }, [seanceId]);
 
   // --- actions ---
@@ -370,7 +381,7 @@ const AnimerSeanceView = () => {
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" noWrap>
                                       {isQuiz
-                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash")}`
+                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit && meta.timeLimit > 0 ? `${Math.floor(meta.timeLimit / 60)} ${t("seances.min")}` : t("seances.dash")}`
                             : (cn?.fileType || t("seances.file"))}
                                     </Typography>
                                   </Box>
@@ -882,7 +893,7 @@ const AnimerSeanceView = () => {
                   {getSessionQuizzes().map((q) => {
                     const meta = quizMetaByContenu[q.contenuId];
                     const qCount = meta?.questions?.length ?? t("seances.dash");
-                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash");
+                    const timeStr = meta?.timeLimit && meta.timeLimit > 0 ? `${Math.floor(meta.timeLimit / 60)} ${t("seances.min")}` : t("seances.dash");
 
                     return (
                       <Paper
