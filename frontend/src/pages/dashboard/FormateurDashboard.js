@@ -26,6 +26,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import CardGiftcardIcon from "@mui/icons-material/CardGiftcard";
+import { getCurrentUserId } from '../auth/token';
 
 const PRIMARY_BLUE = "#1e40af";
 const GREEN = "#4caf50";
@@ -98,7 +99,6 @@ function ModernStatCard({ icon, value, label, extra }) {
 export default function FormateurDashboardPage() {
   const [sessions, setSessions] = useState([]);
   const [feedbacks, setFeedbacks] = useState(null);
-  const [topFormateurs, setTopFormateurs] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const totalSessions = sessions.length;
@@ -110,8 +110,7 @@ export default function FormateurDashboardPage() {
     setLoading(true);
     Promise.all([
       fetchSessions(),
-      fetchFeedbacks(),
-      fetchTopFormateurs()
+      fetchFeedbacks()
     ]).finally(() => setLoading(false));
     // eslint-disable-next-line
   }, []);
@@ -124,18 +123,17 @@ export default function FormateurDashboardPage() {
   }
 
   function fetchFeedbacks() {
-    return fetch(`${API_BASE}/dashboard-formateur/feedbacks`)
+    const currentUserId = getCurrentUserId();
+    const url = currentUserId 
+      ? `${API_BASE}/dashboard-formateur/feedbacks?formateurId=${currentUserId}`
+      : `${API_BASE}/dashboard-formateur/feedbacks`;
+    
+    return fetch(url)
       .then((res) => res.json())
       .then((data) => setFeedbacks(data))
       .catch(() => setFeedbacks(null));
   }
 
-  function fetchTopFormateurs() {
-    return fetch(`${API_BASE}/dashboard-formateur/top-formateurs`)
-      .then((res) => res.json())
-      .then((data) => setTopFormateurs(Array.isArray(data) ? data : []))
-      .catch(() => setTopFormateurs([]));
-  }
 
   return (
     <Box
@@ -524,101 +522,6 @@ export default function FormateurDashboardPage() {
           </CardContent>
         </ModernCard>
 
-        {/* TOP 3 FORMATEURS */}
-        <ModernCard sx={{ mb: 4 }}>
-          <CardContent>
-            <Stack direction="row" alignItems="center" spacing={1} mb={3}>
-              <EmojiEventsIcon color="secondary" />
-              <Typography fontWeight={700} fontSize={20}>
-                🏆 Top 3 Formateurs
-              </Typography>
-            </Stack>
-            <Divider sx={{ mb: 3 }} />
-            {loading ? (
-              <Box textAlign="center" py={4}>
-                <CircularProgress />
-              </Box>
-            ) : topFormateurs.length > 0 ? (
-              <Grid container spacing={3}>
-                {topFormateurs.map((formateur, index) => {
-                  const medals = ['🥇', '🥈', '🥉'];
-                  const colors = ['#ffd700', '#c0c0c0', '#cd7f32'];
-                  return (
-                    <Grid item xs={12} md={4} key={formateur.id}>
-                      <Paper
-                        sx={{
-                          p: 3,
-                          textAlign: 'center',
-                          background: `linear-gradient(135deg, ${colors[index]}20 0%, ${colors[index]}10 100%)`,
-                          border: `2px solid ${colors[index]}40`,
-                          borderRadius: 3
-                        }}
-                      >
-                        <Typography variant="h3" mb={1}>
-                          {medals[index]}
-                        </Typography>
-                        <Avatar
-                          sx={{
-                            width: 60,
-                            height: 60,
-                            mx: 'auto',
-                            mb: 2,
-                            bgcolor: colors[index],
-                            fontSize: '1.5rem',
-                            fontWeight: 'bold'
-                          }}
-                        >
-                          {formateur.name?.charAt(0)?.toUpperCase() || '?'}
-                        </Avatar>
-                        <Typography variant="h6" fontWeight={700} mb={1}>
-                          {formateur.name}
-                        </Typography>
-                        <Stack spacing={1} alignItems="center">
-                          <Chip
-                            label={`${formateur.averageRating}/5 ⭐`}
-                            color="warning"
-                            size="small"
-                            variant="filled"
-                          />
-                          <Chip
-                            label={`${formateur.feedbackPoints} pts`}
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {formateur.totalFeedbacks} feedback(s)
-                          </Typography>
-                          {formateur.rewards?.length > 0 && (
-                            <Box mt={1}>
-                              <Typography variant="caption" fontWeight={600} color="primary.main">
-                                🎁 Récompenses:
-                              </Typography>
-                              {formateur.rewards.map((reward, idx) => (
-                                <Chip
-                                  key={idx}
-                                  label={reward}
-                                  size="small"
-                                  variant="outlined"
-                                  color="secondary"
-                                  sx={{ mt: 0.5, mx: 0.25, fontSize: '0.7rem' }}
-                                />
-                              ))}
-                            </Box>
-                          )}
-                        </Stack>
-                      </Paper>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            ) : (
-              <Typography color="text.secondary" textAlign="center" py={4}>
-                Aucun classement disponible pour le moment
-              </Typography>
-            )}
-          </CardContent>
-        </ModernCard>
       </Container>
     </Box>
   );

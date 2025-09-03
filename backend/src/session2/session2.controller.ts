@@ -49,7 +49,7 @@ export class Session2Controller {
     return this.service.findAll();
   }
 
-  @Roles('createurdeformation', 'admin', 'etudiant','formateur')
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get('simple')
   findAllSimple() {
     return this.prisma.session2.findMany({
@@ -63,7 +63,7 @@ export class Session2Controller {
     return this.service.remove(+id);
   }
 
-  @Roles('formateur', 'admin')
+  @Roles('formateur', 'admin','etablissement')
   @Post(':session2Id/add-user')
   async addUserToSession(
     @Param('session2Id') session2Id: string,

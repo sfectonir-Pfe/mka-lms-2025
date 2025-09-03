@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
   Query,
+  Request,
 } from "@nestjs/common"
 import { FileInterceptor } from "@nestjs/platform-express"
 import { diskStorage } from "multer"
@@ -22,7 +23,6 @@ import type { Express } from "express"
 
 import { Role } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
-import { Roles } from "../auth/roles.decorator";
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {
@@ -55,14 +55,14 @@ export class UsersController {
   ) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  create(@Body() createUserDto: CreateUserDto, @Request() req) {
+    return this.usersService.create(createUserDto, req.user);
   }
 
   @Get()
-  async findAll() {
+  async findAll(@Request() req) {
     try {
-      const users = await this.usersService.findAll()
+      const users = await this.usersService.findAll(req.user)
       return users
     } catch (error) {
       console.error("UsersController: Error fetching users:", error)

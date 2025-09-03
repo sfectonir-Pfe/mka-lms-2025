@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { NotificationGateway } from './notification-gateway';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @Injectable()
 export class NotificationService {
+  private readonly logger = new Logger(NotificationService.name);
+
   constructor(
     private prisma: PrismaService,
     private notificationGateway: NotificationGateway,
@@ -25,79 +28,115 @@ export class NotificationService {
   }
 
   // Get all notifications for a user
-  async getNotificationsForUser(userId: number | string) {
-    return await this.prisma.notification.findMany({
-      where: { userId: Number(userId) },
-      orderBy: { createdAt: 'desc' },
-    });
+  async getNotificationsForUser(userId: number) {
+    try {
+      return await this.prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to get notifications for user ${userId}:`, error);
+      throw error;
+    }
   }
 
   // Mark a notification as read
-  // Mark a notification as read
-async markNotificationAsRead(notificationId: number | string) {
-  // Convert notificationId to an integer
-  const idAsInt = Number(notificationId);
-  
-  return await this.prisma.notification.update({
-    where: {
-      id: idAsInt, // Use the integer ID here
-    },
-    data: {
-      read: true,
-    },
-  });
-}
+  async markNotificationAsRead(notificationId: number) {
+    try {
+      // First check if notification exists
+      const existingNotification = await this.prisma.notification.findUnique({
+        where: { id: notificationId },
+      });
+
+      if (!existingNotification) {
+        this.logger.warn(`Notification ${notificationId} not found for update`);
+        return { message: `Notification with ID ${notificationId} already read or not found`, updated: false };
+      }
+
+      return await this.prisma.notification.update({
+        where: { id: notificationId },
+        data: { read: true },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to mark notification ${notificationId} as read:`, error);
+      throw error;
+    }
+  }
 
   // Get unread count for a user
-  async getUnreadCountForUser(userId: number | string) {
-    const count = await this.prisma.notification.count({
-      where: {
-        userId: Number(userId),
-        read: false,
-      },
-    });
-    return { count };
+  async getUnreadCountForUser(userId: number) {
+    try {
+      const count = await this.prisma.notification.count({
+        where: {
+          userId,
+          read: false,
+        },
+      });
+      return { count };
+    } catch (error) {
+      this.logger.error(`Failed to get unread count for user ${userId}:`, error);
+      throw error;
+    }
   }
 
   // Mark all notifications as read for a user
-  async markAllNotificationsAsRead(userId: number | string) {
-    return await this.prisma.notification.updateMany({
-      where: {
-        userId: Number(userId),
-        read: false,
-      },
-      data: { read: true },
-    });
+  async markAllNotificationsAsRead(userId: number) {
+    try {
+      return await this.prisma.notification.updateMany({
+        where: {
+          userId,
+          read: false,
+        },
+        data: { read: true },
+      });
+    } catch (error) {
+      this.logger.error(`Failed to mark all notifications as read for user ${userId}:`, error);
+      throw error;
+    }
   }
 
   // Delete a notification
-  // Delete a notification
-async deleteNotification(notificationId: number | string) {
-  console.log('Deleting notification with ID:', notificationId);
-  
-  // Convert notificationId to an integer
-  const idAsInt = Number(notificationId);
-  
-  // Delete the notification from the database
-  const notification = await this.prisma.notification.delete({
-    where: { id: idAsInt },
-  });
+  async deleteNotification(notificationId: number) {
+    try {
+      this.logger.log(`Deleting notification with ID: ${notificationId}`);
+      
+      // First check if notification exists
+      const existingNotification = await this.prisma.notification.findUnique({
+        where: { id: notificationId },
+      });
 
-  return notification; // Optionally return the deleted notification
-}
+      if (!existingNotification) {
+        this.logger.warn(`Notification ${notificationId} not found for deletion`);
+        return { message: `Notification with ID ${notificationId} already deleted or not found`, deleted: false };
+      }
 
-  // Create a new notification (for admin/test use)
-  async createNotification(createNotificationDto: any) {
-    const notification = await this.prisma.notification.create({
-      data: {
-        userId: createNotificationDto.userId,
-        type: createNotificationDto.type || 'info',
-        message: createNotificationDto.message,
-        link: createNotificationDto.link || null,
-      },
-    });
-    this.notificationGateway.sendRealTimeNotification(notification.userId, notification);
-    return notification;
+      const notification = await this.prisma.notification.delete({
+        where: { id: notificationId },
+      });
+      return notification;
+    } catch (error) {
+      this.logger.error(`Failed to delete notification ${notificationId}:`, error);
+      throw error;
+    }
+  }
+
+  // Create a new notification
+  async createNotification(createNotificationDto: CreateNotificationDto) {
+    try {
+      const notification = await this.prisma.notification.create({
+        data: {
+          userId: createNotificationDto.userId,
+          type: createNotificationDto.type,
+          message: createNotificationDto.message,
+          link: createNotificationDto.link || null,
+        },
+      });
+      this.notificationGateway.sendRealTimeNotification(notification.userId, notification);
+      return notification;
+    } catch (error) {
+      this.logger.error('Failed to create notification:', error);
+      throw error;
+    }
   }
   
 }

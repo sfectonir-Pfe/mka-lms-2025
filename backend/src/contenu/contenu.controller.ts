@@ -80,14 +80,29 @@ export class ContenusController {
 
     console.log('Creating content with data:', contentData);
 
-    const newContenu = await this.prisma.contenu.create({
-      data: contentData,
+    // Use service method to trigger notifications
+    const newContenu = await this.contenusService.create({
+      title,
+      type,
+      fileType: file ? fileType : 'PDF',
+      fileUrl: file ? `http://localhost:8000/uploads/${file.filename}` : 'placeholder.pdf',
+      courseIds: courseIds && courseIds !== 'undefined' && courseIds !== 'null'
+        ? (() => {
+            try {
+              const parsedIds = JSON.parse(courseIds);
+              return parsedIds.map((id: string | number) => typeof id === 'string' ? parseInt(id) : id);
+            } catch (error) {
+              console.error('Error parsing courseIds:', error);
+              return [];
+            }
+          })()
+        : []
     });
 
     return newContenu;
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.contenusService.findAll();

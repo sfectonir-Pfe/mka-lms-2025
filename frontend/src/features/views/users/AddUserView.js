@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { getCurrentRole } from "../../../pages/auth/token";
 import SearchIcon from '@mui/icons-material/Search';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -44,6 +45,7 @@ const AddUserView = () => {
   const dropdownRef = useRef(null);
   const [etabs, setEtabs] = useState([]);
   const [etablissement2Id, setEtablissement2Id] = useState('');
+  const [currentUserRole, setCurrentUserRole] = useState('');
 
   // New: session selection
   const [sessions, setSessions] = useState([]);
@@ -104,6 +106,10 @@ const AddUserView = () => {
   }, []);
 
   useEffect(() => {
+    // Get current user role
+    const userRole = getCurrentRole();
+    setCurrentUserRole(userRole);
+    
     // Fetch sessions on mount
     api
       .get("/session2")
@@ -112,6 +118,7 @@ const AddUserView = () => {
   }, []);
 
   useEffect(() => {
+    // Fetch establishments for all users since backend has proper role permissions
     api
       .get("/etablissement2")
       .then(res => setEtabs(res.data))
@@ -244,13 +251,25 @@ const AddUserView = () => {
 
   const selectedCountry = countries.find(c => c.code === countryCode) || countries[0];
 
-  const roleOptions = [
-    { value: "Etudiant", key: "etudiant" },
-    { value: "Formateur", key: "formateur" },
-    { value: "CreateurDeFormation", key: "createurdeformation" },
-    { value: "Etablissement", key: "etablissement" },
-    { value: "Admin", key: "admin" }
-  ];
+  // Filter role options based on current user role
+  const getRoleOptions = () => {
+    const allRoles = [
+      { value: "Etudiant", key: "etudiant" },
+      { value: "Formateur", key: "formateur" },
+      { value: "CreateurDeFormation", key: "createurdeformation" },
+      { value: "Etablissement", key: "etablissement" },
+      { value: "Admin", key: "admin" }
+    ];
+
+    // If current user is Etablissement, only allow creating Etudiant
+    if (currentUserRole === 'Etablissement') {
+      return [{ value: "Etudiant", key: "etudiant" }];
+    }
+
+    return allRoles;
+  };
+
+  const roleOptions = getRoleOptions();
 
   return (
     <Box sx={{ p: 3, maxWidth: 800, mx: 'auto' }}>
@@ -389,7 +408,7 @@ const AddUserView = () => {
               </Select>
             </FormControl>
 
-            {role === "Etudiant" && (
+            {role === "Etudiant" && currentUserRole !== 'Etablissement' && (
               <FormControl fullWidth>
                 <InputLabel>{t('users.chooseEstablishment')}</InputLabel>
                 <Select
@@ -408,6 +427,12 @@ const AddUserView = () => {
                   ))}
                 </Select>
               </FormControl>
+            )}
+
+            {role === "Etudiant" && currentUserRole === 'Etablissement' && (
+              <Alert severity="info" sx={{ mt: 2 }}>
+                {t('users.student_Will_Be_Added_To_Your_Establishment')}
+              </Alert>
             )}
 
             {role === "Etablissement" && (

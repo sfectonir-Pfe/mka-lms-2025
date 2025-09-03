@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import { NotificationService } from '../notification/notification.service';
 
 type Session2MessageInput = {
   session2Id: number;
@@ -12,7 +13,10 @@ type Session2MessageInput = {
 export class Session2ChatService {
   private readonly logger = new Logger(Session2ChatService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   /**
    * Create and broadcast a session chat message
@@ -65,6 +69,12 @@ export class Session2ChatService {
     this.logger.log(
       `Message created | id: ${newMsg.id}, session2Id: ${data.session2Id}, senderId: ${data.senderId}`,
     );
+
+    // Send notifications to other session participants
+    if (data.senderId) {
+      await this.sendSessionChatNotifications(data.session2Id, data.senderId, newMsg);
+    }
+
     return newMsg;
   }
 
@@ -115,5 +125,68 @@ export class Session2ChatService {
     this.logger.warn(`Deleting ALL messages for session2: ${session2Id}`);
     await this.prisma.session2ChatMessage.deleteMany({ where: { session2Id } });
     return { success: true };
+  }
+
+  /**
+   * Send notifications to session participants when a new message is sent
+   */
+  private async sendSessionChatNotifications(session2Id: number, senderId: number, message: any) {
+    try {
+      // Get all participants of the session except the sender
+      const participants = await this.prisma.userSession2.findMany({
+        where: {
+          session2Id,
+          userId: { not: senderId },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Get session details for notification context
+      const session = await this.prisma.session2.findUnique({
+        where: { id: session2Id },
+        select: {
+          name: true,
+          program: {
+            select: { name: true },
+          },
+        },
+      });
+
+      const senderName = message.sender?.name || 'Someone';
+      const sessionName = session?.name || 'Session';
+      const programName = session?.program?.name || 'Program';
+      
+      // Truncate message content for notification
+      const messagePreview = message.content.length > 50 
+        ? message.content.substring(0, 50) + '...'
+        : message.content;
+
+      // Send notification to each participant
+      for (const participant of participants) {
+        await this.notificationService.createNotification({
+          userId: participant.userId,
+          type: 'session-chat',
+          message: `${senderName} sent a message in ${sessionName} (${programName}): ${messagePreview}`,
+          link: `/sessions/${session2Id}/chat`,
+        });
+      }
+
+      this.logger.log(
+        `Sent session chat notifications to ${participants.length} participants for session ${session2Id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send session chat notifications for session ${session2Id}:`,
+        error,
+      );
+    }
   }
 }

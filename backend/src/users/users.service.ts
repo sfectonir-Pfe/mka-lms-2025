@@ -65,7 +65,7 @@ export class UsersService {
       .join("")
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, currentUser?: any) {
     // ✅ Check if email already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
@@ -95,24 +95,32 @@ export class UsersService {
     //     name: true,
     //     role: true,
     //     phone: true,
-    //     location: true,
-    //     about: true,
-    //     skills: true,
-    //     profilePic: true,
-    //   },
-    // });
     let etablissement2IdToUse: number | undefined = createUserDto.etablissement2Id;
 
-if (
-  createUserDto.role === 'Etablissement' &&
-  !etablissement2IdToUse &&
-  createUserDto.etablissement2Name
-) {
-  const newEtab = await this.prisma.etablissement2.create({
-    data: { name: createUserDto.etablissement2Name },
-  });
-  etablissement2IdToUse = newEtab.id;
-}
+    // If current user is Etablissement role, restrict to their establishment only
+    if (currentUser?.role === 'Etablissement' && createUserDto.role === 'Etudiant') {
+      const responsableEtab = await this.prisma.etablissement.findFirst({
+        where: { userId: currentUser.sub },
+        include: { Etablissement2: true }
+      });
+      
+      if (!responsableEtab) {
+        throw new ConflictException('Responsable non lié à un établissement.');
+      }
+      
+      etablissement2IdToUse = responsableEtab.etablissement2Id || undefined;
+    }
+
+    if (
+      createUserDto.role === 'Etablissement' &&
+      !etablissement2IdToUse &&
+      createUserDto.etablissement2Name
+    ) {
+      const newEtab = await this.prisma.etablissement2.create({
+        data: { name: createUserDto.etablissement2Name },
+      });
+      etablissement2IdToUse = newEtab.id;
+    }
 
     const newUser = await this.prisma.user.create({
   data: {
@@ -126,11 +134,11 @@ if (
     skills: createUserDto.skills ? [createUserDto.skills] : undefined,
 
     Etudiants:
-      createUserDto.role === 'Etudiant' && createUserDto.etablissement2Id
+      createUserDto.role === 'Etudiant' && etablissement2IdToUse
         ? {
             create: {
               NameEtablissement: 'to-be-dynamic', // optional, can remove
-              etablissement2Id: createUserDto.etablissement2Id,
+              etablissement2Id: etablissement2IdToUse,
             },
           }
         : undefined,
@@ -200,9 +208,37 @@ if (
   //     return this.fallbackUsers
   //   }
   // }
-  async findAll() {
+  async findAll(currentUser?: any) {
   try {
+    let whereClause = {};
+    
+    // If current user is Etablissement role, filter to show only students from their establishment
+    if (currentUser?.role === 'Etablissement') {
+      const responsableEtab = await this.prisma.etablissement.findFirst({
+        where: { userId: currentUser.sub },
+      });
+      
+      if (responsableEtab) {
+        whereClause = {
+          OR: [
+            {
+              role: 'Etudiant',
+              Etudiants: {
+                some: {
+                  etablissement2Id: responsableEtab.etablissement2Id
+                }
+              }
+            },
+            {
+              id: currentUser.sub // Include the responsable themselves
+            }
+          ]
+        };
+      }
+    }
+
     const users = await this.prisma.user.findMany({
+      where: whereClause,
       include: {
         Etudiants: { include: { Etablissement2: true } },
         Etablissements: { include: { Etablissement2: true } },
@@ -572,6 +608,7 @@ if (
 
       const updateData: {
         name?: string
+        role?: Role
         phone?: string
         location?: string
         about?: string
@@ -583,6 +620,11 @@ if (
         phone: updateUserDto.phone,
         location: updateUserDto.location,
         about: updateUserDto.about,
+      }
+
+      // Add role to update data if provided
+      if (updateUserDto.role !== undefined) {
+        updateData.role = updateUserDto.role;
       }
 
       if (updateUserDto.skills !== undefined) {

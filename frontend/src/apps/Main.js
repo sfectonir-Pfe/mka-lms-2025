@@ -38,7 +38,8 @@ import { secureLogout } from "../utils/authUtils";
 import Session2ChatPopup from "../components/chatmessages/Session2ChatPopup";
 import NotificationCenter from "../components/notification/NotificationCenter";
 import ThemeToggle from "../components/constants/ThemeToggle";
-
+import logoImage from "./images/logo.png";
+import logoImage2 from "./images/logo3.png";
 
 
 const drawerWidth = 260;
@@ -359,7 +360,22 @@ export default function Main({ setUser, user }) {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 700 }}>
+            <Box 
+              component="img" 
+              src={logoImage2} 
+              alt="Logo"
+              onClick={() => navigate('/')}
+              sx={{ 
+                height: 45, 
+                width: 'auto', 
+                marginRight: 1, 
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8
+                }
+              }} 
+            />
+            <Typography variant="h5" noWrap component="div" sx={{ fontWeight: 700 }}>
               {t('common.appTitle', 'Master Knowledge Academy')}
             </Typography>
           </Box>
@@ -554,7 +570,7 @@ export default function Main({ setUser, user }) {
           flexGrow: 1,
           p: 3,
           // backgroundColor: muiTheme.palette.background.default,
-          backgroundColor: "#698aad",
+          backgroundColor: "#34495E",
           minHeight: "100vh",
           overflow: "auto",
           height: "100vh",
@@ -567,10 +583,33 @@ export default function Main({ setUser, user }) {
             borderRadius: 2,
             boxShadow: muiTheme.shadows[1],
             p: 3,
+            minHeight: 'calc(100vh - 200px)',
           }}
         >
           <Outlet />
         </Box>
+        
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            mt: 4,
+            py: 3,
+            px: 2,
+            backgroundColor: muiTheme.palette.background.paper,
+            borderRadius: 2,
+            boxShadow: muiTheme.shadows[1],
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            © 2025 Master Knowledge Academy. All rights reserved.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Empowering education through technology
+          </Typography>
+        </Box>
+        
         <ScrollToTopButton />
         {user && <Session2ChatPopup user={user} />}
 
