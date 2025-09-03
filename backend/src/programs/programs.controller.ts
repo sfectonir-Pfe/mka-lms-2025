@@ -24,13 +24,13 @@ export class ProgramsController {
     return this.programsService.create(dto);
   }
 
-  @Roles('createurdeformation', 'admin', 'etudiant','formateur','establishment')
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.programsService.findAll();
   }
 
-  @Roles('createurdeformation', 'admin','establishment','formateur','etudiant')
+  @Roles('createurdeformation', 'admin','Etablissement','formateur','etudiant')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.programsService.findOne(+id);

@@ -14,7 +14,7 @@ export class CoursesController {
     return this.coursesService.create(dto);
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.coursesService.findAll();

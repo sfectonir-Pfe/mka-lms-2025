@@ -115,7 +115,7 @@ const SessionList = () => {
       setSessions(sessionsData);
       
       // Only fetch users if user has admin/creator permissions
-      const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+      const canManageUsers = ['admin', 'createurdeformation',].includes(currentRole);
       
       const usersMap = {};
       if (canManageUsers) {
@@ -482,6 +482,7 @@ const SessionList = () => {
                     >
                       {t("sessions.addUser")}
                     </Button>
+                    
                   )}
                   <RoleGate roles={["admin"]}>
                     <Button

@@ -49,7 +49,7 @@ export class Session2Controller {
     return this.service.findAll();
   }
 
-  @Roles('createurdeformation', 'admin', 'etudiant','formateur')
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get('simple')
   findAllSimple() {
     return this.prisma.session2.findMany({

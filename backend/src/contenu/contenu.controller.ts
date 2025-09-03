@@ -102,7 +102,7 @@ export class ContenusController {
     return newContenu;
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.contenusService.findAll();

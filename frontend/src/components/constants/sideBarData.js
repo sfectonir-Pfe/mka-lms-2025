@@ -112,6 +112,7 @@ const roleBasedItems = {
   ],
 
   etablissement: [
+    { text: "sidebar.users", icon: <FaUsers />, path: "users" },
     { 
       text: "sidebar.sessions", 
       icon: <CalendarMonthIcon />, 

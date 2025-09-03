@@ -23,7 +23,7 @@ export class ModulesController {
     return this.modulesService.create(dto);
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.modulesService.findAll();
