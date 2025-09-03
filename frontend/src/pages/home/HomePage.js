@@ -25,9 +25,9 @@ export default function HomePage() {
       return <Navigate to="/etablissement/dashboard" replace />;
     }
     
-    // if (normalizedRole === 'admin') {
-    //   return <Navigate to="/admin/dashboard" replace />;
-    // }
+    if (normalizedRole === 'admin') {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
     
     // You can add other role redirects here if needed
     // if (normalizedRole === 'admin') {

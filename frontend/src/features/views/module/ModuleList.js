@@ -82,7 +82,7 @@ const ModuleList = () => {
       flex: 1,
       renderCell: (params) => (
         <>
-          <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+          <RoleGate roles={['CreateurDeFormation', ]}>
             <Button
               variant="contained"
               color="error"
@@ -108,7 +108,7 @@ const ModuleList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('modules.moduleList')}</Typography>
-        <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+        <RoleGate roles={['CreateurDeFormation',]}>
           <Button variant="contained" onClick={() => navigate("/module/add")}
             sx={{
               borderRadius: 3,
@@ -150,6 +150,7 @@ const ModuleList = () => {
             {t('users.irreversibleAction')}
           </Typography>
         </DialogContent>
+        
         <DialogActions>
           <Button onClick={() => setDeleteDialog({ open: false, module: null })} sx={{ borderRadius: 2 }}>
             {t('common.cancel')}

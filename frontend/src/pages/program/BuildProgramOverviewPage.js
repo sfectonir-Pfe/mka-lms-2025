@@ -21,6 +21,7 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useTranslation } from 'react-i18next';
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
+import RoleGate from "../../pages/auth/RoleGate";
 
 const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
   <Box component={Paper} elevation={2} sx={{ p: 2, mb: 4 }}>
@@ -28,7 +29,7 @@ const Section = ({ title, items, renderItem, expanded, onToggle, t }) => (
       <Badge badgeContent={items.length} color="primary">
         <Typography variant="h6">{title}</Typography>
       </Badge>
-      <IconButton 
+      <IconButton
         onClick={onToggle}
         sx={{
           background: "linear-gradient(135deg, #1976d2, #42a5f5)",
@@ -221,6 +222,7 @@ export default function BuildProgramOverviewPage() {
             ))}
 
             <Box display="flex" justifyContent="flex-end" mt={2} gap={2} flexWrap="wrap">
+               <RoleGate roles={['CreateurDeFormation',]}>
               <Button
                 variant="contained"
                 sx={styles.info}
@@ -228,7 +230,7 @@ export default function BuildProgramOverviewPage() {
               >
                 🛠️ {t('common.edit')}
               </Button>
-
+</RoleGate>
               {buildProgram.program.published && (
                 <Chip
                   label={t('buildProgram.published')}
@@ -249,32 +251,33 @@ export default function BuildProgramOverviewPage() {
                   }}
                 />
               )}
-
-              <Button
-                variant="contained"
-                sx={buildProgram.program.published ? styles.warning : styles.success}
-                onClick={async () => {
-                  try {
-                    await api.patch(`/programs/${buildProgram.program.id}/publish`);
-                    toast.success(
-                      buildProgram.program.published
-                        ? t('buildProgram.unpublishSuccess')
-                        : t('buildProgram.publishSuccess')
-                    );
-                    fetchbuildProgram(); // refresh list
-                  } catch (err) {
-                    toast.error(t('buildProgram.publishError'));
-                  }
-                }}
-              >
-                {buildProgram.program.published ? `❌ ${t('buildProgram.unpublish')}` : `📤 ${t('buildProgram.publish')}`}
-              </Button>
-
+              <RoleGate roles={['CreateurDeFormation',]}>
+                <Button
+                  variant="contained"
+                  sx={buildProgram.program.published ? styles.warning : styles.success}
+                  onClick={async () => {
+                    try {
+                      await api.patch(`/programs/${buildProgram.program.id}/publish`);
+                      toast.success(
+                        buildProgram.program.published
+                          ? t('buildProgram.unpublishSuccess')
+                          : t('buildProgram.publishSuccess')
+                      );
+                      fetchbuildProgram(); // refresh list
+                    } catch (err) {
+                      toast.error(t('buildProgram.publishError'));
+                    }
+                  }}
+                >
+                  {buildProgram.program.published ? `❌ ${t('buildProgram.unpublish')}` : `📤 ${t('buildProgram.publish')}`}
+                </Button>
+              </RoleGate>
             </Box>
           </Box>
-        )}
+        )
+        }
       />
-    </Container>
+    </Container >
   );
 
 }

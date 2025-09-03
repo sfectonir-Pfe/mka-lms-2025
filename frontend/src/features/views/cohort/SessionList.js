@@ -495,6 +495,7 @@ const SessionList = () => {
                     </Button>
                   </RoleGate>
                   {session.status === "COMPLETED" && (
+                    <RoleGate roles={["etudiant"]}>
                     <Button
                       variant="contained"
                       size="small"
@@ -503,8 +504,9 @@ const SessionList = () => {
                     >
                       🏅 {t("sessions.attestation")}
                     </Button>
+                    </RoleGate>
                   )}
-                  <RoleGate roles={["admin","etudiant"]}>
+                  <RoleGate roles={["etudiant"]}>
                   <Button
                     variant="contained"
                     size="small"
