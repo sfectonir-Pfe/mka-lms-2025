@@ -179,9 +179,11 @@ export default function BuildProgramOverviewPage() {
             )}
 
             {buildProgram.averageRating && (
+                <RoleGate roles={['admin']}>
               <Typography variant="body2" sx={{ mb: 1 }}>
                 ⭐ {t('buildProgram.averageRating', 'Note moyenne')}: <strong>{buildProgram.averageRating}/5</strong>
               </Typography>
+              </RoleGate>
             )}
 
             <Divider sx={{ my: 1 }} />
