@@ -126,4 +126,16 @@ async setProgramVisibility(@Param('id') id: string, @Body() body: { visible: boo
   return this.service.setProgramVisibility(+id, body.visible);
 }
 
+@Roles('formateur','Admin','etudiant','Etablissement')
+@Get(':id/feedback-visibility')
+async getFeedbackVisibility(@Param('id') id: string) {
+  return this.service.getFeedbackVisibility(+id);
+}
+
+@Roles('formateur','Admin')
+@Post(':id/feedback-visibility')
+async setFeedbackVisibility(@Param('id') id: string, @Body() body: { visible: boolean }) {
+  return this.service.setFeedbackVisibility(+id, body.visible);
+}
+
 }

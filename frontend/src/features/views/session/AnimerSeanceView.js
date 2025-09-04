@@ -70,7 +70,7 @@ const AnimerSeanceView = () => {
   const [sessionVideos, setSessionVideos] = useState([]);
   const [zoomedImage, setZoomedImage] = useState(null);
   const [expandedCourses, setExpandedCourses] = useState({});
-  const [showFeedbackTab, setShowFeedbackTab] = useState(false);
+  const [feedbackVisibleToStudents, setFeedbackVisibleToStudents] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
@@ -216,6 +216,25 @@ const AnimerSeanceView = () => {
     return () => clearInterval(interval);
   }, [seanceId]);
 
+  // Fetch feedback visibility state from backend with polling for real-time updates
+  useEffect(() => {
+    if (!seanceId) return;
+    
+    const fetchFeedbackVisibility = () => {
+      api.get(`/seance-formateur/${seanceId}/feedback-visibility`)
+        .then(res => setFeedbackVisibleToStudents(res.data.visible))
+        .catch(() => {});
+    };
+    
+    // Initial fetch
+    fetchFeedbackVisibility();
+    
+    // Poll every 3 seconds for feedback visibility changes
+    const interval = setInterval(fetchFeedbackVisibility, 3000);
+    
+    return () => clearInterval(interval);
+  }, [seanceId]);
+
   // --- actions ---
   const handleTabChange = (_e, newValue) => setTab(newValue);
 
@@ -300,6 +319,23 @@ const AnimerSeanceView = () => {
       // Revert on error
       setProgramVisibleToStudents(!programVisibleToStudents);
       console.error(t('seances.programVisibilityError'), error);
+    }
+  };
+
+  const handleToggleFeedbackVisibility = async () => {
+    if (!seanceId) return;
+    try {
+      const newVisibility = !feedbackVisibleToStudents;
+      // Optimistic UI update
+      setFeedbackVisibleToStudents(newVisibility);
+      
+      await api.post(`/seance-formateur/${seanceId}/feedback-visibility`, {
+        visible: newVisibility
+      });
+    } catch (error) {
+      // Revert on error
+      setFeedbackVisibleToStudents(!feedbackVisibleToStudents);
+      console.error(t('seances.feedbackVisibilityError'), error);
     }
   };
 
@@ -569,32 +605,38 @@ const AnimerSeanceView = () => {
               {showContenus ? t("seances.hideHierarchy") : t("seances.showHierarchy")}
             </Button>
             </RoleGate>
-             <RoleGate roles={['foramteur',]}>
-
+             
+<RoleGate roles={['formateur',]}>
             <Button
               startIcon={<FeedbackIcon />}
-              onClick={() => setShowFeedbackTab((v) => !v)}
-              variant={showFeedbackTab ? "outlined" : "contained"}
+              onClick={handleToggleFeedbackVisibility}
+              variant={feedbackVisibleToStudents ? "contained" : "outlined"}
               color="secondary"
               sx={{
                 borderRadius: 2,
-                background: showFeedbackTab 
+                background: feedbackVisibleToStudents 
                   ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
-                  : "linear-gradient(135deg, #7b1fa2, #ab47bc)",
-                boxShadow: showFeedbackTab 
+                  : "transparent",
+                boxShadow: feedbackVisibleToStudents 
                   ? "0 4px 12px rgba(123, 31, 162, 0.3)"
-                  : "0 4px 12px rgba(123, 31, 162, 0.3)",
-                color: 'white',
-                border: 'none',
+                  : "none",
+                color: feedbackVisibleToStudents ? 'white' : '#7b1fa2',
+                border: feedbackVisibleToStudents ? 'none' : '2px solid #7b1fa2',
                 '&:hover': { 
                   transform: 'translateY(-1px)', 
-                  boxShadow: '0 8px 20px rgba(123,31,162,0.4)' 
+                  boxShadow: feedbackVisibleToStudents 
+                    ? '0 8px 20px rgba(123,31,162,0.4)'
+                    : '0 4px 12px rgba(123, 31, 162, 0.2)',
+                  background: feedbackVisibleToStudents
+                    ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
+                    : "rgba(123, 31, 162, 0.1)"
                 }
               }}
             >
-              {showFeedbackTab ? t("seances.hideFeedback") : t("seances.showFeedback")}
+              {feedbackVisibleToStudents ? t("seances.hideFeedback") : t("seances.showFeedback")}
             </Button>
-             </RoleGate>
+            </RoleGate>
+             
           </ButtonGroup>
         </Stack>
 
@@ -696,7 +738,7 @@ const AnimerSeanceView = () => {
               </RoleGate>
               
               {/* Collaboration */}
-              <RoleGate roles={['formateur', 'etudiant']}>
+              <RoleGate roles={['formateur', ]}>
                 <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
                   👥 {t("seances.collaboration")}
                 </Typography>
@@ -739,7 +781,8 @@ const AnimerSeanceView = () => {
                 </Button>
                 </RoleGate>
 
-                {showFeedbackTab && (
+                {feedbackVisibleToStudents && (
+                  <RoleGate roles={['etudiant']}>
                   <Button
                     fullWidth
                     variant={tab === 6 ? "contained" : "text"}
@@ -749,13 +792,14 @@ const AnimerSeanceView = () => {
                   >
                     {t("seances.feedback")}
                   </Button>
+                  </RoleGate>
                 )}
                 <RoleGate roles={['formateur', 'admin',]}>
                 <Button
                   fullWidth
-                  variant={tab === (showFeedbackTab ? 7 : 6) ? "contained" : "text"}
+                  variant={tab === (feedbackVisibleToStudents ? 7 : 6) ? "contained" : "text"}
                   startIcon={<FeedbackIcon />}
-                  onClick={() => setTab(showFeedbackTab ? 7 : 6)}
+                  onClick={() => setTab(feedbackVisibleToStudents ? 7 : 6)}
                   sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
                 >
                   {t("seances.feedbackList")}
@@ -1011,18 +1055,20 @@ const AnimerSeanceView = () => {
             </Box>
           )}
 
-          {/* Dynamic Feedback form (only if toggled) */}
-          {showFeedbackTab && tab === 6 && (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
-              </Stack>
-              <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
-            </Box>
+          {/* Dynamic Feedback form (only if visible and student role) */}
+          {feedbackVisibleToStudents && tab === 6 && (
+            <RoleGate roles={['etudiant']}>
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                  <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
+                </Stack>
+                <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
+              </Box>
+            </RoleGate>
           )}
 
           {/* Feedback list (last tab) */}
-          {tab === (showFeedbackTab ? 7 : 6) && <SeanceFeedbackList />}
+          {tab === (feedbackVisibleToStudents ? 7 : 6) && <SeanceFeedbackList />}
         </Box>
       </Box>
 
