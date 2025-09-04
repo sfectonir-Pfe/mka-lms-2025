@@ -109,7 +109,13 @@ const QuizScores = () => {
           )}
           <Box display="flex" gap={3} flexWrap="wrap">
             <Typography variant="body2">
-              <strong>Temps limite:</strong> {quizInfo.timeLimit || '∞'} min
+              <strong>Temps limite:</strong> {
+                quizInfo.timeLimit 
+                  ? quizInfo.timeLimit >= 60 
+                    ? `${Math.floor(quizInfo.timeLimit / 60)} min`
+                    : `${quizInfo.timeLimit} sec`
+                  : '∞'
+              }
             </Typography>
             <Typography variant="body2">
               <strong>Participants:</strong> {userScores.length}

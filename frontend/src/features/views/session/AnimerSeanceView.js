@@ -615,21 +615,21 @@ const AnimerSeanceView = () => {
               sx={{
                 borderRadius: 2,
                 background: feedbackVisibleToStudents 
-                  ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
+                  ? "linear-gradient(135deg, #ff9800, #ffc107)"
                   : "transparent",
                 boxShadow: feedbackVisibleToStudents 
-                  ? "0 4px 12px rgba(123, 31, 162, 0.3)"
+                  ? "0 4px 12px rgba(255, 152, 0, 0.3)"
                   : "none",
-                color: feedbackVisibleToStudents ? 'white' : '#7b1fa2',
-                border: feedbackVisibleToStudents ? 'none' : '2px solid #7b1fa2',
+                color: feedbackVisibleToStudents ? 'white' : '#ff9800',
+                border: feedbackVisibleToStudents ? 'none' : '2px solid #ff9800',
                 '&:hover': { 
                   transform: 'translateY(-1px)', 
                   boxShadow: feedbackVisibleToStudents 
-                    ? '0 8px 20px rgba(123,31,162,0.4)'
-                    : '0 4px 12px rgba(123, 31, 162, 0.2)',
+                    ? '0 8px 20px rgba(255, 152, 0, 0.4)'
+                    : '0 4px 12px rgba(255, 152, 0, 0.2)',
                   background: feedbackVisibleToStudents
-                    ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
-                    : "rgba(123, 31, 162, 0.1)"
+                    ? "linear-gradient(135deg, #ff9800, #ffc107)"
+                    : "rgba(255, 152, 0, 0.1)"
                 }
               }}
             >
