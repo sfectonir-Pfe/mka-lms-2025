@@ -72,7 +72,7 @@ const CourseList = () => {
       headerName: t('courses.actions'),
       flex: 1,
       renderCell: (params) => (
-        <><RoleGate roles={['CreateurDeFormation', 'Admin']}>
+        <><RoleGate roles={['CreateurDeFormation', ]}>
           <Button
             variant="contained"
             color="error"
@@ -98,7 +98,7 @@ const CourseList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('courses.courseList')}</Typography>
-        <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+        <RoleGate roles={['CreateurDeFormation',]}>
           <Button variant="contained" onClick={() => navigate("/courses/add")}
             sx={{
               borderRadius: 3,

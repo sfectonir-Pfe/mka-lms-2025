@@ -130,7 +130,7 @@ const ContenusList = () => {
 
         if (isQuiz) {
           return (
-            <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+            <RoleGate roles={['CreateurDeFormation',]}>
               <Button
                 variant="contained"
                 size="small"
@@ -164,7 +164,7 @@ const ContenusList = () => {
       headerName: t('content.actions'),
       flex: 1,
       renderCell: (params) => (
-        <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+        <RoleGate roles={['CreateurDeFormation',]}>
           <Button
             variant="contained"
             size="small"
@@ -183,7 +183,7 @@ const ContenusList = () => {
     <Box mt={4}>
       <Grid container justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h5">{t('content.contentList')}</Typography>
-        <RoleGate roles={['CreateurDeFormation', 'Admin']}>
+        <RoleGate roles={['CreateurDeFormation', ]}>
         <Button variant="contained" onClick={() => navigate("/contenus/add")} sx={styles.primary}>
         ➕ {t('content.addContent')}
       </Button>

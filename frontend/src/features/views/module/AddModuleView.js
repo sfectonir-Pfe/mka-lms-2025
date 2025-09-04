@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 const AddModuleView = () => {
   const { t } = useTranslation();

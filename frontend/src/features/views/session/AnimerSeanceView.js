@@ -70,7 +70,7 @@ const AnimerSeanceView = () => {
   const [sessionVideos, setSessionVideos] = useState([]);
   const [zoomedImage, setZoomedImage] = useState(null);
   const [expandedCourses, setExpandedCourses] = useState({});
-  const [showFeedbackTab, setShowFeedbackTab] = useState(false);
+  const [feedbackVisibleToStudents, setFeedbackVisibleToStudents] = useState(false);
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
@@ -197,12 +197,42 @@ const AnimerSeanceView = () => {
     reloadFeedbacks();
   }, [seanceId]);
 
-  // Fetch program visibility state from backend
+  // Fetch program visibility state from backend with polling for real-time updates
   useEffect(() => {
     if (!seanceId) return;
-    api.get(`/seance-formateur/${seanceId}/program-visibility`)
-      .then(res => setProgramVisibleToStudents(res.data.visible))
-      .catch(() => {});
+    
+    const fetchVisibility = () => {
+      api.get(`/seance-formateur/${seanceId}/program-visibility`)
+        .then(res => setProgramVisibleToStudents(res.data.visible))
+        .catch(() => {});
+    };
+    
+    // Initial fetch
+    fetchVisibility();
+    
+    // Poll every 3 seconds for visibility changes
+    const interval = setInterval(fetchVisibility, 3000);
+    
+    return () => clearInterval(interval);
+  }, [seanceId]);
+
+  // Fetch feedback visibility state from backend with polling for real-time updates
+  useEffect(() => {
+    if (!seanceId) return;
+    
+    const fetchFeedbackVisibility = () => {
+      api.get(`/seance-formateur/${seanceId}/feedback-visibility`)
+        .then(res => setFeedbackVisibleToStudents(res.data.visible))
+        .catch(() => {});
+    };
+    
+    // Initial fetch
+    fetchFeedbackVisibility();
+    
+    // Poll every 3 seconds for feedback visibility changes
+    const interval = setInterval(fetchFeedbackVisibility, 3000);
+    
+    return () => clearInterval(interval);
   }, [seanceId]);
 
   // --- actions ---
@@ -292,6 +322,23 @@ const AnimerSeanceView = () => {
     }
   };
 
+  const handleToggleFeedbackVisibility = async () => {
+    if (!seanceId) return;
+    try {
+      const newVisibility = !feedbackVisibleToStudents;
+      // Optimistic UI update
+      setFeedbackVisibleToStudents(newVisibility);
+      
+      await api.post(`/seance-formateur/${seanceId}/feedback-visibility`, {
+        visible: newVisibility
+      });
+    } catch (error) {
+      // Revert on error
+      setFeedbackVisibleToStudents(!feedbackVisibleToStudents);
+      console.error(t('seances.feedbackVisibilityError'), error);
+    }
+  };
+
   // --- UI: hierarchy (accordion, cards) ---
   const renderProgramHierarchy = () => {
     if (!programDetails) return <Typography>{t("seances.loadingProgram")}</Typography>;
@@ -370,7 +417,7 @@ const AnimerSeanceView = () => {
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary" noWrap>
                                       {isQuiz
-                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash")}`
+                            ? `${t("seances.questions")}: ${meta?.questions?.length ?? t("seances.dash")} · ${t("seances.time")}: ${meta?.timeLimit && meta.timeLimit > 0 ? `${Math.floor(meta.timeLimit / 60)} ${t("seances.min")}` : t("seances.dash")}`
                             : (cn?.fileType || t("seances.file"))}
                                     </Typography>
                                   </Box>
@@ -387,6 +434,8 @@ const AnimerSeanceView = () => {
                                     {isQuiz ? (
                                       <Tooltip title={cn?.published ? t("seances.open") : t("seances.publishFirst")}>
                                         <span>
+                                           <RoleGate roles={['formatuer',]}>
+
                                           <Button
                                             size="small"
                                             variant="contained"
@@ -405,6 +454,7 @@ const AnimerSeanceView = () => {
                                           >
                                             {t("seances.open")}
                                           </Button>
+                                          </RoleGate>
                                         </span>
                                       </Tooltip>
                                     ) : (
@@ -535,6 +585,8 @@ const AnimerSeanceView = () => {
             color="primary"
           />
           <ButtonGroup variant="outlined" size="small">
+                         <RoleGate roles={['formateur',]}>
+
             <Button 
               startIcon={<ZoomInMapIcon />} 
               onClick={() => setShowContenus(!showContenus)}
@@ -552,35 +604,45 @@ const AnimerSeanceView = () => {
             >
               {showContenus ? t("seances.hideHierarchy") : t("seances.showHierarchy")}
             </Button>
+            </RoleGate>
+             
+<RoleGate roles={['formateur',]}>
             <Button
               startIcon={<FeedbackIcon />}
-              onClick={() => setShowFeedbackTab((v) => !v)}
-              variant={showFeedbackTab ? "outlined" : "contained"}
+              onClick={handleToggleFeedbackVisibility}
+              variant={feedbackVisibleToStudents ? "contained" : "outlined"}
               color="secondary"
               sx={{
                 borderRadius: 2,
-                background: showFeedbackTab 
-                  ? "linear-gradient(135deg, #7b1fa2, #ab47bc)"
-                  : "linear-gradient(135deg, #7b1fa2, #ab47bc)",
-                boxShadow: showFeedbackTab 
-                  ? "0 4px 12px rgba(123, 31, 162, 0.3)"
-                  : "0 4px 12px rgba(123, 31, 162, 0.3)",
-                color: 'white',
-                border: 'none',
+                background: feedbackVisibleToStudents 
+                  ? "linear-gradient(135deg, #ff9800, #ffc107)"
+                  : "transparent",
+                boxShadow: feedbackVisibleToStudents 
+                  ? "0 4px 12px rgba(255, 152, 0, 0.3)"
+                  : "none",
+                color: feedbackVisibleToStudents ? 'white' : '#ff9800',
+                border: feedbackVisibleToStudents ? 'none' : '2px solid #ff9800',
                 '&:hover': { 
                   transform: 'translateY(-1px)', 
-                  boxShadow: '0 8px 20px rgba(123,31,162,0.4)' 
+                  boxShadow: feedbackVisibleToStudents 
+                    ? '0 8px 20px rgba(255, 152, 0, 0.4)'
+                    : '0 4px 12px rgba(255, 152, 0, 0.2)',
+                  background: feedbackVisibleToStudents
+                    ? "linear-gradient(135deg, #ff9800, #ffc107)"
+                    : "rgba(255, 152, 0, 0.1)"
                 }
               }}
             >
-              {showFeedbackTab ? t("seances.hideFeedback") : t("seances.showFeedback")}
+              {feedbackVisibleToStudents ? t("seances.hideFeedback") : t("seances.showFeedback")}
             </Button>
+            </RoleGate>
+             
           </ButtonGroup>
         </Stack>
 
         <Collapse in={showContenus}>
           <Divider sx={{ my: 2 }} />
-          <RoleGate roles={['formateur', 'admin', 'createurdeformation']} fallback={
+          <RoleGate roles={['formateur',]} fallback={
             programVisibleToStudents ? renderProgramHierarchy() : (
               <Box sx={{ p: 3, textAlign: "center", bgcolor: "#f5f5f5", borderRadius: 2 }}>
                 <Typography color="text.secondary">
@@ -619,18 +681,20 @@ const AnimerSeanceView = () => {
           <Box sx={{ p: 1 }}>
             <Stack spacing={0.5}>
               {/* Media & Resources */}
-              <Typography variant="overline" sx={{ px: 1, py: 0.5, fontWeight: 700, color: "text.secondary" }}>
-                📁 {t("seances.mediaResources")}
-              </Typography>
-              <Button
-                fullWidth
-                variant={tab === 0 ? "contained" : "text"}
-                startIcon={<DescriptionIcon />}
-                onClick={() => setTab(0)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.sessionAdditions")}
-              </Button>
+              <RoleGate roles={['formateur','etudiant']}>
+                <Typography variant="overline" sx={{ px: 1, py: 0.5, fontWeight: 700, color: "text.secondary" }}>
+                  📁 {t("seances.mediaResources")}
+                </Typography>
+                <Button
+                  fullWidth
+                  variant={tab === 0 ? "contained" : "text"}
+                  startIcon={<DescriptionIcon />}
+                  onClick={() => setTab(0)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.sessionAdditions")}
+                </Button>
+              </RoleGate>
               
               {/* Program Control */}
               <RoleGate roles={['formateur']}>
@@ -649,84 +713,99 @@ const AnimerSeanceView = () => {
               </RoleGate>
               
               {/* Learning Tools */}
-              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
-                🎓 {t("seances.learningTools")}
-              </Typography>
-              <Button
-                fullWidth
-                variant={tab === 1 ? "contained" : "text"}
-                startIcon={<QuizIcon />}
-                onClick={() => setTab(1)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.quizComing")}
-              </Button>
-              <Button
-                fullWidth
-                variant="text"
-                startIcon={<InsertDriveFileIcon />}
-                onClick={() => navigate(`/whiteboard/${seanceId}`)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.whiteboard")}
-              </Button>
-              
-              {/* Collaboration */}
-              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
-                👥 {t("seances.collaboration")}
-              </Typography>
-              <Button
-                fullWidth
-                variant={tab === 3 ? "contained" : "text"}
-                startIcon={<GroupIcon />}
-                onClick={() => setTab(3)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.regroupement")}
-              </Button>
-              
-              {/* Feedback */}
-              <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
-                💬 {t("seances.feedbackSection")}
-              </Typography>
-              <Button
-                fullWidth
-                variant={tab === 4 ? "contained" : "text"}
-                startIcon={<FeedbackIcon />}
-                onClick={() => setTab(4)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.feedbackFormateur")}
-              </Button>
-              <Button
-                fullWidth
-                variant={tab === 5 ? "contained" : "text"}
-                startIcon={<FeedbackIcon />}
-                onClick={() => setTab(5)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.feedbackEtudiant")}
-              </Button>
-              {showFeedbackTab && (
+              <RoleGate roles={['formateur', 'etudiant']}>
+                <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                  🎓 {t("seances.learningTools")}
+                </Typography>
                 <Button
                   fullWidth
-                  variant={tab === 6 ? "contained" : "text"}
-                  startIcon={<FeedbackIcon />}
-                  onClick={() => setTab(6)}
+                  variant={tab === 1 ? "contained" : "text"}
+                  startIcon={<QuizIcon />}
+                  onClick={() => setTab(1)}
                   sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
                 >
-                  {t("seances.feedback")}
+                  {t("seances.quizComing")}
                 </Button>
-              )}
-              <Button
-                fullWidth
-                variant={tab === (showFeedbackTab ? 7 : 6) ? "contained" : "text"}
-                startIcon={<FeedbackIcon />}
-                onClick={() => setTab(showFeedbackTab ? 7 : 6)}
-                sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
-              >
-                {t("seances.feedbackList")}
-              </Button>
+                <Button
+                  fullWidth
+                  variant="text"
+                  startIcon={<InsertDriveFileIcon />}
+                  onClick={() => navigate(`/whiteboard/${seanceId}`)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.whiteboard")}
+                </Button>
+              </RoleGate>
+              
+              {/* Collaboration */}
+              <RoleGate roles={['formateur', ]}>
+                <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                  👥 {t("seances.collaboration")}
+                </Typography>
+                <Button
+                  fullWidth
+                  variant={tab === 3 ? "contained" : "text"}
+                  startIcon={<GroupIcon />}
+                  onClick={() => setTab(3)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.regroupement")}
+                </Button>
+              </RoleGate>
+              
+              {/* Feedback */}
+              <RoleGate roles={['formateur', 'admin','etudiant']}>
+                <Typography variant="overline" sx={{ px: 1, py: 0.5, mt: 1, fontWeight: 700, color: "text.secondary" }}>
+                  💬 {t("seances.feedbackSection")}
+                </Typography>
+                <RoleGate roles={['formateur']}>
+                <Button
+                  fullWidth
+                  variant={tab === 4 ? "contained" : "text"}
+                  startIcon={<FeedbackIcon />}
+                  onClick={() => setTab(4)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.feedbackFormateur")}
+                </Button>
+                </RoleGate>
+                <RoleGate roles={['etudiant']}>
+                <Button
+                  fullWidth
+                  variant={tab === 5 ? "contained" : "text"}
+                  startIcon={<FeedbackIcon />}
+                  onClick={() => setTab(5)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.feedbackEtudiant")}
+                </Button>
+                </RoleGate>
+
+                {feedbackVisibleToStudents && (
+                  <RoleGate roles={['etudiant']}>
+                  <Button
+                    fullWidth
+                    variant={tab === 6 ? "contained" : "text"}
+                    startIcon={<FeedbackIcon />}
+                    onClick={() => setTab(6)}
+                    sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                  >
+                    {t("seances.feedback")}
+                  </Button>
+                  </RoleGate>
+                )}
+                <RoleGate roles={['formateur', 'admin',]}>
+                <Button
+                  fullWidth
+                  variant={tab === (feedbackVisibleToStudents ? 7 : 6) ? "contained" : "text"}
+                  startIcon={<FeedbackIcon />}
+                  onClick={() => setTab(feedbackVisibleToStudents ? 7 : 6)}
+                  sx={{ justifyContent: "flex-start", textTransform: "none", py: 1 }}
+                >
+                  {t("seances.feedbackList")}
+                </Button>
+                </RoleGate>
+              </RoleGate>
             </Stack>
           </Box>
         </Paper>
@@ -746,17 +825,19 @@ const AnimerSeanceView = () => {
                   <Typography variant="h6" fontWeight={600}>
                     🖼️ {t("seances.sessionImages")}
                   </Typography>
-                  <Tooltip title={t("seances.uploadImage")}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      component="label"
-                      startIcon={<AddPhotoAlternateIcon />}
-                    >
-                      {t("seances.addImage")}
-                      <input type="file" accept="image/*" hidden onChange={handleAddImage} />
-                    </Button>
-                  </Tooltip>
+                  <RoleGate roles={['formateur']}>
+                    <Tooltip title={t("seances.uploadImage")}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        component="label"
+                        startIcon={<AddPhotoAlternateIcon />}
+                      >
+                        {t("seances.addImage")}
+                        <input type="file" accept="image/*" hidden onChange={handleAddImage} />
+                      </Button>
+                    </Tooltip>
+                  </RoleGate>
                 </Stack>
 
                 {sessionImages.length ? (
@@ -804,17 +885,19 @@ const AnimerSeanceView = () => {
                   <Typography variant="h6" fontWeight={600}>
                     🎥 {t("seances.sessionVideos")}
                   </Typography>
-                  <Tooltip title={t("seances.uploadVideo")}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      component="label"
-                      startIcon={<MovieIcon />}
-                    >
-                      {t("seances.addVideo")}
-                      <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
-                    </Button>
-                  </Tooltip>
+                  <RoleGate roles={['formateur']}>
+                    <Tooltip title={t("seances.uploadVideo")}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        component="label"
+                        startIcon={<MovieIcon />}
+                      >
+                        {t("seances.addVideo")}
+                        <input type="file" accept="video/*" hidden onChange={handleAddVideo} />
+                      </Button>
+                    </Tooltip>
+                  </RoleGate>
                 </Stack>
 
                 {sessionVideos.length ? (
@@ -882,7 +965,7 @@ const AnimerSeanceView = () => {
                   {getSessionQuizzes().map((q) => {
                     const meta = quizMetaByContenu[q.contenuId];
                     const qCount = meta?.questions?.length ?? t("seances.dash");
-                    const timeStr = meta?.timeLimit ? `${meta.timeLimit} ${t("seances.min")}` : t("seances.dash");
+                    const timeStr = meta?.timeLimit && meta.timeLimit > 0 ? `${Math.floor(meta.timeLimit / 60)} ${t("seances.min")}` : t("seances.dash");
 
                     return (
                       <Paper
@@ -972,18 +1055,20 @@ const AnimerSeanceView = () => {
             </Box>
           )}
 
-          {/* Dynamic Feedback form (only if toggled) */}
-          {showFeedbackTab && tab === 6 && (
-            <Box>
-              <Stack direction="row" alignItems="center" spacing={2} mb={2}>
-                <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
-              </Stack>
-              <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
-            </Box>
+          {/* Dynamic Feedback form (only if visible and student role) */}
+          {feedbackVisibleToStudents && tab === 6 && (
+            <RoleGate roles={['etudiant']}>
+              <Box>
+                <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                  <Typography variant="h6">📝 {t("seances.sessionFeedback")}</Typography>
+                </Stack>
+                <AddSeanceFeedback seanceId={seanceId} onFeedbackSubmitted={reloadFeedbacks} />
+              </Box>
+            </RoleGate>
           )}
 
           {/* Feedback list (last tab) */}
-          {tab === (showFeedbackTab ? 7 : 6) && <SeanceFeedbackList />}
+          {tab === (feedbackVisibleToStudents ? 7 : 6) && <SeanceFeedbackList />}
         </Box>
       </Box>
 

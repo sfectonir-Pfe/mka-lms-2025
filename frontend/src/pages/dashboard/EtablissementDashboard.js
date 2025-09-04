@@ -131,8 +131,21 @@ export default function EtablissementDashboardPage() {
 
   // Helper functions
   const handleViewFeedbacks = async (student) => {
-    setSelectedStudent(student);
-    setFeedbackDialogOpen(true);
+    try {
+      // Fetch detailed feedbacks for this specific student
+      const response = await api.get(`/dashboard-establishment/my-feedbacks?studentId=${student.id}`);
+      const studentFeedbackData = {
+        ...student,
+        detailedFeedbacks: response.data
+      };
+      setSelectedStudent(studentFeedbackData);
+      setFeedbackDialogOpen(true);
+    } catch (error) {
+      console.error('Error fetching student feedbacks:', error);
+      // Fallback to existing data
+      setSelectedStudent(student);
+      setFeedbackDialogOpen(true);
+    }
   };
 
   const handleViewHistory = async (student) => {
@@ -439,45 +452,57 @@ export default function EtablissementDashboardPage() {
           {selectedStudent && (
             <Box>
               <Typography variant="h6" mb={2}>
-                Total des feedbacks: {feedbacks.find(f => f.id === selectedStudent.id)?.totalFeedbacks || 0}
+                Total des feedbacks: {selectedStudent.detailedFeedbacks?.length || 0}
               </Typography>
               <Typography variant="h6" mb={2}>
-                Note moyenne: {feedbacks.find(f => f.id === selectedStudent.id)?.averageRating || 0}⭐
+                Note moyenne: {selectedStudent.averageRating || 0}⭐
               </Typography>
               
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Session</TableCell>
-                      <TableCell>Programme</TableCell>
-                      <TableCell>Formateur</TableCell>
-                      <TableCell>Note</TableCell>
-                      <TableCell>Date</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(feedbacks.find(f => f.id === selectedStudent.id)?.feedbacks || []).map((feedback, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{feedback.sessionName}</TableCell>
-                        <TableCell>{feedback.programName}</TableCell>
-                        <TableCell>{feedback.formateurName}</TableCell>
-                        <TableCell>
-                          <Chip
-                            icon={<StarIcon />}
-                            label={`${feedback.averageRating}⭐`}
-                            color="warning"
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {new Date(feedback.createdAt).toLocaleDateString()}
-                        </TableCell>
+              {selectedStudent.detailedFeedbacks && selectedStudent.detailedFeedbacks.length > 0 ? (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Session</TableCell>
+                        <TableCell>Programme</TableCell>
+                        <TableCell>Note</TableCell>
+                        <TableCell>Commentaires</TableCell>
+                        <TableCell>Date</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {selectedStudent.detailedFeedbacks.map((feedback, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{feedback.sessionName}</TableCell>
+                          <TableCell>{feedback.programName}</TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={<StarIcon />}
+                              label={`${feedback.rating || 'N/A'}⭐`}
+                              color="warning"
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {feedback.comments ? (
+                              <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {typeof feedback.comments === 'string' ? feedback.comments : JSON.stringify(feedback.comments)}
+                              </Typography>
+                            ) : 'Aucun commentaire'}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(feedback.createdAt).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography color="text.secondary" textAlign="center" py={2}>
+                  Aucun feedback disponible pour cet étudiant
+                </Typography>
+              )}
             </Box>
           )}
         </DialogContent>
@@ -504,56 +529,53 @@ export default function EtablissementDashboardPage() {
           {studentHistory && (
             <Box>
               <Typography variant="h6" mb={2}>
-                Sessions rejointes: {studentHistory.sessions?.length || 0}
+                Sessions rejointes: {studentHistory.length || 0}
               </Typography>
               
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Session</TableCell>
-                      <TableCell>Programme</TableCell>
-                      <TableCell>Statut</TableCell>
-                      <TableCell>Date d'inscription</TableCell>
-                      <TableCell>Séances</TableCell>
-                      <TableCell>Feedbacks donnés</TableCell>
-                      <TableCell>Note moyenne</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {(studentHistory.sessions || []).map((session, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{session.name}</TableCell>
-                        <TableCell>{session.programName}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={getStatusLabel(session.status)}
-                            color={getStatusColor(session.status)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          {new Date(session.joinedAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>{session.totalSeances}</TableCell>
-                        <TableCell>{session.feedbacksGiven}</TableCell>
-                        <TableCell>
-                          {session.averageRating > 0 ? (
+              {studentHistory.length > 0 ? (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Session</TableCell>
+                        <TableCell>Programme</TableCell>
+                        <TableCell>Statut</TableCell>
+                        <TableCell>Date de début</TableCell>
+                        <TableCell>Date de fin</TableCell>
+                        <TableCell>Date d'inscription</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {studentHistory.map((session, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{session.sessionName}</TableCell>
+                          <TableCell>{session.programName}</TableCell>
+                          <TableCell>
                             <Chip
-                              icon={<StarIcon />}
-                              label={`${session.averageRating}⭐`}
-                              color="warning"
+                              label={getStatusLabel(session.status)}
+                              color={getStatusColor(session.status)}
                               size="small"
                             />
-                          ) : (
-                            'N/A'
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                          </TableCell>
+                          <TableCell>
+                            {session.startDate ? new Date(session.startDate).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {session.endDate ? new Date(session.endDate).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(session.joinedAt).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography color="text.secondary" textAlign="center" py={2}>
+                  Aucun historique de session disponible pour cet étudiant
+                </Typography>
+              )}
             </Box>
           )}
         </DialogContent>
