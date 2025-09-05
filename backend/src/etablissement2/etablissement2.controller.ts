@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, Delete, Request } from '@nestjs/common';
 import { Etablissement2Service } from './etablissement2.service';
 import { Roles } from '../auth/roles.decorator';
 
@@ -19,8 +19,15 @@ export class Etablissement2Controller {
   }
 
   @Roles('admin', 'createurdeformation', 'etablissement')
-  @Get('user/:userId')
+  @Roles('etablissement', 'admin')
+  @Get(':userId/my-establishment')
   async findByUserId(@Param('userId') userId: string) {
-    return this.service.findByUserId(parseInt(userId));
+    return this.service.findByUserId(+userId);
+  }
+
+  @Roles('etablissement', 'admin', 'etudiant', 'formateur')
+  @Get('my-establishment-info')
+  async getMyEstablishmentInfo(@Request() req: any) {
+    return this.service.getEstablishmentInfo(req.user.userId);
   }
 }
