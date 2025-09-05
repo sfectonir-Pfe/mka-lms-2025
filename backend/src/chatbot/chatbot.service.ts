@@ -16,6 +16,7 @@ interface UserMemory {
   };
   lastContext?: string;
   lastQuery?: string;
+  lastAccess?: number;
   context?: {
     lastTopic?: string;
     [key: string]: any;
@@ -42,21 +43,78 @@ export class ChatbotService implements OnModuleDestroy {
     timestamp: 0,
     ttl: 300000 // 5 minutes
   };
+  private memoryCleanupInterval: NodeJS.Timeout;
+  private readonly MAX_MEMORY_ENTRIES = 1000; // Maximum number of users to keep in memory
+  private readonly MEMORY_TTL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-  constructor() {}
+  constructor() {
+    // Start memory cleanup scheduler
+    this.memoryCleanupInterval = setInterval(() => {
+      this.cleanupUserMemory();
+    }, 60 * 60 * 1000); // Run every hour
+  }
 
   async onModuleDestroy() {
+    if (this.memoryCleanupInterval) {
+      clearInterval(this.memoryCleanupInterval);
+    }
     await prisma.$disconnect();
     this.languageCache.clear();
+    this.userMemoryStore = {}; // Clear user memory
     this.dbCache.data = null;
   }
 
   // Nettoyer les caches périodiquement
   clearCaches(): void {
     this.languageCache.clear();
+    this.userMemoryStore = {}; // Clear user memory
     this.dbCache.data = null;
     this.dbCache.timestamp = 0;
     this.logger.log('Caches nettoyés');
+  }
+
+  // Cleanup user memory to prevent memory leaks
+  private cleanupUserMemory(): void {
+    const now = Date.now();
+    const userIds = Object.keys(this.userMemoryStore).map(id => parseInt(id));
+    let cleanedCount = 0;
+
+    // Remove expired entries
+    for (const userId of userIds) {
+      const userMemory = this.userMemoryStore[userId];
+      if (userMemory?.lastAccess && (now - userMemory.lastAccess) > this.MEMORY_TTL) {
+        delete this.userMemoryStore[userId];
+        cleanedCount++;
+      }
+    }
+
+    // If still over limit, remove oldest entries (LRU eviction)
+    const remainingUserIds = Object.keys(this.userMemoryStore).map(id => parseInt(id));
+    if (remainingUserIds.length > this.MAX_MEMORY_ENTRIES) {
+      // Sort by lastAccess time (oldest first)
+      const sortedUsers = remainingUserIds
+        .map(userId => ({ userId, lastAccess: this.userMemoryStore[userId]?.lastAccess || 0 }))
+        .sort((a, b) => a.lastAccess - b.lastAccess);
+      
+      const toRemove = sortedUsers.slice(0, remainingUserIds.length - this.MAX_MEMORY_ENTRIES);
+      for (const { userId } of toRemove) {
+        delete this.userMemoryStore[userId];
+        cleanedCount++;
+      }
+    }
+
+    if (cleanedCount > 0) {
+      this.logger.log(`Cleaned up ${cleanedCount} user memory entries. Current count: ${Object.keys(this.userMemoryStore).length}`);
+    }
+  }
+
+  // Get memory statistics for monitoring
+  getMemoryStats(): { userCount: number; cacheSize: number; dbCacheAge: number } {
+    return {
+      userCount: Object.keys(this.userMemoryStore).length,
+      cacheSize: this.languageCache.size,
+      dbCacheAge: this.dbCache.timestamp ? Date.now() - this.dbCache.timestamp : 0
+    };
   }
 
   // Obtenir les statistiques des caches
@@ -72,30 +130,32 @@ export class ChatbotService implements OnModuleDestroy {
     try {
       const normalizedMsg = message.toLowerCase().trim();
       
+      // Détecter la langue au début si pas fournie
+      let detectedLanguage = userLanguage;
+      if (!detectedLanguage) {
+        detectedLanguage = await this.detectLanguage(message);
+      }
+      
       // Commande de debug pour voir les contenus
       if (normalizedMsg.includes('debug') && normalizedMsg.includes('contenu')) {
         const response = await this.debugListAllContents();
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
-        return { response, detectedLanguage: 'fr' };
+        return { response, detectedLanguage };
       }
       
       // Détection directe pour "Liste des Sessions"
       if (normalizedMsg.includes('liste') && normalizedMsg.includes('session')) {
-        const response = await this.getSessionList('fr');
+        const response = await this.getSessionList(detectedLanguage);
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
-        return { response, detectedLanguage: 'fr' };
+        return { response, detectedLanguage };
       }
-      
-      // Détecter la langue si pas fournie
-      let detectedLanguage = userLanguage;
       
       // Détection spécifique pour résumé de test logiciel
       if (/summary.*test\s+logiciel|résumé.*test\s+logiciel|resume.*test\s+logiciel/i.test(message)) {
-        detectedLanguage = 'fr'; // Forcer le français
         const response = await this.summarizeContentByTitle('test logiciel');
         if (userId) {
           await this.saveToMemory(userId, message, response);
@@ -105,14 +165,11 @@ export class ChatbotService implements OnModuleDestroy {
       
       // Détection directe pour "Liste des Séances"
       if (normalizedMsg.includes('liste') && (normalizedMsg.includes('seance') || normalizedMsg.includes('séance'))) {
-        const response = await this.getSeanceList(userLanguage || 'fr');
+        const response = await this.getSeanceList(detectedLanguage);
         if (userId) {
           await this.saveToMemory(userId, message, response, 'seances_list');
         }
-        return { response, detectedLanguage: userLanguage || 'fr' };
-      }
-      if (!detectedLanguage) {
-        detectedLanguage = await this.detectLanguage(message);
+        return { response, detectedLanguage };
       }
       
       // Détection universelle des demandes de résumé (priorité haute)
@@ -137,6 +194,22 @@ export class ChatbotService implements OnModuleDestroy {
         return { response: finalResponse, detectedLanguage };
       }
       
+      // Salutations générales multilingues
+      if (/^(hello|hi|hey|bonjour|salut|hola|مرحبا|أهلا|السلام عليكم)\s*[!.]*$/i.test(normalizedMsg)) {
+        const responses = {
+          fr: "Bonjour ! Je suis votre assistant LMS. Comment puis-je vous aider aujourd'hui ?",
+          en: "Hello! I'm your LMS assistant. How can I help you today?",
+          es: "¡Hola! Soy tu asistente LMS. ¿Cómo puedo ayudarte hoy?",
+          ar: "مرحبا! أنا مساعد نظام إدارة التعلم الخاص بك. كيف يمكنني مساعدتك اليوم؟",
+          tn: "أهلا! أنا مساعد نظام إدارة التعلم متاعك. كيفاش نجم نعاونك اليوم؟"
+        };
+        const response = responses[detectedLanguage] || responses.en;
+        if (userId) {
+          await this.saveToMemory(userId, message, response);
+        }
+        return { response, detectedLanguage };
+      }
+      
       // Présentations personnelles multilingues
       if (/my name is|je m'appelle|i am|je suis|me llamo|soy|اسمي/i.test(message)) {
         const nameMatch = message.match(/(?:my name is|je m'appelle|i am|je suis|me llamo|soy|اسمي)\s+([^\n\r.,!?]+)/i);
@@ -148,7 +221,7 @@ export class ChatbotService implements OnModuleDestroy {
             es: `¡Encantado de conocerte ${name}! Soy tu asistente LMS. Hazme preguntas sobre la base de datos como 'número de usuarios', 'lista de cursos', etc.`,
             ar: `سعيد بلقائك ${name}! أنا مساعد نظام إدارة التعلم الخاص بك. اسألني أسئلة قاعدة البيانات مثل 'عدد المستخدمين'، 'قائمة الدورات'، إلخ.`
           };
-          const response = responses[detectedLanguage] || responses.fr;
+          const response = responses[detectedLanguage] || responses.en;
           if (userId) {
             await this.saveToMemory(userId, message, response);
           }
@@ -160,7 +233,7 @@ export class ChatbotService implements OnModuleDestroy {
           es: "¡Encantado! Soy tu asistente LMS. ¿Cómo puedo ayudarte con la base de datos?",
           ar: "سعيد بلقائك! أنا مساعد نظام إدارة التعلم الخاص بك. كيف يمكنني مساعدتك مع قاعدة البيانات؟"
         };
-        const response = responses[detectedLanguage] || responses.fr;
+        const response = responses[detectedLanguage] || responses.en;
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
@@ -184,7 +257,7 @@ export class ChatbotService implements OnModuleDestroy {
           es: `Hay ${users.length} usuario(s) en total.`,
           ar: `يوجد ${users.length} مستخدم(ين) في المجموع.`
         };
-        const response = responses[detectedLanguage] || responses.fr;
+        const response = responses[detectedLanguage] || responses.en;
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
@@ -312,7 +385,7 @@ export class ChatbotService implements OnModuleDestroy {
           es: "Para resumir contenido, especifica su título (ej: 'resumen de pliego de condiciones') o ID (ej: 'resumen del contenido 1').",
           ar: "لتلخيص المحتوى، حدد عنوانه (مثل: 'ملخص دفتر الشروط') أو معرفه (مثل: 'ملخص المحتوى 1')."
         };
-        const response = helpMessages[detectedLanguage] || helpMessages.fr;
+        const response = helpMessages[detectedLanguage] || helpMessages.en;
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
@@ -334,7 +407,11 @@ export class ChatbotService implements OnModuleDestroy {
                 storedName = nameMatch[1].trim();
                 // Sauvegarder en mémoire temporaire pour les futures demandes
                 if (!this.userMemoryStore[userId]) {
-                  this.userMemoryStore[userId] = {};
+                  this.userMemoryStore[userId] = {
+                    lastAccess: Date.now()
+                  };
+                } else {
+                  this.userMemoryStore[userId].lastAccess = Date.now();
                 }
                 this.userMemoryStore[userId].name = storedName || undefined;
                 break;
@@ -363,7 +440,7 @@ export class ChatbotService implements OnModuleDestroy {
           ar: "لا أتذكر اسمك. هل يمكنك إخباري مرة أخرى؟",
           tn: "ما نتفكرش إسمك. تنجم تقولهولي مرة أخرى؟"
         };
-        const response = responses[detectedLanguage] || responses.fr;
+        const response = responses[detectedLanguage] || responses.en;
         if (userId) {
           await this.saveToMemory(userId, message, response);
         }
@@ -462,7 +539,7 @@ export class ChatbotService implements OnModuleDestroy {
         ar: "لا أفهم سؤالك. جرب: 'عدد المستخدمين'، 'قائمة الدورات'، 'المستخدمون النشطون'، إلخ.",
         tn: "ما فهمتش سؤالك. جرب: 'عدد المستخدمين'، 'قائمة الكورسات'، 'المستخدمين النشاط'، إلخ."
       };
-      const finalResponse = notUnderstoodMessages[detectedLanguage] || notUnderstoodMessages.fr;
+      const finalResponse = notUnderstoodMessages[detectedLanguage] || notUnderstoodMessages.en;
       if (userId) {
         await this.saveToMemory(userId, message, finalResponse);
       }
@@ -477,7 +554,7 @@ export class ChatbotService implements OnModuleDestroy {
         ar: "خطأ في معالجة طلبك.",
         tn: "فمة غلطة في معالجة طلبك."
       };
-      return { response: errorMessages[userLanguage || 'fr'] || errorMessages.fr };
+      return { response: errorMessages[userLanguage || 'en'] || errorMessages.en };
     }
   }
 
@@ -556,7 +633,7 @@ export class ChatbotService implements OnModuleDestroy {
     
     try {
       const response = await this.makeGroqRequest({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ 
           role: 'user', 
           content: `Detect language, respond only with code (fr/en/es/ar/tn): "${text.substring(0, 100)}"` 
@@ -638,45 +715,30 @@ export class ChatbotService implements OnModuleDestroy {
         avgFeedbackRating: feedback.length > 0 ? '4.5' : '0'
       };
       
-      const prompt = `You are an intelligent LMS assistant with complete database knowledge and user-specific memory. Analyze the user's message and provide a helpful response in ${languageNames[language] || 'French'}.
+      const prompt = `You are a concise LMS assistant. Answer directly and briefly in ${languageNames[language] || 'French'}.
 
-Complete LMS Database:
-- Users: ${contextData.totalUsers} (${contextData.activeUsers} active, ${contextData.inactiveUsers} inactive, ${contextData.activityRate}% activity rate)
-- Courses: ${contextData.totalCourses}
-- Programs: ${contextData.totalPrograms}
-- Modules: ${contextData.totalModules}
-- Content items: ${contextData.totalContents}
-- Sessions: ${contextData.totalSessions}
-- Quizzes: ${contextData.totalQuizzes}
-- Feedback: ${contextData.totalFeedback} (avg rating: ${contextData.avgFeedbackRating}/5)
-- Seances: ${contextData.totalSeances}${conversationHistory}
+Database Stats:
+- Users: ${contextData.totalUsers} (${contextData.activeUsers} active)
+- Courses: ${contextData.totalCourses} | Programs: ${contextData.totalPrograms} | Modules: ${contextData.totalModules}
+- Sessions: ${contextData.totalSessions} | Quizzes: ${contextData.totalQuizzes} | Content: ${contextData.totalContents}${conversationHistory}
 
-Current message: "${message}"
-Language: ${languageNames[language] || 'French'}
-User ID: ${userId || 'Anonymous'}
+User asks: "${message}"
 
-Instructions:
-1. IMPORTANT: Only use conversation history from THIS specific user (User ID: ${userId || 'Anonymous'})
-2. If no conversation history exists for this user, treat them as a new user
-3. If user introduces themselves, remember ONLY their name for future conversations
-4. If asking "what is my name?", only check THIS user's conversation history
-5. Don't confuse this user with other users (like Nessrine, Khalil, etc.)
-6. For greetings, respond warmly but don't assume you know them unless they're in the conversation history
-7. Be conversational but user-specific
-8. For Tunisian Darija, use authentic expressions
-9. You have access to ALL database tables: users, courses, programs, modules, content, sessions, quizzes, feedback, seances
-10. IMPORTANT: If user asks for "Liste des Sessions" or "sessions list" or similar, provide the session data from the ${contextData.totalSessions} sessions available
-11. Can answer questions about any aspect of the LMS system including sessions, quizzes, feedback
-12. Provide detailed statistics and insights from the complete database
+Rules:
+- Keep responses SHORT (1-2 sentences max)
+- Answer directly without repetition
+- Don't mention previous conversations unless specifically asked
+- Use simple, clear language
+- Only provide the requested information
 
-Respond naturally and user-specifically:`;
+Answer concisely:`;
       
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-70b-8192',
+          model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'user', content: prompt }],
-          max_tokens: 300,
+          max_tokens: 80,
           temperature: 0.4,
         },
         {
@@ -691,6 +753,10 @@ Respond naturally and user-specifically:`;
       return response.data.choices[0].message.content.trim();
     } catch (error) {
       this.logger.error(`Erreur analyse intention: ${error.message}`);
+      if (error.response) {
+        this.logger.error(`Response status: ${error.response.status}`);
+        this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
+      }
       return null;
     }
   }
@@ -889,7 +955,7 @@ Respond naturally and user-specifically:`;
   async askGroq(prompt: string): Promise<string> {
     try {
       const response = await this.makeGroqRequest({
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 512,
         temperature: 0.2
@@ -1533,7 +1599,12 @@ Soyez concis, pratique et utilisez un langage accessible.`;
 
   // Récupérer le nom de l'utilisateur
   getUserName(userId: number): string | null {
-    return this.userMemoryStore[userId]?.name || null;
+    const userMemory = this.userMemoryStore[userId];
+    if (userMemory) {
+      // Update last access time
+      userMemory.lastAccess = Date.now();
+    }
+    return userMemory?.name || null;
   }
 
   // Sauvegarder un échange dans la mémoire d'un utilisateur (optimisé)
@@ -1551,7 +1622,12 @@ Soyez concis, pratique et utilisez un langage accessible.`;
       
       // Initialiser la mémoire utilisateur
       if (!this.userMemoryStore[userId]) {
-        this.userMemoryStore[userId] = {};
+        this.userMemoryStore[userId] = {
+          lastAccess: Date.now()
+        };
+      } else {
+        // Update last access time
+        this.userMemoryStore[userId].lastAccess = Date.now();
       }
       
       // Extraire et sauvegarder le nom

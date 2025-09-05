@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { $Enums } from '@prisma/client';
@@ -186,7 +187,47 @@ export class Session2Service {
     return assigned.map((item) => item.user);
   }
 
-  async removeUserFromSession(session2Id: number, userId: number) {
+  async removeUserFromSession(session2Id: number, userId: number, currentUser?: any) {
+    // If the current user is 'etablissement' role, check if they can delete this user
+    if (currentUser && (currentUser.role?.toLowerCase() === 'etablissement' || currentUser.role === 'Etablissement')) {
+      // Get the establishment of the current user (responsable etablissement)
+      const currentUserEtablissement = await this.prisma.etablissement.findFirst({
+        where: { userId: currentUser.userId },
+        include: { Etablissement2: true }
+      });
+
+      if (!currentUserEtablissement || !currentUserEtablissement.Etablissement2) {
+        throw new ForbiddenException('Vous n\'êtes pas associé à un établissement');
+      }
+
+      // Get the student to be removed and check their establishment
+      const studentToRemove = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          Etudiants: {
+            include: { Etablissement2: true }
+          }
+        }
+      });
+
+      if (!studentToRemove) {
+        throw new NotFoundException('Utilisateur introuvable');
+      }
+
+      // Check if the user to be removed is a student
+      if (studentToRemove.role !== 'Etudiant') {
+        throw new ForbiddenException('Vous ne pouvez supprimer que des étudiants');
+      }
+
+      // Check if the student belongs to the same establishment
+      const studentEtablissement = studentToRemove.Etudiants[0]?.Etablissement2;
+      
+      if (!studentEtablissement || studentEtablissement.id !== currentUserEtablissement.etablissement2Id) {
+        throw new ForbiddenException('Vous ne pouvez supprimer que les étudiants de votre établissement');
+      }
+    }
+
+    // Proceed with removal
     return this.prisma.userSession2.deleteMany({
       where: { session2Id, userId },
     });
@@ -503,11 +544,7 @@ export class Session2Service {
 }
 // new add
 async getSessionsForUser(userId: number) {
-  console.log('Getting sessions for user:', userId);
-  
-
   // Regular user (formateur/etudiant) - return their assigned sessions
-  console.log('Regular user, getting assigned sessions');
   const userSessions = await this.prisma.userSession2.findMany({
     where: { userId },
     include: {
