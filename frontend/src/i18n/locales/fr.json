@@ -1188,12 +1188,15 @@
   },
   "notifications": {
     "title": "Notifications",
+    "allNotifications": "Toutes les Notifications",
     "noNotifications": "Aucune notification",
     "noMatchingNotifications": "Aucune notification correspondante",
     "markAllRead": "Tout marquer comme lu",
     "markAsRead": "Marquer comme lu",
     "delete": "Supprimer",
-    "viewAll": "Voir toutes",
+    "viewAll": "Voir Toutes les Notifications",
+    "loading": "Chargement des notifications...",
+    "new": "Nouveau",
     "loadError": "Erreur lors du chargement des notifications",
     "searchPlaceholder": "Rechercher dans les notifications...",
     "filterByType": "Filtrer par type",
@@ -1209,9 +1212,15 @@
     "read": "Lues",
     "clearFilters": "Effacer les filtres",
     "settings": "Paramètres",
-    "autoMarkRead": "Marquer automatiquement comme lu"
-  }
-  ,
+    "autoMarkRead": "Marquer automatiquement comme lu",
+    "errors": {
+      "failedToLoad": "Échec du chargement des notifications",
+      "realtimeUnavailable": "Notifications en temps réel indisponibles",
+      "failedToMarkRead": "Échec du marquage de la notification comme lue",
+      "failedToMarkAllRead": "Échec du marquage de toutes les notifications comme lues",
+      "failedToDelete": "Échec de la suppression de la notification"
+    }
+  },
   "feedbackFormateur": {
     "title": "Feedback Formateur",
     "selectStudentTitle": "Sélectionnez un étudiant 👨‍🎓👩‍🎓",

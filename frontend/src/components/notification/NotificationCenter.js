@@ -7,12 +7,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { io } from 'socket.io-client';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from "../../api/axiosInstance";
 
 
 
 
 const NotificationCenter = ({ user }) => {
+  const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -35,7 +37,7 @@ const NotificationCenter = ({ user }) => {
       setUnreadCount(res.data.filter(n => !n.read).length);
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
-      setError('Failed to load notifications');
+      setError(t('notifications.errors.failedToLoad'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ const NotificationCenter = ({ user }) => {
 
     socketInstance.on('connect_error', (err) => {
       console.error('Socket connection error:', err);
-      setError('Real-time notifications unavailable');
+      setError(t('notifications.errors.realtimeUnavailable'));
     });
 
     return () => {
@@ -99,7 +101,7 @@ const NotificationCenter = ({ user }) => {
       }
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
-      setError('Failed to mark notification as read');
+      setError(t('notifications.errors.failedToMarkRead'));
     }
   };
 
@@ -111,7 +113,7 @@ const NotificationCenter = ({ user }) => {
       setUnreadCount(0);
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
-      setError('Failed to mark all notifications as read');
+      setError(t('notifications.errors.failedToMarkAllRead'));
     }
   };
 
@@ -130,7 +132,7 @@ const NotificationCenter = ({ user }) => {
       }
     } catch (err) {
       console.error('Failed to delete notification:', err);
-      setError('Failed to delete notification');
+      setError(t('notifications.errors.failedToDelete'));
     }
   };
 
@@ -148,7 +150,7 @@ const NotificationCenter = ({ user }) => {
       </IconButton>
       <Menu open={!!anchorEl} anchorEl={anchorEl} onClose={() => setAnchorEl(null)}>
         <MenuItem disabled>
-          Notifications
+          {t('notifications.title')}
           {unreadCount > 0 && !loading &&
             <IconButton size="small" onClick={handleMarkAllAsRead} sx={{ ml: 'auto' }}>
               <DoneAllIcon fontSize="small" />
@@ -159,10 +161,10 @@ const NotificationCenter = ({ user }) => {
         {loading && notifications.length === 0 ? (
           <MenuItem disabled>
             <CircularProgress size={20} sx={{ mr: 1 }} />
-            Loading notifications...
+            {t('notifications.loading')}
           </MenuItem>
         ) : notifications.length === 0 ? (
-          <MenuItem disabled>No notifications</MenuItem>
+          <MenuItem disabled>{t('notifications.noNotifications')}</MenuItem>
         ) : (
           <List dense sx={{ width: 320, maxWidth: 400 }}>
             {notifications.map(n => (
@@ -190,7 +192,7 @@ const NotificationCenter = ({ user }) => {
               <ListItemIcon>
                 <ViewListIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText primary="View All Notifications" />
+              <ListItemText primary={t('notifications.viewAll')} />
             </MenuItem>
           </>
         )}

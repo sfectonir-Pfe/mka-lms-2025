@@ -1348,12 +1348,15 @@
   },
   "notifications": {
     "title": "الإشعارات",
+    "allNotifications": "جميع الإشعارات",
     "noNotifications": "لا توجد إشعارات",
     "noMatchingNotifications": "لا توجد إشعارات مطابقة",
     "markAllRead": "تحديد الكل كمقروء",
     "markAsRead": "تحديد كمقروء",
     "delete": "حذف",
-    "viewAll": "عرض الكل",
+    "viewAll": "عرض جميع الإشعارات",
+    "loading": "جاري تحميل الإشعارات...",
+    "new": "جديد",
     "loadError": "خطأ في تحميل الإشعارات",
     "searchPlaceholder": "البحث في الإشعارات...",
     "filterByType": "تصفية حسب النوع",
@@ -1369,7 +1372,14 @@
     "read": "مقروءة",
     "clearFilters": "مسح المرشحات",
     "settings": "الإعدادات",
-    "autoMarkRead": "تحديد تلقائي كمقروء"
+    "autoMarkRead": "تحديد تلقائي كمقروء",
+    "errors": {
+      "failedToLoad": "فشل في تحميل الإشعارات",
+      "realtimeUnavailable": "الإشعارات الفورية غير متاحة",
+      "failedToMarkRead": "فشل في تحديد الإشعار كمقروء",
+      "failedToMarkAllRead": "فشل في تحديد جميع الإشعارات كمقروءة",
+      "failedToDelete": "فشل في حذف الإشعار"
+    }
   },
 
   "feedbackFormateur": {
