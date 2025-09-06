@@ -14,10 +14,11 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ApiBody, ApiProperty } from '@nestjs/swagger';
+import { ApiBody, ApiProperty, ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from './public.decorator';
 import { JwtService } from '@nestjs/jwt';
 
+@ApiBearerAuth('JWT-auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -26,6 +27,7 @@ export class AuthController {
     
   ) { }
 
+ 
   @Post('verify')
   async verifyAccount(@Body() body: { email: string }) {
     try {
@@ -76,6 +78,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Get()
   async findAll() {
     try {
@@ -89,6 +92,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Get(':id')
   async findOne(@Param('id') id: number) {
     try {
@@ -102,6 +106,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -118,6 +123,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Delete('users/:id')
   async remove(@Param('id') id: number) {
     try {
@@ -157,6 +163,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Post('change-password')
   async changePassword(@Body() changePasswordDto: ChangePasswordDto & { sendNotification?: boolean }) {
     try {
@@ -175,6 +182,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Post('logout')
   async logout(@Body() body?: any) {
     try {
@@ -197,6 +205,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('JWT-auth')
   @Post('update-user')
   async updateUser(@Body() body: { email: string }) {
     try {
