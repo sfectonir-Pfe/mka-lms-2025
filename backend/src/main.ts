@@ -13,12 +13,12 @@ async function bootstrap() {
 
   // More permissive CORS for debugging
   app.enableCors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "https://mka.tunir-digital.com"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ['Content-Type', 'Authorization', 'user-id', 'Accept', 'Origin', 'X-Requested-With'],
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204 
   });
 
   // Serve files from the top-level /uploads folder with CORS headers
@@ -35,6 +35,17 @@ async function bootstrap() {
     .setTitle('MKA-LMS')
     .setDescription('The MKA-LMS API description')
     .setVersion('0.1')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controllers
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

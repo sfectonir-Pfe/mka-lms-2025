@@ -1,7 +1,7 @@
 // src/api/axiosinstance.js
 import axios from 'axios';
 
-const baseURL = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
+const baseURL = process.env.REACT_APP_API_BASE || 'http://localhost:4001';
 console.log("API Base URL:", baseURL);
 console.log("Environment variable:", process.env.REACT_APP_API_BASE);
 
