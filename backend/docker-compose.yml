@@ -5,6 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: mka-lms-backend
     container_name: mka-lms-backend
     restart: always
     ports:
@@ -19,7 +20,7 @@ services:
   
   postgres:
     image: postgres:15
-    container_name: mka_lms_postgres
+    container_name: mka-lms-postgres
     restart: always
     ports:
       - "5433:5432"

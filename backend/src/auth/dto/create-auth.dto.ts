@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum } from 'class-validator';
 
 export class CreateAuthDto { }
 
@@ -13,8 +13,6 @@ export class LoginDto {
     @ApiProperty()
     @IsNotEmpty({ message: 'Mot de passe requis' })
     password: string;
-
-
 
     @ApiProperty({ required: false, default: false })
     rememberMe?: boolean;
@@ -32,7 +30,7 @@ export class RegisterDto {
     password: string;
 
     @ApiProperty()
-    @IsNotEmpty({ message: 'Rôle requis' })
+    @IsEnum(Role)
     role: Role;
 
     @ApiProperty({ required: false })

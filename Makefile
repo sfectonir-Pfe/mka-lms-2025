@@ -68,7 +68,7 @@ front-logs:
 # ===========================
 # Backend Commands
 # ===========================
-.PHONY: back-up back-down back-build back-logs migrate migrate-dev studio
+.PHONY: back-up back-down back-build back-logs migrate migrate-dev studio seed
 
 back-up:
 	@echo "$(GREEN)Starting backend...$(NC)"
@@ -97,6 +97,10 @@ migrate-dev:
 studio:
 	@echo "$(GREEN)Launching Prisma Studio...$(NC)"
 	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma studio
+
+seed:
+	@echo "$(GREEN)Running Prisma seed...$(NC)"
+	docker-compose -f $(BACK_COMPOSE) exec $(SERVICE) npx prisma db seed
 
 # ===========================
 # LMS (Frontend + Backend only)

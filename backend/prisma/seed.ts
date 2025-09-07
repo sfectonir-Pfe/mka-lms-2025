@@ -11,7 +11,7 @@ async function main() {
   where: { email: 'khalil@gmail.com' },
   update: {},
   create: {
-    role: Role.Admin,
+    role: Role.Admin ,
     email: 'khalil@gmail.com',
     password: hashedPassword,
     needsVerification: false,  // Ajoutez cette ligne
