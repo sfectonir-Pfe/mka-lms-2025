@@ -14,10 +14,11 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ChangePasswordDto, ResetPassword } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ApiBody, ApiProperty } from '@nestjs/swagger';
 import { Public } from './public.decorator';
 import { JwtService } from '@nestjs/jwt';
+import { ApiBody, ApiProperty, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth('JWT-auth')
 @Controller('auth')
 export class AuthController {
   constructor(
