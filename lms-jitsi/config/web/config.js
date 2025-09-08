@@ -15,6 +15,7 @@ if (subdomain) {
 }
 config.hosts.muc = 'muc.' + subdomain + 'localhost';
 config.bosh = 'https://localhost:8443/' + subdir + 'http-bind';
+config.websocket = 'wss://localhost:8443/' + subdir + 'xmpp-websocket';
 config.bridgeChannel = {
     preferSctp: true
 };
