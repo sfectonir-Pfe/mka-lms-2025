@@ -31,6 +31,10 @@ consider_bosh_secure = true;
 consider_websocket_secure = true;
 
 
+smacks_max_unacked_stanzas = 5;
+smacks_hibernation_time = 60;
+smacks_max_old_sessions = 1;
+
 
 
 
@@ -44,6 +48,9 @@ VirtualHost "localhost"
     }
     modules_enabled = {
         "bosh";
+        
+        "websocket";
+        "smacks"; -- XEP-0198: Stream Management
         
         "speakerstats";
         "conference_duration";

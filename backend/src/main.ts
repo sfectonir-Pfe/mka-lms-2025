@@ -11,9 +11,13 @@ async function bootstrap() {
   // Configure WebSocket adapter with CORS
   app.useWebSocketAdapter(new CustomIoAdapter(app));
 
-  // More permissive CORS for debugging
+  // CORS configuration for containerized environment
+  const corsOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',')
+    : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"];
+    
   app.enableCors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
+    origin: corsOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ['Content-Type', 'Authorization', 'user-id', 'Accept', 'Origin', 'X-Requested-With'],
     credentials: true,
@@ -51,8 +55,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(8000);
-  console.log('Backend server running on http://localhost:8000');
-  console.log('Swagger documentation available at http://localhost:8000/api');
+  const port = process.env.PORT || 8000;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Backend server running on http://0.0.0.0:${port}`);
+  console.log(`Swagger documentation available at http://0.0.0.0:${port}/api`);
 }
 bootstrap();

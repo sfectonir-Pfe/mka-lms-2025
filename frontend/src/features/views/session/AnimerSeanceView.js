@@ -61,6 +61,9 @@ const AnimerSeanceView = () => {
   const { id: seanceId } = useParams();
   const navigate = useNavigate();
 
+  // Jitsi configuration
+  const jitsiUrl = process.env.REACT_APP_JITSI_URL || 'http://localhost:8000';
+
   // --- state ---
   const [seance, setSeance] = useState(null);
   const [programDetails, setProgramDetails] = useState(null);
@@ -76,8 +79,21 @@ const AnimerSeanceView = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [quizMetaByContenu, setQuizMetaByContenu] = useState({}); // {contenuId: {timeLimit, questions: []}}
   const [programVisibleToStudents, setProgramVisibleToStudents] = useState(false);
+  const [jitsiLoading, setJitsiLoading] = useState(true);
+  const [jitsiError, setJitsiError] = useState(false);
 
   // --- helpers ---
+  const sanitizeRoomName = (name) => {
+    if (!name) return 'default-room';
+    // Remove special characters and spaces, keep only alphanumeric, hyphens, and underscores
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\-_]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 50) || 'default-room';
+  };
+
   const getSessionQuizzes = () => {
     if (!programDetails) return [];
     const items = [];
@@ -557,14 +573,77 @@ const AnimerSeanceView = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            position: "relative",
           }}
         >
-          <iframe
-            src={`https://localhost:8443/${seance.title || t("seances.defaultRoom")}`}
-            allow="camera; microphone; fullscreen; display-capture"
-            style={{ width: "100%", height: "68vh", border: "none" }}
-            title={t("seances.jitsiMeeting")}
-          />
+          {jitsiError ? (
+            <Box
+              sx={{
+                width: "100%",
+                height: "68vh",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "#f5f5f5",
+                borderRadius: 2,
+                border: "2px dashed #ccc",
+              }}
+            >
+              <Typography variant="h6" color="error" mb={2}>
+                🚫 {t("seances.jitsiError")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                {t("seances.jitsiErrorMessage")}
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setJitsiError(false);
+                  setJitsiLoading(true);
+                }}
+              >
+                {t("seances.retry")}
+              </Button>
+            </Box>
+          ) : (
+            <>
+              {jitsiLoading && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: "rgba(255, 255, 255, 0.9)",
+                    zIndex: 1,
+                  }}
+                >
+                  <Box sx={{ textAlign: "center" }}>
+                    <LinearProgress sx={{ width: 200, mb: 2 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {t("seances.loadingJitsi")}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              <iframe
+                src={`${jitsiUrl}/${sanitizeRoomName(seance.title || t("seances.defaultRoom"))}`}
+                allow="camera; microphone; fullscreen; display-capture"
+                style={{ width: "100%", height: "68vh", border: "none" }}
+                title={t("seances.jitsiMeeting")}
+                onLoad={() => setJitsiLoading(false)}
+                onError={() => {
+                  setJitsiLoading(false);
+                  setJitsiError(true);
+                }}
+              />
+            </>
+          )}
         </Box>
       </Paper>
 
