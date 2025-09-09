@@ -37,7 +37,7 @@ export class ContenusController {
     private readonly prisma: PrismaService // ✅ Injected properly
   ) {}
 
-  @Roles('CreateurDeFormation', 'Admin')
+  @Roles('CreateurDeFormation', )
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))
   async uploadFile(
@@ -108,13 +108,13 @@ export class ContenusController {
     return this.contenusService.findAll();
   }
 
-  @Roles('CreateurDeFormation', 'Admin')
+  @Roles('CreateurDeFormation', )
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.contenusService.remove(+id);
   }
  
-  @Roles('CreateurDeFormation', 'Admin','formateur')
+  @Roles('CreateurDeFormation','formateur')
 @Patch(':id/publish')
 updatePublishStatus(@Param('id') id: string, @Body() body: { published: boolean }) {
   return this.contenusService.updatePublishStatus(+id, body.published);

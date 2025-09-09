@@ -62,7 +62,7 @@ const AnimerSeanceView = () => {
   const navigate = useNavigate();
 
   // Jitsi configuration
-  const jitsiUrl = process.env.REACT_APP_JITSI_URL || 'http://localhost:8000';
+  const jitsiUrl = process.env.REACT_APP_JITSI_URL || 'https://localhost:8443';
 
   // --- state ---
   const [seance, setSeance] = useState(null);
@@ -656,7 +656,7 @@ const AnimerSeanceView = () => {
               )}
               <iframe
                 src={`${jitsiUrl}/${sanitizeRoomName(seance.title || t("seances.defaultRoom"))}`}
-                allow="camera; microphone; fullscreen; display-capture"
+                allow="camera; microphone; fullscreen; display-capture; screen-wake-lock"
                 style={{ width: "100%", height: "68vh", border: "none" }}
                 title={t("seances.jitsiMeeting")}
                 onLoad={() => setJitsiLoading(false)}

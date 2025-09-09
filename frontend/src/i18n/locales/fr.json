@@ -1219,6 +1219,24 @@
       "failedToMarkRead": "Échec du marquage de la notification comme lue",
       "failedToMarkAllRead": "Échec du marquage de toutes les notifications comme lues",
       "failedToDelete": "Échec de la suppression de la notification"
+    },
+    "actions": {
+      "markAllAsRead": "Tout marquer comme lu",
+      "deleteNotification": "Supprimer la notification",
+      "refresh": "Actualiser les notifications"
+    },
+    "status": {
+      "connected": "Connecté aux notifications en temps réel",
+      "disconnected": "Déconnecté des notifications en temps réel",
+      "reconnecting": "Reconnexion en cours..."
+    },
+    "messages": {
+      "newMessage": "{{senderName}} vous a envoyé un nouveau message : {{messageContent}}",
+      "sessionChat": "{{senderName}} a envoyé un message dans {{sessionName}} ({{programName}}) : {{messagePreview}}",
+      "programChat": "{{senderName}} a envoyé un message dans {{programName}} : {{messagePreview}}",
+      "newProgram": "Nouveau programme créé : {{programName}} ({{date}})",
+      "programPublished": "Programme publié : {{programName}} ({{date}})",
+      "programUnpublished": "Programme dépublié : {{programName}} ({{date}})"
     }
   },
   "feedbackFormateur": {

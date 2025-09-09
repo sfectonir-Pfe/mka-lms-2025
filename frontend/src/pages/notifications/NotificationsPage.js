@@ -103,13 +103,61 @@ const NotificationsPage = ({ user }) => {
     }
   };
 
+  // Function to translate notification messages
+  const translateNotificationMessage = (message) => {
+    if (!message) return '';
+    
+    // Parse different notification message patterns
+    // Pattern: "Name has sent you a new message: content"
+    const newMessageMatch = message.match(/^(.+?) has sent you a new message: (.+)$/);
+    if (newMessageMatch) {
+      const [, senderName, messageContent] = newMessageMatch;
+      return t('notifications.messages.newMessage', { senderName, messageContent });
+    }
+    
+    // Pattern: "Name sent a message in SessionName (ProgramName): content"
+    const sessionChatMatch = message.match(/^(.+?) sent a message in (.+?) \((.+?)\): (.+)$/);
+    if (sessionChatMatch) {
+      const [, senderName, sessionName, programName, messagePreview] = sessionChatMatch;
+      return t('notifications.messages.sessionChat', { senderName, sessionName, programName, messagePreview });
+    }
+    
+    // Pattern: "Name sent a message in ProgramName: content"
+    const programChatMatch = message.match(/^(.+?) sent a message in (.+?): (.+)$/);
+    if (programChatMatch) {
+      const [, senderName, programName, messagePreview] = programChatMatch;
+      return t('notifications.messages.programChat', { senderName, programName, messagePreview });
+    }
+    
+    // Pattern: "New program created: ProgramName (date)"
+    const newProgramMatch = message.match(/^Nouveau programme créé: (.+?) \((.+?)\)$|^New program created: (.+?) \((.+?)\)$/);
+    if (newProgramMatch) {
+      const programName = newProgramMatch[1] || newProgramMatch[3];
+      const date = newProgramMatch[2] || newProgramMatch[4];
+      return t('notifications.messages.newProgram', { programName, date });
+    }
+    
+    // Pattern: "Program published/unpublished: ProgramName (date)"
+    const programStatusMatch = message.match(/^Programme (publié|dépublié): (.+?) \((.+?)\)$|^Program (published|unpublished): (.+?) \((.+?)\)$/);
+    if (programStatusMatch) {
+      const status = programStatusMatch[1] || programStatusMatch[4];
+      const programName = programStatusMatch[2] || programStatusMatch[5];
+      const date = programStatusMatch[3] || programStatusMatch[6];
+      const key = (status === 'publié' || status === 'published') ? 'programPublished' : 'programUnpublished';
+      return t(`notifications.messages.${key}`, { programName, date });
+    }
+    
+    // Fallback: return original message if no pattern matches
+    return message;
+  };
+
   return (
     <>
       <div style={{ maxWidth: 600, margin: '40px auto', padding: 24 }}>
         <Typography variant="h4" gutterBottom>
           {t('notifications.allNotifications')}
           {!loading && notifications.some(n => !n.read) && (
-            <IconButton onClick={handleMarkAllAsRead}>
+            <IconButton onClick={handleMarkAllAsRead} title={t('notifications.actions.markAllAsRead')}>
               <DoneAllIcon />
             </IconButton>
           )}
@@ -130,7 +178,7 @@ const NotificationsPage = ({ user }) => {
             {notifications.map(n => (
               <ListItem key={n.id} sx={{ bgcolor: n.read ? undefined : '#e3f2fd' }}>
                 <ListItemText
-                  primary={n.message}
+                  primary={translateNotificationMessage(n.message)}
                   secondary={
                     <>
                       {new Date(n.createdAt).toLocaleString()}
@@ -140,7 +188,7 @@ const NotificationsPage = ({ user }) => {
                   onClick={() => !n.read && handleMarkAsRead(n.id)}
                   sx={{ cursor: n.read ? 'default' : 'pointer' }}
                 />
-                <IconButton onClick={() => handleDelete(n.id)}>
+                <IconButton onClick={() => handleDelete(n.id)} title={t('notifications.actions.deleteNotification')}>
                   <DeleteIcon />
                 </IconButton>
               </ListItem>
