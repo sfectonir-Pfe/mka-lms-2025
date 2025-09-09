@@ -271,10 +271,10 @@ useEffect(() => {
           <Avatar
             src={user.profilePic ?
               (user.profilePic.startsWith('/profile-pics/') ?
-                `/uploads${user.profilePic}` :
+                `${api.defaults.baseURL}/uploads${user.profilePic}` :
                 (user.profilePic.startsWith('http') ?
                   user.profilePic :
-                  `/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                  `${api.defaults.baseURL}/uploads/profile-pics/${user.profilePic.split('/').pop()}`
                 )
               ) :
               undefined

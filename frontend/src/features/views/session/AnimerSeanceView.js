@@ -535,6 +535,29 @@ const AnimerSeanceView = () => {
 
   return (
     <Box p={2}>
+      {/* Header with Return Button */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+          🎯 {t('seances.animateSession')}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => navigate(-1)}
+          sx={{
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+            boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+            transition: 'transform 0.15s ease',
+            '&:hover': { 
+              transform: 'translateY(-1px)', 
+              boxShadow: '0 10px 24px rgba(123,31,162,0.35)' 
+            }
+          }}
+        >
+          📋 {t('seances.backToList')}
+        </Button>
+      </Box>
+
       {/* Meet */}
       <Paper
         elevation={0}
