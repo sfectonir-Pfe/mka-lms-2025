@@ -52,7 +52,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "HTTPS=false HOST=0.0.0.0 PORT=3000 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "dev": "HTTPS=false HOST=0.0.0.0 PORT=3000 react-scripts start"
   },

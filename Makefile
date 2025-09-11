@@ -39,10 +39,10 @@ logs:
 	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) logs -f
 
 build-all:
-	@echo "$(GREEN)Building all Docker images...$(NC)"
-	docker-compose -f $(FRONT_COMPOSE) build
-	docker-compose -f $(BACK_COMPOSE) build
-	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build
+	@echo "$(GREEN)Building all Docker images (no cache)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) build --no-cache
+	docker-compose -f $(BACK_COMPOSE) build --no-cache
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build --no-cache
 
 # ===========================
 # Frontend Commands
@@ -58,7 +58,7 @@ front-down:
 	docker-compose -f $(FRONT_COMPOSE) down
 
 front-build:
-	@echo "$(GREEN)Building frontend Docker image...$(NC)"
+	@echo "$(GREEN)Building frontend Docker image (no cache)...$(NC)"
 	docker-compose -f $(FRONT_COMPOSE) build
 
 front-logs:
@@ -79,8 +79,8 @@ back-down:
 	docker-compose -f $(BACK_COMPOSE) down
 
 back-build:
-	@echo "$(GREEN)Building backend Docker image...$(NC)"
-	docker-compose -f $(BACK_COMPOSE) build
+	@echo "$(GREEN)Building backend Docker image (no cache)...$(NC)"
+	docker-compose -f $(BACK_COMPOSE) build 
 
 back-logs:
 	@echo "$(GREEN)Showing backend logs...$(NC)"
@@ -123,9 +123,9 @@ lms-logs:
 	docker-compose -f $(BACK_COMPOSE) logs -f
 
 lms-build:
-	@echo "$(GREEN)Building LMS (frontend + backend only)...$(NC)"
-	docker-compose -f $(FRONT_COMPOSE) build
-	docker-compose -f $(BACK_COMPOSE) build
+	@echo "$(GREEN)Building LMS (frontend + backend only, no cache)...$(NC)"
+	docker-compose -f $(FRONT_COMPOSE) build --no-cache
+	docker-compose -f $(BACK_COMPOSE) build --no-cache
 
 # ===========================
 # Jitsi Commands
@@ -145,5 +145,5 @@ jitsi-logs:
 	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) logs -f
 
 jitsi-build:
-	@echo "$(GREEN)Building Jitsi Docker images...$(NC)"
-	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build
+	@echo "$(GREEN)Building Jitsi Docker images (no cache)...$(NC)"
+	docker-compose -f $(JITSI_COMPOSE) -f $(JITSI_JIBRI) build --no-cache

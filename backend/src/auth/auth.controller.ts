@@ -18,6 +18,7 @@ import { Public } from './public.decorator';
 import { JwtService } from '@nestjs/jwt';
 import { ApiBody, ApiProperty, ApiBearerAuth } from '@nestjs/swagger';
 
+
 @ApiBearerAuth('JWT-auth')
 @Controller('auth')
 export class AuthController {

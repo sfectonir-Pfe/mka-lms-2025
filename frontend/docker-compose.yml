@@ -4,18 +4,17 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     container_name: mka-lms-frontend
     image: mka-lms-frontend
     ports:
       - "9000:3000"   
-    # environment:
-    #   - HTTPS=false
-    #   - HOST=0.0.0.0
-    #   - PORT=3000
-    #   - GENERATE_SOURCEMAP=false
-    environment: 
-      - REACT_APP_API_URL=http://localhost:4001
+    environment:
+      - HTTPS=false
+      - HOST=0.0.0.0
+      - PORT=3000
+      - GENERATE_SOURCEMAP=false
+      - REACT_APP_API_BASE=https://mka.tunir-digital.com/api
     volumes:
       - mka-lms-frontend-volume:/app       
     restart: always

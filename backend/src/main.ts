@@ -46,6 +46,7 @@ async function bootstrap() {
       },
       'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controllers
     )
+    .addServer('/api')   // 🔥 باش Swagger يولّي يستعمل /api في كل endpoints
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

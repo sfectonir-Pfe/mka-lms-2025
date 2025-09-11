@@ -2,7 +2,8 @@
 import axios from 'axios';
 
 
-const baseURL = process.env.REACT_APP_API_BASE || 'http://51.83.75.65:4001';
+const baseURL = process.env.REACT_APP_API_BASE || 'https://mka.tunir-digital.com/api';
+
 console.log("API Base URL:", baseURL);
 console.log("Environment variable:", process.env.REACT_APP_API_BASE);
 
