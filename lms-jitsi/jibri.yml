@@ -43,6 +43,9 @@ services:
             - JIBRI_RECORDING_QUEUE_SIZE
             - JIBRI_RECORDING_STREAMING_MAX_BITRATE
             - JIBRI_USAGE_TIMEOUT
+            - JIBRI_CALL_PAGE_LOAD_TIMEOUT=300
+            - JIBRI_CALL_JOIN_TIMEOUT=360
+            - JIBRI_CHROME_FLAGS=--use-fake-ui-for-media-stream,--start-maximized,--kiosk,--enabled,--autoplay-policy=no-user-gesture-required,--ignore-certificate-errors,--disable-web-security,--disable-features=VizDisplayCompositor,--disable-dev-shm-usage,--no-sandbox,--disable-gpu
             - JIBRI_XMPP_USER
             - JIBRI_XMPP_PASSWORD
             - JIBRI_XORG_HORIZ_SYNC

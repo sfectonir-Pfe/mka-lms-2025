@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../api/axiosInstance';
 
 // Certificate of participation with thick borders similar to the provided design
 // Fetches session data from API using route parameters
 export default function Attestation() {
   const { programId, sessionId } = useParams();
   
-  // Debug: Log params immediately
-  console.log('=== COMPONENT PARAMS DEBUG ===');
-  console.log('programId from useParams:', programId);
-  console.log('sessionId from useParams:', sessionId);
-  console.log('=== END COMPONENT DEBUG ===');
   
   const [sessionData, setSessionData] = useState({
     fullName: '',
     topic: '',
     eventType: '',
     dateText: '',
-    company: 'SFECTORIA',
+    company: '',
     trainerName: '',
     loading: true
   });
@@ -31,68 +26,17 @@ export default function Attestation() {
               // Get current user from localStorage (moved outside try-catch)
         const currentUser = JSON.parse(localStorage.getItem('user')) || {};
         
-        // Debug: Check all localStorage keys for establishment data
-        console.log('=== LOCALSTORAGE ESTABLISHMENT DEBUG ===');
-        const allKeys = Object.keys(localStorage);
-        console.log('All localStorage keys:', allKeys);
-        
-        const establishmentKeys = allKeys.filter(key => 
-          key.toLowerCase().includes('etablissement') || 
-          key.toLowerCase().includes('organization') || 
-          key.toLowerCase().includes('establishment') || 
-          key.toLowerCase().includes('institution') ||
-          key.toLowerCase().includes('company') ||
-          key.toLowerCase().includes('user')
-        );
-        console.log('Establishment-related localStorage keys:', establishmentKeys);
-        
-        establishmentKeys.forEach(key => {
-          try {
-            const value = localStorage.getItem(key);
-            console.log(`${key}:`, value);
-            
-            // Try to parse JSON and look for establishment
-            if (value && value.startsWith('{')) {
-              try {
-                const parsed = JSON.parse(value);
-                console.log(`${key} (parsed):`, parsed);
-                
-                // Look for establishment in parsed object
-                if (parsed.establishment) console.log(`${key}.establishment:`, parsed.establishment);
-                if (parsed.etablissement) console.log(`${key}.etablissement:`, parsed.etablissement);
-                if (parsed.organization) console.log(`${key}.organization:`, parsed.organization);
-                if (parsed.institution) console.log(`${key}.institution:`, parsed.institution);
-              } catch (parseError) {
-                console.log(`${key} (not JSON):`, value);
-              }
-            }
-          } catch (e) {
-            console.log(`${key}: [Error reading]`);
-          }
-        });
-        console.log('=== END LOCALSTORAGE DEBUG ===');
       
       try {
-        // Debug: Log route parameters
-        console.log('=== ROUTE PARAMETERS DEBUG ===');
-        console.log('sessionId:', sessionId);
-        console.log('programId:', programId);
-        
         // Check URL search params as fallback
         const searchParams = new URLSearchParams(window.location.search);
         const urlSessionId = searchParams.get('sessionId') || searchParams.get('session') || searchParams.get('id');
         const urlProgramId = searchParams.get('programId') || searchParams.get('program') || searchParams.get('pid');
         const urlEstablishment = searchParams.get('establishment') || searchParams.get('etablissement') || searchParams.get('company');
-        console.log('URL search params - sessionId:', urlSessionId);
-        console.log('URL search params - programId:', urlProgramId);
-        console.log('URL search params - establishment:', urlEstablishment);
         
         // Use URL params if route params are not available
         const finalSessionId = sessionId || urlSessionId;
         const finalProgramId = programId || urlProgramId;
-        console.log('Final sessionId to use:', finalSessionId);
-        console.log('Final programId to use:', finalProgramId);
-        console.log('=== END ROUTE DEBUG ===');
         
         // Get trainer data
         const currentTrainer = JSON.parse(localStorage.getItem('currentTrainer')) || 
@@ -102,37 +46,15 @@ export default function Attestation() {
         let sessionName = '';
         let programName = '';
         
-        // Get authentication token from multiple possible sources
-        const token = localStorage.getItem('token') || 
-                     localStorage.getItem('accessToken') ||
-                     localStorage.getItem('authToken') ||
-                     sessionStorage.getItem('token') || 
-                     sessionStorage.getItem('accessToken') ||
-                     sessionStorage.getItem('authToken') ||
-                     '';
-        console.log('Auth token found:', token ? 'Yes' : 'No');
-        console.log('Token length:', token.length);
-        console.log('Token preview:', token.substring(0, 20) + '...');
+        // Token is handled automatically by the API instance
         
         // Fetch session data if finalSessionId exists
         if (finalSessionId) {
           try {
-            console.log('Fetching session with ID:', finalSessionId);
-            console.log('API URL:', `http://localhost:8000/session2/${finalSessionId}`);
-            
-            const sessionRes = await axios.get(`http://localhost:8000/session2/${finalSessionId}`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
+            const sessionRes = await api.get(`/session2/${finalSessionId}`);
             const session = sessionRes.data;
             sessionName = session?.name || '';
             programName = session?.program?.name || '';
-            
-            console.log('Session data fetched:', session);
-            console.log('Session name:', sessionName);
-            console.log('Program name:', programName);
           } catch (error) {
             console.error('Error fetching session:', error);
             console.error('Error details:', {
@@ -146,26 +68,13 @@ export default function Attestation() {
               }
             });
           }
-        } else {
-          console.log('No sessionId provided');
         }
         
         // Fetch program data if finalProgramId exists
         if (finalProgramId && !programName) {
           try {
-            console.log('Fetching program with ID:', finalProgramId);
-            console.log('API URL:', `http://localhost:8000/programs/${finalProgramId}`);
-            
-            const programRes = await axios.get(`http://localhost:8000/programs/${finalProgramId}`, {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              }
-            });
+            const programRes = await api.get(`/programs/${finalProgramId}`);
             programName = programRes.data?.name || '';
-            
-            console.log('Program data fetched:', programRes.data);
-            console.log('Program name:', programName);
     } catch (error) {
             console.error('Error fetching program:', error);
             console.error('Program error details:', {
@@ -175,22 +84,15 @@ export default function Attestation() {
               data: error.response?.data
             });
           }
-        } else if (finalProgramId) {
-          console.log('ProgramId provided but programName already set:', finalProgramId);
-        } else {
-          console.log('No programId provided');
         }
         
         // Set the session name as topic
         let topic = sessionName || programName || '';
         // Convert to uppercase
         topic = topic.toUpperCase();
-        console.log('Final topic from API (uppercase):', topic);
         
         // Fallback: If API calls failed, try to get session name from localStorage
         if (!topic) {
-          console.log('No session name from API, trying localStorage fallbacks...');
-          
           // Try multiple localStorage keys for session data
           const localStorageSession = JSON.parse(localStorage.getItem('currentSession') || 'null') ||
                                    JSON.parse(localStorage.getItem('session') || 'null') ||
@@ -220,147 +122,36 @@ export default function Attestation() {
           
           // Convert to uppercase
           topic = topic.toUpperCase();
-          
-          console.log('localStorage fallback - session:', localStorageSession);
-          console.log('localStorage fallback - course:', localStorageCourse);
-          console.log('localStorage fallback - found topic (uppercase):', topic);
         }
         
         // Final fallback: Use a default session name if nothing is found
         if (!topic) {
           topic = 'INTRO TO WEB DEVELOPMENT'; // Default session name (already uppercase)
-          console.log('Using default session name (uppercase):', topic);
         }
         
-        console.log('Final topic after all fallbacks:', topic);
+        // Fetch establishment name from API
+        let establishmentName = '';
         
-        // Get establishment name from user data
-        console.log('=== ESTABLISHMENT DEBUG ===');
-        console.log('Current user data:', currentUser);
-        console.log('User etablissement:', currentUser?.etablissement);
-        console.log('User organization:', currentUser?.organization);
-        console.log('User establishment:', currentUser?.establishment);
-        console.log('User institution:', currentUser?.institution);
-        
-        // Try to get establishment from sessionStorage as well
-        const sessionUser = JSON.parse(sessionStorage.getItem('user') || 'null');
-        console.log('SessionStorage user:', sessionUser);
-        console.log('SessionStorage etablissement:', sessionUser?.etablissement);
-        
-        // Try to get establishment from localStorage or sessionStorage
-        let userEstablishment = '';
-        
-        // Check if establishment is stored directly in user data
-        if (currentUser?.establishment) {
-          userEstablishment = currentUser.establishment;
-          console.log('Establishment found in currentUser:', userEstablishment);
-        } else if (sessionUser?.establishment) {
-          userEstablishment = sessionUser.establishment;
-          console.log('Establishment found in sessionUser:', userEstablishment);
-        }
-        
-        // If not found, try to get from localStorage with different keys
-        if (!userEstablishment) {
-          const establishmentFromStorage = localStorage.getItem('establishment') || 
-                                         localStorage.getItem('userEstablishment') ||
-                                         localStorage.getItem('user_establishment') ||
-                                         sessionStorage.getItem('establishment') ||
-                                         sessionStorage.getItem('userEstablishment') ||
-                                         sessionStorage.getItem('user_establishment');
-          
-          if (establishmentFromStorage) {
-            userEstablishment = establishmentFromStorage;
-            console.log('Establishment found in storage:', userEstablishment);
-          }
-        }
-        
-        // If still not found, try to extract from user data structure
-        if (!userEstablishment && currentUser) {
-          // Try different possible field names
-          const possibleFields = [
-            'establishment',
-            'etablissement',
-            'organization',
-            'institution',
-            'company',
-            'school',
-            'university',
-            'college'
-          ];
-          
-          for (const field of possibleFields) {
-            if (currentUser[field]) {
-              userEstablishment = currentUser[field];
-              console.log(`Establishment found in field '${field}':`, userEstablishment);
-              break;
-            }
-          }
-        }
-        
-        // Try to fetch user establishment from API if we have user ID
-        if (!userEstablishment && currentUser?.id && token) {
+        // Try to get establishment from URL parameters first
+        if (urlEstablishment) {
+          establishmentName = urlEstablishment;
+        } else {
+          // Fetch establishment info from API
           try {
-            console.log('Trying to fetch user establishment from API...');
+            const establishmentRes = await api.get('/etablissement2/my-establishment-info');
             
-            // Try different endpoints to get user data
-            const endpoints = [
-              `http://localhost:8000/users/${currentUser.id}`,
-              `http://localhost:8000/user/${currentUser.id}`,
-              `http://localhost:8000/users/profile`,
-              `http://localhost:8000/user/profile`,
-              `http://localhost:8000/auth/profile`,
-              `http://localhost:8000/auth/me`
-            ];
-            
-            for (const endpoint of endpoints) {
-              try {
-                console.log('Trying endpoint for establishment:', endpoint);
-                const userRes = await axios.get(endpoint, {
-                  headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                  }
-                });
-                
-                const userData = userRes.data;
-                if (userData?.establishment) {
-                  userEstablishment = userData.establishment;
-                  console.log('Establishment found from API:', userEstablishment);
-                  break;
-                }
-              } catch (endpointError) {
-                console.log('Failed endpoint for establishment:', endpoint, endpointError.response?.status);
-                continue;
-              }
+            if (establishmentRes.data && establishmentRes.data.establishment) {
+              establishmentName = establishmentRes.data.establishment.name;
             }
           } catch (error) {
-            console.error('Error fetching user establishment from API:', error);
+            // Fallback to user data in localStorage
+            establishmentName = currentUser?.etablissement?.name || 
+                              currentUser?.organization || 
+                              currentUser?.establishment ||
+                              currentUser?.institution ||
+                              'SFECTORIA'; // Final fallback
           }
         }
-        
-        console.log('Final userEstablishment value:', userEstablishment);
-        
-        // ==========================================
-        // TO CHANGE ESTABLISHMENT NAME:
-        // Replace 'VOTRE_ETABLISSEMENT' below with your actual establishment name
-        // Example: 'Université de Tunis', 'École Supérieure', etc.
-        // ==========================================
-        const defaultEstablishment = 'TUNIR'; // ← CHANGE THIS TO YOUR ESTABLISHMENT NAME
-        
-        const establishmentName = urlEstablishment ||
-                                userEstablishment ||
-                                currentUser?.etablissement?.name || 
-                                sessionUser?.etablissement?.name ||
-                                currentUser?.organization || 
-                                sessionUser?.organization ||
-                                currentUser?.establishment ||
-                                sessionUser?.establishment ||
-                                currentUser?.institution ||
-                                sessionUser?.institution ||
-                                defaultEstablishment; // Use the default instead of 'SFECTORIA'
-        
-        console.log('Establishment name found:', establishmentName);
-        console.log('=== END ESTABLISHMENT DEBUG ===');
         
         setSessionData({
           fullName: currentUser.firstName || currentUser.name || currentUser.email || 'Student Name',

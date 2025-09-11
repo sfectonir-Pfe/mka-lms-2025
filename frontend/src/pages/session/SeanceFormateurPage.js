@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Container, Typography, Button } from "@mui/material";
 import { useTranslation } from 'react-i18next';
 import api from "../../api/axiosInstance";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import AddSeanceFormateurView from "../../features/views/session/AddSeanceFormateurView";
 import SeanceFormateurList from "../../features/views/session/SeanceFormateurList";
@@ -10,6 +10,7 @@ import AnimerSeanceView from "../../features/views/session/AnimerSeanceView";
 
 const SeanceFormateurPage = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [refreshSeancesList, setRefreshSeancesList] = useState(null);
   const { sessionId } = useParams();
   const [selectedSeance, setSelectedSeance] = useState(null);
@@ -108,10 +109,30 @@ const SeanceFormateurPage = () => {
   return (
     <Container>
       <Box mt={4}>
-        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap">
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" mb={2}>
           <Typography variant="h4" gutterBottom>
             {`🎓 ${sessionName} 🎓`}
           </Typography>
+          
+          <Button
+            variant="contained"
+            onClick={() => navigate('/sessions')}
+            sx={{
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+              boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+              transition: 'transform 0.15s ease',
+              '&:hover': { 
+                transform: 'translateY(-1px)', 
+                boxShadow: '0 10px 24px rgba(123,31,162,0.35)' 
+              }
+            }}
+          >
+            📋 {t('sessions.backToList')}
+          </Button>
+        </Box>
+        
+        <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap">
           
           {averageRating !== null && (
             <Box 

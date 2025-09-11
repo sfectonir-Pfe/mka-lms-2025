@@ -149,4 +149,54 @@ export class SeanceFormateurService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async getProgramVisibility(seanceId: number): Promise<{ visible: boolean }> {
+    if (!seanceId) throw new BadRequestException('seanceId requis');
+    const seance = await this.prisma.seanceFormateur.findUnique({
+      where: { id: seanceId },
+      select: { programVisible: true },
+    });
+    if (!seance) throw new NotFoundException('Séance non trouvée');
+    return { visible: seance.programVisible || false };
+  }
+
+  async setProgramVisibility(seanceId: number, visible: boolean): Promise<{ message: string; visible: boolean }> {
+    if (!seanceId) throw new BadRequestException('seanceId requis');
+    if (typeof visible !== 'boolean') throw new BadRequestException('visible doit être un booléen');
+    
+    await this.prisma.seanceFormateur.update({
+      where: { id: seanceId },
+      data: { programVisible: visible },
+    });
+    
+    return { 
+      message: visible ? 'Programme visible aux étudiants ✅' : 'Programme masqué aux étudiants 🔒',
+      visible 
+    };
+  }
+
+  async getFeedbackVisibility(seanceId: number): Promise<{ visible: boolean }> {
+    if (!seanceId) throw new BadRequestException('seanceId requis');
+    const seance = await this.prisma.seanceFormateur.findUnique({
+      where: { id: seanceId },
+      select: { feedbackVisible: true },
+    });
+    if (!seance) throw new NotFoundException('Séance non trouvée');
+    return { visible: seance.feedbackVisible || false };
+  }
+
+  async setFeedbackVisibility(seanceId: number, visible: boolean): Promise<{ message: string; visible: boolean }> {
+    if (!seanceId) throw new BadRequestException('seanceId requis');
+    if (typeof visible !== 'boolean') throw new BadRequestException('visible doit être un booléen');
+    
+    await this.prisma.seanceFormateur.update({
+      where: { id: seanceId },
+      data: { feedbackVisible: visible },
+    });
+    
+    return { 
+      message: visible ? 'Feedback visible aux étudiants ✅' : 'Feedback masqué aux étudiants 🔒',
+      visible 
+    };
+  }
 }

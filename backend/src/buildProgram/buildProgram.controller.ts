@@ -19,7 +19,7 @@ const storage = diskStorage({
 @Controller('buildProgram')
 export class buildProgramController {
   constructor(private readonly buildProgramService: buildProgramService) {}
-@Roles('createurdeformation', 'admin')
+@Roles('createurdeformation',)
 @Post()
 @UseInterceptors(FileInterceptor('image', { storage }))
 async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
@@ -35,17 +35,17 @@ async create(@UploadedFile() file: Express.Multer.File, @Body() body: any) {
 }
 
  
-@Roles('createurdeformation', 'admin', 'etudiant','formateur','establishment' )
+@Roles('createurdeformation', 'admin', 'etudiant','formateur','Etablissement' )
   @Get()
   findAll() {
     return this.buildProgramService.findAll();
   }
-@Roles('createurdeformation', 'admin')
+@Roles('createurdeformation', )
   @Delete(':id')
 remove(@Param('id') id: string) {
   return this.buildProgramService.remove(+id);
 }
-@Roles('createurdeformation', 'admin')
+@Roles('createurdeformation', )
 @Patch(':id')
 @UseInterceptors(FileInterceptor('image', { storage }))
 async update(
@@ -55,7 +55,7 @@ async update(
 ) {
   return this.buildProgramService.update(+id, body, file);
 }
-@Roles('createurdeformation', 'admin', 'etudiant','formateur','establishment' )
+@Roles('createurdeformation', 'admin', 'etudiant','formateur','Etablissement' )
 @Get('program/:programId')
 getByProgram(@Param('programId') programId: string) {
   return this.buildProgramService.findByProgramId(+programId);

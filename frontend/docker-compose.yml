@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mka-lms-frontend
-    image: mka-lms-frontend
+    image: mka-lms-frontend:1.0.0
     ports:
       - "9000:3000"   
     environment:

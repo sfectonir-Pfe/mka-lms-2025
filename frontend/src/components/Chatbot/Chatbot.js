@@ -8,9 +8,9 @@ const BOT_AVATAR = 'https://cdn-icons-png.flaticon.com/512/4712/4712035.png'; //
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [userLanguage, setUserLanguage] = useState(() => LanguageService.detectBrowserLanguage());
+  const [userLanguage, setUserLanguage] = useState('en'); // Default to English
   const [messages, setMessages] = useState([]);
-  const [uiMessages, setUiMessages] = useState(() => LanguageService.getUIMessages(LanguageService.detectBrowserLanguage()));
+  const [uiMessages, setUiMessages] = useState(() => LanguageService.getUIMessages('en'));
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +29,7 @@ const Chatbot = () => {
   // Initialize with welcome message and update UI messages
   useEffect(() => {
     if (messages.length === 0) {
-      setMessages([{ text: welcomeMessages[userLanguage], isBot: true }]);
+      setMessages([{ text: welcomeMessages[userLanguage] || welcomeMessages.en, isBot: true }]);
     }
     setUiMessages(LanguageService.getUIMessages(userLanguage));
   }, [userLanguage]);
@@ -100,19 +100,20 @@ const Chatbot = () => {
         message: inputMessage,
         sessionId: sessionId,
         userId: userInfo.id,
-        userLanguage: userLanguage
+        userLanguage: null
       });
 
       const response = await api.post('/chatbot/message', {
         message: inputMessage,
         sessionId: sessionId,
         userId: userInfo.id,
-        userLanguage: userLanguage
+        userLanguage: null // Let backend detect language automatically
       });
       
       // Update user language if detected
       if (response.data.detectedLanguage && response.data.detectedLanguage !== userLanguage) {
         setUserLanguage(response.data.detectedLanguage);
+        setUiMessages(LanguageService.getUIMessages(response.data.detectedLanguage));
       }
       
       setMessages(prev => [...prev, { text: response.data.response, isBot: true }]);

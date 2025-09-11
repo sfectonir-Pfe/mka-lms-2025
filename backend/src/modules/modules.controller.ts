@@ -9,10 +9,11 @@ import {
 } from '@nestjs/common';
 import { ModulesService } from './modules.service';
 import { CreateModuleDto } from './dto/create-module.dto';
-import { ApiTags } from '@nestjs/swagger';
 import { Patch } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
+import { ApiBody, ApiProperty, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth('JWT-auth')
 @Controller('modules')
 export class ModulesController {
   constructor(private readonly modulesService: ModulesService) {}
@@ -23,7 +24,7 @@ export class ModulesController {
     return this.modulesService.create(dto);
   }
 
-  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','establishment')
+  @Roles('CreateurDeFormation', 'Admin','etudiant','formateur','Etablissement')
   @Get()
   findAll() {
     return this.modulesService.findAll();

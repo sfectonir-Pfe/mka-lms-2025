@@ -147,7 +147,7 @@ const SeanceFormateurList = ({ seances, onAnimer, onDelete, fetchSeances, setSel
                   💬 {t('seances.feedback')}
                 </Button>
               )}
-              <RoleGate roles={['admin', 'formateur']}>
+              <RoleGate roles={[ 'formateur']}>
               <Button
                 variant="contained"
                 color="error"

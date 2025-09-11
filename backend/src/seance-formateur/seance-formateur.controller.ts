@@ -42,7 +42,7 @@ export class SeanceFormateurController {
     return this.service.create(body, formateurId);
   }
 
-  @Roles('formateur','Admin','etudiant')
+  @Roles('formateur','Admin','etudiant','Etablissement')
   @Get()
   async findAll() {
     return this.service.findAll();
@@ -54,13 +54,13 @@ export class SeanceFormateurController {
     return this.service.findAll();
   }
 
-  @Roles('formateur','Admin','etudiant')
+  @Roles('formateur','Admin','etudiant','Etablissement')
   @Get('formateur/:id')
   async findByFormateur(@Param('id') id: string) {
     return this.service.findByFormateur(+id);
   }
 
-  @Roles('formateur','Admin','etudiant')
+  @Roles('formateur','Admin','etudiant','Etablissement')
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.service.findOne(+id);
@@ -95,23 +95,47 @@ export class SeanceFormateurController {
     return this.service.removeMedia(+id);
   }
 
-  @Roles('formateur','Admin','etudiant')
+  @Roles('formateur','Admin','etudiant','Etablissement')
   @Get('details/:session2Id')
   async getSessionDetails(@Param('session2Id') id: string) {
     return this.service.getSession2Details(+id);
   }
   // seance-formateur.controller.ts
   
-  @Roles('formateur','Admin','etudiant')
+  @Roles('formateur','Admin','etudiant','Etablissement')
 @Get(':id/media')
 async getMedia(@Param('id') id: string) {
   return this.service.getMediaForSeance(+id);
 }
 
-@Roles('formateur','Admin','etudiant')
+@Roles('formateur','Admin','etudiant','Etablissement')
 @Get('session/:session2Id')
 async findBySession2(@Param('session2Id') id: string) {
   return this.service.findBySession2(+id);
+}
+
+@Roles('formateur','Admin','etudiant','Etablissement')
+@Get(':id/program-visibility')
+async getProgramVisibility(@Param('id') id: string) {
+  return this.service.getProgramVisibility(+id);
+}
+
+@Roles('formateur','Admin')
+@Post(':id/program-visibility')
+async setProgramVisibility(@Param('id') id: string, @Body() body: { visible: boolean }) {
+  return this.service.setProgramVisibility(+id, body.visible);
+}
+
+@Roles('formateur','Admin','etudiant','Etablissement')
+@Get(':id/feedback-visibility')
+async getFeedbackVisibility(@Param('id') id: string) {
+  return this.service.getFeedbackVisibility(+id);
+}
+
+@Roles('formateur','Admin')
+@Post(':id/feedback-visibility')
+async setFeedbackVisibility(@Param('id') id: string, @Body() body: { visible: boolean }) {
+  return this.service.setFeedbackVisibility(+id, body.visible);
 }
 
 }

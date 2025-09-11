@@ -43,12 +43,14 @@ const SessionList = () => {
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, sessionId: null });
+  const [establishmentStudents, setEstablishmentStudents] = useState([]);
   const { t, ready } = useTranslation();
   const navigate = useNavigate();
   
   // Check user permissions
   const currentRole = getCurrentRole()?.toLowerCase();
-  const canManageUsers = ['admin',].includes(currentRole);
+  const canManageUsers = ['admin', 'etablissement'].includes(currentRole);
+  const currentUserId = getCurrentUserId();
 
   const styles = {
     primary: {
@@ -91,6 +93,18 @@ const SessionList = () => {
     rounded: { borderRadius: 2 }
   };
 
+  const fetchEstablishmentInfo = async () => {
+    if (currentRole === 'etablissement') {
+      try {
+        const res = await api.get('/etablissement2/my-establishment-info');
+        setEstablishmentStudents(res.data.students || []);
+      } catch (error) {
+        console.error('Error fetching establishment info:', error);
+        setEstablishmentStudents([]);
+      }
+    }
+  };
+
   const fetchSessions = async () => {
     try {
       const currentRole = getCurrentRole()?.toLowerCase();
@@ -99,15 +113,15 @@ const SessionList = () => {
       let sessionsData = [];
       
       // Role-based session fetching
-      if (['formateur', 'etudiant'].includes(currentRole)) {
-        // For formateurs and etudiants, only fetch sessions they're assigned to
+      if (['formateur', 'etudiant', 'etablissement'].includes(currentRole)) {
+        // For formateurs, etudiants, and etablissement, only fetch sessions they're assigned to
         if (currentUserId) {
           const res = await api.get(`/session2/my-sessions/${currentUserId}`);
           // Transform the response to match the expected format
           sessionsData = res.data.map(userSession => userSession.session2);
         }
       } else {
-        // For admin, createurdeformation, and etablissement, fetch all sessions
+        // For admin and createurdeformation, fetch all sessions
         const res = await api.get("/session2");
         sessionsData = res.data;
       }
@@ -115,7 +129,7 @@ const SessionList = () => {
       setSessions(sessionsData);
       
       // Only fetch users if user has admin/creator permissions
-      const canManageUsers = ['admin', 'createurdeformation'].includes(currentRole);
+      const canManageUsers = ['admin', 'createurdeformation', 'etablissement'].includes(currentRole);
       
       const usersMap = {};
       if (canManageUsers) {
@@ -138,7 +152,8 @@ const SessionList = () => {
 
   useEffect(() => {
     fetchSessions();
-  }, []);
+    fetchEstablishmentInfo();
+  }, [currentRole]);
 
   const handleDelete = async (id) => {
     setDeleteDialog({ open: true, sessionId: id });
@@ -429,7 +444,7 @@ const SessionList = () => {
                     }
                     sx={{ fontWeight: 700, textTransform: "capitalize" }}
                   />
-                  {canManageUsers && (
+                  <RoleGate roles={["admin"]}>
                     <FormControl size="small" sx={{ minWidth: 120 }}>
                       <InputLabel id={`status-label-${session.id}`}>{t("sessions.status")}</InputLabel>
                       <Select
@@ -444,13 +459,13 @@ const SessionList = () => {
                         <MenuItem value="ARCHIVED">{t("sessions.archived")}</MenuItem>
                       </Select>
                     </FormControl>
-                  )}
+                  </RoleGate>
                 </Stack>
               </Stack>
 
               {!sidebarOpen[session.id] && (
                 <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-                  {canManageUsers && (
+                  <RoleGate roles={["admin"]}>
                     <Button
                     variant="outlined"
                     size="small"
@@ -460,7 +475,8 @@ const SessionList = () => {
                   >
                     {t("sessions.delete")}
                   </Button>
-                  )}
+                  </RoleGate>
+                  <RoleGate roles={["admin","formateur","etudiant"]}>
                   <Button
                     variant="contained"
                     size="small"
@@ -468,8 +484,9 @@ const SessionList = () => {
                     onClick={() => navigate(`/sessions/${session.id}/seances`)}
                     sx={styles.primary}
                   >
-                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la séance'}
+                    {currentRole === 'formateur' ? 'Animer la session' : 'Rejoindre la session'}
                   </Button>
+                  </RoleGate>
                   {canManageUsers && (
                     <Button
                       variant="contained"
@@ -480,6 +497,7 @@ const SessionList = () => {
                     >
                       {t("sessions.addUser")}
                     </Button>
+                    
                   )}
                   <RoleGate roles={["admin"]}>
                     <Button
@@ -492,6 +510,7 @@ const SessionList = () => {
                     </Button>
                   </RoleGate>
                   {session.status === "COMPLETED" && (
+                    <RoleGate roles={["etudiant"]}>
                     <Button
                       variant="contained"
                       size="small"
@@ -500,7 +519,9 @@ const SessionList = () => {
                     >
                       🏅 {t("sessions.attestation")}
                     </Button>
+                    </RoleGate>
                   )}
+                  <RoleGate roles={["etudiant"]}>
                   <Button
                     variant="contained"
                     size="small"
@@ -510,7 +531,8 @@ const SessionList = () => {
                   >
                     📝 {t("sessions.feedback")}
                   </Button>
-                  <RoleGate roles={["admin"]}>
+                  </RoleGate>
+                  <RoleGate roles={["admin","formateur"]}>
                   <Button
                     variant="outlined"
                     size="small"
@@ -522,8 +544,8 @@ const SessionList = () => {
                   </RoleGate>
                 </Stack>
               )}
-
-              {/* Add User Section */}
+{/* 
+              Add User Section
               {showAddUserId === session.id && (
                 <Box mt={2} mb={2} display="flex" gap={1} alignItems="center">
                   <TextField
@@ -552,7 +574,7 @@ const SessionList = () => {
                     {t("sessions.cancel")}
                   </Button>
                 </Box>
-              )}
+              )} */}
 
               <Typography variant="body2" mb={0.5}>
                 📚 {t("sessions.program")} : <strong>{session.program?.name || t("sessions.unknown")}</strong>
@@ -562,26 +584,28 @@ const SessionList = () => {
                 <strong>{session.endDate?.slice(0, 10)}</strong>
               </Typography>
               
-              {/* Average Feedback Rating */}
-              <Box mt={1} display="flex" alignItems="center" gap={1}>
-                <Typography variant="body2" fontWeight="bold">
-                  ⭐ {t("sessions.averageRating")}:
-                </Typography>
-                {session.averageRating ? (
-                  <>
-                    <Typography variant="body2" color="primary" fontWeight="bold">
-                      {session.averageRating.toFixed(1)}/5
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      ({session.feedbackCount} {session.feedbackCount === 1 ? t("sessions.feedback") : t("sessions.feedbacks")})
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    {t("sessions.noFeedbackYet")}
+              {/* Average Feedback Rating - Only for admin and formateur */}
+              <RoleGate roles={["admin", "formateur"]}>
+                <Box mt={1} display="flex" alignItems="center" gap={1}>
+                  <Typography variant="body2" fontWeight="bold">
+                    ⭐ {t("sessions.averageRating")}:
                   </Typography>
-                )}
-              </Box>
+                  {session.averageRating ? (
+                    <>
+                      <Typography variant="body2" color="primary" fontWeight="bold">
+                        {session.averageRating.toFixed(1)}/5
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        ({session.feedbackCount} {session.feedbackCount === 1 ? t("sessions.feedback") : t("sessions.feedbacks")})
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sessions.noFeedbackYet")}
+                    </Typography>
+                  )}
+                </Box>
+              </RoleGate>
 
               {/* Modules and Contents */}
               {session.session2Modules?.length > 0 && (
@@ -720,16 +744,23 @@ const SessionList = () => {
                             {user.role}
                           </Typography>
                         </Box>
-                        <IconButton
-                          size="small"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleRemoveUser(session.id, user.id);
-                          }}
-                          sx={styles.danger}
-                        >
-                          <DeleteIcon fontSize="small" sx={{ color: 'white' }} />
-                        </IconButton>
+                        {/* Show delete button based on role and establishment */}
+                        {(currentRole === 'admin' || 
+                          (currentRole === 'etablissement' && 
+                           user.role === 'Etudiant' && 
+                           establishmentStudents.some(student => student.id === user.id))) && (
+                          <IconButton
+                            size="small"
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleRemoveUser(session.id, user.id);
+                            }}
+                            sx={styles.danger}
+                            title={currentRole === 'etablissement' ? 'Supprimer cet étudiant de votre établissement' : 'Supprimer cet utilisateur'}
+                          >
+                            <DeleteIcon fontSize="small" sx={{ color: 'white' }} />
+                          </IconButton>
+                        )}
                       </Box>
                     ))
                   )}

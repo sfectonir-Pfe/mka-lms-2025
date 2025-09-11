@@ -59,7 +59,7 @@ front-down:
 
 front-build:
 	@echo "$(GREEN)Building frontend Docker image (no cache)...$(NC)"
-	docker-compose -f $(FRONT_COMPOSE) build
+	docker-compose -f $(FRONT_COMPOSE) build --no-cache
 
 front-logs:
 	@echo "$(GREEN)Showing frontend logs...$(NC)"

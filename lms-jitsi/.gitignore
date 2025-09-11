@@ -1,13 +1,93 @@
+# Backup and temporary files
 *.bak
 *.swp
+*.tmp
+*.temp
+*~
+
+# Environment files
 .env*
+!.env.example
+
+# Docker specific
 docker-compose.override.yml
+.docker/
+
+# Logs and runtime data
+*.log
+logs/
+/config/jibri/logs/
+/config/jvb/logs/
+/config/prosody/logs/
+/config/jicofo/logs/
 log-analyser/grafana
-**/.DS_Store
-**/.idea
-/config/jibri/logs
+
+# Jitsi configuration and data
 /config/jvb/jvb.conf
-/config/prosody/config/data/auth%2elocalhost/accounts/
-/config/prosody/config/data/auth%2elocalhost/accounts/
-/config/prosody/config/data/auth%2elocalhost/cron.dat
+/config/jvb/*.log
+/config/prosody/config/data/
+/config/prosody/config/data/**/*
+/config/prosody/config/data/auth%2elocalhost/
+/config/prosody/config/data/auth%2elocalhost/**/*
+/config/prosody/config/data/hidden%2emeet%2ejitsi/
+/config/prosody/config/data/recorder%2elocalhost/
+/config/prosody/config/data/*.pid
+/config/prosody/config/data/*.dat
+/config/prosody/*.log
+/config/prosody/logs/
+/config/jibri/recordings/
+/config/jibri/finalize.sh
+/config/jibri/logs/
+/config/jibri/*.log
+/config/jicofo/*.log
+/config/jicofo/logs/
+/config/web/letsencrypt/
+/config/web/crontabs/
+/config/web/*.log
+/config/*.pid
+/config/**/*.pid
+
+# IDE and editor files
+**/.DS_Store
+**/.idea/
+.vscode/
+*.sublime-*
+.atom/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
+.directory
+
+# Node.js (if any frontend components)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if any scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# SSL certificates and keys
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Monitoring and metrics
+prometheus/
+grafana/
 /config/prosody/config/data/prosody.pid

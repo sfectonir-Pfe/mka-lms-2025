@@ -1,11 +1,17 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
+import { NotificationService } from '../notification/notification.service';
 
 type ChatType = 'text' | 'image' | 'video' | 'audio' | 'file';
 
 @Injectable()
 export class ProgramChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(ProgramChatService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async create(data: {
     programId: number;
@@ -14,7 +20,8 @@ export class ProgramChatService {
     content: string;
   }) {
     if (!data.content?.trim()) throw new BadRequestException('Empty content');
-    return this.prisma.programChatMessage.create({
+    
+    const newMsg = await this.prisma.programChatMessage.create({
       data: { ...data, content: data.content.trim() },
       include: {
         sender: {
@@ -22,6 +29,17 @@ export class ProgramChatService {
         },
       },
     });
+
+    this.logger.log(
+      `Message created | id: ${newMsg.id}, programId: ${data.programId}, senderId: ${data.senderId}`,
+    );
+
+    // Send notifications to other program participants
+    if (data.senderId) {
+      await this.sendProgramChatNotifications(data.programId, data.senderId, newMsg);
+    }
+
+    return newMsg;
   }
 
   // simple pagination by limit (ascending chronological order)
@@ -75,5 +93,67 @@ export class ProgramChatService {
     });
 
     return Array.from(programsMap.values());
+  }
+
+  /**
+   * Send notifications to program participants when a new message is sent
+   */
+  private async sendProgramChatNotifications(programId: number, senderId: number, message: any) {
+    try {
+      // Get all participants of the program except the sender
+      const participants = await this.prisma.userSession2.findMany({
+        where: {
+          session2: {
+            programId,
+          },
+          userId: { not: senderId },
+        },
+        distinct: ['userId'],
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      // Get program details for notification context
+      const program = await this.prisma.program.findUnique({
+        where: { id: programId },
+        select: {
+          name: true,
+        },
+      });
+
+      const senderName = message.sender?.name || 'Someone';
+      const programName = program?.name || 'Program';
+      
+      // Truncate message content for notification
+      const messagePreview = message.content.length > 50 
+        ? message.content.substring(0, 50) + '...'
+        : message.content;
+
+      // Send notification to each participant
+      for (const participant of participants) {
+        await this.notificationService.createNotification({
+          userId: participant.userId,
+          type: 'program-chat',
+          message: `${senderName} sent a message in ${programName}: ${messagePreview}`,
+          link: `/programs/${programId}/chat`,
+        });
+      }
+
+      this.logger.log(
+        `Sent program chat notifications to ${participants.length} participants for program ${programId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send program chat notifications for program ${programId}:`,
+        error,
+      );
+    }
   }
 }

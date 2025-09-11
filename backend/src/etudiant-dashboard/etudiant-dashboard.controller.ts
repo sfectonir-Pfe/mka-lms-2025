@@ -14,4 +14,14 @@ export class EtudiantDashboardController {
   async getJoinedSessionsStats(@Query('userId') userId: number) {
     return this.etudiantDashboardService.getJoinedSessionStats(+userId);
   }
+
+  @Get('feedback-received')
+  async getFeedbackReceived(@Query('userId') userId: number) {
+    return this.etudiantDashboardService.getFeedbackReceived(+userId);
+  }
+
+  @Get('top-students')
+  async getTopStudents() {
+    return this.etudiantDashboardService.getTopStudents();
+  }
 }

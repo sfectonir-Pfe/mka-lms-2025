@@ -139,7 +139,7 @@ const ProgramList = () => {
   {t('programs.viewProgram')}
 </Button>
 
-          <RoleGate roles={['CreateurDeFormation','Admin']}>
+          <RoleGate roles={['CreateurDeFormation',]}>
           <Button
             variant="contained"
             size="small"
@@ -160,7 +160,7 @@ const ProgramList = () => {
         <Typography variant="h5">{t('programs.programList')}</Typography>
 
         <Box>
-        <RoleGate roles={['CreateurDeFormation','Admin']}>
+        <RoleGate roles={['CreateurDeFormation',]}>
           <Button
             variant="contained"
             onClick={() => navigate("/programs/add")}

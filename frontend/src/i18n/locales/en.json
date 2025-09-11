@@ -1163,12 +1163,15 @@
   },
   "notifications": {
     "title": "Notifications",
+    "allNotifications": "All Notifications",
     "noNotifications": "No notifications",
     "noMatchingNotifications": "No matching notifications",
     "markAllRead": "Mark all as read",
     "markAsRead": "Mark as read",
     "delete": "Delete",
-    "viewAll": "View all",
+    "viewAll": "View All Notifications",
+    "loading": "Loading notifications...",
+    "new": "New",
     "loadError": "Error loading notifications",
     "searchPlaceholder": "Search notifications...",
     "filterByType": "Filter by type",
@@ -1184,7 +1187,32 @@
     "read": "Read",
     "clearFilters": "Clear filters",
     "settings": "Settings",
-    "autoMarkRead": "Auto mark as read"
+    "autoMarkRead": "Auto mark as read",
+    "errors": {
+      "failedToLoad": "Failed to load notifications",
+      "realtimeUnavailable": "Real-time notifications unavailable",
+      "failedToMarkRead": "Failed to mark notification as read",
+      "failedToMarkAllRead": "Failed to mark all notifications as read",
+      "failedToDelete": "Failed to delete notification"
+    },
+    "actions": {
+      "markAllAsRead": "Mark all as read",
+      "deleteNotification": "Delete notification",
+      "refresh": "Refresh notifications"
+    },
+    "status": {
+      "connected": "Connected to real-time notifications",
+      "disconnected": "Disconnected from real-time notifications",
+      "reconnecting": "Reconnecting..."
+    },
+    "messages": {
+      "newMessage": "{{senderName}} has sent you a new message: {{messageContent}}",
+      "sessionChat": "{{senderName}} sent a message in {{sessionName}} ({{programName}}): {{messagePreview}}",
+      "programChat": "{{senderName}} sent a message in {{programName}}: {{messagePreview}}",
+      "newProgram": "New program created: {{programName}} ({{date}})",
+      "programPublished": "Program published: {{programName}} ({{date}})",
+      "programUnpublished": "Program unpublished: {{programName}} ({{date}})"
+    }
   }
   ,
   "feedbackFormateur": {

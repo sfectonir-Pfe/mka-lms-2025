@@ -16,55 +16,109 @@ import {
   Avatar,
   CircularProgress,
   Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Group";
 import StarIcon from "@mui/icons-material/Star";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SchoolIcon from "@mui/icons-material/School";
 import PersonIcon from "@mui/icons-material/Person";
+import FeedbackIcon from "@mui/icons-material/Feedback";
+import HistoryIcon from "@mui/icons-material/History";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import api from "../../api/axiosInstance";
+import { getCurrentRole, getCurrentUserId } from '../auth/token';
 
 export default function EtablissementDashboardPage() {
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState("Tous");
   const [students, setStudents] = useState([]);
   const [topStudents, setTopStudents] = useState([]);
+  const [stats, setStats] = useState({});
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [establishmentName, setEstablishmentName] = useState("");
+  
+  // Dialog states
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [studentHistory, setStudentHistory] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
 
-  // Get establishment name from user context (you might need to adjust this based on your auth system)
+  // Get establishment name from logged-in user
   useEffect(() => {
-    // For now, we'll use a placeholder. In a real app, you'd get this from the logged-in user
-    // You might want to get this from localStorage, context, or an API call
-    const userEstablishment = localStorage.getItem('userEstablishment') || 'Default Establishment';
-    setEstablishmentName(userEstablishment);
+    const fetchUserEstablishment = async () => {
+      try {
+        const currentRole = getCurrentRole();
+        const currentUserId = getCurrentUserId();
+        
+        if (currentRole === 'etablissement') {
+          // For etablissement users, get their establishment info
+          const etablissementResponse = await api.get(`/etablissement2/user/${currentUserId}`);
+          if (etablissementResponse.data && etablissementResponse.data.length > 0) {
+            setEstablishmentName(etablissementResponse.data[0].name);
+          }
+        } else {
+          // For other users, try to get from localStorage or use a default
+          const userEstablishment = localStorage.getItem('userEstablissement') || 'Default Establishment';
+          setEstablishmentName(userEstablishment);
+        }
+      } catch (error) {
+        console.error('Error fetching user establishment:', error);
+        // Fallback to localStorage or default
+        const userEstablishment = localStorage.getItem('userEstablissement') || 'Default Establishment';
+        setEstablishmentName(userEstablishment);
+      }
+    };
+
+    fetchUserEstablishment();
   }, []);
 
-  // Fetch students and sessions data
+  // Fetch comprehensive establishment data
   useEffect(() => {
-    if (!establishmentName) return;
+    // Remove dependency on establishmentName since we're using user-specific endpoints
+    // if (!establishmentName) return;
 
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Use new user-specific endpoints that automatically filter by establishment
+        console.log('Fetching data for establishment user');
+
+        // Fetch establishment statistics
+        const statsResponse = await api.get('/dashboard-establishment/my-stats');
+        setStats(statsResponse.data);
+        console.log('Stats response:', statsResponse.data);
+
         // Fetch students and their sessions
-        const studentsResponse = await api.get(`/dashboard-establishment/students/${encodeURIComponent(establishmentName)}`);
+        const studentsResponse = await api.get('/dashboard-establishment/my-students');
         setStudents(studentsResponse.data);
 
         // Fetch top students by rating
-        const topStudentsResponse = await api.get(`/dashboard-establishment/top-students/${encodeURIComponent(establishmentName)}`);
+        const topStudentsResponse = await api.get('/dashboard-establishment/my-top-students');
         setTopStudents(topStudentsResponse.data);
 
-        // Extract unique sessions from students data
-        const allSessions = studentsResponse.data.flatMap(student => student.sessions);
-        const uniqueSessions = allSessions.reduce((acc, session) => {
-          if (!acc.find(s => s.id === session.id)) {
-            acc.push(session);
-          }
-          return acc;
-        }, []);
-        
-        setSessions([{ id: "Tous", name: "Toutes les sessions" }, ...uniqueSessions]);
+        // Fetch establishment sessions
+        const sessionsResponse = await api.get('/dashboard-establishment/my-sessions');
+        setSessions([{ id: "Tous", name: "Toutes les sessions" }, ...sessionsResponse.data]);
+
+        // Fetch student feedbacks
+        const feedbacksResponse = await api.get('/dashboard-establishment/my-feedbacks');
+        setFeedbacks(feedbacksResponse.data);
       } catch (error) {
         console.error('Error fetching establishment data:', error);
       } finally {
@@ -73,7 +127,37 @@ export default function EtablissementDashboardPage() {
     };
 
     fetchData();
-  }, [establishmentName]);
+  }, []); // Remove establishmentName dependency
+
+  // Helper functions
+  const handleViewFeedbacks = async (student) => {
+    try {
+      // Fetch detailed feedbacks for this specific student
+      const response = await api.get(`/dashboard-establishment/my-feedbacks?studentId=${student.id}`);
+      const studentFeedbackData = {
+        ...student,
+        detailedFeedbacks: response.data
+      };
+      setSelectedStudent(studentFeedbackData);
+      setFeedbackDialogOpen(true);
+    } catch (error) {
+      console.error('Error fetching student feedbacks:', error);
+      // Fallback to existing data
+      setSelectedStudent(student);
+      setFeedbackDialogOpen(true);
+    }
+  };
+
+  const handleViewHistory = async (student) => {
+    try {
+      const response = await api.get(`/dashboard-establishment/my-student-history/${student.id}`);
+      setStudentHistory(response.data);
+      setSelectedStudent(student);
+      setHistoryDialogOpen(true);
+    } catch (error) {
+      console.error('Error fetching student history:', error);
+    }
+  };
 
   // Filter students by selected session
   const filteredStudents = selectedSession === "Tous"
@@ -119,6 +203,11 @@ export default function EtablissementDashboardPage() {
     <Box p={3}>
       <Typography variant="h4" fontWeight={700} mb={4} color="primary.main">
         🏫 Tableau de bord Établissement
+        {establishmentName && (
+          <Typography variant="h6" color="text.secondary" mt={1}>
+            {establishmentName}
+          </Typography>
+        )}
       </Typography>
 
       {/* Filtre par Session */}
@@ -140,37 +229,52 @@ export default function EtablissementDashboardPage() {
 
       {/* Statistiques */}
       <Grid container spacing={4} mb={3} maxWidth={1440} margin="auto">
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Typography variant="h3" fontWeight={700} color="primary.main">
-                  {filteredStudents.length}
+                  {stats.totalStudents || 0}
                 </Typography>
                 <GroupIcon sx={{ color: "primary.main", fontSize: 44 }} />
               </Stack>
               <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
-                Étudiants inscrits
+                Total Étudiants
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <Typography variant="h3" fontWeight={700} color="secondary.main">
-                  {sessions.length - 1}
+                  {stats.activeSessions || 0}
                 </Typography>
                 <SchoolIcon sx={{ color: "secondary.main", fontSize: 44 }} />
               </Stack>
               <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
-                Sessions actives
+                Sessions Actives
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <Typography variant="h3" fontWeight={700} color="info.main">
+                  {stats.totalFeedbacks || 0}
+                </Typography>
+                <FeedbackIcon sx={{ color: "info.main", fontSize: 44 }} />
+              </Stack>
+              <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
+                Total Feedbacks
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Stack direction="row" alignItems="center" spacing={2}>
@@ -180,7 +284,7 @@ export default function EtablissementDashboardPage() {
                 <EmojiEventsIcon sx={{ color: "warning.main", fontSize: 44 }} />
               </Stack>
               <Typography mt={2} color="text.primary" fontWeight={500} fontSize={18}>
-                Top étudiants
+                Top Étudiants
               </Typography>
             </CardContent>
           </Card>
@@ -226,6 +330,22 @@ export default function EtablissementDashboardPage() {
                               size="small"
                             />
                           )}
+                          <Button
+                            size="small"
+                            startIcon={<FeedbackIcon />}
+                            onClick={() => handleViewFeedbacks(student)}
+                            sx={{ ml: 1 }}
+                          >
+                            Feedbacks
+                          </Button>
+                          <Button
+                            size="small"
+                            startIcon={<HistoryIcon />}
+                            onClick={() => handleViewHistory(student)}
+                            sx={{ ml: 1 }}
+                          >
+                            Historique
+                          </Button>
                         </Stack>
                       }
                       secondary={
@@ -295,7 +415,7 @@ export default function EtablissementDashboardPage() {
                       {student.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {student.sessions.length} session(s) inscrite(s)
+                      {student.sessions?.length || 0} session(s) inscrite(s)
                     </Typography>
                   </Box>
                   <Chip 
@@ -310,6 +430,210 @@ export default function EtablissementDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Feedback Dialog */}
+      <Dialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              📋 Feedbacks de {selectedStudent?.name}
+            </Typography>
+            <IconButton onClick={() => setFeedbackDialogOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          {selectedStudent && (
+            <Box>
+              <Typography variant="h6" mb={2}>
+                Total des feedbacks: {selectedStudent.detailedFeedbacks?.length || 0}
+              </Typography>
+              <Typography variant="h6" mb={2}>
+                Note moyenne: {selectedStudent.averageRating || 0}⭐
+              </Typography>
+              
+              {selectedStudent.detailedFeedbacks && selectedStudent.detailedFeedbacks.length > 0 ? (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Session</TableCell>
+                        <TableCell>Programme</TableCell>
+                        <TableCell>Note</TableCell>
+                        <TableCell>Commentaires</TableCell>
+                        <TableCell>Date</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedStudent.detailedFeedbacks.map((feedback, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{feedback.sessionName}</TableCell>
+                          <TableCell>{feedback.programName}</TableCell>
+                          <TableCell>
+                            <Chip
+                              icon={<StarIcon />}
+                              label={`${feedback.rating || 'N/A'}⭐`}
+                              color="warning"
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              let commentText = '';
+                              
+                              if (feedback.comments) {
+                                try {
+                                  // Try to parse as JSON first
+                                  if (typeof feedback.comments === 'string') {
+                                    const parsed = JSON.parse(feedback.comments);
+                                    // If it's an object with a comment field, use that
+                                    if (parsed && typeof parsed === 'object' && parsed.comment) {
+                                      commentText = parsed.comment;
+                                    }
+                                    // If it's an object with comments field, use that
+                                    else if (parsed && typeof parsed === 'object' && parsed.comments) {
+                                      commentText = parsed.comments;
+                                    }
+                                    // If parsing succeeded but it's still a string, return it
+                                    else if (typeof parsed === 'string') {
+                                      commentText = parsed;
+                                    }
+                                  }
+                                  // If it's already an object
+                                  else if (typeof feedback.comments === 'object') {
+                                    if (feedback.comments.comment) {
+                                      commentText = feedback.comments.comment;
+                                    } else if (feedback.comments.comments) {
+                                      commentText = feedback.comments.comments;
+                                    }
+                                  }
+                                  // Fallback to original value
+                                  else {
+                                    commentText = feedback.comments;
+                                  }
+                                } catch (error) {
+                                  // If JSON parsing fails, treat as plain string
+                                  commentText = feedback.comments;
+                                }
+                              }
+                              
+                              return commentText && commentText.trim() !== '' && commentText !== 'null' ? (
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary" 
+                                  sx={{ 
+                                    fontStyle: 'italic', 
+                                    maxWidth: 200, 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  "{commentText}"
+                                </Typography>
+                              ) : (
+                                <Typography variant="body2" color="text.disabled">
+                                  Aucun commentaire
+                                </Typography>
+                              );
+                            })()}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(feedback.createdAt).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography color="text.secondary" textAlign="center" py={2}>
+                  Aucun feedback disponible pour cet étudiant
+                </Typography>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* History Dialog */}
+      <Dialog
+        open={historyDialogOpen}
+        onClose={() => setHistoryDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              📚 Historique de {selectedStudent?.name}
+            </Typography>
+            <IconButton onClick={() => setHistoryDialogOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          {studentHistory && (
+            <Box>
+              <Typography variant="h6" mb={2}>
+                Sessions rejointes: {studentHistory.length || 0}
+              </Typography>
+              
+              {studentHistory.length > 0 ? (
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Session</TableCell>
+                        <TableCell>Programme</TableCell>
+                        <TableCell>Statut</TableCell>
+                        <TableCell>Date de début</TableCell>
+                        <TableCell>Date de fin</TableCell>
+                        <TableCell>Date d'inscription</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {studentHistory.map((session, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{session.sessionName}</TableCell>
+                          <TableCell>{session.programName}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={getStatusLabel(session.status)}
+                              color={getStatusColor(session.status)}
+                              size="small"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            {session.startDate ? new Date(session.startDate).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {session.endDate ? new Date(session.endDate).toLocaleDateString() : 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(session.joinedAt).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography color="text.secondary" textAlign="center" py={2}>
+                  Aucun historique de session disponible pour cet étudiant
+                </Typography>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }
