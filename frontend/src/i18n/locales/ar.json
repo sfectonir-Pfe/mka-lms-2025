@@ -662,7 +662,7 @@
     "id": "المعرف",
     "mySessions": "حصصي",
     "noSessions": "لم يتم العثور على حصص.",
-    "sessionsList": "قائمة الجلسات",
+    "sessionsListMain": "قائمة الجلسات",
     "program": "البرنامج",
     "animateSession": "إدارة الحصة",
     "programDetails": "تفاصيل البرنامج",
@@ -761,7 +761,7 @@
     "programVisibilityError": "خطأ في تحديث رؤية البرنامج",
     "min": "دقيقة",
     "dash": "—",
-    "sessionsList": "حصص هذه الجلسة",
+    "sessionsListSession": "حصص هذه الجلسة",
     "basedOnReviews": "استناداً إلى {{count}} تقييم",
     "loadError": "خطأ في تحميل الحصص.",
     "regroupementTitle": "👥 تجميع الطلاب",
@@ -1379,6 +1379,24 @@
       "failedToMarkRead": "فشل في تحديد الإشعار كمقروء",
       "failedToMarkAllRead": "فشل في تحديد جميع الإشعارات كمقروءة",
       "failedToDelete": "فشل في حذف الإشعار"
+    },
+    "actions": {
+      "markAllAsRead": "تحديد الكل كمقروء",
+      "deleteNotification": "حذف الإشعار",
+      "refresh": "تحديث الإشعارات"
+    },
+    "status": {
+      "connected": "متصل بالإشعارات الفورية",
+      "disconnected": "منقطع عن الإشعارات الفورية",
+      "reconnecting": "إعادة الاتصال..."
+    },
+    "messages": {
+      "newMessage": "{{senderName}} أرسل لك رسالة جديدة: {{messageContent}}",
+      "sessionChat": "{{senderName}} أرسل رسالة في {{sessionName}} ({{programName}}): {{messagePreview}}",
+      "programChat": "{{senderName}} أرسل رسالة في {{programName}}: {{messagePreview}}",
+      "newProgram": "برنامج جديد تم إنشاؤه: {{programName}} ({{date}})",
+      "programPublished": "تم نشر البرنامج: {{programName}} ({{date}})",
+      "programUnpublished": "تم إلغاء نشر البرنامج: {{programName}} ({{date}})"
     }
   },
 

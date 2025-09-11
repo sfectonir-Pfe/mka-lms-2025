@@ -1194,6 +1194,24 @@
       "failedToMarkRead": "Failed to mark notification as read",
       "failedToMarkAllRead": "Failed to mark all notifications as read",
       "failedToDelete": "Failed to delete notification"
+    },
+    "actions": {
+      "markAllAsRead": "Mark all as read",
+      "deleteNotification": "Delete notification",
+      "refresh": "Refresh notifications"
+    },
+    "status": {
+      "connected": "Connected to real-time notifications",
+      "disconnected": "Disconnected from real-time notifications",
+      "reconnecting": "Reconnecting..."
+    },
+    "messages": {
+      "newMessage": "{{senderName}} has sent you a new message: {{messageContent}}",
+      "sessionChat": "{{senderName}} sent a message in {{sessionName}} ({{programName}}): {{messagePreview}}",
+      "programChat": "{{senderName}} sent a message in {{programName}}: {{messagePreview}}",
+      "newProgram": "New program created: {{programName}} ({{date}})",
+      "programPublished": "Program published: {{programName}} ({{date}})",
+      "programUnpublished": "Program unpublished: {{programName}} ({{date}})"
     }
   }
   ,

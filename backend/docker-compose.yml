@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:15
     restart: always
@@ -11,11 +10,15 @@ services:
       POSTGRES_DB: mka-lms-2025-db
     volumes:
       - pgdata-mka-lms-2025:/var/lib/postgresql/data
-
-
+    networks:
+      - lms-net
 
 volumes:
   pgdata-mka-lms-2025:
+
+networks:
+  lms-net:
+
 
 # services:
 #   postgres:

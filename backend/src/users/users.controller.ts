@@ -23,6 +23,7 @@ import type { Express } from "express"
 
 import { Role } from '@prisma/client';
 import { PrismaService } from 'nestjs-prisma';
+import { Roles } from '../auth/roles.decorator';
 
 // 🔧 Inline Multer config (no external file)
 const multerOptions = {

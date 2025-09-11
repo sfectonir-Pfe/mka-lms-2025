@@ -62,7 +62,7 @@ const AnimerSeanceView = () => {
   const navigate = useNavigate();
 
   // Jitsi configuration
-  const jitsiUrl = process.env.REACT_APP_JITSI_URL || 'http://localhost:8000';
+  const jitsiUrl = process.env.REACT_APP_JITSI_URL || 'https://localhost:8443';
 
   // --- state ---
   const [seance, setSeance] = useState(null);
@@ -535,6 +535,29 @@ const AnimerSeanceView = () => {
 
   return (
     <Box p={2}>
+      {/* Header with Return Button */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+          🎯 {t('seances.animateSession')}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => navigate(-1)}
+          sx={{
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #7b1fa2, #ab47bc)',
+            boxShadow: '0 6px 18px rgba(123,31,162,0.25)',
+            transition: 'transform 0.15s ease',
+            '&:hover': { 
+              transform: 'translateY(-1px)', 
+              boxShadow: '0 10px 24px rgba(123,31,162,0.35)' 
+            }
+          }}
+        >
+          📋 {t('seances.backToList')}
+        </Button>
+      </Box>
+
       {/* Meet */}
       <Paper
         elevation={0}
@@ -633,7 +656,7 @@ const AnimerSeanceView = () => {
               )}
               <iframe
                 src={`${jitsiUrl}/${sanitizeRoomName(seance.title || t("seances.defaultRoom"))}`}
-                allow="camera; microphone; fullscreen; display-capture"
+                allow="camera; microphone; fullscreen; display-capture; screen-wake-lock"
                 style={{ width: "100%", height: "68vh", border: "none" }}
                 title={t("seances.jitsiMeeting")}
                 onLoad={() => setJitsiLoading(false)}

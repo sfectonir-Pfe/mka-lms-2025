@@ -8,7 +8,7 @@ import { Roles } from '../auth/roles.decorator';
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @Roles('CreateurDeFormation', 'Admin')
+  @Roles('CreateurDeFormation',)
   @Post()
   create(@Body() dto: CreateCourseDto) {
     return this.coursesService.create(dto);
@@ -20,7 +20,7 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
-  @Roles('CreateurDeFormation', 'Admin')
+  @Roles('CreateurDeFormation', )
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.coursesService.remove(+id);

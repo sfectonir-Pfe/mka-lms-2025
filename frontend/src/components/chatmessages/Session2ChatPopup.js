@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  Box, Paper, Typography, Stack, TextField, IconButton, Button, Avatar,
+  Box, Paper, Typography, Stack, TextField, IconButton, Button, Avatar, useTheme,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -11,6 +11,8 @@ import api from "../../api/axiosInstance";
 const SOCKET_URL = process.env.REACT_APP_API_BASE;
 
 export default function UnifiedSessionChatPopup({ user }) {
+  const theme = useTheme();
+  
   // --- NEW: Program chat state ---
   const programSocketRef = useRef(null);
   const [programs, setPrograms] = useState([]);        // [{id, name}]
@@ -325,14 +327,17 @@ export default function UnifiedSessionChatPopup({ user }) {
         onClick={() => setOpen(!open)}
         style={{
           position: "fixed", bottom: "104px", right: "24px", width: "64px", height: "64px",
-          borderRadius: "50%", background: open ? "#fff" : "#d32f2f", color: open ? "#d32f2f" : "#fff",
-          fontSize: "28px", boxShadow: "0 4px 24px rgba(0, 0, 0, 0.22)", border: open ? "3px solid #d32f2f" : "none",
+          borderRadius: "50%", 
+          background: open ? theme.palette.background.paper : "#d32f2f", 
+          color: open ? "#d32f2f" : "#fff",
+          fontSize: "28px", boxShadow: "0 4px 24px rgba(0, 0, 0, 0.22)", 
+          border: open ? "3px solid #d32f2f" : "none",
           zIndex: 2000, cursor: "pointer", transition: "all 0.18s ease-in-out", display: "flex",
           alignItems: "center", justifyContent: "center", outline: "none"
         }}
         aria-label={open ? "Close chat" : "Open chat"}
-        onMouseOver={(e) => { e.currentTarget.style.background = open ? "#fbeaec" : "#e53935"; }}
-        onMouseOut={(e) => { e.currentTarget.style.background = open ? "#fff" : "#d32f2f"; }}
+        onMouseOver={(e) => { e.currentTarget.style.background = open ? theme.palette.action.hover : "#e53935"; }}
+        onMouseOut={(e) => { e.currentTarget.style.background = open ? theme.palette.background.paper : "#d32f2f"; }}
         onFocus={(e) => { e.currentTarget.style.boxShadow = "0 0 0 3px rgba(211, 47, 47, 0.4)"; }}
         onBlur={(e) => { e.currentTarget.style.boxShadow = "0 4px 24px rgba(0, 0, 0, 0.22)"; }}
       >
@@ -345,11 +350,12 @@ export default function UnifiedSessionChatPopup({ user }) {
           sx={{
             position: "fixed", bottom: 180, right: 32, width: 410, maxHeight: "74vh",
             borderRadius: 4, boxShadow: 10, zIndex: 2100, display: "flex", flexDirection: "column",
-            p: 0, overflow: "hidden", background: "#f9f9fa",
+            p: 0, overflow: "hidden", 
+            bgcolor: theme.palette.background.paper,
           }}
         >
           {/* Tabs */}
-          <Box display="flex" alignItems="center" bgcolor="#fff" px={2} pt={1.5} pb={0.5} borderBottom="1px solid #e8e8e8">
+          <Box display="flex" alignItems="center" bgcolor={theme.palette.background.paper} px={2} pt={1.5} pb={0.5} borderBottom={`1px solid ${theme.palette.divider}`}>
             <Button
               variant={selectedTab === "program" ? "contained" : "text"}
               onClick={() => setSelectedTab("program")}
@@ -379,11 +385,16 @@ export default function UnifiedSessionChatPopup({ user }) {
 
           {/* Program selector */}
           {selectedTab === "program" && programs.length > 1 && (
-            <Box bgcolor="#f6f6fc" px={2} py={1.5}>
+            <Box bgcolor={theme.palette.background.default} px={2} py={1.5}>
               <select
                 value={programId ?? ""}
                 onChange={e => setProgramId(Number(e.target.value))}
-                style={{ width: "100%", padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc", fontWeight: 500 }}
+                style={{ 
+                  width: "100%", padding: "6px 10px", borderRadius: 8, 
+                  border: `1px solid ${theme.palette.divider}`, fontWeight: 500,
+                  backgroundColor: theme.palette.background.paper,
+                  color: theme.palette.text.primary
+                }}
               >
                 {programs.map(p => (
                   <option value={p.id} key={p.id}>{p.name || `Programme ${p.id}`}</option>
@@ -394,11 +405,16 @@ export default function UnifiedSessionChatPopup({ user }) {
 
           {/* Session selector */}
           {selectedTab === "session" && session2s.length > 1 && (
-            <Box bgcolor="#f6f6fc" px={2} py={1.5}>
+            <Box bgcolor={theme.palette.background.default} px={2} py={1.5}>
               <select
                 value={session2Id ?? ""}
                 onChange={e => setSession2Id(Number(e.target.value))}
-                style={{ width: "100%", padding: "6px 10px", borderRadius: 8, border: "1px solid #ccc", fontWeight: 500 }}
+                style={{ 
+                  width: "100%", padding: "6px 10px", borderRadius: 8, 
+                  border: `1px solid ${theme.palette.divider}`, fontWeight: 500,
+                  backgroundColor: theme.palette.background.paper,
+                  color: theme.palette.text.primary
+                }}
               >
                 {session2s.map(s => (
                   <option value={s.id} key={s.id}>{s.name}</option>
@@ -411,10 +427,11 @@ export default function UnifiedSessionChatPopup({ user }) {
           {/* Chat Messages */}
           <Box
             sx={{
-              p: 2, pt: 1.5, flex: 1, overflowY: "auto", background: "#f7f7fa",
-              borderBottom: "1px solid #eee", minHeight: 200, scrollbarWidth: "thin",
-              "&::-webkit-scrollbar": { width: "7px", background: "#eaeaea", borderRadius: 5 },
-              "&::-webkit-scrollbar-thumb": { background: "#e1e1e1", borderRadius: 5 }
+              p: 2, pt: 1.5, flex: 1, overflowY: "auto", 
+              bgcolor: theme.palette.background.default,
+              borderBottom: `1px solid ${theme.palette.divider}`, minHeight: 200, scrollbarWidth: "thin",
+              "&::-webkit-scrollbar": { width: "7px", background: theme.palette.action.hover, borderRadius: 5 },
+              "&::-webkit-scrollbar-thumb": { background: theme.palette.action.selected, borderRadius: 5 }
             }}
           >
             <Stack spacing={1}>
@@ -427,10 +444,14 @@ export default function UnifiedSessionChatPopup({ user }) {
                   key={msg.id || i}
                   sx={{
                     display: "flex", alignItems: "flex-start", gap: 1.5,
-                    bgcolor: msg.sender?.id === user.id ? "#fff8f8" : "#fff",
+                    bgcolor: msg.sender?.id === user.id 
+                      ? theme.palette.mode === 'dark' ? 'rgba(25, 118, 210, 0.1)' : "#fff8f8"
+                      : theme.palette.background.paper,
                     borderRadius: 3,
-                    boxShadow: msg.sender?.id === user.id ? "0 1px 8px #ffe0e0" : "0 1px 8px #e2e2ef0c",
-                    border: "1px solid #f2f2f3",
+                    boxShadow: msg.sender?.id === user.id 
+                      ? theme.palette.mode === 'dark' ? "0 1px 8px rgba(25, 118, 210, 0.2)" : "0 1px 8px #ffe0e0"
+                      : theme.palette.mode === 'dark' ? "0 1px 8px rgba(255, 255, 255, 0.05)" : "0 1px 8px #e2e2ef0c",
+                    border: `1px solid ${theme.palette.divider}`,
                     px: 1.5, py: 1,
                     mr: msg.sender?.id === user.id ? 0 : "auto",
                     ml: msg.sender?.id === user.id ? "auto" : 0,
@@ -442,22 +463,42 @@ export default function UnifiedSessionChatPopup({ user }) {
                       src={
                         msg.sender?.profilePic?.startsWith('http')
                           ? msg.sender.profilePic
-                          : `http://localhost:8000${msg.sender?.profilePic || '/profile-pics/default.png'}`
+                          : msg.sender?.profilePic?.startsWith('/profile-pics/')
+                            ? `${api.defaults.baseURL}/uploads${msg.sender.profilePic}`
+                            : `${api.defaults.baseURL}/uploads/profile-pics/${msg.sender.profilePic}`
                       }
-                      alt={msg.sender?.name}
-                      style={{ width: 32, height: 32, borderRadius: "50%", marginTop: 2 }}
+                      alt={msg.sender?.name || 'User'}
+                      style={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: "50%", 
+                        marginTop: 2,
+                        objectFit: "cover",
+                        border: `2px solid ${theme.palette.divider}`
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <Avatar sx={{ width: 32, height: 32, bgcolor: "#d5dde9", mt: 0.25 }}>
-                      {msg.sender?.name?.[0]?.toUpperCase() || "?"}
-                    </Avatar>
-                  )}
+                  ) : null}
+                  <Avatar sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    bgcolor: theme.palette.action.selected, 
+                    mt: 0.25,
+                    display: msg.sender?.profilePic ? 'none' : 'flex',
+                    fontSize: '16px',
+                    fontWeight: 600
+                  }}>
+                    {msg.sender?.name?.[0]?.toUpperCase() || msg.sender?.email?.[0]?.toUpperCase() || "?"}
+                  </Avatar>
                   <Box sx={{ flex: 1 }}>
                     <Box display="flex" alignItems="center">
                       <Typography variant="subtitle2" fontWeight="bold" color="primary" sx={{ fontSize: 15 }}>
                         {msg.sender?.name || "Anonyme"}
                       </Typography>
-                      <Typography sx={{ color: "#aaa", fontSize: 11.5, fontWeight: 500, ml: 1, mt: 0.3 }}>
+                      <Typography sx={{ color: theme.palette.text.secondary, fontSize: 11.5, fontWeight: 500, ml: 1, mt: 0.3 }}>
                         {msg.sender?.role ? "· " + msg.sender.role : ""}
                         {msg.createdAt && (
                           <span style={{ marginLeft: 8 }}>
@@ -473,7 +514,7 @@ export default function UnifiedSessionChatPopup({ user }) {
                     </Box>
                     <Box mt={0.5}>
                       {msg.type === "text" && (
-                        <Typography sx={{ fontSize: 15, color: "#222" }}>{msg.content}</Typography>
+                        <Typography sx={{ fontSize: 15, color: theme.palette.text.primary }}>{msg.content}</Typography>
                       )}
                       {msg.type === "image" && (
                         <img src={msg.content} alt="img" style={{ maxWidth: 170, borderRadius: 7, marginTop: 4 }} />
@@ -485,7 +526,7 @@ export default function UnifiedSessionChatPopup({ user }) {
                         <video controls src={msg.content} style={{ maxWidth: 160, borderRadius: 7, marginTop: 4 }} />
                       )}
                       {msg.type === "file" && (
-                        <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4, color: "#0072ff" }}>
+                        <a href={msg.content} target="_blank" rel="noopener noreferrer" style={{ display: "block", marginTop: 4, color: theme.palette.primary.main }}>
                           📎 {msg.content.split("/").pop()}
                         </a>
                       )}
@@ -498,12 +539,21 @@ export default function UnifiedSessionChatPopup({ user }) {
           </Box>
 
           {/* Input */}
-          <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1, background: "#fff", borderTop: "1px solid #e8e8e8" }}>
+          <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1, bgcolor: theme.palette.background.paper, borderTop: `1px solid ${theme.palette.divider}` }}>
             <TextField
               fullWidth value={newMsg} size="small" placeholder="Écris un message…"
               onChange={e => setNewMsg(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleChatSend()}
-              sx={{ background: "#f8f8f8", borderRadius: 2 }} inputProps={{ style: { fontSize: 15 } }}
+              sx={{ 
+                bgcolor: theme.palette.background.default, 
+                borderRadius: 2,
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: theme.palette.divider,
+                  },
+                }
+              }} 
+              inputProps={{ style: { fontSize: 15, color: theme.palette.text.primary } }}
             />
             <IconButton onClick={() => setShowEmoji(v => !v)}><span role="img" aria-label="emoji">😀</span></IconButton>
             <IconButton component="label" color={newFile ? "success" : "primary"}>
@@ -532,7 +582,7 @@ export default function UnifiedSessionChatPopup({ user }) {
             </Box>
           )}
           {newFile && (
-            <Typography color="primary" fontSize={13} ml={2} mt={0.5}>
+            <Typography color="primary" fontSize={13} ml={2} mt={0.5} sx={{ color: theme.palette.text.secondary }}>
               Fichier prêt à envoyer : <strong>{newFile.name}</strong>
             </Typography>
           )}

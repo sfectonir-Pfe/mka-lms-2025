@@ -238,8 +238,6 @@ export default function FormateurDashboardPage() {
                       mb: 1,
                       py: 1,
                       px: 2,
-                      bgcolor: "#f7fafd",
-                      "&:hover": { bgcolor: "#eef7fc" },
                       transition: "background 0.2s"
                     }}
                   >

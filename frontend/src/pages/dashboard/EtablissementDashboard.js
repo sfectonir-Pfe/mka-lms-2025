@@ -484,11 +484,65 @@ export default function EtablissementDashboardPage() {
                             />
                           </TableCell>
                           <TableCell>
-                            {feedback.comments ? (
-                              <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {typeof feedback.comments === 'string' ? feedback.comments : JSON.stringify(feedback.comments)}
-                              </Typography>
-                            ) : 'Aucun commentaire'}
+                            {(() => {
+                              let commentText = '';
+                              
+                              if (feedback.comments) {
+                                try {
+                                  // Try to parse as JSON first
+                                  if (typeof feedback.comments === 'string') {
+                                    const parsed = JSON.parse(feedback.comments);
+                                    // If it's an object with a comment field, use that
+                                    if (parsed && typeof parsed === 'object' && parsed.comment) {
+                                      commentText = parsed.comment;
+                                    }
+                                    // If it's an object with comments field, use that
+                                    else if (parsed && typeof parsed === 'object' && parsed.comments) {
+                                      commentText = parsed.comments;
+                                    }
+                                    // If parsing succeeded but it's still a string, return it
+                                    else if (typeof parsed === 'string') {
+                                      commentText = parsed;
+                                    }
+                                  }
+                                  // If it's already an object
+                                  else if (typeof feedback.comments === 'object') {
+                                    if (feedback.comments.comment) {
+                                      commentText = feedback.comments.comment;
+                                    } else if (feedback.comments.comments) {
+                                      commentText = feedback.comments.comments;
+                                    }
+                                  }
+                                  // Fallback to original value
+                                  else {
+                                    commentText = feedback.comments;
+                                  }
+                                } catch (error) {
+                                  // If JSON parsing fails, treat as plain string
+                                  commentText = feedback.comments;
+                                }
+                              }
+                              
+                              return commentText && commentText.trim() !== '' && commentText !== 'null' ? (
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary" 
+                                  sx={{ 
+                                    fontStyle: 'italic', 
+                                    maxWidth: 200, 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                  }}
+                                >
+                                  "{commentText}"
+                                </Typography>
+                              ) : (
+                                <Typography variant="body2" color="text.disabled">
+                                  Aucun commentaire
+                                </Typography>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             {new Date(feedback.createdAt).toLocaleDateString()}

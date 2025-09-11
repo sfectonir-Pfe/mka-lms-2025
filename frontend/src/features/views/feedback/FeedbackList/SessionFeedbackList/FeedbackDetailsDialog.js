@@ -7,7 +7,7 @@ import { SectionCard, RatingsGrid, ChoiceRow, ChipsBox, CommentBlock } from './F
 export const FeedbackDetailsDialog = ({ open, onClose, t, items }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth sx={{ '& .MuiDialog-paper': { borderRadius: 3 } }}>
-      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', display: 'flex', alignItems: 'center', justifyContent: 'space-between', pr: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <FeedbackIcon fontSize="large" />
           <Box>
@@ -20,7 +20,7 @@ export const FeedbackDetailsDialog = ({ open, onClose, t, items }) => {
             )}
           </Box>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: 'white' }} size="large">
+        <IconButton onClick={onClose} sx={{ color: 'primary.contrastText' }} size="large">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -181,7 +181,7 @@ export const FeedbackDetailsDialog = ({ open, onClose, t, items }) => {
         )}
       </DialogContent>
 
-      <DialogActions sx={{ p: 3, bgcolor: 'grey.50' }}>
+      <DialogActions sx={{ p: 3, bgcolor: 'background.default' }}>
         <Button onClick={onClose} variant="outlined" color="primary">{t('sessions.close')}</Button>
       </DialogActions>
     </Dialog>
