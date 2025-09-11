@@ -4,8 +4,12 @@ import React from 'react';
 const JitsiRoom = ({ roomName = "lms-default-room" }) => {
 // const domain = "meet.jitsi.local:8081";
 // const iframeSrc = `https://${domain}/${roomName}`;
-const domain = "localhost:8443";
-const iframeSrc = `https://${domain}/${roomName}`;
+
+const domain = "51.83.75.65:8081";
+const iframeSrc = `http://${domain}/${roomName}`;
+
+
+
 
   return (
     <div style={{ height: "90vh", width: "100%", marginTop: "10px" }}>

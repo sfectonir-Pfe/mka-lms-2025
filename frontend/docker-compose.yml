@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mka-lms-frontend
+    image: mka-lms-frontend
+    ports:
+      - "9000:3000"   
+    # environment:
+    #   - HTTPS=false
+    #   - HOST=0.0.0.0
+    #   - PORT=3000
+    #   - GENERATE_SOURCEMAP=false
+    environment: 
+      - REACT_APP_API_URL=http://localhost:4001
+    volumes:
+      - mka-lms-frontend-volume:/app       
+    restart: always
+    networks:
+      - lms-net
+      # - meet.jitsi
+
+volumes:
+  mka-lms-frontend-volume:
+
+networks:
+  lms-net:
+    driver: bridge
+  # meet.jitsi:
+  #   external: true

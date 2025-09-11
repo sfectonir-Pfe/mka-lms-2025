@@ -1,22 +1,16 @@
-# FROM node:18
 
-# WORKDIR /app
+# Stage 1: Build
+FROM node:21 AS builder
 
-# # Copy package files
-# COPY package*.json ./
+WORKDIR /app
 
-# # Install dependencies with legacy peer deps to avoid conflicts
-# RUN npm install --legacy-peer-deps
+COPY package.json yarn.lock ./
 
-# # Copy source code
-# COPY . .
+RUN yarn install 
 
-# # Build the application
-# RUN npm run build
+COPY . .
 
-# # Serve with simple http-server
-# RUN npm install -g serve
+EXPOSE 3000
 
-# EXPOSE 3000
+CMD [ "npm" , "start" ]
 
-# CMD ["serve", "-s", "build", "-l", "3000"]

@@ -1,9 +1,28 @@
 services:
-  postgres:
-    image: postgres:15
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mka-lms-backend
     restart: always
     ports:
-      - "5432:5432"
+      - "4001:8000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/mka-lms-2025-db"
+    depends_on:
+      - postgres
+    networks:
+      - lms-net
+    command: yarn start:prod   
+  
+
+  postgres:
+    image: postgres:15
+    container_name: mka_lms_postgres
+    restart: always
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,49 +32,28 @@ services:
     networks:
       - lms-net
 
+
+  n8n:
+    image: n8nio/n8n
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: mka-lms-2025-db
+      DB_POSTGRESDB_USER: postgres
+      DB_POSTGRESDB_PASSWORD: postgres
+      N8N_BASIC_AUTH_ACTIVE: 1
+      N8N_BASIC_AUTH_USER: admin
+      N8N_BASIC_AUTH_PASSWORD: password
+    networks:
+      - lms-net
+
+
 volumes:
   pgdata-mka-lms-2025:
-
 networks:
   lms-net:
+    driver: bridge 
 
-
-# services:
-#   postgres:
-#     image: postgres:15
-#     ports:
-#       - "5432:5432"
-#     environment:
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD: postgres
-#       POSTGRES_DB: mka-lms-2025-db
-#     volumes:
-#       - postgres_data:/var/lib/postgresql/data
-
-#   backend:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     ports:
-#       - "8000:8000"
-#     environment:
-#       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/mka-lms-2025-db
-#       - JWT_SECRET=your-jwt-secret-key-change-in-production
-#     depends_on:
-#       - postgres
-#     volumes:
-#       - ./uploads:/app/uploads
-
-#   frontend:
-#     build:
-#       context: ../frontend
-#       dockerfile: Dockerfile
-#     ports:
-#       - "3000:3000"
-#     environment:
-#       - REACT_APP_API_BASE=http://localhost:8000
-#     depends_on:
-#       - backend
-
-# volumes:
-#   postgres_data:

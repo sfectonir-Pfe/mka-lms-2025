@@ -2,7 +2,6 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8000",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -52,8 +51,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build"
+    "start": "HTTPS=false HOST=0.0.0.0 PORT=3000 react-scripts start",
+    "build": "react-scripts build",
+    "dev": "HTTPS=false HOST=0.0.0.0 PORT=3000 react-scripts start"
   },
   "eslintConfig": {
     "extends": [

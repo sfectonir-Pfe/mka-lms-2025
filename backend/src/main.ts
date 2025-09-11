@@ -17,12 +17,14 @@ async function bootstrap() {
     : ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"];
     
   app.enableCors({
-    origin: corsOrigins,
+
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "https://mka.tunir-digital.com"],
+
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     allowedHeaders: ['Content-Type', 'Authorization', 'user-id', 'Accept', 'Origin', 'X-Requested-With'],
     credentials: true,
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204 
   });
 
   // Serve files from the top-level /uploads folder with CORS headers
