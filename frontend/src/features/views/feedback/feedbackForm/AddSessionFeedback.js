@@ -95,9 +95,9 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           mb: 2,
           p: 2,
           borderRadius: 2,
-          bgcolor: "grey.50",
+          bgcolor: "background.default",
           border: "1px solid",
-          borderColor: "grey.200",
+          borderColor: "divider",
           transition: "all 0.3s ease",
         }}
       >
@@ -370,9 +370,10 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       <CardHeader
         sx={{
           ...headerStyle,
-          color: "white",
+          bgcolor: "primary.main",
+          color: "primary.contrastText",
           "& .MuiCardHeader-content": {
-            color: "white",
+            color: "primary.contrastText",
           },
         }}
         title={
@@ -384,7 +385,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
           </Box>
         }
         subheader={
-          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5, color: "inherit" }}>
             {subtitle}
           </Typography>
         }
@@ -398,9 +399,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 0: // Guide des Évaluations
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #667eea, #764ba2)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.guide", "Guide des Évaluations", "دليل التقييم")}
             subtitle={tr("sessions.guideSubtitle", "Comprendre le système de notation avec les emojis", "فهم نظام التقييم باستخدام الإيموجي")}
             icon="📖"
@@ -493,9 +492,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 1: // Évaluation Globale
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #1976d2, #1565c0)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.globalEvaluation", "Évaluation Globale de la Session", "التقييم العام للجلسة")}
             subtitle={tr("sessions.overallSessionRatingHelp", "Comment évaluez-vous l'ensemble de cette session de formation ?", "كيف تقيم هذه الجلسة التدريبية بشكل عام؟")}
             icon="⭐"
@@ -544,9 +541,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 2: // Progression et Apprentissage
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #388e3c, #2e7d32)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.progressionAndLearning", "Progression et Apprentissage", "التقدّم والتعلّم")}
             subtitle={tr("sessions.progressionAndLearningHelp", "Évaluez votre progression et les acquis de cette formation", "قيّم تقدمك وما اكتسبته")}
             icon="📈"
@@ -595,9 +590,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 3: // Organisation et Logistique
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #0288d1, #0277bd)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.organizationAndLogistics", "Organisation et Logistique", "التنظيم واللوجستيات")}
             subtitle={tr("sessions.organizationAndLogisticsHelp", "Comment évaluez-vous l'organisation pratique de la session ?", "كيف تقيّم التنظيم العملي للجلسة؟")}
             icon="📅"
@@ -643,9 +636,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 4: // Impact et Valeur
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #f57c00, #ef6c00)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.impactAndValue", "Impact et Valeur de la Formation", "الأثر والقيمة")}
             subtitle={tr("sessions.impactAndValueHelp", "Quel est l'impact de cette formation sur votre parcours professionnel ?", "ما أثر هذا التدريب على مسارك المهني؟")}
             icon="💼"
@@ -694,9 +685,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 5: // Satisfaction et Recommandations
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #424242, #303030)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.satisfactionAndRecommendations", "Satisfaction et Recommandations", "الرضا والتوصيات")}
             subtitle={tr("sessions.choicesAndRecommendations", "Votre niveau de satisfaction et vos recommandations", "مستوى رضاك وتوصياتك")}
             icon="👍"
@@ -750,9 +739,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
       case 6: // Points Forts et Améliorations
         return (
           <SectionCard
-            headerStyle={{
-              background: "linear-gradient(135deg, #9c27b0, #7b1fa2)",
-            }}
+            headerStyle={{}}
             title={tr("sessions.strengthsAndImprovements", "Points Forts et Axes d'Amélioration", "نقاط القوة والتحسينات")}
             subtitle={tr("sessions.strengthsAndImprovementsHelp", "Identifiez les aspects les plus réussis et ceux à améliorer", "حدّد الجوانب الأكثر نجاحًا وتلك التي تحتاج للتحسين")}
             icon="💡"
@@ -865,8 +852,8 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
     >
       <DialogTitle
         sx={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "white",
+          bgcolor: "primary.main",
+          color: "primary.contrastText",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -881,7 +868,7 @@ const SessionFeedbackForm = ({ open, onClose, session, onFeedbackSubmitted }) =>
             {tr("sessions.stepOf", "Étape", "الخطوة")} {currentStep + 1} {tr("sessions.of", "sur", "من")} {steps.length}: {steps[currentStep]}
           </Typography>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: "white" }}>
+        <IconButton onClick={onClose} sx={{ color: "primary.contrastText" }}>
           <Close />
         </IconButton>
       </DialogTitle>

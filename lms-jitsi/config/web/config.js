@@ -13,8 +13,12 @@ if (subdir.startsWith('<!--')) {
 if (subdomain) {
     subdomain = subdomain.substring(0,subdomain.length-1).split('.').join('_').toLowerCase() + '.';
 }
+
+config.websocket = 'wss://51.83.75.65:8443/' + subdir + 'xmpp-websocket';
+
 config.hosts.muc = 'muc.' + subdomain + '51.83.75.65';
 config.bosh = 'https://51.83.75.65:8443/' + subdir + 'http-bind';
+
 config.bridgeChannel = {
     preferSctp: true
 };

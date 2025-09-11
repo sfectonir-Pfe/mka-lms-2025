@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Param, Delete, UploadedFile,
-  UseInterceptors, Patch
+  UseInterceptors, Patch, Request
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -49,7 +49,7 @@ export class Session2Controller {
     return this.service.findAll();
   }
 
-  @Roles('createurdeformation', 'admin', 'etudiant','formateur')
+  @Roles('createurdeformation', 'admin', 'etudiant','formateur','etablissement')
   @Get('simple')
   findAllSimple() {
     return this.prisma.session2.findMany({
@@ -63,7 +63,7 @@ export class Session2Controller {
     return this.service.remove(+id);
   }
 
-  @Roles('formateur', 'admin')
+  @Roles('formateur', 'admin','etablissement')
   @Post(':session2Id/add-user')
   async addUserToSession(
     @Param('session2Id') session2Id: string,
@@ -78,13 +78,14 @@ export class Session2Controller {
     return this.service.getUsersForSession(Number(session2Id));
   }
 
-  @Roles('formateur', 'admin')
+  @Roles('formateur', 'admin', 'etablissement')
   @Delete(':session2Id/remove-user/:userId')
   async removeUserFromSession(
     @Param('session2Id') session2Id: string,
-    @Param('userId') userId: string
+    @Param('userId') userId: string,
+    @Request() req: any
   ) {
-    return this.service.removeUserFromSession(Number(session2Id), Number(userId));
+    return this.service.removeUserFromSession(Number(session2Id), Number(userId), req.user);
   }
 
   @Roles( 'admin')

@@ -4,19 +4,21 @@ import React from 'react';
 const JitsiRoom = ({ roomName = "lms-default-room" }) => {
 // const domain = "meet.jitsi.local:8081";
 // const iframeSrc = `https://${domain}/${roomName}`;
+
 const domain = "51.83.75.65:8081";
 const iframeSrc = `http://${domain}/${roomName}`;
 
 
 
+
   return (
     <div style={{ height: "90vh", width: "100%", marginTop: "10px" }}>
-      <iframe
-        allow="camera; microphone; fullscreen; display-capture"
-        src={iframeSrc}
-        style={{ height: "100%", width: "100%", border: 0 }}
-        title="Jitsi Meeting"
-      />
+     <iframe
+  allow="camera; microphone; fullscreen; display-capture; screen-wake-lock"
+  src={iframeSrc}
+  style={{ height: "100%", width: "100%", border: 0 }}
+  title="Jitsi Meeting"
+/>
     </div>
   );
 };

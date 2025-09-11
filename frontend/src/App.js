@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './i18n';
 import { getStoredUser } from "./utils/authUtils";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
-import ThemeToggle from "./components/constants/ThemeToggle";
 
 // Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -17,6 +16,7 @@ import Réclamation from "./features/views/feedback/feedbackForm/Réclamation";
 import Réclamationlist from "./features/views/feedback/FeedbackList/Réclamationlist";
 import ProfilePage from "./pages/profile/ProfilePage";
 import EditProfilePage from "./pages/profile/EditProfilePage/EditProfilePage";
+import ActivateDeactivateUser from "./pages/users/activte_deactivate_user";
 
 // Auth / Main/chatbot containers
 import Auth from "./apps/Auth";
@@ -203,9 +203,6 @@ function AppContent() {
   return (
     <div className={`${darkMode ? "text-white bg-dark position-fixed h-100 w-100" : ""}`}>
       <ToastContainer />
-      <div className="d-flex justify-content-end p-2">
-        <ThemeToggle />
-      </div>
       {user && <Chatbot />}
 
       {loading ? (
@@ -217,6 +214,9 @@ function AppContent() {
           <Routes>
             {/* Route de connexion toujours disponible */}
             <Route path="/login" element={<LoginPage setUser={setUser} />} />
+            
+            {/* Route for account status - accessible without authentication */}
+            <Route path="/account-status" element={<ActivateDeactivateUser />} />
 
             {user ? (
               <Route path="/" element={<Main setUser={setUser} user={user} />}>

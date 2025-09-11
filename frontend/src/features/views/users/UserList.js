@@ -43,6 +43,7 @@ import {
   Analytics,
 } from "@mui/icons-material"
 import { toast } from "react-toastify"
+import RoleGate from "../../../pages/auth/RoleGate"
 
 export default function UserList() {
   const { t } = useTranslation()
@@ -469,29 +470,34 @@ export default function UserList() {
                           >
                             <Visibility />
                           </IconButton>
-                          <IconButton
-                            size="small"
-                            sx={{ color: "primary.main" }}
-                            onClick={() => {
-                              sessionStorage.setItem("editingUser", JSON.stringify(user))
-                              window.location.href = `/EditProfile/${user.email}`
-                            }}
-                          >
-                            <Edit />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            disabled={actionLoading}
-                            sx={{
-                              color: user.isActive ? "warning.main" : "success.main",
-                              "&:hover": {
-                                opacity: 0.7,
-                              },
-                            }}
-                            onClick={() => setToggleDialog({ open: true, user })}
-                          >
-                            {actionLoading ? <CircularProgress size={16} /> : user.isActive ? <Block /> : <LockOpen />}
-                          </IconButton>
+                          <RoleGate roles={["admin"]}>
+                            <IconButton
+                              size="small"
+                              sx={{ color: "primary.main" }}
+                              onClick={() => {
+                                sessionStorage.setItem("editingUser", JSON.stringify(user))
+                                window.location.href = `/EditProfile/${user.email}`
+                              }}
+                            >
+                              <Edit />
+                            </IconButton>
+                          </RoleGate>
+                          <RoleGate roles={["admin"]}>
+                            <IconButton
+                              size="small"
+                              disabled={actionLoading}
+                              sx={{
+                                color: user.isActive ? "warning.main" : "success.main",
+                                "&:hover": {
+                                  opacity: 0.7,
+                                },
+                              }}
+                              onClick={() => setToggleDialog({ open: true, user })}
+                            >
+                              {actionLoading ? <CircularProgress size={16} /> : user.isActive ? <Block /> : <LockOpen />}
+                            </IconButton>
+                          </RoleGate>
+                          <RoleGate roles={["admin"]}>
                           <IconButton
                             size="small"
                             disabled={actionLoading}
@@ -500,6 +506,7 @@ export default function UserList() {
                           >
                             <Delete />
                           </IconButton>
+                          </RoleGate>
                         </Box>
                       </TableCell>
                     </TableRow>

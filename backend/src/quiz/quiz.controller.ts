@@ -80,14 +80,14 @@ export class QuizController {
     return this.quizService.submitQuiz(Number(quizId), body);
   }
 
-  @Roles('CreateurDeFormation','Admin','formateur','establishment')
+  @Roles('CreateurDeFormation','Admin','formateur','establishment','etudiant')
   @Get(':id/user-answers')
   getUsersByQuiz(@Param('id') quizId: string) {
     return this.quizService.getUsersByQuiz(Number(quizId));
   }
 
   // ---- Submit & results (by contenuId) ----
-  @Roles('CreateurDeFormation','Admin')
+  @Roles('CreateurDeFormation','Admin','etudiant')
   @Post('by-contenu/:contenuId/submit')
   submitByContenu(@Param('contenuId') contenuId: string, @Body() body: any) {
     return this.quizService.submitByContenu(Number(contenuId), body);

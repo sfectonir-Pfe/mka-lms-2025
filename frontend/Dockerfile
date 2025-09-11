@@ -1,3 +1,4 @@
+
 # Stage 1: Build
 FROM node:21 AS builder
 
@@ -12,3 +13,4 @@ COPY . .
 EXPOSE 3000
 
 CMD [ "npm" , "start" ]
+

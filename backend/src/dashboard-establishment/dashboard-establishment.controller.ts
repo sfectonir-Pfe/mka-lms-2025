@@ -1,17 +1,58 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { DashboardEstablishmentService } from './dashboard-establishment.service';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('dashboard-establishment')
 export class DashboardEstablishmentController {
   constructor(private readonly dashboardEstablishmentService: DashboardEstablishmentService) {}
 
-  @Get('students/:establishmentName')
-  getEstablishmentStudents(@Param('establishmentName') establishmentName: string) {
-    return this.dashboardEstablishmentService.getEstablishmentStudents(establishmentName);
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-stats')
+  getMyEstablishmentStats(@Req() req: any) {
+    const userId = req.user.id;
+    return this.dashboardEstablishmentService.getMyEstablishmentStats(userId);
   }
-  
-  @Get('top-students/:establishmentName')
-  getTopStudentsByRating(@Param('establishmentName') establishmentName: string) {
-    return this.dashboardEstablishmentService.getTopStudentsByRating(establishmentName);
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-students')
+  getMyEstablishmentStudents(@Req() req: any) {
+    const userId = req.user.id;
+    return this.dashboardEstablishmentService.getMyEstablishmentStudents(userId);
   }
+
+
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-top-students')
+  getMyTopStudentsByRating(@Req() req: any, @Query('limit') limit?: string) {
+    const userId = req.user.id;
+    const limitNumber = limit ? parseInt(limit) : 3;
+    return this.dashboardEstablishmentService.getMyTopStudentsByRating(userId, limitNumber);
+  }
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-feedbacks')
+  getMyStudentFeedbacks(@Req() req: any, @Query('studentId') studentId?: string) {
+    const userId = req.user.id;
+    return this.dashboardEstablishmentService.getMyStudentFeedbacks(userId, studentId ? parseInt(studentId) : undefined);
+  }
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-student-history/:studentId')
+  getMyStudentSessionHistory(@Req() req: any, @Param('studentId') studentId: string) {
+    const userId = req.user.id;
+    return this.dashboardEstablishmentService.getMyStudentSessionHistory(userId, parseInt(studentId));
+  }
+
+  @Roles('admin', 'createurdeformation', 'etablissement')
+  @Get('my-sessions')
+  getMyEstablishmentSessions(@Req() req: any) {
+    const userId = req.user.id;
+    return this.dashboardEstablishmentService.getMyEstablishmentSessions(userId);
+  }
+
+
+
+
 }

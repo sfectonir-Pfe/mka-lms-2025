@@ -22,6 +22,8 @@ import WorkIcon from '@mui/icons-material/Work';
 import PersonIcon from '@mui/icons-material/Person';
 import { useTranslation } from 'react-i18next';
 import api from "../../api/axiosInstance";
+import RoleGate from "../auth/RoleGate";
+import { getCurrentUserId, getCurrentRole } from "../auth/token";
 
 
 const ProfilePage = () => {
@@ -32,7 +34,35 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sessions, setSessions] = useState([]);
-const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
+  
+  // Check if current user can edit this profile
+  const canEditProfile = () => {
+    const currentUserId = getCurrentUserId();
+    const currentRole = getCurrentRole();
+    const profileUserId = user?.id;
+    
+    console.log("ProfilePage - Permission Check:");
+    console.log("Current User ID:", currentUserId);
+    console.log("Current Role:", currentRole);
+    console.log("Profile User ID:", profileUserId);
+    console.log("Role toLowerCase:", currentRole?.toLowerCase());
+    
+    // Admin can edit any profile
+    if (currentRole?.toLowerCase() === 'admin' || currentRole === 'Admin') {
+      console.log("Permission granted: Admin role");
+      return true;
+    }
+    
+    // Users can edit their own profile
+    if (currentUserId && profileUserId && parseInt(currentUserId) === parseInt(profileUserId)) {
+      console.log("Permission granted: Own profile");
+      return true;
+    }
+    
+    console.log("Permission denied");
+    return false;
+  };
 
 
 useEffect(() => {
@@ -236,28 +266,30 @@ useEffect(() => {
           }}>
             {t('profile.userProfile')}
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<EditIcon />}
-            onClick={() => {
-              // Stocker temporairement l'utilisateur à éditer dans sessionStorage
-              console.log("Storing user data for editing:", user);
-              sessionStorage.setItem("editingUser", JSON.stringify(user));
-              navigate(`/EditProfile/${user.email}`);
-            }}
-            sx={{
-              borderRadius: 20,
-              px: 3,
-              py: 1,
-              textTransform: 'none',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              '&:hover': {
-                boxShadow: '0 6px 8px rgba(0,0,0,0.15)'
-              }
-            }}
-          >
-            {t('profile.editProfile')}
-          </Button>
+          {canEditProfile() && (
+            <Button
+              variant="contained"
+              startIcon={<EditIcon />}
+              onClick={() => {
+                // Stocker temporairement l'utilisateur à éditer dans sessionStorage
+                console.log("Storing user data for editing:", user);
+                sessionStorage.setItem("editingUser", JSON.stringify(user));
+                navigate(`/EditProfile/${user.email}`);
+              }}
+              sx={{
+                borderRadius: 20,
+                px: 3,
+                py: 1,
+                textTransform: 'none',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  boxShadow: '0 6px 8px rgba(0,0,0,0.15)'
+                }
+              }}
+            >
+              {t('profile.editProfile')}
+            </Button>
+          )}
         </Box>
 
         {/* Profile Top Section */}
@@ -271,10 +303,10 @@ useEffect(() => {
           <Avatar
             src={user.profilePic ?
               (user.profilePic.startsWith('/profile-pics/') ?
-                `/uploads${user.profilePic}` :
+                `${api.defaults.baseURL}/uploads${user.profilePic}` :
                 (user.profilePic.startsWith('http') ?
                   user.profilePic :
-                  `/uploads/profile-pics/${user.profilePic.split('/').pop()}`
+                  `${api.defaults.baseURL}/uploads/profile-pics/${user.profilePic.split('/').pop()}`
                 )
               ) :
               undefined

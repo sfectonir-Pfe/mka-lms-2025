@@ -1,13 +1,37 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'nestjs-prisma';
 import { CreateProgramDto } from './dto/create-program.dto';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationGateway } from '../notification/notification-gateway';
 
 @Injectable()
 export class ProgramsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+    private notificationGateway: NotificationGateway,
+  ) {}
 
   async create(data: CreateProgramDto) {
-    return this.prisma.program.create({ data });
+    // 1. Create the program
+    const program = await this.prisma.program.create({ data });
+
+    // 2. Notify only admin users
+    const users = await this.prisma.user.findMany({
+      where: { role: 'Admin' }
+    });
+
+    // 3. For each admin, create notification and emit socket event
+    for (const user of users) {
+      const notification = await this.notificationService.createNotification({
+        userId: user.id,
+        type: 'info',
+        message: `Nouveau programme créé: ${program.name} (${new Date().toLocaleDateString()})`,
+      });
+      // createNotification already sends real-time notification
+    }
+
+    return program;
   }
 
   async findAll() {
@@ -79,6 +103,20 @@ export class ProgramsService {
       where: { id },
       data: { published: !program.published },
     });
+
+    // Notify only admin users about program publication/unpublication
+    const users = await this.prisma.user.findMany({
+      where: { role: 'Admin' }
+    });
+
+    for (const user of users) {
+      const notification = await this.notificationService.createNotification({
+        userId: user.id,
+        type: 'info',
+        message: `Programme ${updated.published ? 'publié' : 'dépublié'}: ${updated.name} (${new Date().toLocaleDateString()})`,
+      });
+      // createNotification already sends real-time notification
+    }
 
     return {
       message: `Programme ${updated.published ? 'publié' : 'dépublié'} avec succès ✅`,

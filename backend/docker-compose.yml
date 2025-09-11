@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+
   backend:
     build:
       context: .
@@ -17,6 +16,7 @@ services:
       - lms-net
     command: yarn start:prod   
   
+
   postgres:
     image: postgres:15
     container_name: mka_lms_postgres
@@ -31,6 +31,7 @@ services:
       - pgdata-mka-lms-2025:/var/lib/postgresql/data
     networks:
       - lms-net
+
 
   n8n:
     image: n8nio/n8n
@@ -55,3 +56,4 @@ volumes:
 networks:
   lms-net:
     driver: bridge 
+

@@ -25,6 +25,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import api from "../../../api/axiosInstance";
 import { toast } from "react-toastify";
+import RoleGate from "../../auth/RoleGate";
+import { getCurrentRole } from "../../auth/token";
 
 // Composants réutilisables
 import ProfileFormField from "./ProfileFormField";
@@ -55,6 +57,12 @@ const EditProfilePage = () => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  
+  // État pour le rôle actuel de l'utilisateur connecté
+  const [currentUserRole, setCurrentUserRole] = useState(null);
+  const [availableRoles] = useState([
+    'Etudiant', 'Formateur', 'CreateurDeFormation', 'Admin', 'Etablissement'
+  ]);
 
   // Fonction pour traduire le rôle
   const translateRole = (role) => {
@@ -91,6 +99,10 @@ const EditProfilePage = () => {
 
   // Charger les données utilisateur
   useEffect(() => {
+    // Récupérer le rôle de l'utilisateur connecté
+    const role = getCurrentRole();
+    setCurrentUserRole(role);
+    
     const fetchUser = async () => {
       try {
         setLoading(true);
@@ -241,6 +253,11 @@ const EditProfilePage = () => {
         about: form.about || null,
         skills: skills.filter(skill => skill && skill.trim()),
       };
+      
+      // Ajouter le rôle seulement si l'utilisateur connecté est admin
+      if (currentUserRole === 'Admin' && form.role) {
+        userData.role = form.role;
+      }
 
       const updateResponse = await api.patch(`/users/email/${userEmail}`, userData);
       const updatedUser = updateResponse.data;
@@ -479,14 +496,44 @@ const EditProfilePage = () => {
                 {t('profile.professionalDetails')}
               </Typography>
 
-              <ProfileFormField
-                label={t('profile.role')}
-                name="role"
-                value={translateRole(form.role || "Etudiant")}
-                disabled
-                helperText={t('profile.contactAdminRole')}
-                InputProps={{ sx: { textTransform: 'capitalize' } }}
-              />
+              <RoleGate roles={['Admin']}>
+                <Box sx={{ mt: 2, mb: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                    {t('profile.role')}
+                  </Typography>
+                  <select
+                    name="role"
+                    value={form.role || 'Etudiant'}
+                    onChange={handleChange}
+                    className="form-control"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      backgroundColor: '#fff'
+                    }}
+                  >
+                    {availableRoles.map((role) => (
+                      <option key={role} value={role}>
+                        {translateRole(role)}
+                      </option>
+                    ))}
+                  </select>
+                </Box>
+              </RoleGate>
+              
+              <RoleGate roles={['Etudiant', 'Formateur', 'CreateurDeFormation', 'Etablissement']}>
+                <ProfileFormField
+                  label={t('profile.role')}
+                  name="role"
+                  value={translateRole(form.role || "Etudiant")}
+                  disabled
+                  helperText={t('profile.contactAdminRole')}
+                  InputProps={{ sx: { textTransform: 'capitalize' } }}
+                />
+              </RoleGate>
 
               <ProfileFormField
                 label={t('profile.aboutMe')}

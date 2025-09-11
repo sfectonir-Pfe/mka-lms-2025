@@ -15,6 +15,7 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
+import RoleGate from "../../../pages/auth/RoleGate";
 
 // const API_BASE = "http://localhost:8000/feedback-etudiant";
 
@@ -165,6 +166,7 @@ const Regroupement = () => {
                     <Box>
                       <Typography variant="caption" color="text.secondary">{t('seances.dragStudentHere')}</Typography>
                       {students.map(student => (
+                        
                         <Button
                           key={student.id}
                           size="small"
@@ -174,6 +176,7 @@ const Regroupement = () => {
                         >
                           {t('seances.addStudent', { name: student.name || student.email })}
                         </Button>
+                        
                       ))}
                     </Box>
                   )}

@@ -16,8 +16,10 @@ export class CoursesService {
     // 1. Create the course
     const course = await this.prisma.course.create({ data });
 
-    // 2. Fetch all users
-    const users = await this.prisma.user.findMany();
+    // 2. Fetch only admin users
+    const users = await this.prisma.user.findMany({
+      where: { role: 'Admin' }
+    });
 
     // 3. For each user, create and emit notification
     for (const user of users) {
@@ -25,9 +27,8 @@ export class CoursesService {
         userId: user.id,
         type: 'info',
         message: `Nouveau cours ajouté: ${course.title} (${new Date().toLocaleDateString()})`,
-        link: null,
       });
-      this.notificationGateway.sendRealTimeNotification(user.id, notification);
+      // createNotification already sends real-time notification
     }
 
     return course;
